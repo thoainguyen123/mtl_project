@@ -10,6 +10,7 @@
     "dev": "vite",
     "build": "vinext build",
     "start": "vinext start",
+    "deploy": "npm run build && wrangler deploy",
     "test": "npm run build && node --test \"tests/*.test.mjs\"",
     "lint": "eslint app worker tests vite.config.ts --ignore-pattern dist --ignore-pattern .next"
   },
