@@ -1,6 +1,6 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "mtl-workspace-buoc-5",
+  "name": "mtl-project",
   "compatibility_date": "2026-05-15",
   "compatibility_flags": [
     "nodejs_compat"
