@@ -22,7 +22,6 @@ export default defineConfig(async ({ command }) => {
         inspectorPort: false,
         config: {
           main: "./worker/index.ts",
-          compatibility_flags: ["nodejs_compat"],
           d1_databases: [],
           r2_buckets: [],
         },
