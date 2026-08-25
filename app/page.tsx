@@ -1130,9 +1130,9 @@ export default function Home() {
       `}</style>
       <aside className="sidebar">
         <div className="brand"><img className="brand-logo" src="/nova-group-logo-light.png" alt="Nova Group" /><div className="brand-app"><strong><span>QUẢN LÝ</span><span>TIẾN ĐỘ TỔNG THỂ DỰ ÁN</span></strong></div></div>
-        <nav className="sidebar-nav sidebar-nav-top" aria-label="Điều hướng chính"><button className={view === "overview" ? "active" : ""} onClick={() => setView("overview")}><IconGauge /><span>Tổng quan</span></button></nav>
+        <nav className="sidebar-nav sidebar-nav-top" aria-label="Điều hướng chính"><button className={view === "overview" ? "active" : ""} onClick={() => setView("overview")}><IconGauge /><span>Tổng quan tiến độ dự án</span></button></nav>
         <div className="sidebar-section-label">Lập Master Timeline</div>
-        <nav className="sidebar-nav" aria-label="Điều hướng"><button className={view === "projects" || view === "workspace" ? "active" : ""} onClick={() => setView("projects")}><IconTimeline /><span>Lập Master timeline</span><b>{projects.length}</b></button><button className={view === "departments" ? "active" : ""} onClick={() => openDepartmentReview()}><IconCheck /><span>PBCM xác nhận Master timeline</span>{departmentPendingCount > 0 && <b>{departmentPendingCount}</b>}</button><button className={view === "gms" ? "active" : ""} onClick={() => setView("gms")}><IconSeal /><span>GMS Thẩm định</span>{pendingGmsCount > 0 && <b className="nav-alert">{pendingGmsCount}</b>}</button><button className={view === "catalog" ? "active" : ""} onClick={() => setView("catalog")}><IconList /><span>Danh mục WBS</span><b>{fullCatalog.length}</b></button></nav>
+        <nav className="sidebar-nav" aria-label="Điều hướng"><button className={view === "projects" || view === "workspace" ? "active" : ""} onClick={() => setView("projects")}><IconTimeline /><span>Lập & Cập nhật</span><b>{projects.length}</b></button><button className={view === "departments" ? "active" : ""} onClick={() => openDepartmentReview()}><IconCheck /><span>PBCM xác nhận</span>{departmentPendingCount > 0 && <b>{departmentPendingCount}</b>}</button><button className={view === "gms" ? "active" : ""} onClick={() => setView("gms")}><IconSeal /><span>Thẩm định</span>{pendingGmsCount > 0 && <b className="nav-alert">{pendingGmsCount}</b>}</button><button className={view === "catalog" ? "active" : ""} onClick={() => setView("catalog")}><IconList /><span>Danh mục WBS</span><b>{fullCatalog.length}</b></button></nav>
         <div className="template-card"><span>MẪU ĐANG DÙNG</span><strong>NVLG MTL 2026.06</strong><small>{fullCatalog.length} task · 14 nhóm · WBS cấp 4</small></div>
         <div className="sidebar-footer">MTL v1.0 · © 2026 Novaland Group</div>
       </aside>
@@ -1304,7 +1304,7 @@ export default function Home() {
           </>
         ) : view === "gms" ? (
           <>
-            <header className="topbar"><div className="breadcrumbs"><strong>GMS Thẩm định</strong></div><div className="top-actions"><UserBadge /></div></header>
+            <header className="topbar"><div className="breadcrumbs"><strong>Thẩm định</strong></div><div className="top-actions"><UserBadge /></div></header>
             <section className="gms-header"><div><h1>Danh mục dự án MTL cần thẩm định</h1><p>Tìm và chọn dự án để xem toàn bộ công việc, nhập ý kiến rồi gửi phản hồi cho người lập.</p></div><div className="gms-metrics"><div><b>{pendingGmsCount}</b><span>CHỜ THẨM ĐỊNH</span></div><div><b>{projects.filter((project) => project.approvalStatus === "approved").length}</b><span>ĐÃ XÁC NHẬN</span></div><div><b>{projects.filter((project) => project.approvalStatus === "changes_requested").length}</b><span>YÊU CẦU ĐIỀU CHỈNH</span></div></div></section>
             <section className="gms-queue">
               <div className="gms-directory-toolbar">
