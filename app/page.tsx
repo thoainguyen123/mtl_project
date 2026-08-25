@@ -55,6 +55,7 @@ type Project = {
   name: string;
   code: string;
   type: string;
+  investor?: string;
   location: string;
   area?: string;
   region?: string;
@@ -69,6 +70,8 @@ type Project = {
   includedTaskCodes: string[];
   departmentApprovals: Record<string, DepartmentApproval>;
   approvalStatus: ApprovalStatus;
+  designTaskStatus?: "chua_lap" | "dang_lap" | "pbcm_gop_y" | "da_duyet";
+  fsStatus?: "chua_lap" | "dang_tinh_toan" | "cho_doi_chieu" | "da_duyet";
   gmdSubmittedAt?: string;
   gmdReviewer?: string;
   gmdNote?: string;
@@ -89,7 +92,7 @@ type Project = {
   baselineLocked?: boolean;
 };
 
-type ProjectForm = Pick<Project, "name" | "code" | "type" | "location" | "startDate" | "targetDate" | "area" | "region" | "group">;
+type ProjectForm = Pick<Project, "name" | "code" | "type" | "investor" | "location" | "startDate" | "targetDate" | "area" | "region" | "group">;
 
 type ScheduledTask = TemplateTask & {
   startDate: string;
@@ -169,27 +172,102 @@ const nextYear = new Date(Date.now() + 365 * 86400000).toISOString().slice(0, 10
 
 const emptyForm: ProjectForm = {
   area: "Khu vực 1",
-  region: "",
+  region: "Vùng 1 (TP.HCM)",
   name: "",
   code: "",
+  investor: "Tập đoàn Novaland",
   group: "Nhóm 1 (Đang nghiên cứu)",
-  type: "Công trình cao tầng",
+  type: "Khu đô thị sinh thái",
   location: "",
   startDate: today,
   targetDate: nextYear,
 };
 
-const emptyTaskForm: TaskForm = {
-  groupCode: GROUPS[0].code,
-  parentCode: GROUPS[0].code,
-  code: "",
-  name: "",
-  startDate: today,
-  endDate: dateAtWorkingOffset(today, 9),
-  status: "Đang thực hiện",
-  predecessorCodes: [],
-  addToCurrent: true,
-};
+const DEFAULT_INITIAL_PROJECTS: Partial<Project>[] = [
+  {
+    id: "proj-aqua-city-phoenix",
+    code: "NVL-AQH-2026",
+    name: "Aqua City - Đảo Phượng Hoàng (Phoenix Island)",
+    type: "Khu đô thị sinh thái thông minh",
+    investor: "Công ty TNHH BĐS Đà Lạt Valley",
+    location: "Biên Hòa, Đồng Nai",
+    area: "Đồng Nai",
+    region: "Vùng 2 (Đông Nam Bộ)",
+    group: "Nhóm 1 (Đang triển khai)",
+    approvalStatus: "approved",
+    isOfficialApproved: true,
+    eApprovalCode: "QĐ-NVL-2026/892",
+    eApprovalDate: "2026-06-15",
+    officialVersion: "v1.0",
+    designTaskStatus: "da_duyet",
+    fsStatus: "da_duyet",
+    startDate: "2026-06-01",
+    targetDate: "2028-12-31",
+  },
+  {
+    id: "proj-novaworld-phanthiet",
+    code: "NVL-NVW-2026",
+    name: "NovaWorld Phan Thiet (PGA Golf & Resort)",
+    type: "Tổ hợp Du lịch Nghỉ dưỡng Giải trí",
+    investor: "Công ty CP Đầu tư Địa ốc No Va",
+    location: "Phan Thiết, Bình Thuận",
+    area: "Bình Thuận",
+    region: "Vùng 3 (Nam Trung Bộ)",
+    group: "Nhóm 1 (Đang triển khai)",
+    approvalStatus: "gmd_review",
+    designTaskStatus: "pbcm_gop_y",
+    fsStatus: "dang_tinh_toan",
+    startDate: "2026-05-15",
+    targetDate: "2028-06-30",
+  },
+  {
+    id: "proj-the-grand-manhattan",
+    code: "NVL-GMH-2026",
+    name: "The Grand Manhattan (Cô Bắc - Cô Giang)",
+    type: "Khu phức hợp Căn hộ Cao cấp & Thương mại",
+    investor: "Công ty CP Đất Ngọc",
+    location: "Quận 1, TP. Hồ Chí Minh",
+    area: "TP.HCM",
+    region: "Vùng 1 (TP.HCM)",
+    group: "Nhóm 1 (Đang triển khai)",
+    approvalStatus: "draft",
+    designTaskStatus: "dang_lap",
+    fsStatus: "dang_tinh_toan",
+    startDate: "2026-07-01",
+    targetDate: "2027-12-31",
+  },
+  {
+    id: "proj-novaworld-hotram",
+    code: "NVL-NVG-2026",
+    name: "NovaWorld Ho Tram (Habana & Wonderland)",
+    type: "Tổ hợp Du lịch Nghỉ dưỡng Cao cấp",
+    investor: "Công ty CP BĐS Nova Lexington",
+    location: "Xuyên Mộc, Bà Rịa - Vũng Tàu",
+    area: "Bà Rịa - Vũng Tàu",
+    region: "Vùng 4 (Bà Rịa - Vũng Tàu)",
+    group: "Nhóm 2 (Chuẩn bị đầu tư)",
+    approvalStatus: "submitted",
+    designTaskStatus: "pbcm_gop_y",
+    fsStatus: "cho_doi_chieu",
+    startDate: "2026-08-01",
+    targetDate: "2029-06-30",
+  }
+];
+
+function emptyTaskFormCreator(): TaskForm {
+  return {
+    groupCode: GROUPS[0].code,
+    parentCode: GROUPS[0].code,
+    code: "",
+    name: "",
+    startDate: today,
+    endDate: dateAtWorkingOffset(today, 9),
+    status: "Đang thực hiện",
+    predecessorCodes: [],
+    addToCurrent: true,
+  };
+}
+const emptyTaskForm = emptyTaskFormCreator();
 
 function normalizeDepartmentApprovals(selectedGroups: string[], approvals?: Record<string, DepartmentApproval>, legacyApproved = false) {
   return Object.fromEntries(PBCM_GROUPS.filter((group) => selectedGroups.includes(group.code)).map((group) => {
@@ -242,6 +320,7 @@ function normalizeProject(project: Partial<Project>): Project {
     name: project.name ?? "Dự án chưa đặt tên",
     code: project.code ?? "MTL",
     type: project.type ?? "Công trình cao tầng",
+    investor: project.investor ?? "Tập đoàn Novaland",
     location: project.location ?? "",
     area: project.area ?? "Khu vực 1",
     region: project.region ?? "",
@@ -256,6 +335,8 @@ function normalizeProject(project: Partial<Project>): Project {
     includedTaskCodes,
     departmentApprovals: normalizeDepartmentApprovals(selectedGroups, project.departmentApprovals, Boolean(!project.departmentApprovals && project.approvalStatus && project.approvalStatus !== "draft")),
     approvalStatus: migrateApprovalStatus(project),
+    designTaskStatus: project.designTaskStatus ?? (isOfficial ? "da_duyet" : project.approvalStatus === "draft" ? "dang_lap" : "pbcm_gop_y"),
+    fsStatus: project.fsStatus ?? (isOfficial ? "da_duyet" : "dang_tinh_toan"),
     gmdSubmittedAt: project.gmdSubmittedAt,
     gmdReviewer: project.gmdReviewer,
     gmdNote: project.gmdNote,
@@ -812,9 +893,23 @@ export default function Home() {
   const [search, setSearch] = useState("");
   const [projectSearch, setProjectSearch] = useState("");
   const [projectStatusFilter, setProjectStatusFilter] = useState<ApprovalStatus | "all">("all");
+  const [projectRegionFilter, setProjectRegionFilter] = useState("all");
+  const [projectTypeFilter, setProjectTypeFilter] = useState("all");
   const [projectPage, setProjectPage] = useState(1);
   const [projectPageSize, setProjectPageSize] = useState(10);
-  
+
+  const [designSearch, setDesignSearch] = useState("");
+  const [designRegionFilter, setDesignRegionFilter] = useState("all");
+  const [designStatusFilter, setDesignStatusFilter] = useState<string>("all");
+  const [designPage, setDesignPage] = useState(1);
+  const [designPageSize, setDesignPageSize] = useState(10);
+
+  const [fsSearch, setFsSearch] = useState("");
+  const [fsRegionFilter, setFsRegionFilter] = useState("all");
+  const [fsStatusFilter, setFsStatusFilter] = useState<string>("all");
+  const [fsPage, setFsPage] = useState(1);
+  const [fsPageSize, setFsPageSize] = useState(10);
+
   const [confirmSearch, setConfirmSearch] = useState("");
   const [confirmFilter, setConfirmFilter] = useState<"all" | "pending" | "approved">("all");
   const [confirmPage, setConfirmPage] = useState(1);
@@ -883,14 +978,16 @@ export default function Home() {
         const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? "[]") as Partial<Project>[];
         const savedCustomCatalog = JSON.parse(localStorage.getItem(CATALOG_KEY) ?? "[]") as TemplateTask[];
         const savedEnabledCodes = localStorage.getItem(CATALOG_ENABLED_KEY);
-        const normalized = saved.map(normalizeProject);
+        const initialList = (saved && saved.length > 0) ? saved : DEFAULT_INITIAL_PROJECTS;
+        const normalized = initialList.map(normalizeProject);
         setProjects(normalized);
         setCustomCatalog(savedCustomCatalog);
         const catalogCodes = new Set([...TEMPLATE, ...savedCustomCatalog].map((task) => task.code));
         setEnabledCatalogCodes(new Set(savedEnabledCodes ? (JSON.parse(savedEnabledCodes) as string[]).filter((code) => catalogCodes.has(code)) : [...catalogCodes]));
         setActiveId(localStorage.getItem(ACTIVE_KEY) ?? normalized[0]?.id ?? "");
       } catch {
-        setProjects([]);
+        const normalized = DEFAULT_INITIAL_PROJECTS.map(normalizeProject);
+        setProjects(normalized);
         setCustomCatalog([]);
         setEnabledCatalogCodes(new Set(TEMPLATE.map((task) => task.code)));
       }
@@ -989,12 +1086,36 @@ export default function Home() {
   const visibleProjects = useMemo(() => {
     const query = projectSearch.trim().toLocaleLowerCase("vi");
     return projects.filter((project) => {
-      const matchesQuery = !query || `${project.code} ${project.name} ${project.location} ${project.type}`.toLocaleLowerCase("vi").includes(query);
+      const matchesQuery = !query || `${project.code} ${project.name} ${project.location} ${project.type} ${project.investor || ""}`.toLocaleLowerCase("vi").includes(query);
       const matchesStatus = projectStatusFilter === "all" || project.approvalStatus === projectStatusFilter;
-      return matchesQuery && matchesStatus;
+      const matchesRegion = projectRegionFilter === "all" || project.region === projectRegionFilter;
+      const matchesType = projectTypeFilter === "all" || project.type === projectTypeFilter;
+      return matchesQuery && matchesStatus && matchesRegion && matchesType;
     });
-  }, [projects, projectSearch, projectStatusFilter]);
+  }, [projects, projectSearch, projectStatusFilter, projectRegionFilter, projectTypeFilter]);
   const pagedProjects = useMemo(() => visibleProjects.slice((Math.min(projectPage, Math.max(1, Math.ceil(visibleProjects.length / projectPageSize))) - 1) * projectPageSize, Math.min(projectPage, Math.max(1, Math.ceil(visibleProjects.length / projectPageSize))) * projectPageSize), [visibleProjects, projectPage, projectPageSize]);
+
+  const visibleDesignProjects = useMemo(() => {
+    const query = designSearch.trim().toLocaleLowerCase("vi");
+    return projects.filter((project) => {
+      const matchesQuery = !query || `${project.code} ${project.name} ${project.location} ${project.type} ${project.investor || ""}`.toLocaleLowerCase("vi").includes(query);
+      const matchesStatus = designStatusFilter === "all" || project.designTaskStatus === designStatusFilter;
+      const matchesRegion = designRegionFilter === "all" || project.region === designRegionFilter;
+      return matchesQuery && matchesStatus && matchesRegion;
+    });
+  }, [projects, designSearch, designStatusFilter, designRegionFilter]);
+  const pagedDesignProjects = useMemo(() => visibleDesignProjects.slice((Math.min(designPage, Math.max(1, Math.ceil(visibleDesignProjects.length / designPageSize))) - 1) * designPageSize, Math.min(designPage, Math.max(1, Math.ceil(visibleDesignProjects.length / designPageSize))) * designPageSize), [visibleDesignProjects, designPage, designPageSize]);
+
+  const visibleFsProjects = useMemo(() => {
+    const query = fsSearch.trim().toLocaleLowerCase("vi");
+    return projects.filter((project) => {
+      const matchesQuery = !query || `${project.code} ${project.name} ${project.location} ${project.type} ${project.investor || ""}`.toLocaleLowerCase("vi").includes(query);
+      const matchesStatus = fsStatusFilter === "all" || project.fsStatus === fsStatusFilter;
+      const matchesRegion = fsRegionFilter === "all" || project.region === fsRegionFilter;
+      return matchesQuery && matchesStatus && matchesRegion;
+    });
+  }, [projects, fsSearch, fsStatusFilter, fsRegionFilter]);
+  const pagedFsProjects = useMemo(() => visibleFsProjects.slice((Math.min(fsPage, Math.max(1, Math.ceil(visibleFsProjects.length / fsPageSize))) - 1) * fsPageSize, Math.min(fsPage, Math.max(1, Math.ceil(visibleFsProjects.length / fsPageSize))) * fsPageSize), [visibleFsProjects, fsPage, fsPageSize]);
   
   const overviewToday = new Date().toISOString().slice(0, 10);
   const overviewSourceProjects = useMemo(() => {
@@ -2100,6 +2221,80 @@ export default function Home() {
         .auto-generate-check input:checked ~ b {
           color: #15803d !important;
         }
+        /* ================= 8-COLUMN PROJECT TABLE ================= */
+        .project-table {
+          margin: 0 24px 20px !important;
+          background: #ffffff !important;
+          border-radius: 10px !important;
+          border: 1px solid #e2e8f0 !important;
+          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
+          overflow: hidden !important;
+        }
+        .project-table-head {
+          display: grid !important;
+          grid-template-columns: 130px minmax(200px, 1.8fr) 150px minmax(180px, 1.3fr) 140px 110px 170px 90px !important;
+          align-items: center !important;
+          gap: 12px !important;
+          padding: 12px 18px !important;
+          background: #f8fafc !important;
+          border-bottom: 1px solid #e2e8f0 !important;
+          font-size: 11px !important;
+          font-weight: 800 !important;
+          color: #475569 !important;
+          letter-spacing: 0.4px !important;
+          text-transform: uppercase !important;
+        }
+        .project-table-row {
+          display: grid !important;
+          grid-template-columns: 130px minmax(200px, 1.8fr) 150px minmax(180px, 1.3fr) 140px 110px 170px 90px !important;
+          align-items: center !important;
+          gap: 12px !important;
+          padding: 12px 18px !important;
+          border-bottom: 1px solid #f1f5f9 !important;
+          font-size: 12.5px !important;
+          color: #1e293b !important;
+          cursor: pointer !important;
+          transition: all 0.12s ease !important;
+        }
+        .project-table-row:hover {
+          background: #f8fafc !important;
+        }
+        .project-table-cell-ellipsis {
+          white-space: nowrap !important;
+          overflow: hidden !important;
+          text-overflow: ellipsis !important;
+        }
+        .table-stats-bar {
+          display: grid !important;
+          grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)) !important;
+          gap: 12px !important;
+          padding: 14px 24px !important;
+          background: #f8fafc !important;
+          border-bottom: 1px solid #e2e8f0 !important;
+        }
+        .table-stat-card {
+          display: flex !important;
+          flex-direction: column !important;
+          gap: 4px !important;
+          padding: 10px 14px !important;
+          background: #ffffff !important;
+          border-radius: 8px !important;
+          border: 1px solid #e2e8f0 !important;
+          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03) !important;
+        }
+        .table-stat-card span {
+          font-size: 10.5px !important;
+          font-weight: 700 !important;
+          color: #64748b !important;
+          text-transform: uppercase !important;
+          letter-spacing: 0.3px !important;
+        }
+        .table-stat-card b {
+          font-size: 19px !important;
+          font-weight: 800 !important;
+          color: #0f172a !important;
+          line-height: 1.2 !important;
+        }
       `}</style>
       <aside className="sidebar">
         <div className="brand">
@@ -2118,7 +2313,7 @@ export default function Home() {
         {(() => {
           const lapMtlSectionOpen = lapMtlOpen;
           return <>
-            <button type="button" className={`sidebar-section-toggle ${lapMtlSectionOpen ? "open" : ""}`} onClick={() => setLapMtlOpen((current) => !current)} aria-expanded={lapMtlSectionOpen} title={lapMtlSectionOpen ? "Thu gọn menu Lập MTL" : "Mở rộng menu Lập MTL"}>
+            <button type="button" className={`sidebar-section-toggle ${lapMtlSectionOpen ? "open" : ""}`} onClick={() => { setLapMtlOpen((current) => !current); setView("projects"); }} aria-expanded={lapMtlSectionOpen} title={lapMtlSectionOpen ? "Thu gọn menu Lập MTL" : "Mở rộng menu Lập MTL"}>
               <div className="section-toggle-left">
                 <IconBuilding />
                 <span>Lập Master Timeline</span>
@@ -2158,7 +2353,7 @@ export default function Home() {
         {(() => {
           const isSectionOpen = designTaskOpen;
           return <>
-            <button type="button" className={`sidebar-section-toggle ${isSectionOpen ? "open" : ""}`} onClick={() => setDesignTaskOpen((current) => !current)} aria-expanded={isSectionOpen} title={isSectionOpen ? "Thu gọn menu Lập NVTK" : "Mở rộng menu Lập NVTK"}>
+            <button type="button" className={`sidebar-section-toggle ${isSectionOpen ? "open" : ""}`} onClick={() => { setDesignTaskOpen((current) => !current); setView("design_task"); }} aria-expanded={isSectionOpen} title={isSectionOpen ? "Thu gọn menu Lập NVTK" : "Mở rộng menu Lập NVTK"}>
               <div className="section-toggle-left">
                 <IconDesignTask />
                 <span>Lập Nhiệm Vụ Thiết Kế</span>
@@ -2186,7 +2381,7 @@ export default function Home() {
         {(() => {
           const isSectionOpen = fsVer2Open;
           return <>
-            <button type="button" className={`sidebar-section-toggle ${isSectionOpen ? "open" : ""}`} onClick={() => setFsVer2Open((current) => !current)} aria-expanded={isSectionOpen} title={isSectionOpen ? "Thu gọn menu Lập FS-Ver2" : "Mở rộng menu Lập FS-Ver2"}>
+            <button type="button" className={`sidebar-section-toggle ${isSectionOpen ? "open" : ""}`} onClick={() => { setFsVer2Open((current) => !current); setView("fs_ver2"); }} aria-expanded={isSectionOpen} title={isSectionOpen ? "Thu gọn menu Lập FS-Ver2" : "Mở rộng menu Lập FS-Ver2"}>
               <div className="section-toggle-left">
                 <IconFS />
                 <span>Lập FS Thực Thi (FS-Ver2)</span>
@@ -2545,36 +2740,141 @@ export default function Home() {
           </>
         ) : view === "projects" ? (
           <>
-            <header className="topbar"><div className="breadcrumbs"><span>Lập Master timeline</span><i>/</i><strong>Lập & Cập nhật</strong><i>/</i><span>{projects.length} dự án</span></div><div className="top-actions"><button className="primary-button" onClick={openCreate}>Tạo Master timeline</button><UserBadge /></div></header>
+            <header className="topbar">
+              <div className="breadcrumbs">
+                <span>Cấu trúc Master Timeline</span>
+                <i>/</i>
+                <strong>Lập & Cập nhật Master Timeline</strong>
+                <i>/</i>
+                <span>{projects.length} dự án</span>
+              </div>
+              <div className="top-actions">
+                <button className="primary-button" onClick={openCreate}>+ Tạo Master Timeline</button>
+                <UserBadge />
+              </div>
+            </header>
             <section className="project-index">
-              <header className="project-index-header"><div><span>LẬP MASTER TIMELINE</span><h1>Danh mục dự án</h1><p>Chọn tên dự án để mở màn hình lập và theo dõi MTL.</p></div><label className="search-field project-index-search"><span>Tìm dự án</span><input value={projectSearch} onChange={(event) => { setProjectSearch(event.target.value); setProjectPage(1); }} placeholder="Nhập tên hoặc mã dự án" /></label></header>
-              <div className="table-filters">
-                <label className="table-filters-select"><span>Trạng thái</span><select value={projectStatusFilter} onChange={(event) => { setProjectStatusFilter(event.target.value as ApprovalStatus | "all"); setProjectPage(1); }}><option value="all">Tất cả trạng thái</option><option value="draft">{APPROVAL_LABEL.draft}</option><option value="submitted">{APPROVAL_LABEL.submitted}</option><option value="approved">{APPROVAL_LABEL.approved}</option><option value="changes_requested">{APPROVAL_LABEL.changes_requested}</option></select></label>
+              <header className="project-index-header">
+                <div>
+                  <span className="status-badge" style={{ background: "#edf8f5", color: "#167461", border: "1px solid #a4dfd1" }}>SOP06 · QUẢN LÝ TIẾN ĐỘ TỔNG THỂ</span>
+                  <h1>DANH SÁCH DỰ ÁN MASTER TIMELINE</h1>
+                  <p>Quản lý tiến độ lập, kiểm soát GMD, thẩm định GMS và phê duyệt Baseline chính thức theo chuẩn quy trình SOP06.</p>
+                </div>
+                <label className="search-field project-index-search">
+                  <span>Tìm dự án</span>
+                  <input value={projectSearch} onChange={(event) => { setProjectSearch(event.target.value); setProjectPage(1); }} placeholder="Nhập tên, mã dự án, chủ đầu tư..." />
+                </label>
+              </header>
+
+              {/* KPI Stats Bar */}
+              <div className="table-stats-bar">
+                <div className="table-stat-card">
+                  <span>TỔNG DỰ ÁN</span>
+                  <b>{projects.length}</b>
+                </div>
+                <div className="table-stat-card">
+                  <span>ĐANG LẬP MTL</span>
+                  <b style={{ color: "#1a56a8" }}>{projects.filter((p) => p.approvalStatus === "draft").length}</b>
+                </div>
+                <div className="table-stat-card">
+                  <span>GMD KIỂM SOÁT</span>
+                  <b style={{ color: "#7e22ce" }}>{projects.filter((p) => p.approvalStatus === "gmd_review").length}</b>
+                </div>
+                <div className="table-stat-card">
+                  <span>GMS THẨM ĐỊNH</span>
+                  <b style={{ color: "#0369a1" }}>{projects.filter((p) => p.approvalStatus === "submitted" || p.approvalStatus === "appraised").length}</b>
+                </div>
+                <div className="table-stat-card">
+                  <span>ĐÃ DUYỆT BASELINE</span>
+                  <b style={{ color: "#167461" }}>{projects.filter((p) => p.isOfficialApproved).length}</b>
+                </div>
+              </div>
+
+              {/* Table Filters */}
+              <div className="table-filters" style={{ margin: "14px 24px 14px", border: "none" }}>
+                <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", alignItems: "center" }}>
+                  <label className="table-filters-select">
+                    <span>Vùng</span>
+                    <select value={projectRegionFilter} onChange={(event) => { setProjectRegionFilter(event.target.value); setProjectPage(1); }}>
+                      <option value="all">Tất cả vùng</option>
+                      {[...new Set(projects.map((p) => p.region).filter(Boolean) as string[])].sort().map((r) => (
+                        <option key={r} value={r}>{r}</option>
+                      ))}
+                    </select>
+                  </label>
+                  <label className="table-filters-select">
+                    <span>Loại dự án</span>
+                    <select value={projectTypeFilter} onChange={(event) => { setProjectTypeFilter(event.target.value); setProjectPage(1); }}>
+                      <option value="all">Tất cả loại dự án</option>
+                      {[...new Set(projects.map((p) => p.type).filter(Boolean) as string[])].sort().map((t) => (
+                        <option key={t} value={t}>{t}</option>
+                      ))}
+                    </select>
+                  </label>
+                  <label className="table-filters-select">
+                    <span>Trạng thái MTL</span>
+                    <select value={projectStatusFilter} onChange={(event) => { setProjectStatusFilter(event.target.value as ApprovalStatus | "all"); setProjectPage(1); }}>
+                      <option value="all">Tất cả trạng thái</option>
+                      <option value="draft">{APPROVAL_LABEL.draft}</option>
+                      <option value="gmd_review">{APPROVAL_LABEL.gmd_review}</option>
+                      <option value="submitted">{APPROVAL_LABEL.submitted}</option>
+                      <option value="appraised">{APPROVAL_LABEL.appraised}</option>
+                      <option value="approved">{APPROVAL_LABEL.approved}</option>
+                      <option value="changes_requested">{APPROVAL_LABEL.changes_requested}</option>
+                    </select>
+                  </label>
+                </div>
                 <span className="table-filters-count">{visibleProjects.length} dự án</span>
               </div>
-              {visibleProjects.length > 0 ? <div className="project-table" aria-label="Các dự án hiện có">
-                <div className="project-table-head"><span>Vùng</span><span>Mã dự án</span><span>Tên dự án</span><span>Vị trí</span><span>Trạng thái</span><span>Ngày tạo</span><span>Hành động</span></div>
-                <div className="project-table-body">
-                  {pagedProjects.map((project) => (
-                    <div key={project.id} className="project-table-row" onClick={() => openProject(project)}>
-                      <span className="project-region-cell">{project.region || project.area || "—"}</span>
-                      <span className="project-code">{project.code}</span>
-                      <span className="project-name-cell"><b>{project.name}</b><small>{project.type}</small></span>
-                      <span>{project.location || "—"}</span>
-                      <span><span className={`status-badge approval-${project.approvalStatus}`}>{projectApprovalLabel(project)}{project.approvedVersion ? ` · ${project.approvedVersion}` : ""}</span></span>
-                      <span>{formatDate(project.createdAt)}</span>
-                      <span className="project-action-cell">
-                        <button type="button" className="action-btn view-btn" title="Mở dự án" aria-label="Mở dự án" onClick={(event) => { event.stopPropagation(); openProject(project); }}>
-                          <IconEye />
-                        </button>
-                        <button type="button" className="action-btn delete-btn" title="Xóa dự án" aria-label="Xóa dự án" onClick={(event) => { event.stopPropagation(); setProjectToDelete(project); }}>
-                          <IconTrash />
-                        </button>
-                      </span>
-                    </div>
-                  ))}
+
+              {/* Exact 8-column Table */}
+              {visibleProjects.length > 0 ? (
+                <div className="project-table" aria-label="Danh sách dự án Master Timeline">
+                  <div className="project-table-head">
+                    <span>Mã dự án</span>
+                    <span>Tên dự án</span>
+                    <span>Loại dự án</span>
+                    <span>Chủ đầu tư</span>
+                    <span>Khu vực</span>
+                    <span>Vùng</span>
+                    <span>Trạng thái</span>
+                    <span>Hành động</span>
+                  </div>
+                  <div className="project-table-body">
+                    {pagedProjects.map((project) => (
+                      <div key={project.id} className="project-table-row" onClick={() => openProject(project)}>
+                        <span className="project-code">{project.code}</span>
+                        <span className="project-name-cell">
+                          <b>{project.name}</b>
+                        </span>
+                        <span className="project-table-cell-ellipsis" title={project.type}>{project.type}</span>
+                        <span className="project-table-cell-ellipsis" title={project.investor || "Tập đoàn Novaland"}>{project.investor || "Tập đoàn Novaland"}</span>
+                        <span className="project-table-cell-ellipsis" title={project.location || project.area || "—"}>{project.location || project.area || "—"}</span>
+                        <span className="project-region-cell">{project.region || "Toàn quốc"}</span>
+                        <span>
+                          <span className={`status-badge approval-${project.approvalStatus}`}>
+                            {projectApprovalLabel(project)}{project.approvedVersion ? ` · ${project.approvedVersion}` : ""}
+                          </span>
+                        </span>
+                        <span className="project-action-cell" onClick={(event) => event.stopPropagation()}>
+                          <button type="button" className="action-btn view-btn" title="Mở Master Timeline" aria-label="Mở dự án" onClick={() => openProject(project)}>
+                            <IconEye />
+                          </button>
+                          <button type="button" className="action-btn delete-btn" title="Xóa dự án" aria-label="Xóa dự án" onClick={() => setProjectToDelete(project)}>
+                            <IconTrash />
+                          </button>
+                        </span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              </div> : <div className="project-index-empty"><b>{projectSearch || projectStatusFilter !== "all" ? "Không tìm thấy dự án phù hợp" : "Chưa có dự án nào"}</b><span>{projectSearch || projectStatusFilter !== "all" ? "Thử tìm bằng tên/mã khác hoặc đổi bộ lọc trạng thái." : "Tạo dự án đầu tiên để hệ thống sinh Master Timeline từ danh mục WBS."}</span>{!projectSearch && projectStatusFilter === "all" && <button className="primary-button" onClick={openCreate}>Tạo Master timeline</button>}</div>}
+              ) : (
+                <div className="project-index-empty">
+                  <b>{projectSearch || projectStatusFilter !== "all" || projectRegionFilter !== "all" || projectTypeFilter !== "all" ? "Không tìm thấy dự án phù hợp" : "Chưa có dự án nào"}</b>
+                  <span>{projectSearch || projectStatusFilter !== "all" || projectRegionFilter !== "all" || projectTypeFilter !== "all" ? "Thử tìm bằng từ khóa khác hoặc thiết lập lại bộ lọc." : "Tạo dự án đầu tiên để hệ thống sinh Master Timeline từ danh mục WBS."}</span>
+                  {!projectSearch && projectStatusFilter === "all" && <button className="primary-button" onClick={openCreate}>Tạo Master timeline</button>}
+                </div>
+              )}
               <Pagination total={visibleProjects.length} pageSize={projectPageSize} page={projectPage} onPageChange={setProjectPage} onPageSizeChange={(size) => { setProjectPageSize(size); setProjectPage(1); }} />
             </section>
           </>
@@ -3199,7 +3499,9 @@ export default function Home() {
               <div className="breadcrumbs">
                 <span>Lập Nhiệm Vụ Thiết Kế</span>
                 <i>/</i>
-                <strong>Quản lý hồ sơ NVTK</strong>
+                <strong>Danh sách hồ sơ NVTK</strong>
+                <i>/</i>
+                <span>{projects.length} dự án</span>
               </div>
               <div className="top-actions">
                 <button type="button" className="secondary-button" onClick={() => setView("projects")}>← Quay lại MTL</button>
@@ -3207,47 +3509,121 @@ export default function Home() {
                 <UserBadge />
               </div>
             </header>
-            <section className="catalog-header">
-              <div>
-                <span className="status-badge">SOP-NVTK · QUY TRÌNH THIẾT KẾ DỰ ÁN</span>
-                <h1>Lập &amp; Quản Lý Nhiệm Vụ Thiết Kế (NVTK)</h1>
-                <p>Chuẩn hóa yêu cầu kỹ thuật, phân kỳ đầu tư, định hướng kiến trúc và tiếp nhận ý kiến đóng góp từ các Phòng Ban Chuyên Môn.</p>
-              </div>
-            </section>
-            <div className="table-filters" style={{ margin: "18px 24px 0", borderRadius: "12px 12px 0 0", border: "1px solid #d6e1e5", borderBottom: 0 }}>
-              <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
-                <span style={{ fontSize: "12px", fontWeight: 700, color: "#102d4b" }}>Danh sách dự án áp dụng NVTK ({projects.length})</span>
-              </div>
-            </div>
-            <div className="project-table" style={{ marginTop: 0, borderRadius: "0 0 12px 12px" }}>
-              <div className="project-table-head">
-                <span>MÃ DỰ ÁN</span>
-                <span>VÙNG</span>
-                <span>TÊN DỰ ÁN</span>
-                <span>TRẠNG THÁI NVTK</span>
-                <span>TIẾN ĐỘ THIẾT KẾ</span>
-                <span>HÀNH ĐỘNG</span>
-              </div>
-              {projects.map((p) => (
-                <div key={p.id} className="project-table-row" onClick={() => { setActiveId(p.id); setView("workspace"); }}>
-                  <span className="project-code">{p.code}</span>
-                  <span className="project-region-cell">{p.region || "Toàn quốc"}</span>
-                  <span className="project-name-cell">
-                    <b>{p.name}</b>
-                    <small>{p.type} · {p.location}</small>
-                  </span>
-                  <span>
-                    <span className="status-badge" style={{ background: "#edf8f5", color: "#167461" }}>Đang lập NVTK</span>
-                  </span>
-                  <span>Đồng bộ từ MTL</span>
-                  <span className="project-action-cell">
-                    <button type="button" className="secondary-button" style={{ height: "30px", fontSize: "11px", padding: "0 10px" }} onClick={(e) => { e.stopPropagation(); setActiveId(p.id); setView("workspace"); }}>
-                      Chi tiết ↗
-                    </button>
-                  </span>
+            <section className="project-index">
+              <header className="project-index-header">
+                <div>
+                  <span className="status-badge" style={{ background: "#edf8f5", color: "#167461", border: "1px solid #a4dfd1" }}>SOP-NVTK · QUY TRÌNH THIẾT KẾ DỰ ÁN</span>
+                  <h1>DANH SÁCH DỰ ÁN LẬP NHIỆM VỤ THIẾT KẾ (NVTK)</h1>
+                  <p>Chuẩn hóa yêu cầu kỹ thuật, phân kỳ đầu tư, định hướng kiến trúc và tiếp nhận ý kiến đóng góp từ các Phòng Ban Chuyên Môn.</p>
                 </div>
-              ))}
-            </div>
+                <label className="search-field project-index-search">
+                  <span>Tìm dự án</span>
+                  <input value={designSearch} onChange={(event) => { setDesignSearch(event.target.value); setDesignPage(1); }} placeholder="Nhập tên, mã dự án, chủ đầu tư..." />
+                </label>
+              </header>
+
+              {/* KPI Stats Bar */}
+              <div className="table-stats-bar">
+                <div className="table-stat-card">
+                  <span>TỔNG DỰ ÁN NVTK</span>
+                  <b>{projects.length}</b>
+                </div>
+                <div className="table-stat-card">
+                  <span>CHƯA LẬP NVTK</span>
+                  <b style={{ color: "#64748b" }}>{projects.filter((p) => p.designTaskStatus === "chua_lap").length}</b>
+                </div>
+                <div className="table-stat-card">
+                  <span>ĐANG LẬP NVTK</span>
+                  <b style={{ color: "#1a56a8" }}>{projects.filter((p) => p.designTaskStatus === "dang_lap").length}</b>
+                </div>
+                <div className="table-stat-card">
+                  <span>PBCM GÓP Ý</span>
+                  <b style={{ color: "#d97706" }}>{projects.filter((p) => p.designTaskStatus === "pbcm_gop_y").length}</b>
+                </div>
+                <div className="table-stat-card">
+                  <span>ĐÃ PHÊ DUYỆT NVTK</span>
+                  <b style={{ color: "#167461" }}>{projects.filter((p) => p.designTaskStatus === "da_duyet").length}</b>
+                </div>
+              </div>
+
+              {/* Filters */}
+              <div className="table-filters" style={{ margin: "14px 24px 14px", border: "none" }}>
+                <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", alignItems: "center" }}>
+                  <label className="table-filters-select">
+                    <span>Vùng</span>
+                    <select value={designRegionFilter} onChange={(event) => { setDesignRegionFilter(event.target.value); setDesignPage(1); }}>
+                      <option value="all">Tất cả vùng</option>
+                      {[...new Set(projects.map((p) => p.region).filter(Boolean) as string[])].sort().map((r) => (
+                        <option key={r} value={r}>{r}</option>
+                      ))}
+                    </select>
+                  </label>
+                  <label className="table-filters-select">
+                    <span>Trạng thái NVTK</span>
+                    <select value={designStatusFilter} onChange={(event) => { setDesignStatusFilter(event.target.value); setDesignPage(1); }}>
+                      <option value="all">Tất cả trạng thái NVTK</option>
+                      <option value="chua_lap">Chưa lập NVTK</option>
+                      <option value="dang_lap">Đang lập NVTK</option>
+                      <option value="pbcm_gop_y">PBCM góp ý</option>
+                      <option value="da_duyet">Đã phê duyệt NVTK</option>
+                    </select>
+                  </label>
+                </div>
+                <span className="table-filters-count">{visibleDesignProjects.length} dự án</span>
+              </div>
+
+              {/* Exact 8-column Table */}
+              {visibleDesignProjects.length > 0 ? (
+                <div className="project-table" aria-label="Danh sách dự án Lập Nhiệm Vụ Thiết Kế">
+                  <div className="project-table-head">
+                    <span>Mã dự án</span>
+                    <span>Tên dự án</span>
+                    <span>Loại dự án</span>
+                    <span>Chủ đầu tư</span>
+                    <span>Khu vực</span>
+                    <span>Vùng</span>
+                    <span>Trạng thái</span>
+                    <span>Hành động</span>
+                  </div>
+                  <div className="project-table-body">
+                    {pagedDesignProjects.map((project) => (
+                      <div key={project.id} className="project-table-row" onClick={() => { setActiveId(project.id); setView("workspace"); }}>
+                        <span className="project-code">{project.code}</span>
+                        <span className="project-name-cell">
+                          <b>{project.name}</b>
+                        </span>
+                        <span className="project-table-cell-ellipsis" title={project.type}>{project.type}</span>
+                        <span className="project-table-cell-ellipsis" title={project.investor || "Tập đoàn Novaland"}>{project.investor || "Tập đoàn Novaland"}</span>
+                        <span className="project-table-cell-ellipsis" title={project.location || project.area || "—"}>{project.location || project.area || "—"}</span>
+                        <span className="project-region-cell">{project.region || "Toàn quốc"}</span>
+                        <span>
+                          {project.designTaskStatus === "da_duyet" ? (
+                            <span className="status-badge" style={{ background: "#edf8f5", color: "#167461", border: "1px solid #a4dfd1" }}>✓ ĐÃ DUYỆT NVTK</span>
+                          ) : project.designTaskStatus === "pbcm_gop_y" ? (
+                            <span className="status-badge" style={{ background: "#fef3c7", color: "#92400e", border: "1px solid #fde68a" }}>PBCM GÓP Ý</span>
+                          ) : project.designTaskStatus === "dang_lap" ? (
+                            <span className="status-badge" style={{ background: "#eef4fb", color: "#1a56a8", border: "1px solid #bfdbfe" }}>ĐANG LẬP NVTK</span>
+                          ) : (
+                            <span className="status-badge" style={{ background: "#f1f5f9", color: "#64748b" }}>CHƯA LẬP NVTK</span>
+                          )}
+                        </span>
+                        <span className="project-action-cell" onClick={(event) => event.stopPropagation()}>
+                          <button type="button" className="action-btn view-btn" title="Xem chi tiết NVTK" aria-label="Chi tiết NVTK" onClick={() => { setActiveId(project.id); setView("workspace"); }}>
+                            <IconEye />
+                          </button>
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <div className="project-index-empty">
+                  <b>Không tìm thấy hồ sơ NVTK phù hợp</b>
+                  <span>Thử tìm bằng từ khóa khác hoặc thiết lập lại bộ lọc.</span>
+                </div>
+              )}
+              <Pagination total={visibleDesignProjects.length} pageSize={designPageSize} page={designPage} onPageChange={setDesignPage} onPageSizeChange={(size) => { setDesignPageSize(size); setDesignPage(1); }} />
+            </section>
           </>
         ) : view === "fs_ver2" ? (
           <>
@@ -3256,6 +3632,8 @@ export default function Home() {
                 <span>Lập FS Thực Thi (FS-Ver2)</span>
                 <i>/</i>
                 <strong>Phân tích hiệu quả tài chính</strong>
+                <i>/</i>
+                <span>{projects.length} dự án</span>
               </div>
               <div className="top-actions">
                 <button type="button" className="secondary-button" onClick={() => setView("projects")}>← Quay lại MTL</button>
@@ -3263,51 +3641,121 @@ export default function Home() {
                 <UserBadge />
               </div>
             </header>
-            <section className="catalog-header">
-              <div>
-                <span className="status-badge">FS-VER2 · FINANCIAL FEASIBILITY STUDY</span>
-                <h1>Lập Phương Án FS Thực Thi (FS-Ver2)</h1>
-                <p>Tổng hợp dữ liệu chi phí từ Master Timeline, tiến độ bán hàng, dòng tiền và phân tích các chỉ số tài chính (IRR, NPV, Payback Period).</p>
-              </div>
-            </section>
-            <div className="table-filters" style={{ margin: "18px 24px 0", borderRadius: "12px 12px 0 0", border: "1px solid #d6e1e5", borderBottom: 0 }}>
-              <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
-                <span style={{ fontSize: "12px", fontWeight: 700, color: "#102d4b" }}>Danh mục dự án tính toán FS ({projects.length})</span>
-              </div>
-            </div>
-            <div className="project-table" style={{ marginTop: 0, borderRadius: "0 0 12px 12px" }}>
-              <div className="project-table-head">
-                <span>MÃ DỰ ÁN</span>
-                <span>VÙNG</span>
-                <span>TÊN DỰ ÁN</span>
-                <span>CHỈ SỐ TÀI CHÍNH</span>
-                <span>TRẠNG THÁI FS</span>
-                <span>HÀNH ĐỘNG</span>
-              </div>
-              {projects.map((p) => (
-                <div key={p.id} className="project-table-row" onClick={() => { setActiveId(p.id); setView("workspace"); }}>
-                  <span className="project-code">{p.code}</span>
-                  <span className="project-region-cell">{p.region || "Toàn quốc"}</span>
-                  <span className="project-name-cell">
-                    <b>{p.name}</b>
-                    <small>{p.type} · {p.location}</small>
-                  </span>
-                  <span>
-                    <span className="status-badge" style={{ background: "#eef4fb", color: "#1a56a8" }}>IRR: 18.5% · NPV &gt; 0</span>
-                  </span>
-                  <span>
-                    <span className="status-badge" style={{ background: p.isOfficialApproved ? "#edf8f5" : "#fff4dc", color: p.isOfficialApproved ? "#167461" : "#976719" }}>
-                      {p.isOfficialApproved ? "FS Đã duyệt" : "Đang tính toán FS-Ver2"}
-                    </span>
-                  </span>
-                  <span className="project-action-cell">
-                    <button type="button" className="secondary-button" style={{ height: "30px", fontSize: "11px", padding: "0 10px" }} onClick={(e) => { e.stopPropagation(); setActiveId(p.id); setView("workspace"); }}>
-                      Xem FS ↗
-                    </button>
-                  </span>
+            <section className="project-index">
+              <header className="project-index-header">
+                <div>
+                  <span className="status-badge" style={{ background: "#edf8f5", color: "#167461", border: "1px solid #a4dfd1" }}>FS-VER2 · FINANCIAL FEASIBILITY STUDY</span>
+                  <h1>DANH SÁCH DỰ ÁN LẬP FS THỰC THI (FS-VER2)</h1>
+                  <p>Tổng hợp dữ liệu chi phí từ Master Timeline, tiến độ bán hàng, dòng tiền và phân tích các chỉ số tài chính (IRR, NPV, Payback Period).</p>
                 </div>
-              ))}
-            </div>
+                <label className="search-field project-index-search">
+                  <span>Tìm dự án</span>
+                  <input value={fsSearch} onChange={(event) => { setFsSearch(event.target.value); setFsPage(1); }} placeholder="Nhập tên, mã dự án, chủ đầu tư..." />
+                </label>
+              </header>
+
+              {/* KPI Stats Bar */}
+              <div className="table-stats-bar">
+                <div className="table-stat-card">
+                  <span>TỔNG DỰ ÁN FS</span>
+                  <b>{projects.length}</b>
+                </div>
+                <div className="table-stat-card">
+                  <span>CHƯA LẬP FS</span>
+                  <b style={{ color: "#64748b" }}>{projects.filter((p) => p.fsStatus === "chua_lap").length}</b>
+                </div>
+                <div className="table-stat-card">
+                  <span>ĐANG TÍNH TOÁN FS</span>
+                  <b style={{ color: "#1a56a8" }}>{projects.filter((p) => p.fsStatus === "dang_tinh_toan").length}</b>
+                </div>
+                <div className="table-stat-card">
+                  <span>ĐỐI CHIẾU SỐ LIỆU</span>
+                  <b style={{ color: "#d97706" }}>{projects.filter((p) => p.fsStatus === "cho_doi_chieu").length}</b>
+                </div>
+                <div className="table-stat-card">
+                  <span>ĐÃ DUYỆT FS-VER2</span>
+                  <b style={{ color: "#167461" }}>{projects.filter((p) => p.fsStatus === "da_duyet").length}</b>
+                </div>
+              </div>
+
+              {/* Filters */}
+              <div className="table-filters" style={{ margin: "14px 24px 14px", border: "none" }}>
+                <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", alignItems: "center" }}>
+                  <label className="table-filters-select">
+                    <span>Vùng</span>
+                    <select value={fsRegionFilter} onChange={(event) => { setFsRegionFilter(event.target.value); setFsPage(1); }}>
+                      <option value="all">Tất cả vùng</option>
+                      {[...new Set(projects.map((p) => p.region).filter(Boolean) as string[])].sort().map((r) => (
+                        <option key={r} value={r}>{r}</option>
+                      ))}
+                    </select>
+                  </label>
+                  <label className="table-filters-select">
+                    <span>Trạng thái FS</span>
+                    <select value={fsStatusFilter} onChange={(event) => { setFsStatusFilter(event.target.value); setFsPage(1); }}>
+                      <option value="all">Tất cả trạng thái FS</option>
+                      <option value="chua_lap">Chưa lập FS</option>
+                      <option value="dang_tinh_toan">Đang tính toán FS</option>
+                      <option value="cho_doi_chieu">Đối chiếu số liệu</option>
+                      <option value="da_duyet">Đã duyệt FS-Ver2</option>
+                    </select>
+                  </label>
+                </div>
+                <span className="table-filters-count">{visibleFsProjects.length} dự án</span>
+              </div>
+
+              {/* Exact 8-column Table */}
+              {visibleFsProjects.length > 0 ? (
+                <div className="project-table" aria-label="Danh sách dự án Lập FS Thực Thi">
+                  <div className="project-table-head">
+                    <span>Mã dự án</span>
+                    <span>Tên dự án</span>
+                    <span>Loại dự án</span>
+                    <span>Chủ đầu tư</span>
+                    <span>Khu vực</span>
+                    <span>Vùng</span>
+                    <span>Trạng thái</span>
+                    <span>Hành động</span>
+                  </div>
+                  <div className="project-table-body">
+                    {pagedFsProjects.map((project) => (
+                      <div key={project.id} className="project-table-row" onClick={() => { setActiveId(project.id); setView("workspace"); }}>
+                        <span className="project-code">{project.code}</span>
+                        <span className="project-name-cell">
+                          <b>{project.name}</b>
+                        </span>
+                        <span className="project-table-cell-ellipsis" title={project.type}>{project.type}</span>
+                        <span className="project-table-cell-ellipsis" title={project.investor || "Tập đoàn Novaland"}>{project.investor || "Tập đoàn Novaland"}</span>
+                        <span className="project-table-cell-ellipsis" title={project.location || project.area || "—"}>{project.location || project.area || "—"}</span>
+                        <span className="project-region-cell">{project.region || "Toàn quốc"}</span>
+                        <span>
+                          {project.fsStatus === "da_duyet" ? (
+                            <span className="status-badge" style={{ background: "#edf8f5", color: "#167461", border: "1px solid #a4dfd1" }}>✓ ĐÃ DUYỆT FS-VER2</span>
+                          ) : project.fsStatus === "cho_doi_chieu" ? (
+                            <span className="status-badge" style={{ background: "#fef3c7", color: "#92400e", border: "1px solid #fde68a" }}>ĐỐI CHIẾU SỐ LIỆU</span>
+                          ) : project.fsStatus === "dang_tinh_toan" ? (
+                            <span className="status-badge" style={{ background: "#eef4fb", color: "#1a56a8", border: "1px solid #bfdbfe" }}>ĐANG TÍNH TOÁN FS</span>
+                          ) : (
+                            <span className="status-badge" style={{ background: "#f1f5f9", color: "#64748b" }}>CHƯA LẬP FS</span>
+                          )}
+                        </span>
+                        <span className="project-action-cell" onClick={(event) => event.stopPropagation()}>
+                          <button type="button" className="action-btn view-btn" title="Xem phân tích FS" aria-label="Xem FS" onClick={() => { setActiveId(project.id); setView("workspace"); }}>
+                            <IconEye />
+                          </button>
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <div className="project-index-empty">
+                  <b>Không tìm thấy hồ sơ FS phù hợp</b>
+                  <span>Thử tìm bằng từ khóa khác hoặc thiết lập lại bộ lọc.</span>
+                </div>
+              )}
+              <Pagination total={visibleFsProjects.length} pageSize={fsPageSize} page={fsPage} onPageChange={setFsPage} onPageSizeChange={(size) => { setFsPageSize(size); setFsPage(1); }} />
+            </section>
           </>
         ) : !activeProject ? (
           <div className="empty-state">
