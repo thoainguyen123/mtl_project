@@ -22,7 +22,11 @@ type TaskEdit = {
   endDate?: string;
   duration?: number;
   pic?: string;
-  status?: "Đang thực hiện" | "Đóng" | "Hoàn thành";
+  status?: "Đang thực hiện" | "Đóng" | "Hoàn thành" | "Trễ hạn";
+  actualProgress?: number;
+  actualStartDate?: string;
+  actualEndDate?: string;
+  actualNote?: string;
 };
 
 type TaskDependency = {
@@ -33,7 +37,10 @@ type TaskDependency = {
 
 type DefaultTaskDependency = TaskDependency & { successorCode: string };
 
-type ApprovalStatus = "draft" | "submitted" | "approved" | "changes_requested";
+/* Vòng đời MTL theo SOP06 mục 6.1:
+   lập (B3-5) → GMD kiểm soát (B6) → GMS.P thẩm định (B7) → trình E-Approval (B8-9) → duyệt chính thức.
+   "appraised" tách riêng khỏi "approved" vì thẩm định không phải là phê duyệt. */
+type ApprovalStatus = "draft" | "gmd_review" | "gmd_returned" | "submitted" | "changes_requested" | "appraised" | "approved";
 type DepartmentApprovalStatus = "pending" | "approved" | "changes_requested";
 
 type DepartmentApproval = {
@@ -62,12 +69,24 @@ type Project = {
   includedTaskCodes: string[];
   departmentApprovals: Record<string, DepartmentApproval>;
   approvalStatus: ApprovalStatus;
+  gmdSubmittedAt?: string;
+  gmdReviewer?: string;
+  gmdNote?: string;
+  gmdReviewedAt?: string;
   submittedAt?: string;
   submittedBy?: string;
   approvedAt?: string;
   reviewedAt?: string;
   approvedVersion?: string;
   reviewNote?: string;
+  isOfficialApproved?: boolean;
+  eApprovalCode?: string;
+  eApprovalUrl?: string;
+  eApprovalDate?: string;
+  eApprovalSigner?: string;
+  eApprovalNote?: string;
+  officialVersion?: string;
+  baselineLocked?: boolean;
 };
 
 type ProjectForm = Pick<Project, "name" | "code" | "type" | "location" | "startDate" | "targetDate" | "area" | "region" | "group">;
@@ -83,6 +102,11 @@ type ScheduledTask = TemplateTask & {
   predecessors: TaskDependency[];
   dependencyConflict?: string;
   suggestedStartDate?: string;
+  actualProgress: number;
+  actualStartDate?: string;
+  actualEndDate?: string;
+  actualStatus: "Chưa bắt đầu" | "Đang thực hiện" | "Hoàn thành" | "Trễ hạn";
+  actualNote?: string;
 };
 
 type TaskForm = {
@@ -104,22 +128,39 @@ const ACTIVE_KEY = "mtl-workspace-active-project-v1";
 const CATALOG_KEY = "mtl-workspace-custom-catalog-v1";
 const CATALOG_ENABLED_KEY = "mtl-workspace-enabled-catalog-v1";
 
+/* Theo SOP06 mục 2.2, PBCM gồm 9 ban/phòng gián tiếp + 4 phòng trực tiếp = 13 đơn vị.
+   PMD là đơn vị chủ trì lập MTL nên có công việc riêng trong kế hoạch, nhưng không
+   nằm trong nhóm phải xác nhận — không ai tự xác nhận bản mình lập. */
 const GROUPS = [
-  { code: "9.1", short: "HRC", name: "Hành chính Nhân sự", scope: "9 phòng ban" },
-  { code: "9.2", short: "FAC", name: "Tài chính - Kế toán", scope: "9 phòng ban" },
-  { code: "9.3", short: "SAC", name: "Kinh doanh", scope: "9 phòng ban" },
-  { code: "9.4", short: "MAC", name: "Marketing", scope: "9 phòng ban" },
-  { code: "9.5", short: "PRC", name: "Cung ứng Đấu thầu", scope: "9 phòng ban" },
-  { code: "9.6", short: "QSB", name: "Khối lượng và Ngân sách", scope: "9 phòng ban" },
-  { code: "9.7", short: "SEC", name: "An ninh", scope: "9 phòng ban" },
-  { code: "9.8", short: "IDD", name: "Thiết kế Nội bộ", scope: "9 phòng ban" },
-  { code: "9.9", short: "CSC", name: "Bồi thường GPMB", scope: "9 phòng ban" },
-  { code: "4.0", short: "PMD", name: "Quản lý Phát triển Dự án", scope: "Phần 4" },
-  { code: "4.1", short: "PLP", name: "Pháp lý Dự án", scope: "Phần 4" },
-  { code: "4.2", short: "DMD", name: "Quản lý Thiết kế", scope: "Phần 4" },
-  { code: "4.3", short: "PCD", name: "Quản lý Thi công", scope: "Phần 4" },
-  { code: "4.4", short: "OM", name: "Quản lý Vận hành", scope: "Phần 4" },
+  { code: "9.1", short: "HRC", name: "Ban Nhân sự", role: "indirect", scope: "9 phòng ban" },
+  { code: "9.2", short: "FAC", name: "Ban Tài chính Kế toán", role: "indirect", scope: "9 phòng ban" },
+  { code: "9.3", short: "SAC", name: "Ban Kinh doanh", role: "indirect", scope: "9 phòng ban" },
+  { code: "9.4", short: "MAC", name: "Ban Marketing", role: "indirect", scope: "9 phòng ban" },
+  { code: "9.5", short: "PTC", name: "Ban Cung ứng Đấu thầu", role: "indirect", scope: "9 phòng ban" },
+  { code: "9.6", short: "QSB", name: "Phòng Khối lượng và Ngân sách", role: "indirect", scope: "9 phòng ban" },
+  { code: "9.7", short: "SED", name: "Phòng An ninh", role: "indirect", scope: "9 phòng ban" },
+  { code: "9.8", short: "IDC", name: "Trung tâm Thiết kế Nội bộ", role: "indirect", scope: "9 phòng ban" },
+  { code: "9.9", short: "CSC", name: "Trung tâm Bồi thường GPMB", role: "indirect", scope: "9 phòng ban" },
+  { code: "4.0", short: "PMD", name: "Phòng Điều hành Dự án", role: "coordinator", scope: "Chủ trì lập MTL" },
+  { code: "4.1", short: "PLP", name: "Phòng Thủ tục Pháp lý Dự án", role: "direct", scope: "4 phòng trực tiếp" },
+  { code: "4.2", short: "DMD", name: "Phòng Quản lý Thiết kế", role: "direct", scope: "4 phòng trực tiếp" },
+  { code: "4.3", short: "PCD", name: "Phòng Quản lý Xây dựng, An toàn và Môi trường", role: "direct", scope: "4 phòng trực tiếp" },
+  { code: "4.4", short: "OM", name: "Phòng Quản lý Vận hành Dự án", role: "direct", scope: "4 phòng trực tiếp" },
 ] as const;
+
+/* Các đầu mục phải xác nhận MTL (PBCM). PMD bị loại vì là đơn vị lập. */
+const PBCM_GROUPS = GROUPS.filter((group) => group.role !== "coordinator");
+const PBCM_CODES = new Set<string>(PBCM_GROUPS.map((group) => group.code));
+const INDIRECT_COUNT = GROUPS.filter((group) => group.role === "indirect").length;
+const DIRECT_COUNT = GROUPS.filter((group) => group.role === "direct").length;
+
+function isPbcmGroup(code: string) {
+  return PBCM_CODES.has(code);
+}
+
+function pbcmGroupsOf(project: Project) {
+  return project.selectedGroups.filter(isPbcmGroup);
+}
 
 const GROUP_BY_CODE = Object.fromEntries(GROUPS.map((group) => [group.code, group]));
 const GROUP_ORDER = Object.fromEntries(GROUPS.map((group, index) => [group.code, index]));
@@ -151,7 +192,7 @@ const emptyTaskForm: TaskForm = {
 };
 
 function normalizeDepartmentApprovals(selectedGroups: string[], approvals?: Record<string, DepartmentApproval>, legacyApproved = false) {
-  return Object.fromEntries(GROUPS.filter((group) => selectedGroups.includes(group.code)).map((group) => {
+  return Object.fromEntries(PBCM_GROUPS.filter((group) => selectedGroups.includes(group.code)).map((group) => {
     const current = approvals?.[group.code];
     return [group.code, {
       reviewer: current?.reviewer ?? (legacyApproved ? "Đã duyệt trước quy trình mới" : ""),
@@ -164,6 +205,7 @@ function normalizeDepartmentApprovals(selectedGroups: string[], approvals?: Reco
 
 function normalizeTaskStatus(status: unknown): NonNullable<TaskEdit["status"]> {
   if (status === "Hoàn thành" || status === "Đã xác nhận") return "Hoàn thành";
+  if (status === "Trễ hạn") return "Trễ hạn";
   if (status === "Đóng") return "Đóng";
   return "Đang thực hiện";
 }
@@ -178,6 +220,14 @@ function defaultDependenciesForCodes(codes: string[]) {
   }, {});
 }
 
+/* Dữ liệu cũ dùng "approved" cho cả hai nghĩa: GMS đã thẩm định và đã phê duyệt
+   chính thức. Bản nào chưa có hồ sơ E-Approval thì thực chất mới ở mức thẩm định. */
+function migrateApprovalStatus(project: Partial<Project>): ApprovalStatus {
+  const status = project.approvalStatus ?? "draft";
+  if (status === "approved" && !project.isOfficialApproved && !project.eApprovalCode) return "appraised";
+  return status;
+}
+
 function normalizeProject(project: Partial<Project>): Project {
   const selectedGroups = project.selectedGroups ?? GROUPS.map((group) => group.code);
   const projectTasks = [...TEMPLATE, ...(project.customTasks ?? [])];
@@ -186,6 +236,7 @@ function normalizeProject(project: Partial<Project>): Project {
     ...(edit.status ? { status: normalizeTaskStatus(edit.status) } : {}),
   }])) as Record<string, TaskEdit>;
   const includedTaskCodes = project.includedTaskCodes ?? projectTasks.filter((task) => selectedGroups.includes(task.groupCode)).map((task) => task.code);
+  const isOfficial = Boolean(project.isOfficialApproved || (project.approvalStatus === "approved" && project.eApprovalCode));
   return {
     id: project.id ?? crypto.randomUUID(),
     name: project.name ?? "Dự án chưa đặt tên",
@@ -204,13 +255,25 @@ function normalizeProject(project: Partial<Project>): Project {
     customTasks: project.customTasks ?? [],
     includedTaskCodes,
     departmentApprovals: normalizeDepartmentApprovals(selectedGroups, project.departmentApprovals, Boolean(!project.departmentApprovals && project.approvalStatus && project.approvalStatus !== "draft")),
-    approvalStatus: project.approvalStatus ?? "draft",
+    approvalStatus: migrateApprovalStatus(project),
+    gmdSubmittedAt: project.gmdSubmittedAt,
+    gmdReviewer: project.gmdReviewer,
+    gmdNote: project.gmdNote,
+    gmdReviewedAt: project.gmdReviewedAt,
     submittedAt: project.submittedAt,
     submittedBy: project.submittedBy,
     approvedAt: project.approvedAt,
     reviewedAt: project.reviewedAt,
     approvedVersion: project.approvedVersion,
     reviewNote: project.reviewNote,
+    isOfficialApproved: isOfficial,
+    eApprovalCode: project.eApprovalCode,
+    eApprovalUrl: project.eApprovalUrl,
+    eApprovalDate: project.eApprovalDate,
+    eApprovalSigner: project.eApprovalSigner,
+    eApprovalNote: project.eApprovalNote,
+    officialVersion: project.officialVersion ?? (isOfficial ? "v1.0" : undefined),
+    baselineLocked: Boolean(project.baselineLocked ?? isOfficial),
   };
 }
 
@@ -295,6 +358,20 @@ function scheduleTasks(project: Project): ScheduledTask[] {
       : Math.max(1, Number(edit.duration ?? suggestedDuration));
     const endDate = edit.endDate && edit.endDate >= startDate ? edit.endDate : dateAtWorkingOffset(startDate, duration - 1);
     const startOffset = Math.max(0, rawDaysBetween(project.startDate, startDate));
+
+    const actualProgress = edit.actualProgress !== undefined ? edit.actualProgress : (edit.status === "Hoàn thành" ? 100 : (edit.status === "Đang thực hiện" ? 30 : 0));
+    const actualStartDate = edit.actualStartDate ?? (actualProgress > 0 ? startDate : undefined);
+    const actualEndDate = edit.actualEndDate ?? (actualProgress === 100 ? endDate : undefined);
+
+    let actualStatus: "Chưa bắt đầu" | "Đang thực hiện" | "Hoàn thành" | "Trễ hạn" = "Chưa bắt đầu";
+    if (actualProgress === 100 || edit.status === "Hoàn thành") {
+      actualStatus = "Hoàn thành";
+    } else if (endDate < today && actualProgress < 100) {
+      actualStatus = "Trễ hạn";
+    } else if (actualProgress > 0 || (startDate <= today && endDate >= today)) {
+      actualStatus = "Đang thực hiện";
+    }
+
     return {
       ...task,
       startDate,
@@ -303,7 +380,12 @@ function scheduleTasks(project: Project): ScheduledTask[] {
       left: Math.min(98, (startOffset / totalDays) * 100),
       width: Math.max(0.7, Math.min(100, (duration / totalDays) * 100)),
       pic: edit.pic ?? "",
-      status: edit.status ?? "Đang thực hiện",
+      status: actualStatus === "Hoàn thành" ? "Hoàn thành" : (actualStatus === "Trễ hạn" ? "Trễ hạn" : (edit.status ?? "Đang thực hiện")),
+      actualProgress,
+      actualStartDate,
+      actualEndDate,
+      actualStatus,
+      actualNote: edit.actualNote,
       predecessors: project.taskDependencies[task.code] ?? [],
     };
   });
@@ -312,9 +394,25 @@ function scheduleTasks(project: Project): ScheduledTask[] {
     if (!task.summary) return task;
     const descendants = tasks.filter((candidate) => candidate.code.startsWith(`${task.code}.`));
     if (!descendants.length) return task;
+    const nonSummary = descendants.filter((c) => !c.summary);
     const startDate = descendants.reduce((earliest, candidate) => candidate.startDate < earliest ? candidate.startDate : earliest, descendants[0].startDate);
     const endDate = descendants.reduce((latest, candidate) => candidate.endDate > latest ? candidate.endDate : latest, descendants[0].endDate);
-    return { ...task, startDate, endDate, duration: Math.max(1, workingDaysBetween(startDate, endDate)) };
+    const actualProgress = nonSummary.length
+      ? Math.round(nonSummary.reduce((sum, c) => sum + c.actualProgress, 0) / nonSummary.length)
+      : task.actualProgress;
+    let actualStatus = task.actualStatus;
+    if (actualProgress === 100) actualStatus = "Hoàn thành";
+    else if (endDate < today && actualProgress < 100) actualStatus = "Trễ hạn";
+    else if (actualProgress > 0) actualStatus = "Đang thực hiện";
+
+    return {
+      ...task,
+      startDate,
+      endDate,
+      duration: Math.max(1, workingDaysBetween(startDate, endDate)),
+      actualProgress,
+      actualStatus,
+    };
   });
   const byCode = Object.fromEntries(rolledUp.map((task) => [task.code, task]));
 
@@ -399,8 +497,18 @@ function IconTimeline() {
 function IconCheck() {
   return <svg className="nav-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3.5" width="18" height="17" rx="3" /><polyline points="8 12 11 15 16 9" /></svg>;
 }
+function IconChevronDown() {
+  return <svg className="section-chevron" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9" /></svg>;
+}
+function IconShield() {
+  return <svg className="nav-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3l7 3v5.5c0 4.2-2.9 7.7-7 9-4.1-1.3-7-4.8-7-9V6z" /><path d="M9 12.2l2.2 2.2 4-4.4" /></svg>;
+}
+
 function IconSeal() {
   return <svg className="nav-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3.5" width="18" height="17" rx="3" /><circle cx="12" cy="12" r="4.5" /><polyline points="10 12 11.5 13.5 14 10.5" /></svg>;
+}
+function IconFileCheck() {
+  return <svg className="nav-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M9 15l2 2 4-4"/></svg>;
 }
 function IconList() {
   return <svg className="nav-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3.5" width="18" height="17" rx="3" /><line x1="8.5" y1="8.5" x2="16" y2="8.5" /><line x1="8.5" y1="12" x2="16" y2="12" /><line x1="8.5" y1="15.5" x2="13" y2="15.5" /><circle cx="5.5" cy="8.5" r="0.75" fill="currentColor" stroke="none" /><circle cx="5.5" cy="12" r="0.75" fill="currentColor" stroke="none" /><circle cx="5.5" cy="15.5" r="0.75" fill="currentColor" stroke="none" /></svg>;
@@ -420,6 +528,15 @@ function IconRefresh() {
 }
 function IconFilter() {
   return <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>;
+}
+function IconExternalLink() {
+  return <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>;
+}
+function IconSlider() {
+  return <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>;
+}
+function IconDownload() {
+  return <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>;
 }
 function IconMore() {
   return <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor"><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/><circle cx="5" cy="12" r="2"/></svg>;
@@ -579,11 +696,12 @@ function projectDependencyCount(project: Project) {
 }
 
 function approvedDepartmentCount(project: Project) {
-  return project.selectedGroups.filter((code) => project.departmentApprovals[code]?.status === "approved").length;
+  return pbcmGroupsOf(project).filter((code) => project.departmentApprovals[code]?.status === "approved").length;
 }
 
 function allDepartmentsApproved(project: Project) {
-  return project.selectedGroups.length > 0 && approvedDepartmentCount(project) === project.selectedGroups.length;
+  const pbcm = pbcmGroupsOf(project);
+  return pbcm.length > 0 && approvedDepartmentCount(project) === pbcm.length;
 }
 
 function projectApprovalLabel(project: Project) {
@@ -630,10 +748,21 @@ function projectXml(project: Project, tasks: ScheduledTask[]) {
 
 const APPROVAL_LABEL: Record<ApprovalStatus, string> = {
   draft: "ĐANG LẬP",
+  gmd_review: "CHỜ GMD KIỂM SOÁT",
+  gmd_returned: "GMD YÊU CẦU ĐIỀU CHỈNH",
   submitted: "CHỜ GMS THẨM ĐỊNH",
-  approved: "HOÀN THÀNH THẨM ĐỊNH",
   changes_requested: "GMS YÊU CẦU ĐIỀU CHỈNH",
+  appraised: "ĐÃ THẨM ĐỊNH · CHỜ PHÊ DUYỆT",
+  approved: "ĐÃ PHÊ DUYỆT CHÍNH THỨC",
 };
+
+/* Các trạng thái mà người lập được phép sửa MTL. Từ lúc trình GMD trở đi,
+   bản kế hoạch phải đứng yên để GMD và GMS.P xem đúng thứ đã gửi. */
+const EDITABLE_STATUSES: ApprovalStatus[] = ["draft", "gmd_returned", "changes_requested"];
+
+function isPlanEditable(project: Project) {
+  return EDITABLE_STATUSES.includes(project.approvalStatus);
+}
 
 const DEPARTMENT_APPROVAL_LABEL: Record<DepartmentApprovalStatus, string> = {
   pending: "CHỜ XÁC NHẬN",
@@ -647,7 +776,9 @@ export default function Home() {
   const [customCatalog, setCustomCatalog] = useState<TemplateTask[]>([]);
   const [enabledCatalogCodes, setEnabledCatalogCodes] = useState<Set<string>>(new Set());
   const [hydrated, setHydrated] = useState(false);
-  const [view, setView] = useState<"overview" | "projects" | "workspace" | "departments" | "catalog" | "gms">("overview");
+  const [view, setView] = useState<"overview" | "projects" | "workspace" | "departments" | "gmd" | "gms" | "confirm_approval" | "approved_projects" | "catalog">("projects");
+  const [lapMtlOpen, setLapMtlOpen] = useState(true);
+  const [overviewSource, setOverviewSource] = useState<"approved" | "all">("approved");
   const [overviewRegion, setOverviewRegion] = useState("all");
   const [overviewProject, setOverviewProject] = useState("all");
   const [overviewGroup, setOverviewGroup] = useState("all");
@@ -659,6 +790,12 @@ export default function Home() {
   const [contextMenu, setContextMenu] = useState<{ code: string; x: number; y: number } | null>(null);
   const [gmsFilter, setGmsFilter] = useState<"pending" | "history">("pending");
   const [gmsSelectedId, setGmsSelectedId] = useState("");
+  const [gmsReturnGroups, setGmsReturnGroups] = useState<Set<string>>(new Set());
+  const [gmdFilter, setGmdFilter] = useState<"pending" | "history">("pending");
+  const [gmdSelectedId, setGmdSelectedId] = useState("");
+  const [gmdNote, setGmdNote] = useState("");
+  const [gmdReviewer, setGmdReviewer] = useState("");
+  const [gmdReturnGroups, setGmdReturnGroups] = useState<Set<string>>(new Set());
   const [departmentCode, setDepartmentCode] = useState<string>(GROUPS[0].code);
   const [form, setForm] = useState<ProjectForm>(emptyForm);
   const [taskForm, setTaskForm] = useState<TaskForm>(emptyTaskForm);
@@ -669,7 +806,40 @@ export default function Home() {
   const [projectStatusFilter, setProjectStatusFilter] = useState<ApprovalStatus | "all">("all");
   const [projectPage, setProjectPage] = useState(1);
   const [projectPageSize, setProjectPageSize] = useState(10);
+  
+  const [confirmSearch, setConfirmSearch] = useState("");
+  const [confirmFilter, setConfirmFilter] = useState<"all" | "pending" | "approved">("all");
+  const [confirmPage, setConfirmPage] = useState(1);
+  const [confirmPageSize, setConfirmPageSize] = useState(10);
+
+  const [approvedSearch, setApprovedSearch] = useState("");
+  const [approvedRegionFilter, setApprovedRegionFilter] = useState("all");
+  const [approvedPage, setApprovedPage] = useState(1);
+  const [approvedPageSize, setApprovedPageSize] = useState(10);
+
+  const [showEApprovalModal, setShowEApprovalModal] = useState(false);
+  const [eApprovalForm, setEApprovalForm] = useState({
+    projectId: "",
+    code: "",
+    url: "",
+    date: today,
+    signer: "PMD - Ban Quản lý Dự án",
+    version: "v1.0",
+    note: "",
+  });
+  const [eApprovalError, setEApprovalError] = useState("");
+
+  const [showProgressModal, setShowProgressModal] = useState(false);
+  const [editingProgressTask, setEditingProgressTask] = useState<ScheduledTask | null>(null);
+  const [progressForm, setProgressForm] = useState({
+    progress: 0,
+    actualStartDate: "",
+    actualEndDate: "",
+    note: "",
+  });
+
   const [gmsSearch, setGmsSearch] = useState("");
+  const [gmdSearch, setGmdSearch] = useState("");
   const [catalogSearch, setCatalogSearch] = useState("");
   const [catalogGroupFilter, setCatalogGroupFilter] = useState("all");
   const [catalogSourceFilter, setCatalogSourceFilter] = useState<"all" | "custom" | "standard">("all");
@@ -744,7 +914,70 @@ export default function Home() {
 
   const activeProject = projects.find((project) => project.id === activeId) ?? projects[0];
   const departmentApprovedCount = activeProject ? approvedDepartmentCount(activeProject) : 0;
-  const departmentPendingCount = activeProject ? activeProject.selectedGroups.length - departmentApprovedCount : 0;
+  const departmentPendingCount = activeProject ? pbcmGroupsOf(activeProject).length - departmentApprovedCount : 0;
+
+  const officialApprovedProjects = useMemo(() => {
+    return projects.filter((p) => p.isOfficialApproved || (p.approvalStatus === "approved" && p.eApprovalCode));
+  }, [projects]);
+
+  const visibleApprovedProjects = useMemo(() => {
+    const query = approvedSearch.trim().toLocaleLowerCase("vi");
+    return officialApprovedProjects.filter((project) => {
+      const matchesQuery = !query || `${project.code} ${project.name} ${project.location} ${project.eApprovalCode ?? ""}`.toLocaleLowerCase("vi").includes(query);
+      const matchesRegion = approvedRegionFilter === "all" || project.region === approvedRegionFilter;
+      return matchesQuery && matchesRegion;
+    });
+  }, [officialApprovedProjects, approvedSearch, approvedRegionFilter]);
+
+  const pagedApprovedProjects = useMemo(() => {
+    const pageCount = Math.max(1, Math.ceil(visibleApprovedProjects.length / approvedPageSize));
+    const currentPage = Math.min(approvedPage, pageCount);
+    return visibleApprovedProjects.slice((currentPage - 1) * approvedPageSize, currentPage * approvedPageSize);
+  }, [visibleApprovedProjects, approvedPage, approvedPageSize]);
+
+  const approvedTotalTasks = useMemo(() => {
+    return officialApprovedProjects.reduce((sum, p) => sum + projectTaskCount(p), 0);
+  }, [officialApprovedProjects]);
+
+  const approvedAverageProgress = useMemo(() => {
+    if (!officialApprovedProjects.length) return 0;
+    const allTasks = officialApprovedProjects.flatMap((p) => scheduleTasks(p).filter((t) => !t.summary));
+    if (!allTasks.length) return 0;
+    return Math.round(allTasks.reduce((sum, t) => sum + t.actualProgress, 0) / allTasks.length);
+  }, [officialApprovedProjects]);
+
+  const approvedDoneTasks = useMemo(() => {
+    return officialApprovedProjects.flatMap((p) => scheduleTasks(p).filter((t) => !t.summary && t.actualStatus === "Hoàn thành")).length;
+  }, [officialApprovedProjects]);
+
+  const approvedLateTasks = useMemo(() => {
+    return officialApprovedProjects.flatMap((p) => scheduleTasks(p).filter((t) => !t.summary && t.actualStatus === "Trễ hạn")).length;
+  }, [officialApprovedProjects]);
+
+  /* Chỉ hồ sơ đã qua thẩm định mới đủ điều kiện trình E-Approval (SOP B8). */
+  const pendingEApprovalCount = useMemo(() => {
+    return projects.filter((p) => p.approvalStatus === "appraised" && !p.isOfficialApproved).length;
+  }, [projects]);
+
+  const visibleConfirmProjects = useMemo(() => {
+    const query = confirmSearch.trim().toLocaleLowerCase("vi");
+    return projects.filter((project) => {
+      const matchesQuery = !query || `${project.code} ${project.name} ${project.location} ${project.eApprovalCode ?? ""}`.toLocaleLowerCase("vi").includes(query);
+      const matchesFilter = confirmFilter === "all"
+        ? true
+        : confirmFilter === "pending"
+          ? !project.isOfficialApproved
+          : !!project.isOfficialApproved;
+      return matchesQuery && matchesFilter;
+    });
+  }, [projects, confirmSearch, confirmFilter]);
+
+  const pagedConfirmProjects = useMemo(() => {
+    const pageCount = Math.max(1, Math.ceil(visibleConfirmProjects.length / confirmPageSize));
+    const currentPage = Math.min(confirmPage, pageCount);
+    return visibleConfirmProjects.slice((currentPage - 1) * confirmPageSize, currentPage * confirmPageSize);
+  }, [visibleConfirmProjects, confirmPage, confirmPageSize]);
+
   const visibleProjects = useMemo(() => {
     const query = projectSearch.trim().toLocaleLowerCase("vi");
     return projects.filter((project) => {
@@ -754,9 +987,17 @@ export default function Home() {
     });
   }, [projects, projectSearch, projectStatusFilter]);
   const pagedProjects = useMemo(() => visibleProjects.slice((Math.min(projectPage, Math.max(1, Math.ceil(visibleProjects.length / projectPageSize))) - 1) * projectPageSize, Math.min(projectPage, Math.max(1, Math.ceil(visibleProjects.length / projectPageSize))) * projectPageSize), [visibleProjects, projectPage, projectPageSize]);
+  
   const overviewToday = new Date().toISOString().slice(0, 10);
-  const overviewRegions = useMemo(() => [...new Set(projects.map((project) => project.region).filter(Boolean) as string[])].sort(), [projects]);
-  const overviewEntries = useMemo(() => projects.flatMap((project) => scheduleTasks(project).filter((task) => !task.summary).map((task) => ({ project, task }))), [projects]);
+  const overviewSourceProjects = useMemo(() => {
+    if (overviewSource === "approved" && officialApprovedProjects.length > 0) {
+      return officialApprovedProjects;
+    }
+    return projects;
+  }, [overviewSource, officialApprovedProjects, projects]);
+
+  const overviewRegions = useMemo(() => [...new Set(overviewSourceProjects.map((project) => project.region).filter(Boolean) as string[])].sort(), [overviewSourceProjects]);
+  const overviewEntries = useMemo(() => overviewSourceProjects.flatMap((project) => scheduleTasks(project).filter((task) => !task.summary).map((task) => ({ project, task }))), [overviewSourceProjects]);
   const overviewFiltered = useMemo(() => overviewEntries.filter(({ project, task }) => (overviewRegion === "all" || project.region === overviewRegion)
     && (overviewProject === "all" || project.id === overviewProject)
     && (overviewGroup === "all" || task.groupCode === overviewGroup)), [overviewEntries, overviewRegion, overviewProject, overviewGroup]);
@@ -766,6 +1007,7 @@ export default function Home() {
     const byPerson = new Map<string, WorkStat>();
     const indirect = emptyWorkStat();
     const direct = emptyWorkStat();
+    const coordinator = emptyWorkStat();
     const all = emptyWorkStat();
     overviewFiltered.forEach(({ project, task }) => {
       const groupStat = byGroup.get(task.groupCode) ?? emptyWorkStat();
@@ -778,7 +1020,8 @@ export default function Home() {
       const personStat = byPerson.get(person) ?? emptyWorkStat();
       countWork(personStat, task, overviewToday);
       byPerson.set(person, personStat);
-      countWork(task.groupCode.startsWith("9.") ? indirect : direct, task, overviewToday);
+      const role = GROUP_BY_CODE[task.groupCode]?.role;
+      countWork(role === "indirect" ? indirect : role === "direct" ? direct : coordinator, task, overviewToday);
       countWork(all, task, overviewToday);
     });
     const visibleProjectIds = new Set(overviewFiltered.map(({ project }) => project.id));
@@ -787,20 +1030,22 @@ export default function Home() {
       all,
       indirect,
       direct,
-      indirectGroups: GROUPS.filter((group) => group.code.startsWith("9.")).length,
-      directGroups: GROUPS.filter((group) => !group.code.startsWith("9.")).length,
+      coordinator,
+      indirectGroups: INDIRECT_COUNT,
+      directGroups: DIRECT_COUNT,
       regionCount: visibleRegions.size,
       projectCount: visibleProjectIds.size,
       groupRows: GROUPS.map((group) => ({ group, stat: byGroup.get(group.code) ?? emptyWorkStat() })).filter((row) => row.stat.total > 0),
-      projectRows: projects.filter((project) => byProject.has(project.id)).map((project) => ({ project, stat: byProject.get(project.id)! })).sort((a, b) => b.stat.total - a.stat.total),
+      projectRows: overviewSourceProjects.filter((project) => byProject.has(project.id)).map((project) => ({ project, stat: byProject.get(project.id)! })).sort((a, b) => b.stat.total - a.stat.total),
       personRows: [...byPerson.entries()].map(([person, stat]) => ({ person, stat })).sort((a, b) => b.stat.late - a.stat.late || b.stat.total - a.stat.total),
     };
-  }, [overviewFiltered, overviewToday, projects]);
+  }, [overviewFiltered, overviewToday, overviewSourceProjects]);
   const overviewMaxGroupTotal = Math.max(1, ...overview.groupRows.map((row) => row.stat.total));
   const overviewMaxProjectTotal = Math.max(1, ...overview.projectRows.map((row) => row.stat.total));
   const overviewMaxPersonLate = Math.max(1, ...overview.personRows.map((row) => row.stat.late));
   const pendingGmsCount = projects.filter((project) => project.approvalStatus === "submitted").length;
-  const reviewedGmsProjects = projects.filter((project) => project.approvalStatus !== "draft").sort((a, b) => {
+  const GMS_STAGES: ApprovalStatus[] = ["submitted", "changes_requested", "appraised", "approved"];
+  const reviewedGmsProjects = projects.filter((project) => GMS_STAGES.includes(project.approvalStatus)).sort((a, b) => {
     if (a.approvalStatus === "submitted" && b.approvalStatus !== "submitted") return -1;
     if (a.approvalStatus !== "submitted" && b.approvalStatus === "submitted") return 1;
     return (b.submittedAt ?? "").localeCompare(a.submittedAt ?? "");
@@ -812,6 +1057,83 @@ export default function Home() {
   });
   const gmsSelectedProject = projects.find((project) => project.id === gmsSelectedId) ?? null;
   const gmsSelectedTasks = useMemo(() => gmsSelectedProject ? scheduleTasks(gmsSelectedProject) : [], [gmsSelectedProject]);
+
+  /* ---- GMD kiểm soát (SOP B6) ---- */
+  const pendingGmdCount = projects.filter((project) => project.approvalStatus === "gmd_review").length;
+  const GMD_STAGES: ApprovalStatus[] = ["gmd_review", "gmd_returned", "submitted", "changes_requested", "appraised", "approved"];
+  const visibleGmdProjects = projects
+    .filter((project) => {
+      const inStatus = gmdFilter === "pending" ? project.approvalStatus === "gmd_review" : GMD_STAGES.includes(project.approvalStatus) && project.approvalStatus !== "gmd_review" && Boolean(project.gmdReviewedAt);
+      const query = gmdSearch.trim().toLocaleLowerCase("vi");
+      return inStatus && (!query || `${project.code} ${project.name} ${project.location}`.toLocaleLowerCase("vi").includes(query));
+    })
+    .sort((a, b) => (b.gmdSubmittedAt ?? "").localeCompare(a.gmdSubmittedAt ?? ""));
+  const gmdSelectedProject = projects.find((project) => project.id === gmdSelectedId) ?? null;
+  const gmdSelectedTasks = useMemo(() => gmdSelectedProject ? scheduleTasks(gmdSelectedProject) : [], [gmdSelectedProject]);
+
+  /* Sáu kiểm tra giúp GMD quyết định trong 0.5 ngày mà không phải soi từng dòng WBS.
+     Tất cả đều tính từ dữ liệu sẵn có, không cần người dùng nhập thêm. */
+  const gmdChecks = useMemo(() => {
+    if (!gmdSelectedProject) return [];
+    const project = gmdSelectedProject;
+    const tasks = gmdSelectedTasks;
+    const leaves = tasks.filter((task) => !task.summary);
+
+    const overTarget = leaves.filter((task) => task.endDate > project.targetDate);
+    const conflicts = tasks.filter((task) => task.dependencyConflict);
+    const noPic = leaves.filter((task) => !task.pic.trim());
+    const notConfirmed = pbcmGroupsOf(project).filter((code) => project.departmentApprovals[code]?.status !== "approved");
+    const emptyGroups = project.selectedGroups.filter((code) => !tasks.some((task) => task.groupCode === code));
+    const planFinish = leaves.reduce((latest, task) => task.endDate > latest ? task.endDate : latest, "");
+    const drift = project.officialVersion && planFinish ? rawDaysBetween(project.targetDate, planFinish) : 0;
+
+    return [
+      {
+        key: "over-target",
+        label: "Công việc kết thúc sau ngày mục tiêu dự án",
+        count: overTarget.length,
+        blocking: true,
+        detail: overTarget.length ? `Muộn nhất: ${overTarget.map((t) => t.code).slice(0, 3).join(", ")}${overTarget.length > 3 ? `…` : ""} · mục tiêu ${formatDate(project.targetDate)}` : `Toàn bộ công việc nằm trong mốc ${formatDate(project.targetDate)}`,
+      },
+      {
+        key: "conflict",
+        label: "Xung đột liên kết trước – sau",
+        count: conflicts.length,
+        blocking: true,
+        detail: conflicts.length ? conflicts.slice(0, 3).map((t) => t.code).join(", ") + (conflicts.length > 3 ? "…" : "") : "Logic tiến độ nhất quán",
+      },
+      {
+        key: "no-pic",
+        label: "Công việc chưa gán người phụ trách",
+        count: noPic.length,
+        blocking: false,
+        detail: noPic.length ? `${noPic.length}/${leaves.length} công việc chưa có PIC` : "Toàn bộ công việc đã có PIC",
+      },
+      {
+        key: "not-confirmed",
+        label: "Đầu mục phòng ban chưa xác nhận",
+        count: notConfirmed.length,
+        blocking: true,
+        detail: notConfirmed.length ? notConfirmed.map((code) => GROUP_BY_CODE[code]?.short ?? code).join(", ") : `Đủ ${pbcmGroupsOf(project).length} đầu mục`,
+      },
+      {
+        key: "empty-group",
+        label: "Đầu mục được chọn nhưng không có công việc",
+        count: emptyGroups.length,
+        blocking: true,
+        detail: emptyGroups.length ? emptyGroups.map((code) => GROUP_BY_CODE[code]?.short ?? code).join(", ") : "Không có đầu mục rỗng",
+      },
+      {
+        key: "drift",
+        label: "Lệch mốc kết thúc so với bản đã duyệt",
+        count: drift > 0 ? drift : 0,
+        blocking: false,
+        unit: "ngày",
+        detail: !project.officialVersion ? "Bản lập lần đầu — không có bản duyệt để so" : drift > 0 ? `Kế hoạch kết thúc ${formatDate(planFinish)}, muộn hơn mốc mục tiêu ${drift} ngày` : "Không kéo dài so với mốc mục tiêu",
+      },
+    ];
+  }, [gmdSelectedProject, gmdSelectedTasks]);
+  const gmdBlockingCount = gmdChecks.filter((check) => check.blocking && check.count > 0).length;
   const scheduled = useMemo(() => activeProject ? scheduleTasks(activeProject) : [], [activeProject]);
   const taskFormDuration = workingDaysBetween(taskForm.startDate, taskForm.endDate);
   const taskFormPredecessors = taskForm.predecessorCodes.map((code) => scheduled.find((task) => task.code === code)).filter(Boolean) as ScheduledTask[];
@@ -983,7 +1305,7 @@ export default function Home() {
   };
 
   const removeTaskFromProject = (task: ScheduledTask) => {
-    if (!activeProject || activeProject.approvalStatus === "approved") return;
+    if (!activeProject || !isPlanEditable(activeProject)) return;
     const affectedCodes = allProjectTasks(activeProject).filter((item) => item.code === task.code || item.code.startsWith(`${task.code}.`)).map((item) => item.code);
     const label = affectedCodes.length > 1 ? `${task.code} và ${affectedCodes.length - 1} công việc con` : task.code;
     if (!window.confirm(`Xóa ${label} khỏi dự án ${activeProject.code}?`)) return;
@@ -1021,7 +1343,7 @@ export default function Home() {
   };
 
   const updateTask = (code: string, edit: TaskEdit) => {
-    if (!activeProject || activeProject.approvalStatus === "approved") return;
+    if (!activeProject || !isPlanEditable(activeProject)) return;
     const groupCode = allProjectTasks(activeProject).find((task) => task.code === code)?.groupCode;
     setProjects((current) => current.map((project) => project.id === activeProject.id
       ? { ...project, taskEdits: { ...project.taskEdits, [code]: { ...project.taskEdits[code], ...edit } }, departmentApprovals: groupCode ? { ...project.departmentApprovals, [groupCode]: { ...project.departmentApprovals[groupCode], status: "pending", note: "", reviewedAt: undefined } } : project.departmentApprovals, approvalStatus: project.approvalStatus === "submitted" ? "draft" : project.approvalStatus }
@@ -1037,7 +1359,7 @@ export default function Home() {
   };
 
   const updateTaskDependencies = (successorCode: string, requestedDependencies: TaskDependency[]) => {
-    if (!activeProject || activeProject.approvalStatus === "approved") return;
+    if (!activeProject || !isPlanEditable(activeProject)) return;
     const dependencies = requestedDependencies.filter((dependency, index, all) => all.findIndex((candidate) => candidate.predecessorCode === dependency.predecessorCode) === index);
     const predecessorCodes = dependencies.map((dependency) => dependency.predecessorCode);
     if (predecessorCodes.some((predecessorCode) => predecessorCode === successorCode || isHierarchicallyRelated(successorCode, predecessorCode))) return notify("Không thể liên kết trực tiếp giữa WBS cha và công việc con của chính nó");
@@ -1062,7 +1384,7 @@ export default function Home() {
   };
 
   const updateDepartmentApproval = (groupCode: string, patch: Partial<DepartmentApproval>) => {
-    if (!activeProject || activeProject.approvalStatus === "approved") return;
+    if (!activeProject || !isPlanEditable(activeProject)) return;
     setProjects((current) => current.map((project) => project.id === activeProject.id ? {
       ...project,
       departmentApprovals: { ...project.departmentApprovals, [groupCode]: { ...project.departmentApprovals[groupCode], ...patch } },
@@ -1070,7 +1392,7 @@ export default function Home() {
   };
 
   const reviewDepartment = (decision: "approved" | "changes_requested") => {
-    if (!activeProject || !departmentApproval || activeProject.approvalStatus === "approved") return;
+    if (!activeProject || !departmentApproval || !isPlanEditable(activeProject)) return;
     const reviewer = departmentApproval.reviewer.trim();
     const note = departmentApproval.note.trim();
     if (!reviewer) return notify("Vui lòng gán người phụ trách xác nhận cho phòng ban này");
@@ -1115,41 +1437,187 @@ export default function Home() {
     notify("Đã xuất file mở trực tiếp bằng Microsoft Project");
   };
 
-  const submitToGms = () => {
+  /* SOP B5 → B6: người lập trình MTL lên GMD kiểm soát, không gửi thẳng GMS.P. */
+  const submitToGmd = () => {
     if (!activeProject) return;
-    if (!allDepartmentsApproved(activeProject)) return notify("Cần đủ xác nhận của 14 đầu mục phòng ban trước khi gửi GMS");
-    setProjects((current) => current.map((project) => project.id === activeProject.id ? { ...project, approvalStatus: "submitted", submittedAt: new Date().toISOString(), submittedBy: "Project Manager", reviewedAt: undefined, reviewNote: "" } : project));
-    notify("Đã gửi MTL sang GMS thẩm định");
+    const pending = pbcmGroupsOf(activeProject).length - approvedDepartmentCount(activeProject);
+    if (pending > 0) return notify(`Còn ${pending} đầu mục phòng ban chưa xác nhận — chưa trình GMD được`);
+    setProjects((current) => current.map((project) => project.id === activeProject.id ? {
+      ...project,
+      approvalStatus: "gmd_review",
+      gmdSubmittedAt: new Date().toISOString(),
+      gmdReviewedAt: undefined,
+      gmdNote: "",
+      reviewedAt: undefined,
+      reviewNote: "",
+    } : project));
+    notify("Đã trình MTL lên GMD kiểm soát");
+  };
+
+  /* Trả hồ sơ về bước 5: chỉ những đầu mục được chọn mới phải xác nhận lại,
+     không bắt cả 13 phòng ban làm lại vì phản hồi của một phòng. */
+  const resetDepartmentApprovals = (project: Project, groupCodes: string[]) => {
+    if (!groupCodes.length) return project.departmentApprovals;
+    const next = { ...project.departmentApprovals };
+    groupCodes.forEach((code) => {
+      const current = next[code];
+      if (current) next[code] = { ...current, status: "pending", reviewedAt: undefined };
+    });
+    return next;
+  };
+
+  const reviewByGmd = (decision: "pass" | "return") => {
+    if (!gmdSelectedProject) return;
+    const note = gmdNote.trim();
+    if (decision === "return" && !note) return notify("Vui lòng nhập ý kiến để người lập biết nội dung cần điều chỉnh");
+    if (decision === "return" && !gmdReturnGroups.size) return notify("Chọn ít nhất một đầu mục cần xác nhận lại");
+    const reviewer = gmdReviewer.trim();
+
+    setProjects((current) => current.map((project) => project.id === gmdSelectedProject.id ? {
+      ...project,
+      approvalStatus: decision === "pass" ? "submitted" : "gmd_returned",
+      gmdReviewer: reviewer,
+      gmdNote: note,
+      gmdReviewedAt: new Date().toISOString(),
+      ...(decision === "pass"
+        ? { submittedAt: new Date().toISOString(), submittedBy: reviewer || "Ban điều hành dự án (GMD)" }
+        : { departmentApprovals: resetDepartmentApprovals(project, [...gmdReturnGroups]) }),
+    } : project));
+
+    setGmdReturnGroups(new Set());
+    setGmdFilter(decision === "pass" ? "pending" : "history");
+    notify(decision === "pass" ? "GMD đã duyệt — MTL chuyển sang GMS thẩm định" : `Đã trả MTL về người lập · ${gmdReturnGroups.size} đầu mục cần xác nhận lại`);
+  };
+
+  const selectGmdProject = (project: Project) => {
+    setGmdSelectedId(project.id);
+    setGmdNote(project.gmdNote ?? "");
+    setGmdReviewer(project.gmdReviewer ?? "");
+    setGmdReturnGroups(new Set());
   };
 
   const selectGmsProject = (project: Project) => {
     setGmsSelectedId(project.id);
     setReviewNote(project.reviewNote ?? "");
+    setGmsReturnGroups(new Set());
   };
 
-  const reviewProject = (decision: "approved" | "changes_requested") => {
+  /* SOP B7: GMS.P chỉ thẩm định. Phê duyệt là bước 9 trên E-Approval,
+     nên đồng ý ở đây chuyển sang "appraised" chứ không phải "approved". */
+  const reviewProject = (decision: "appraised" | "changes_requested") => {
     if (!gmsSelectedProject) return;
     const note = reviewNote.trim();
     if (decision === "changes_requested" && !note) {
       notify("Vui lòng nhập Ý kiến thẩm định để người lập biết nội dung cần sửa");
       return;
     }
+    if (decision === "changes_requested" && !gmsReturnGroups.size) {
+      notify("Chọn ít nhất một đầu mục cần xác nhận lại");
+      return;
+    }
     setProjects((current) => current.map((project) => project.id === gmsSelectedProject.id ? {
       ...project,
       approvalStatus: decision,
       reviewedAt: new Date().toISOString(),
-      approvedAt: decision === "approved" ? new Date().toISOString() : undefined,
-      approvedVersion: decision === "approved" ? "v1.0" : undefined,
       reviewNote: note,
+      ...(decision === "changes_requested"
+        ? { departmentApprovals: resetDepartmentApprovals(project, [...gmsReturnGroups]) }
+        : {}),
     } : project));
+    setGmsReturnGroups(new Set());
     setGmsFilter("history");
-    notify(decision === "approved" ? "GMS đã phê duyệt — bản MTL v1.0 đã khóa" : "GMS đã trả MTL để điều chỉnh");
+    notify(decision === "appraised" ? "GMS đã thẩm định — chuyển bước trình phê duyệt E-Approval" : "GMS đã trả MTL để điều chỉnh");
   };
 
   const reopenApproved = () => {
     if (!activeProject) return;
-    setProjects((current) => current.map((project) => project.id === activeProject.id ? { ...project, approvalStatus: "draft", departmentApprovals: normalizeDepartmentApprovals(project.selectedGroups), approvedAt: undefined, reviewedAt: undefined, approvedVersion: undefined, reviewNote: "" } : project));
+    setProjects((current) => current.map((project) => project.id === activeProject.id ? { ...project, approvalStatus: "draft", isOfficialApproved: false, baselineLocked: false, departmentApprovals: normalizeDepartmentApprovals(project.selectedGroups), approvedAt: undefined, reviewedAt: undefined, approvedVersion: undefined, reviewNote: "" } : project));
     notify("Đã tạo bản điều chỉnh từ MTL được duyệt");
+  };
+
+  const openEApprovalModal = (targetProject?: Project) => {
+    const p = targetProject || (activeProject ? activeProject : projects[0]);
+    setEApprovalForm({
+      projectId: p ? p.id : "",
+      code: p?.eApprovalCode || (p ? `HS-EAPP-${p.code}-01` : ""),
+      url: p?.eApprovalUrl || (p ? `https://eapproval.novaland.com.vn/dossier/${p.code}` : ""),
+      date: p?.eApprovalDate || today,
+      signer: p?.eApprovalSigner || "PMD - Ban Quản lý Dự án",
+      version: p?.officialVersion || "v1.0",
+      note: p?.eApprovalNote || "",
+    });
+    setEApprovalError("");
+    setShowEApprovalModal(true);
+  };
+
+  const submitEApproval = (event: FormEvent) => {
+    event.preventDefault();
+    if (!eApprovalForm.projectId) return setEApprovalError("Vui lòng chọn dự án cần xác nhận phê duyệt.");
+    if (!eApprovalForm.code.trim()) return setEApprovalError("Vui lòng nhập Mã hồ sơ phê duyệt trên E-Approval.");
+    if (!eApprovalForm.url.trim()) return setEApprovalError("Vui lòng nhập Đường dẫn (Link) E-Approval.");
+
+    const target = projects.find((p) => p.id === eApprovalForm.projectId);
+    if (!target) return setEApprovalError("Không tìm thấy dự án.");
+
+    setProjects((current) => current.map((p) => p.id === eApprovalForm.projectId ? {
+      ...p,
+      isOfficialApproved: true,
+      baselineLocked: true,
+      approvalStatus: "approved",
+      approvedAt: eApprovalForm.date,
+      approvedVersion: eApprovalForm.version || "v1.0",
+      officialVersion: eApprovalForm.version || "v1.0",
+      eApprovalCode: eApprovalForm.code.trim(),
+      eApprovalUrl: eApprovalForm.url.trim(),
+      eApprovalDate: eApprovalForm.date,
+      eApprovalSigner: eApprovalForm.signer.trim(),
+      eApprovalNote: eApprovalForm.note.trim(),
+    } : p));
+
+    setShowEApprovalModal(false);
+    notify(`Đã xác nhận phê duyệt Master Timeline cho dự án ${target.code} qua E-Approval!`);
+  };
+
+  const openProgressModal = (task: ScheduledTask) => {
+    setEditingProgressTask(task);
+    setProgressForm({
+      progress: task.actualProgress ?? (task.status === "Hoàn thành" ? 100 : 0),
+      actualStartDate: task.actualStartDate || task.startDate,
+      actualEndDate: task.actualEndDate || (task.actualProgress === 100 ? task.endDate : ""),
+      note: task.actualNote || "",
+    });
+    setShowProgressModal(true);
+  };
+
+  const saveProgress = (event: FormEvent) => {
+    event.preventDefault();
+    if (!editingProgressTask || !activeProject) return;
+    const progress = Math.min(100, Math.max(0, Number(progressForm.progress)));
+    let status: TaskEdit["status"] = "Đang thực hiện";
+    if (progress === 100) status = "Hoàn thành";
+    else if (editingProgressTask.endDate < today) status = "Trễ hạn";
+
+    const currentEdit = activeProject.taskEdits[editingProgressTask.code] ?? {};
+    const updatedEdit: TaskEdit = {
+      ...currentEdit,
+      actualProgress: progress,
+      actualStartDate: progressForm.actualStartDate || undefined,
+      actualEndDate: progress === 100 ? (progressForm.actualEndDate || editingProgressTask.endDate) : (progressForm.actualEndDate || undefined),
+      actualNote: progressForm.note.trim() || undefined,
+      status,
+    };
+
+    setProjects((current) => current.map((p) => p.id === activeProject.id ? {
+      ...p,
+      taskEdits: {
+        ...p.taskEdits,
+        [editingProgressTask.code]: updatedEdit,
+      },
+    } : p));
+
+    setShowProgressModal(false);
+    setEditingProgressTask(null);
+    notify(`Đã cập nhật tiến độ ${editingProgressTask.code}: ${progress}%`);
   };
 
   if (!hydrated) return <main className="loading-screen"><div className="loading-mark">MTL</div><p>Đang chuẩn bị không gian dự án…</p></main>;
@@ -1184,12 +1652,44 @@ export default function Home() {
         }
       `}</style>
       <aside className="sidebar">
-        <div className="brand"><img className="brand-logo" src="/nova-group-logo-light.png" alt="Nova Group" /><div className="brand-app"><strong><span>QUẢN LÝ</span><span>TIẾN ĐỘ TỔNG THỂ DỰ ÁN</span></strong></div></div>
-        <nav className="sidebar-nav sidebar-nav-top" aria-label="Điều hướng chính"><button className={view === "overview" ? "active" : ""} onClick={() => setView("overview")}><IconGauge /><span>Tổng quan tiến độ dự án</span></button></nav>
-        <div className="sidebar-section-label">Lập Master Timeline</div>
-        <nav className="sidebar-nav" aria-label="Điều hướng Lập MTL"><button className={view === "projects" || view === "workspace" ? "active" : ""} onClick={() => setView("projects")}><IconTimeline /><span>Lập & Cập nhật</span><b>{projects.length}</b></button><button className={view === "departments" ? "active" : ""} onClick={() => openDepartmentReview()}><IconCheck /><span>PBCM xác nhận</span>{departmentPendingCount > 0 && <b>{departmentPendingCount}</b>}</button><button className={view === "gms" ? "active" : ""} onClick={() => setView("gms")}><IconSeal /><span>Thẩm định</span>{pendingGmsCount > 0 && <b className="nav-alert">{pendingGmsCount}</b>}</button></nav>
-        <div className="sidebar-section-label">Cấu trúc Master timeline</div>
-        <nav className="sidebar-nav" aria-label="Điều hướng Cấu trúc MTL"><button className={view === "catalog" ? "active" : ""} onClick={() => setView("catalog")}><IconList /><span>Danh mục WBS</span><b>{fullCatalog.length}</b></button></nav>
+        <div className="brand"><img className="brand-logo" src="/nova-group-logo-light.png" alt="Nova Group" /><div className="brand-app"><strong><span>PMD</span><span>PROJECT MANAGEMENT</span></strong></div></div>
+        {/* Module 1: LẬP MASTER TIMELINE — sổ ra/thu gọn được */}
+        {(() => {
+          const lapMtlViews: typeof view[] = ["projects", "workspace", "departments", "gmd", "gms", "confirm_approval", "catalog"];
+          const lapMtlSectionOpen = lapMtlOpen || lapMtlViews.includes(view);
+          return <>
+            <button type="button" className={`sidebar-section-toggle ${lapMtlSectionOpen ? "open" : ""}`} onClick={() => setLapMtlOpen((current) => !current)} aria-expanded={lapMtlSectionOpen}>
+              <span>Lập Master Timeline</span>
+              <IconChevronDown />
+            </button>
+            <nav className={`sidebar-nav sidebar-collapsible ${lapMtlSectionOpen ? "" : "collapsed"}`} aria-label="Điều hướng Lập MTL" aria-hidden={!lapMtlSectionOpen}>
+              <button className={view === "projects" || view === "workspace" ? "active" : ""} onClick={() => setView("projects")} tabIndex={lapMtlSectionOpen ? 0 : -1}>
+                <IconTimeline />
+                <span>Lập & Cập nhật</span>
+              </button>
+              <button className={view === "departments" ? "active" : ""} onClick={() => openDepartmentReview()} tabIndex={lapMtlSectionOpen ? 0 : -1}>
+                <IconCheck />
+                <span>PBCM xác nhận</span>
+              </button>
+              <button className={view === "gmd" ? "active" : ""} onClick={() => setView("gmd")} tabIndex={lapMtlSectionOpen ? 0 : -1}>
+                <IconShield />
+                <span>GMD kiểm soát</span>
+              </button>
+              <button className={view === "gms" ? "active" : ""} onClick={() => setView("gms")} tabIndex={lapMtlSectionOpen ? 0 : -1}>
+                <IconSeal />
+                <span>Thẩm định</span>
+              </button>
+              <button className={view === "confirm_approval" ? "active" : ""} onClick={() => setView("confirm_approval")} tabIndex={lapMtlSectionOpen ? 0 : -1}>
+                <IconFileCheck />
+                <span>Xác nhận phê duyệt MTL</span>
+              </button>
+              <button className={view === "catalog" ? "active" : ""} onClick={() => setView("catalog")} tabIndex={lapMtlSectionOpen ? 0 : -1}>
+                <IconList />
+                <span>Danh mục WBS</span>
+              </button>
+            </nav>
+          </>;
+        })()}
         <div className="template-card"><span>MẪU ĐANG DÙNG</span><strong>NVLG MTL 2026.06</strong><small>{fullCatalog.length} task · 14 nhóm · WBS cấp 4</small></div>
         <div className="sidebar-footer">MTL v1.0 · © 2026 Novaland Group</div>
       </aside>
@@ -1205,9 +1705,19 @@ export default function Home() {
               </div>
               <div className="overview-title-center">
                 <h1>THEO DÕI THỰC HIỆN CÔNG VIỆC</h1>
-                <div className="overview-date-badge">
-                  <IconCalendar />
-                  <span>{formatDate(overviewToday)}</span>
+                <div style={{ display: "flex", alignItems: "center", gap: "10px", justifyContent: "center", marginTop: "4px" }}>
+                  <div className="overview-date-badge">
+                    <IconCalendar />
+                    <span>{formatDate(overviewToday)}</span>
+                  </div>
+                  <div className="source-toggle">
+                    <button type="button" className={overviewSource === "approved" ? "active" : ""} onClick={() => setOverviewSource("approved")} title="Chỉ thống kê từ các Master Timeline đã có phê duyệt E-Approval">
+                      MTL đã duyệt ({officialApprovedProjects.length})
+                    </button>
+                    <button type="button" className={overviewSource === "all" ? "active" : ""} onClick={() => setOverviewSource("all")} title="Thống kê toàn bộ dự án">
+                      Tất cả ({projects.length})
+                    </button>
+                  </div>
                 </div>
               </div>
               <div className="top-actions">
@@ -1551,7 +2061,7 @@ export default function Home() {
         ) : view === "catalog" ? (
           <>
             <header className="topbar"><div className="breadcrumbs"><span>Cấu trúc Master timeline</span><i>/</i><strong>Danh mục WBS</strong><i>/</i><span>{fullCatalog.length} công việc</span></div><div className="top-actions"><button className="secondary-button" onClick={toggleAllCatalogTasks}>{enabledCatalogCount === fullCatalog.length ? "Bỏ tích tất cả" : "Tích tất cả"}</button><button className="primary-button" onClick={() => openTaskCreator(false)}>Thêm công việc</button><UserBadge /></div></header>
-            <section className="catalog-header"><div><span className="status-badge">CẤU TRÚC MASTER TIMELINE · {enabledCatalogCount}/{fullCatalog.length} TỰ ĐỘNG SINH</span><h1>Danh mục WBS</h1><p>Công việc được tích “Tự động sinh” sẽ luôn có sẵn khi tạo dự án mới.</p></div><label className="search-field"><span>Tìm</span><input value={catalogSearch} onChange={(event) => { setCatalogSearch(event.target.value); setCatalogPage(1); }} placeholder="Mã WBS hoặc tên công việc" /></label></section>
+            <section className="catalog-header"><div><span className="status-badge">{enabledCatalogCount}/{fullCatalog.length} TỰ ĐỘNG SINH</span><h1>Danh mục WBS</h1><p>Công việc được tích “Tự động sinh” sẽ luôn có sẵn khi tạo dự án mới.</p></div><label className="search-field"><span>Tìm</span><input value={catalogSearch} onChange={(event) => { setCatalogSearch(event.target.value); setCatalogPage(1); }} placeholder="Mã WBS hoặc tên công việc" /></label></section>
             <section className="catalog-groups">{GROUPS.map((group) => <div key={group.code}><span>{group.short}</span><b>{group.code} {group.name}</b><small>{fullCatalog.filter((task) => task.groupCode === group.code).length} task</small></div>)}</section>
             <div className="table-filters">
               <label className="table-filters-select"><span>Nhóm WBS</span><select value={catalogGroupFilter} onChange={(event) => { setCatalogGroupFilter(event.target.value); setCatalogPage(1); }}><option value="all">Tất cả nhóm</option>{GROUPS.map((group) => <option key={group.code} value={group.code}>{group.code} · {group.short}</option>)}</select></label>
@@ -1569,27 +2079,116 @@ export default function Home() {
           <>
             <header className="topbar"><div className="breadcrumbs"><span>Lập Master timeline</span><i>/</i><strong>PBCM xác nhận</strong>{activeProject && <><i>/</i><span>{activeProject.code}</span></>}</div><div className="top-actions">{activeProject && <label className="department-project-select"><span>Dự án</span><select value={activeProject.id} onChange={(event) => { const project = projects.find((item) => item.id === event.target.value); if (project) { setActiveId(project.id); setDepartmentCode(project.selectedGroups[0] ?? GROUPS[0].code); } }}>{projects.map((project) => <option key={project.id} value={project.id}>{project.name}</option>)}</select></label>}<UserBadge /></div></header>
             {activeProject ? <>
-              <section className="department-header"><div><span className="status-badge">LẬP MASTER TIMELINE · BƯỚC 2/4</span><h1>Xác nhận MTL theo phòng ban</h1><p>Mỗi đơn vị chỉ xem và xác nhận toàn bộ cây công việc thuộc đầu mục WBS của mình.</p></div><div className="department-progress"><b>{departmentApprovedCount}/{activeProject.selectedGroups.length}</b><span>ĐẦU MỤC ĐÃ XÁC NHẬN</span><i><em style={{ width: `${(departmentApprovedCount / Math.max(activeProject.selectedGroups.length, 1)) * 100}%` }} /></i></div></section>
+              <section className="department-header"><div><span className="status-badge">BƯỚC 2/5</span><h1>Xác nhận MTL theo phòng ban</h1><p>Mỗi đơn vị chỉ xem và xác nhận toàn bộ cây công việc thuộc đầu mục WBS của mình.</p></div><div className="department-progress"><b>{departmentApprovedCount}/{activeProject.selectedGroups.length}</b><span>ĐẦU MỤC ĐÃ XÁC NHẬN</span><i><em style={{ width: `${(departmentApprovedCount / Math.max(activeProject.selectedGroups.length, 1)) * 100}%` }} /></i></div></section>
               <section className="department-review-layout">
                 <aside className="department-groups" aria-label="Đầu mục phòng ban">
                   <header><span>VAI TRÒ PHÒNG BAN · DEMO</span><b>{departmentPendingCount} đầu mục còn chờ</b></header><p className="department-demo-note">Bản triển khai thật sẽ tự nhận diện tài khoản và chỉ hiện đúng một đầu mục được phân quyền.</p>
                   <div className="department-group-section"><strong>KHỐI PHÒNG BAN · 9.x</strong>{GROUPS.filter((group) => group.code.startsWith("9.") && activeProject.selectedGroups.includes(group.code)).map((group) => { const approval = activeProject.departmentApprovals[group.code]; return <button key={group.code} className={`${departmentCode === group.code ? "active" : ""} status-${approval?.status ?? "pending"}`} onClick={() => setDepartmentCode(group.code)}><i>{approval?.status === "approved" ? "✓" : approval?.status === "changes_requested" ? "!" : "·"}</i><span><b>{group.code} · {group.short}</b><small>{group.name}</small>{approval?.reviewer && <em>{approval.reviewer}</em>}</span></button>; })}</div>
-                  <div className="department-group-section"><strong>QUẢN LÝ DỰ ÁN · 4.x</strong>{GROUPS.filter((group) => group.code.startsWith("4.") && activeProject.selectedGroups.includes(group.code)).map((group) => { const approval = activeProject.departmentApprovals[group.code]; return <button key={group.code} className={`${departmentCode === group.code ? "active" : ""} status-${approval?.status ?? "pending"}`} onClick={() => setDepartmentCode(group.code)}><i>{approval?.status === "approved" ? "✓" : approval?.status === "changes_requested" ? "!" : "·"}</i><span><b>{group.code} · {group.short}</b><small>{group.name}</small>{approval?.reviewer && <em>{approval.reviewer}</em>}</span></button>; })}</div>
+                  <div className="department-group-section"><strong>PHÒNG TRỰC TIẾP · 4.x</strong>{PBCM_GROUPS.filter((group) => group.code.startsWith("4.") && activeProject.selectedGroups.includes(group.code)).map((group) => { const approval = activeProject.departmentApprovals[group.code]; return <button key={group.code} className={`${departmentCode === group.code ? "active" : ""} status-${approval?.status ?? "pending"}`} onClick={() => setDepartmentCode(group.code)}><i>{approval?.status === "approved" ? "✓" : approval?.status === "changes_requested" ? "!" : "·"}</i><span><b>{group.code} · {group.short}</b><small>{group.name}</small>{approval?.reviewer && <em>{approval.reviewer}</em>}</span></button>; })}</div>
                 </aside>
                 <section className="department-review-main">
                   {departmentApproval ? <>
-                    <header className="department-review-title"><div><span className={`department-status status-${departmentApproval.status}`}>{DEPARTMENT_APPROVAL_LABEL[departmentApproval.status]}</span><h2>{selectedDepartment.code} · {selectedDepartment.name}</h2><p>Xác nhận đầu mục cấp cao nhất sẽ áp dụng cho toàn bộ {departmentTasks.length} công việc bên dưới.</p></div><label className="field"><span>Người phụ trách xác nhận</span><input disabled={activeProject.approvalStatus === "submitted" || activeProject.approvalStatus === "approved"} value={departmentApproval.reviewer} onChange={(event) => updateDepartmentApproval(departmentCode, { reviewer: event.target.value, status: "pending", reviewedAt: undefined })} placeholder="Nhập họ tên người xác nhận" /></label></header>
+                    <header className="department-review-title"><div><span className={`department-status status-${departmentApproval.status}`}>{DEPARTMENT_APPROVAL_LABEL[departmentApproval.status]}</span><h2>{selectedDepartment.code} · {selectedDepartment.name}</h2><p>Xác nhận đầu mục cấp cao nhất sẽ áp dụng cho toàn bộ {departmentTasks.length} công việc bên dưới.</p></div><label className="field"><span>Người phụ trách xác nhận</span><input disabled={!isPlanEditable(activeProject)} value={departmentApproval.reviewer} onChange={(event) => updateDepartmentApproval(departmentCode, { reviewer: event.target.value, status: "pending", reviewedAt: undefined })} placeholder="Nhập họ tên người xác nhận" /></label></header>
                     <div className="department-task-table"><div className="department-task-head"><span>WBS / CÔNG VIỆC</span><span>PIC</span><span>BẮT ĐẦU</span><span>KẾT THÚC</span><span>TRẠNG THÁI</span></div><div className="department-task-body">{departmentTasks.map((task) => <div className={`department-task-row ${task.summary ? "summary" : ""}`} key={task.code}><span style={{ paddingLeft: `${12 + (task.level - 1) * 14}px` }}><b>{task.code}</b><small>{task.name}</small></span><span>{task.pic || "Chưa gán"}</span><span>{formatDate(task.startDate)}</span><span>{formatDate(task.endDate)}</span><span><i className={`task-status status-${taskStatusClass(task.status)}`}>{task.status}</i></span></div>)}</div></div>
-                    <footer className="department-opinion"><label className="field"><span>Ý kiến xác nhận <i>Người lập MTL sẽ đọc được phản hồi này</i></span><textarea disabled={activeProject.approvalStatus === "submitted" || activeProject.approvalStatus === "approved"} value={departmentApproval.note} onChange={(event) => updateDepartmentApproval(departmentCode, { note: event.target.value, status: departmentApproval.status === "approved" ? "pending" : departmentApproval.status, reviewedAt: departmentApproval.status === "approved" ? undefined : departmentApproval.reviewedAt })} placeholder={`Nêu rõ nội dung cần điều chỉnh trong đầu mục ${departmentCode}…`} rows={3} /></label><div>{departmentApproval.reviewedAt && <span>Xác nhận gần nhất: {formatDateTime(departmentApproval.reviewedAt)}</span>}<button className="danger-button" disabled={activeProject.approvalStatus === "submitted" || activeProject.approvalStatus === "approved"} onClick={() => reviewDepartment("changes_requested")}>Yêu cầu điều chỉnh</button><button className="approve-button" disabled={activeProject.approvalStatus === "submitted" || activeProject.approvalStatus === "approved"} onClick={() => reviewDepartment("approved")}>Xác nhận toàn bộ {departmentCode}</button></div></footer>
+                    <footer className="department-opinion"><label className="field"><span>Ý kiến xác nhận <i>Người lập MTL sẽ đọc được phản hồi này</i></span><textarea disabled={!isPlanEditable(activeProject)} value={departmentApproval.note} onChange={(event) => updateDepartmentApproval(departmentCode, { note: event.target.value, status: departmentApproval.status === "approved" ? "pending" : departmentApproval.status, reviewedAt: departmentApproval.status === "approved" ? undefined : departmentApproval.reviewedAt })} placeholder={`Nêu rõ nội dung cần điều chỉnh trong đầu mục ${departmentCode}…`} rows={3} /></label><div>{departmentApproval.reviewedAt && <span>Xác nhận gần nhất: {formatDateTime(departmentApproval.reviewedAt)}</span>}<button className="danger-button" disabled={!isPlanEditable(activeProject)} onClick={() => reviewDepartment("changes_requested")}>Yêu cầu điều chỉnh</button><button className="approve-button" disabled={!isPlanEditable(activeProject)} onClick={() => reviewDepartment("approved")}>Xác nhận toàn bộ {departmentCode}</button></div></footer>
                   </> : <div className="gms-select-prompt"><h2>Đầu mục không thuộc dự án</h2><p>Hãy chọn một phòng ban đang tham gia dự án này.</p></div>}
                 </section>
               </section>
             </> : <div className="empty-state"><span className="empty-kicker">XÁC NHẬN PHÒNG BAN</span><h1>Chưa có dự án để xác nhận</h1><p>Tạo dự án MTL trước, sau đó phân công người xác nhận cho từng đầu mục phòng ban.</p><button className="primary-button" onClick={openCreate}>Tạo Master timeline</button></div>}
           </>
+        ) : view === "gmd" ? (
+          <>
+            <header className="topbar"><div className="breadcrumbs"><span>Lập Master timeline</span><i>/</i><strong>GMD kiểm soát</strong></div><div className="top-actions"><UserBadge /></div></header>
+            <section className="gms-header"><div><span className="status-badge">BƯỚC 3/5</span><h1>Ban điều hành dự án kiểm soát MTL</h1><p>Xem cảnh báo tự động và xác nhận của các phòng ban, sau đó cho ý kiến trước khi MTL đi thẩm định.</p></div><div className="gms-metrics"><div><b>{pendingGmdCount}</b><span>CHỜ KIỂM SOÁT</span></div><div><b>{projects.filter((project) => project.approvalStatus === "gmd_returned").length}</b><span>ĐÃ TRẢ VỀ</span></div><div><b>{projects.filter((project) => Boolean(project.gmdReviewedAt) && project.approvalStatus !== "gmd_returned").length}</b><span>ĐÃ CHO ĐI THẨM ĐỊNH</span></div></div></section>
+
+            <section className="gms-queue">
+              <div className="gms-directory-toolbar">
+                <div className="gms-function-tabs"><button className={gmdFilter === "pending" ? "active" : ""} onClick={() => setGmdFilter("pending")}>Chờ kiểm soát <b>{pendingGmdCount}</b></button><button className={gmdFilter === "history" ? "active" : ""} onClick={() => setGmdFilter("history")}>Đã xử lý</button></div>
+                <label className="search-field gms-search"><span>Tìm dự án</span><input value={gmdSearch} onChange={(event) => setGmdSearch(event.target.value)} placeholder="Tên hoặc mã dự án" /></label>
+              </div>
+
+              <div className="gms-directory-layout">
+                <section className="gms-directory-list" aria-label="Danh sách hồ sơ chờ GMD">
+                  <div className="gms-queue-heading"><div><span>{gmdFilter === "pending" ? "HỒ SƠ ĐANG CHỜ" : "HỒ SƠ ĐÃ XỬ LÝ"}</span><h2>{visibleGmdProjects.length} dự án</h2></div></div>
+                  <div className="gms-list">
+                    {visibleGmdProjects.map((project) => <button className={`gms-card status-${project.approvalStatus} ${gmdSelectedId === project.id ? "selected" : ""}`} key={project.id} onClick={() => selectGmdProject(project)}>
+                      <div className="gms-project-mark">{project.code.slice(0, 2)}</div>
+                      <div className="gms-project-info"><span className={`gms-status ${project.approvalStatus}`}>{APPROVAL_LABEL[project.approvalStatus]}</span><h3>{project.name}</h3><p>{project.code} · {projectTaskCount(project)} task</p><small>{project.gmdSubmittedAt ? `Trình lúc ${formatDateTime(project.gmdSubmittedAt)}` : "Chưa ghi nhận thời điểm trình"}</small></div>
+                      <span className="gms-open-label">Mở hồ sơ</span>
+                    </button>)}
+                    {!visibleGmdProjects.length && <div className="gms-empty"><b>{gmdSearch ? "Không tìm thấy dự án phù hợp" : gmdFilter === "pending" ? "Chưa có MTL nào chờ kiểm soát" : "Chưa có hồ sơ đã xử lý"}</b><span>{gmdSearch ? "Thử tìm theo mã hoặc tên dự án." : gmdFilter === "pending" ? "Khi người lập trình MTL lên, hồ sơ sẽ xuất hiện tại đây." : "Các hồ sơ GMD đã cho ý kiến sẽ được lưu tại đây."}</span></div>}
+                  </div>
+                </section>
+
+                <section className="gms-review-pane" aria-label="Chi tiết kiểm soát">
+                  {gmdSelectedProject ? <>
+                    <header className="gms-review-header"><div><span className={`gms-status ${gmdSelectedProject.approvalStatus}`}>{APPROVAL_LABEL[gmdSelectedProject.approvalStatus]}</span><h2>{gmdSelectedProject.name}</h2><p>{gmdSelectedProject.code} · {gmdSelectedTasks.filter((task) => !task.summary).length} công việc · Mục tiêu {formatDate(gmdSelectedProject.targetDate)}</p></div><div className="gms-review-sender"><small>TRÌNH LÚC</small><b>{gmdSelectedProject.gmdSubmittedAt ? formatDateTime(gmdSelectedProject.gmdSubmittedAt) : "—"}</b><span>{gmdSelectedProject.selectedGroups.length} đầu mục phòng ban</span></div></header>
+
+                    <div className="gmd-body">
+                      <section className="gmd-panel">
+                        <header className="gmd-panel-head"><h3>Cảnh báo tự động</h3>{gmdBlockingCount > 0 ? <span className="gmd-verdict blocked">{gmdBlockingCount} vấn đề cần xem xét</span> : <span className="gmd-verdict clear">Không có vấn đề chặn</span>}</header>
+                        <ul className="gmd-checks">
+                          {gmdChecks.map((check) => <li key={check.key} className={check.count > 0 ? (check.blocking ? "hit blocking" : "hit") : "pass"}>
+                            <span className="gmd-check-mark" aria-hidden="true">{check.count > 0 ? (check.blocking ? "!" : "•") : "✓"}</span>
+                            <span className="gmd-check-body"><b>{check.label}</b><small>{check.detail}</small></span>
+                            <span className="gmd-check-count">{check.count > 0 ? `${check.count}${check.unit ? ` ${check.unit}` : ""}` : "0"}</span>
+                          </li>)}
+                        </ul>
+                      </section>
+
+                      <section className="gmd-panel">
+                        <header className="gmd-panel-head"><h3>Xác nhận của phòng ban</h3><span className="gmd-verdict clear">{approvedDepartmentCount(gmdSelectedProject)}/{pbcmGroupsOf(gmdSelectedProject).length} đã xác nhận</span></header>
+                        <p className="gmd-panel-note">Đây là bằng chứng thay cho biên bản họp thống nhất ở bước 5. Khi trả hồ sơ về, tích chọn đầu mục cần xác nhận lại.</p>
+                        <div className="gmd-dept-table">
+                          <div className="gmd-dept-head"><span>Chọn</span><span>Đầu mục</span><span>Người xác nhận</span><span>Thời điểm</span><span>Ý kiến</span></div>
+                          <div className="gmd-dept-body">
+                            {PBCM_GROUPS.filter((group) => gmdSelectedProject.selectedGroups.includes(group.code)).map((group) => {
+                              const approval = gmdSelectedProject.departmentApprovals[group.code];
+                              const status = approval?.status ?? "pending";
+                              const canEdit = gmdSelectedProject.approvalStatus === "gmd_review";
+                              return <label className={`gmd-dept-row status-${status}`} key={group.code}>
+                                <span><input type="checkbox" disabled={!canEdit} checked={gmdReturnGroups.has(group.code)} onChange={() => setGmdReturnGroups((current) => { const next = new Set(current); if (next.has(group.code)) next.delete(group.code); else next.add(group.code); return next; })} aria-label={`Yêu cầu ${group.short} xác nhận lại`} /></span>
+                                <span className="gmd-dept-name"><b>{group.code} · {group.short}</b><small>{group.name}</small></span>
+                                <span>{approval?.reviewer || <i className="gmd-muted">Chưa gán</i>}</span>
+                                <span>{approval?.reviewedAt ? formatDateTime(approval.reviewedAt) : <i className="gmd-muted">—</i>}</span>
+                                <span className="gmd-dept-note" title={approval?.note || ""}>{approval?.note || <i className="gmd-muted">Không có ý kiến</i>}</span>
+                              </label>;
+                            })}
+                          </div>
+                        </div>
+                      </section>
+                    </div>
+
+                    {gmdSelectedProject.approvalStatus === "gmd_review" ? (
+                      <footer className="gmd-decision">
+                        <div className="gmd-decision-fields">
+                          <label className="field"><span>Người kiểm soát</span><input value={gmdReviewer} onChange={(event) => setGmdReviewer(event.target.value)} placeholder="Họ tên đại diện GMD" /></label>
+                          <label className="field"><span>Ý kiến kiểm soát <i>Bắt buộc khi trả hồ sơ về</i></span><textarea value={gmdNote} onChange={(event) => setGmdNote(event.target.value)} rows={3} placeholder="Nêu rõ nội dung cần điều chỉnh hoặc điều kiện để MTL đi thẩm định…" /></label>
+                        </div>
+                        <div className="gmd-decision-actions">
+                          {gmdReturnGroups.size > 0 && <span className="gmd-return-hint">{gmdReturnGroups.size} đầu mục sẽ phải xác nhận lại</span>}
+                          <button type="button" className="danger-button" onClick={() => reviewByGmd("return")}>Trả về người lập</button>
+                          <button type="button" className="approve-button" onClick={() => reviewByGmd("pass")}>Đồng ý · chuyển GMS thẩm định</button>
+                        </div>
+                      </footer>
+                    ) : (
+                      <footer className="gmd-decision is-readonly">
+                        <div className="gms-review-result">
+                          <b>{gmdSelectedProject.approvalStatus === "gmd_returned" ? "GMD đã trả hồ sơ về người lập" : "GMD đã cho hồ sơ đi thẩm định"}</b>
+                          <span>{gmdSelectedProject.gmdNote || "Không có ý kiến kèm theo"}</span>
+                          <span>{gmdSelectedProject.gmdReviewer || "Chưa ghi nhận người kiểm soát"} · {gmdSelectedProject.gmdReviewedAt ? formatDateTime(gmdSelectedProject.gmdReviewedAt) : "—"}</span>
+                        </div>
+                      </footer>
+                    )}
+                  </> : <div className="gms-select-prompt"><span>GMD</span><h2>Chọn một dự án để kiểm soát</h2><p>Chọn hồ sơ bên trái để xem cảnh báo tự động, xác nhận của từng phòng ban và cho ý kiến.</p></div>}
+                </section>
+              </div>
+            </section>
+          </>
         ) : view === "gms" ? (
           <>
             <header className="topbar"><div className="breadcrumbs"><span>Lập Master timeline</span><i>/</i><strong>Thẩm định</strong></div><div className="top-actions"><UserBadge /></div></header>
-            <section className="gms-header"><div><span className="status-badge">LẬP MASTER TIMELINE · BƯỚC 3/4</span><h1>Danh mục dự án MTL cần thẩm định</h1><p>Tìm và chọn dự án để xem toàn bộ công việc, nhập ý kiến rồi gửi phản hồi cho người lập.</p></div><div className="gms-metrics"><div><b>{pendingGmsCount}</b><span>CHỜ THẨM ĐỊNH</span></div><div><b>{projects.filter((project) => project.approvalStatus === "approved").length}</b><span>ĐÃ XÁC NHẬN</span></div><div><b>{projects.filter((project) => project.approvalStatus === "changes_requested").length}</b><span>YÊU CẦU ĐIỀU CHỈNH</span></div></div></section>
+            <section className="gms-header"><div><span className="status-badge">BƯỚC 4/5</span><h1>Danh mục dự án MTL cần thẩm định</h1><p>Tìm và chọn dự án để xem toàn bộ công việc, nhập ý kiến rồi gửi phản hồi cho người lập.</p></div><div className="gms-metrics"><div><b>{pendingGmsCount}</b><span>CHỜ THẨM ĐỊNH</span></div><div><b>{projects.filter((project) => project.approvalStatus === "approved").length}</b><span>ĐÃ XÁC NHẬN</span></div><div><b>{projects.filter((project) => project.approvalStatus === "changes_requested").length}</b><span>YÊU CẦU ĐIỀU CHỈNH</span></div></div></section>
             <section className="gms-queue">
               <div className="gms-directory-toolbar">
                 <div className="gms-function-tabs"><button className={gmsFilter === "pending" ? "active" : ""} onClick={() => setGmsFilter("pending")}>Cần phê duyệt <b>{pendingGmsCount}</b></button><button className={gmsFilter === "history" ? "active" : ""} onClick={() => setGmsFilter("history")}>Lịch sử thẩm định</button></div>
@@ -1611,10 +2210,295 @@ export default function Home() {
                   {gmsSelectedProject ? <>
                     <header className="gms-review-header"><div><span className={`gms-status ${gmsSelectedProject.approvalStatus}`}>{APPROVAL_LABEL[gmsSelectedProject.approvalStatus]}</span><h2>{gmsSelectedProject.name}</h2><p>{gmsSelectedProject.code} · {gmsSelectedTasks.length} công việc · Mục tiêu {formatDate(gmsSelectedProject.targetDate)}</p></div><div className="gms-review-sender"><small>NGƯỜI GỬI</small><b>{gmsSelectedProject.submittedBy ?? "Project Manager"}</b><span>{formatDateTime(gmsSelectedProject.submittedAt)}</span></div></header>
                     <div className="gms-task-table"><div className="gms-task-head"><span>WBS / CÔNG VIỆC</span><span>ĐƠN VỊ</span><span>BẮT ĐẦU</span><span>KẾT THÚC</span><span>THỜI LƯỢNG</span><span>TRẠNG THÁI</span></div><div className="gms-task-body">{gmsSelectedTasks.map((task) => <div className={`gms-task-row ${task.summary ? "summary" : ""}`} key={task.code}><span style={{ paddingLeft: `${12 + (task.level - 1) * 14}px` }}><b>{task.code}</b><small>{task.name}</small></span><span>{GROUP_BY_CODE[task.groupCode]?.short}</span><span>{formatDate(task.startDate)}</span><span>{formatDate(task.endDate)}</span><span>{task.duration} ngày</span><span><i className={`task-status status-${taskStatusClass(task.status)}`}>{task.status}</i></span></div>)}</div></div>
-                    <div className={`gms-opinion-box ${gmsSelectedProject.approvalStatus !== "submitted" ? "is-readonly" : ""}`}><label className="field"><span>Ý kiến thẩm định {gmsSelectedProject.approvalStatus === "submitted" && <i>Phản hồi này sẽ được gửi về người lập MTL</i>}</span><textarea disabled={gmsSelectedProject.approvalStatus !== "submitted"} value={reviewNote} onChange={(event) => setReviewNote(event.target.value)} placeholder="Nêu rõ công việc/WBS cần sửa, nội dung cần bổ sung hoặc điều kiện phê duyệt…" rows={4} /></label>{gmsSelectedProject.approvalStatus === "submitted" ? <div className="gms-review-actions"><button className="danger-button" onClick={() => reviewProject("changes_requested")}>Trả về để điều chỉnh</button><button className="approve-button" onClick={() => reviewProject("approved")}>Xác nhận</button></div> : <div className="gms-review-result"><b>Đã phản hồi cho người lập</b><span>{formatDateTime(gmsSelectedProject.reviewedAt)} · {gmsSelectedProject.reviewNote || "Không có ý kiến bổ sung."}</span></div>}</div>
+                    <div className={`gms-opinion-box ${gmsSelectedProject.approvalStatus !== "submitted" ? "is-readonly" : ""}`}><label className="field"><span>Ý kiến thẩm định {gmsSelectedProject.approvalStatus === "submitted" && <i>Phản hồi này sẽ được gửi về người lập MTL</i>}</span><textarea disabled={gmsSelectedProject.approvalStatus !== "submitted"} value={reviewNote} onChange={(event) => setReviewNote(event.target.value)} placeholder="Nêu rõ công việc/WBS cần sửa, nội dung cần bổ sung hoặc điều kiện phê duyệt…" rows={4} /></label>{gmsSelectedProject.approvalStatus === "submitted" ? <div className="gms-review-actions"><button className="danger-button" onClick={() => reviewProject("changes_requested")}>Trả về để điều chỉnh</button><button className="approve-button" onClick={() => reviewProject("appraised")}>Xác nhận đã thẩm định</button></div> : <div className="gms-review-result"><b>Đã phản hồi cho người lập</b><span>{formatDateTime(gmsSelectedProject.reviewedAt)} · {gmsSelectedProject.reviewNote || "Không có ý kiến bổ sung."}</span></div>}</div>
+                    {gmsSelectedProject.approvalStatus === "submitted" && <div className="gms-return-picker">
+                      <b>Đầu mục cần xác nhận lại <i>chỉ áp dụng khi trả về để điều chỉnh</i></b>
+                      <div>{PBCM_GROUPS.filter((group) => gmsSelectedProject.selectedGroups.includes(group.code)).map((group) => <label key={group.code} className={gmsReturnGroups.has(group.code) ? "checked" : ""}>
+                        <input type="checkbox" checked={gmsReturnGroups.has(group.code)} onChange={() => setGmsReturnGroups((current) => { const next = new Set(current); if (next.has(group.code)) next.delete(group.code); else next.add(group.code); return next; })} />
+                        <span>{group.code} · {group.short}</span>
+                      </label>)}</div>
+                    </div>}
                   </> : <div className="gms-select-prompt"><span>GMS</span><h2>Chọn một dự án để thẩm định</h2><p>Tìm dự án ở phía trên, sau đó chọn hồ sơ bên trái để xem danh sách công việc và nhập ý kiến phản hồi.</p></div>}
                 </section>
               </div>
+            </section>
+          </>
+        ) : view === "confirm_approval" ? (
+          <>
+            <header className="topbar">
+              <div className="breadcrumbs">
+                <span>Lập Master timeline</span>
+                <i>/</i>
+                <strong>Xác nhận phê duyệt MTL</strong>
+              </div>
+              <div className="top-actions">
+                <button type="button" className="primary-button" onClick={() => openEApprovalModal()}>
+                  + Nhập phê duyệt E-Approval
+                </button>
+                <UserBadge />
+              </div>
+            </header>
+            <section className="project-index">
+              <header className="project-index-header">
+                <div>
+                  <span className="status-badge">BƯỚC 5/5</span>
+                  <h1>Xác nhận phê duyệt MTL từ E-Approval</h1>
+                  <p>PMD kiểm tra hồ sơ sau thẩm định nội bộ, nhập Mã hồ sơ và Link phê duyệt E-Approval để chốt Master Timeline và đưa vào module MTL Đã Duyệt.</p>
+                </div>
+                <label className="search-field project-index-search">
+                  <span>Tìm dự án</span>
+                  <input value={confirmSearch} onChange={(event) => { setConfirmSearch(event.target.value); setConfirmPage(1); }} placeholder="Tên, mã dự án hoặc mã E-Approval" />
+                </label>
+              </header>
+
+              <div className="approved-summary-strip" style={{ margin: "0 24px 14px" }}>
+                <div className="approved-metric-card">
+                  <span>CHỜ XÁC NHẬN E-APPROVAL</span>
+                  <b style={{ color: pendingEApprovalCount > 0 ? "#d92b2b" : "#168c72" }}>{pendingEApprovalCount}</b>
+                </div>
+                <div className="approved-metric-card">
+                  <span>ĐÃ QUA GMS THẨM ĐỊNH</span>
+                  <b>{projects.filter((p) => p.approvalStatus === "approved").length}</b>
+                </div>
+                <div className="approved-metric-card">
+                  <span>ĐÃ PHÊ DUYỆT CHÍNH THỨC</span>
+                  <b style={{ color: "#2ea44f" }}>{officialApprovedProjects.length}</b>
+                </div>
+                <div className="approved-metric-card">
+                  <span>TỔNG DỰ ÁN HỆ THỐNG</span>
+                  <b>{projects.length}</b>
+                </div>
+              </div>
+
+              <div className="table-filters">
+                <div className="gms-function-tabs" style={{ margin: 0 }}>
+                  <button className={confirmFilter === "all" ? "active" : ""} onClick={() => { setConfirmFilter("all"); setConfirmPage(1); }}>
+                    Tất cả dự án <b>{projects.length}</b>
+                  </button>
+                  <button className={confirmFilter === "pending" ? "active" : ""} onClick={() => { setConfirmFilter("pending"); setConfirmPage(1); }}>
+                    Chưa xác nhận E-Approval <b>{projects.filter((p) => !p.isOfficialApproved).length}</b>
+                  </button>
+                  <button className={confirmFilter === "approved" ? "active" : ""} onClick={() => { setConfirmFilter("approved"); setConfirmPage(1); }}>
+                    Đã phê duyệt <b>{officialApprovedProjects.length}</b>
+                  </button>
+                </div>
+                <span className="table-filters-count">{visibleConfirmProjects.length} dự án</span>
+              </div>
+
+              {visibleConfirmProjects.length > 0 ? (
+                <div className="project-table" aria-label="Danh sách xác nhận phê duyệt MTL">
+                  <div className="project-table-head" style={{ gridTemplateColumns: "80px 100px minmax(180px, 1.4fr) 130px 150px 80px 110px 160px" }}>
+                    <span>Vùng</span>
+                    <span>Mã DA</span>
+                    <span>Tên dự án</span>
+                    <span>Thẩm định GMS</span>
+                    <span>Mã E-Approval</span>
+                    <span>Bản</span>
+                    <span>Ngày duyệt</span>
+                    <span>Hành động</span>
+                  </div>
+                  <div className="project-table-body">
+                    {pagedConfirmProjects.map((project) => (
+                      <div key={project.id} className="project-table-row" style={{ gridTemplateColumns: "80px 100px minmax(180px, 1.4fr) 130px 150px 80px 110px 160px" }}>
+                        <span className="project-region-cell">{project.region || project.area || "—"}</span>
+                        <span className="project-code">{project.code}</span>
+                        <span className="project-name-cell"><b>{project.name}</b><small>{project.type}</small></span>
+                        <span>
+                          <span className={`status-badge approval-${project.approvalStatus}`}>
+                            {projectApprovalLabel(project)}
+                          </span>
+                        </span>
+                        <span>
+                          {project.eApprovalUrl ? (
+                            <a href={project.eApprovalUrl} target="_blank" rel="noreferrer" className="eapp-link-badge" title="Mở trên E-Approval">
+                              <span>{project.eApprovalCode || "E-Approval"}</span>
+                              <IconExternalLink />
+                            </a>
+                          ) : (
+                            <span style={{ color: "#829ab1", fontSize: "11px" }}>{project.eApprovalCode || "Chưa nhập"}</span>
+                          )}
+                        </span>
+                        <span><b>{project.officialVersion || (project.isOfficialApproved ? "v1.0" : "—")}</b></span>
+                        <span>{project.eApprovalDate ? formatDate(project.eApprovalDate) : "—"}</span>
+                        <span className="project-action-cell" style={{ gap: "6px" }}>
+                          {!project.isOfficialApproved ? (
+                            <button
+                              type="button"
+                              className="primary-button"
+                              style={{ height: "28px", fontSize: "11px", padding: "0 10px" }}
+                              onClick={() => openEApprovalModal(project)}
+                            >
+                              Xác nhận E-Approval
+                            </button>
+                          ) : (
+                            <>
+                              <button
+                                type="button"
+                                className="secondary-button"
+                                style={{ height: "28px", fontSize: "11px", padding: "0 8px" }}
+                                title="Sửa thông tin E-Approval"
+                                onClick={() => openEApprovalModal(project)}
+                              >
+                                Sửa
+                              </button>
+                              <button
+                                type="button"
+                                className="action-btn view-btn"
+                                title="Xem trong MTL đã duyệt"
+                                onClick={() => { setActiveId(project.id); setView("approved_projects"); }}
+                              >
+                                <IconEye />
+                              </button>
+                            </>
+                          )}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <div className="project-index-empty">
+                  <b>Không tìm thấy dự án phù hợp</b>
+                  <span>Thử tìm bằng tên/mã khác hoặc bấm nút bên dưới để nhập phê duyệt E-Approval.</span>
+                  <button className="primary-button" onClick={() => openEApprovalModal()}>+ Nhập phê duyệt E-Approval</button>
+                </div>
+              )}
+              <Pagination total={visibleConfirmProjects.length} pageSize={confirmPageSize} page={confirmPage} onPageChange={setConfirmPage} onPageSizeChange={(size) => { setConfirmPageSize(size); setConfirmPage(1); }} />
+            </section>
+          </>
+        ) : view === "approved_projects" ? (
+          <>
+            <header className="topbar">
+              <div className="breadcrumbs">
+                <span>MTL đã duyệt</span>
+                <i>/</i>
+                <strong>Danh sách MTL đã phê duyệt ({officialApprovedProjects.length} dự án)</strong>
+              </div>
+              <div className="top-actions">
+                <button type="button" className="primary-button" onClick={() => openEApprovalModal()}>
+                  + Xác nhận phê duyệt MTL
+                </button>
+                <UserBadge />
+              </div>
+            </header>
+            <section className="project-index">
+              <header className="project-index-header">
+                <div>
+                  <span className="status-badge" style={{ background: "#eaf8f4", color: "#167664", border: "1px solid #a4dfd1" }}>OFFICIAL BASELINE · E-APPROVAL</span>
+                  <h1>DANH MỤC MASTER TIMELINE ĐÃ PHÊ DUYỆT</h1>
+                  <p>Các Master Timeline đã có quyết định phê duyệt trên phần mềm E-Approval. Dùng làm chuẩn Baseline để theo dõi tiến độ thực tế.</p>
+                </div>
+                <label className="search-field project-index-search">
+                  <span>Tìm dự án</span>
+                  <input value={approvedSearch} onChange={(event) => { setApprovedSearch(event.target.value); setApprovedPage(1); }} placeholder="Tên, mã dự án hoặc mã E-Approval" />
+                </label>
+              </header>
+
+              <div className="approved-summary-strip" style={{ margin: "0 24px 14px" }}>
+                <div className="approved-metric-card">
+                  <span>DỰ ÁN ĐÃ DUYỆT</span>
+                  <b>{officialApprovedProjects.length}</b>
+                </div>
+                <div className="approved-metric-card">
+                  <span>TỔNG VIỆC BASELINE</span>
+                  <b>{formatCount(approvedTotalTasks)}</b>
+                </div>
+                <div className="approved-metric-card">
+                  <span>TIẾN ĐỘ THỰC HIỆN TB</span>
+                  <b style={{ color: "#168c72" }}>{approvedAverageProgress}%</b>
+                </div>
+                <div className="approved-metric-card">
+                  <span>VIỆC HOÀN THÀNH</span>
+                  <b style={{ color: "#2ea44f" }}>{formatCount(approvedDoneTasks)}</b>
+                </div>
+                <div className="approved-metric-card">
+                  <span>VIỆC TRỄ HẠN</span>
+                  <b style={{ color: approvedLateTasks > 0 ? "#d92b2b" : "#627d98" }}>{formatCount(approvedLateTasks)}</b>
+                </div>
+              </div>
+
+              <div className="table-filters">
+                <label className="table-filters-select">
+                  <span>Vùng</span>
+                  <select value={approvedRegionFilter} onChange={(event) => { setApprovedRegionFilter(event.target.value); setApprovedPage(1); }}>
+                    <option value="all">Tất cả vùng</option>
+                    {overviewRegions.map((r) => <option key={r} value={r}>{r}</option>)}
+                  </select>
+                </label>
+                <span className="table-filters-count">{visibleApprovedProjects.length} dự án</span>
+              </div>
+
+              {visibleApprovedProjects.length > 0 ? (
+                <div className="project-table" aria-label="Các dự án MTL đã duyệt">
+                  <div className="project-table-head" style={{ gridTemplateColumns: "90px 100px minmax(170px, 1.4fr) 140px 80px 100px 130px 110px 150px" }}>
+                    <span>Vùng</span>
+                    <span>Mã DA</span>
+                    <span>Tên dự án</span>
+                    <span>Mã E-Approval</span>
+                    <span>Bản</span>
+                    <span>Ngày duyệt</span>
+                    <span>Tiến độ thực tế</span>
+                    <span>Trạng thái</span>
+                    <span>Hành động</span>
+                  </div>
+                  <div className="project-table-body">
+                    {pagedApprovedProjects.map((project) => {
+                      const tasks = scheduleTasks(project);
+                      const nonSummary = tasks.filter((t) => !t.summary);
+                      const progress = nonSummary.length ? Math.round(nonSummary.reduce((s, t) => s + t.actualProgress, 0) / nonSummary.length) : 0;
+                      const lateCount = nonSummary.filter((t) => t.actualStatus === "Trễ hạn").length;
+                      return (
+                        <div key={project.id} className="project-table-row" style={{ gridTemplateColumns: "90px 100px minmax(170px, 1.4fr) 140px 80px 100px 130px 110px 150px" }} onClick={() => openProject(project)}>
+                          <span className="project-region-cell">{project.region || project.area || "—"}</span>
+                          <span className="project-code">{project.code}</span>
+                          <span className="project-name-cell"><b>{project.name}</b><small>{project.type}</small></span>
+                          <span onClick={(e) => e.stopPropagation()}>
+                            {project.eApprovalUrl ? (
+                              <a href={project.eApprovalUrl} target="_blank" rel="noreferrer" className="eapp-link-badge" title="Mở trên E-Approval">
+                                <span>{project.eApprovalCode || "E-Approval"}</span>
+                                <IconExternalLink />
+                              </a>
+                            ) : (
+                              <span style={{ fontWeight: 700, color: "#168c72", fontSize: "11px" }}>{project.eApprovalCode || "Đã duyệt"}</span>
+                            )}
+                          </span>
+                          <span><b>{project.officialVersion || "v1.0"}</b></span>
+                          <span>{formatDate(project.eApprovalDate || project.approvedAt)}</span>
+                          <span className="progress-cell">
+                            <div className="progress-cell-header">
+                              <span className="percent">{progress}%</span>
+                              {lateCount > 0 && <span style={{ color: "#d92b2b", fontSize: "9px" }}>{lateCount} trễ</span>}
+                            </div>
+                            <div className="progress-bar-track">
+                              <div className={`progress-bar-fill ${progress === 100 ? "done" : (lateCount > 0 ? "late" : "running")}`} style={{ width: `${progress}%` }} />
+                            </div>
+                          </span>
+                          <span>
+                            <i className={`actual-status-badge ${progress === 100 ? "status-done" : (lateCount > 0 ? "status-late" : "status-running")}`}>
+                              {progress === 100 ? "Hoàn thành" : (lateCount > 0 ? "Có trễ hạn" : "Đang chạy")}
+                            </i>
+                          </span>
+                          <span className="project-action-cell" style={{ gap: "4px" }}>
+                            <button type="button" className="action-btn view-btn" title="Theo dõi và cập nhật tiến độ" aria-label="Theo dõi tiến độ" onClick={(event) => { event.stopPropagation(); openProject(project); }}>
+                              <IconEye />
+                            </button>
+                            <button type="button" className="action-btn" title="Xuất MS Project XML" aria-label="Xuất XML" onClick={(event) => { event.stopPropagation(); setActiveId(project.id); exportMicrosoftProject(); }}>
+                              <IconDownload />
+                            </button>
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              ) : (
+                <div className="project-index-empty">
+                  <b>Chưa có dự án nào trong danh mục MTL đã phê duyệt</b>
+                  <span>Nhập Mã hồ sơ và Link phê duyệt E-Approval để xác nhận Master Timeline chính thức.</span>
+                  <button className="primary-button" onClick={() => openEApprovalModal()}>+ Xác nhận phê duyệt MTL</button>
+                </div>
+              )}
+              <Pagination total={visibleApprovedProjects.length} pageSize={approvedPageSize} page={approvedPage} onPageChange={setApprovedPage} onPageSizeChange={(size) => { setApprovedPageSize(size); setApprovedPage(1); }} />
             </section>
           </>
         ) : !activeProject ? (
@@ -1625,72 +2509,159 @@ export default function Home() {
           </div>
         ) : (
           <>
+            {activeProject.isOfficialApproved && (
+              <div className="baseline-banner">
+                <div className="baseline-banner-left">
+                  <span className="baseline-badge">🛡️ BASELINE LOCKED</span>
+                  <span>Hồ sơ E-Approval: <strong>{activeProject.eApprovalCode}</strong></span>
+                  <span>· Phiên bản: <strong>{activeProject.officialVersion || "v1.0"}</strong></span>
+                  <span>· Ngày duyệt: <strong>{formatDate(activeProject.eApprovalDate || activeProject.approvedAt)}</strong></span>
+                </div>
+                <div className="baseline-banner-right">
+                  {activeProject.eApprovalUrl && (
+                    <a href={activeProject.eApprovalUrl} target="_blank" rel="noreferrer">
+                      <span>Mở hồ sơ trên E-Approval</span>
+                      <IconExternalLink />
+                    </a>
+                  )}
+                  <button type="button" className="secondary-button" style={{ height: "26px", fontSize: "10.5px", background: "#ffffff22", color: "#fff", borderColor: "#ffffff44" }} onClick={reopenApproved}>
+                    Tạo bản điều chỉnh
+                  </button>
+                </div>
+              </div>
+            )}
+
             <header className="topbar">
               <div className="breadcrumbs"><span>Lập Master timeline</span><i>/</i><button className="breadcrumb-back" onClick={() => setView("projects")}>Lập & Cập nhật</button><i>/</i><strong>{activeProject.code}</strong></div>
-              <div className="top-actions"><span className="saved-state"><i />Đã lưu trên thiết bị</span><button className="danger-button" onClick={() => setShowDelete(true)}>Xóa dự án</button><button className="secondary-button project-export" onClick={exportMicrosoftProject}>Xuất Microsoft Project <small>.xml → .mpp</small></button><button className="primary-button" onClick={openCreate}>Tạo Master timeline</button><UserBadge /></div>
+              <div className="top-actions">
+                <span className="saved-state"><i />Đã lưu trên thiết bị</span>
+                <button className="danger-button" onClick={() => setShowDelete(true)}>Xóa dự án</button>
+                <button className="secondary-button project-export" onClick={exportMicrosoftProject}>Xuất Microsoft Project <small>.xml → .mpp</small></button>
+                {!activeProject.isOfficialApproved && (
+                  <button className="secondary-button" style={{ borderColor: "#168c72", color: "#168c72", fontWeight: 700 }} onClick={() => openEApprovalModal(activeProject)}>
+                    ✓ Xác nhận E-Approval
+                  </button>
+                )}
+                <button className="primary-button" onClick={openCreate}>Tạo Master timeline</button>
+                <UserBadge />
+              </div>
             </header>
 
             <section className="project-header">
               <div><span className={`status-badge approval-${activeProject.approvalStatus}`}>{projectApprovalLabel(activeProject)}{activeProject.approvedVersion ? ` · ${activeProject.approvedVersion}` : ""}</span><h1>{activeProject.name}</h1><p>{activeProject.code} · {activeProject.type}{activeProject.location ? ` · ${activeProject.location}` : ""}</p></div>
-              <div className="project-metrics"><div><b>{scheduled.length}</b><span>TASK ĐÃ SINH</span></div><div><b>{activeProject.selectedGroups.filter((code) => code.startsWith("9.")).length}/9</b><span>PHÒNG BAN</span></div><div><b>{activeProject.selectedGroups.filter((code) => code.startsWith("4.")).length}/5</b><span>NHÓM PHẦN 4</span></div><div><b>{formatDate(activeProject.targetDate)}</b><span>NGÀY MỤC TIÊU</span></div></div>
+              <div className="project-metrics"><div><b>{scheduled.length}</b><span>TASK ĐÃ SINH</span></div><div><b>{activeProject.selectedGroups.filter((code) => GROUP_BY_CODE[code]?.role === "indirect").length}/{INDIRECT_COUNT}</b><span>BAN/PHÒNG GIÁN TIẾP</span></div><div><b>{activeProject.selectedGroups.filter((code) => GROUP_BY_CODE[code]?.role === "direct").length}/{DIRECT_COUNT}</b><span>PHÒNG TRỰC TIẾP</span></div><div><b>{formatDate(activeProject.targetDate)}</b><span>NGÀY MỤC TIÊU</span></div></div>
             </section>
 
             <section className={`approval-flow state-${activeProject.approvalStatus}`}>
-              <div className="approval-steps"><span className="done"><i>1</i><b>Lập MTL</b></span><em /><span className={allDepartmentsApproved(activeProject) ? "done" : ""}><i>2</i><b>Phòng ban xác nhận</b></span><em /><span className={activeProject.approvalStatus === "submitted" || activeProject.approvalStatus === "approved" ? "done" : ""}><i>3</i><b>GMS thẩm định</b></span><em /><span className={activeProject.approvalStatus === "approved" ? "done" : ""}><i>4</i><b>Hoàn thành thẩm định</b></span></div>
+              <div className="approval-steps">
+                <span className="done"><i>1</i><b>Lập MTL</b></span><em />
+                <span className={allDepartmentsApproved(activeProject) ? "done" : ""}><i>2</i><b>Phòng ban xác nhận</b></span><em />
+                <span className={GMS_STAGES.includes(activeProject.approvalStatus) ? "done" : ""}><i>3</i><b>GMD kiểm soát</b></span><em />
+                <span className={activeProject.approvalStatus === "appraised" || activeProject.approvalStatus === "approved" ? "done" : ""}><i>4</i><b>GMS thẩm định</b></span><em />
+                <span className={activeProject.approvalStatus === "approved" ? "done" : ""}><i>5</i><b>Phê duyệt E-Approval</b></span>
+              </div>
               <div className="approval-action">
-                {(activeProject.approvalStatus === "draft" || activeProject.approvalStatus === "changes_requested") && !allDepartmentsApproved(activeProject) && <><span>Còn {activeProject.selectedGroups.length - approvedDepartmentCount(activeProject)} đầu mục chưa xác nhận</span><button className="secondary-button" onClick={() => openDepartmentReview()}>Mở xác nhận phòng ban</button></>}
-                {(activeProject.approvalStatus === "draft" || activeProject.approvalStatus === "changes_requested") && allDepartmentsApproved(activeProject) && <button className="primary-button" onClick={submitToGms}>Gửi GMS thẩm định</button>}
-                {activeProject.approvalStatus === "submitted" && <span>Đã gửi {formatDate(activeProject.submittedAt)} · Đang chờ GMS xử lý</span>}
-                {activeProject.approvalStatus === "approved" && <><span>Hoàn thành thẩm định {formatDate(activeProject.approvedAt)}</span><button className="secondary-button" onClick={reopenApproved}>Tạo bản điều chỉnh</button></>}
+                {isPlanEditable(activeProject) && !allDepartmentsApproved(activeProject) && <><span>Còn {pbcmGroupsOf(activeProject).length - approvedDepartmentCount(activeProject)} đầu mục chưa xác nhận</span><button className="secondary-button" onClick={() => openDepartmentReview()}>Mở xác nhận phòng ban</button></>}
+                {isPlanEditable(activeProject) && allDepartmentsApproved(activeProject) && <button className="primary-button" onClick={submitToGmd}>Trình GMD kiểm soát</button>}
+                {activeProject.approvalStatus === "gmd_review" && <span>Đã trình {formatDate(activeProject.gmdSubmittedAt)} · Đang chờ GMD kiểm soát</span>}
+                {activeProject.approvalStatus === "submitted" && <span>GMD đã duyệt {formatDate(activeProject.gmdReviewedAt)} · Đang chờ GMS thẩm định</span>}
+                {activeProject.approvalStatus === "appraised" && !activeProject.isOfficialApproved && <button className="primary-button" onClick={() => openEApprovalModal(activeProject)}>Xác nhận duyệt qua E-Approval</button>}
+                {activeProject.isOfficialApproved && <><span>Đã duyệt E-Approval {formatDate(activeProject.eApprovalDate)}</span><button className="secondary-button" onClick={reopenApproved}>Tạo bản điều chỉnh</button></>}
               </div>
             </section>
-            <section className="department-status-strip" aria-label="Trạng thái xác nhận phòng ban">{GROUPS.filter((group) => activeProject.selectedGroups.includes(group.code)).map((group) => { const approval = activeProject.departmentApprovals[group.code]; return <button key={group.code} className={`status-${approval?.status ?? "pending"}`} title={approval?.note || `${group.name} · ${DEPARTMENT_APPROVAL_LABEL[approval?.status ?? "pending"]}`} onClick={() => openDepartmentReview(group.code)}><i>{approval?.status === "approved" ? "✓" : approval?.status === "changes_requested" ? "!" : "·"}</i><span><b>{group.code}</b><small>{group.short}</small></span></button>; })}</section>
+            <section className="department-status-strip" aria-label="Trạng thái xác nhận phòng ban">{PBCM_GROUPS.filter((group) => activeProject.selectedGroups.includes(group.code)).map((group) => { const approval = activeProject.departmentApprovals[group.code]; return <button key={group.code} className={`status-${approval?.status ?? "pending"}`} title={approval?.note || `${group.name} · ${DEPARTMENT_APPROVAL_LABEL[approval?.status ?? "pending"]}`} onClick={() => openDepartmentReview(group.code)}><i>{approval?.status === "approved" ? "✓" : approval?.status === "changes_requested" ? "!" : "·"}</i><span><b>{group.code}</b><small>{group.short}</small></span></button>; })}</section>
             {activeProject.selectedGroups.some((code) => activeProject.departmentApprovals[code]?.note) && <section className="department-feedback-list"><b>Ý kiến xác nhận phòng ban</b><div>{GROUPS.filter((group) => activeProject.departmentApprovals[group.code]?.note).map((group) => { const approval = activeProject.departmentApprovals[group.code]; return <button key={group.code} onClick={() => openDepartmentReview(group.code)}><span>{group.code} · {group.short}</span><p>{approval.note}</p><small>{approval.reviewer || "Chưa gán người xác nhận"} · {DEPARTMENT_APPROVAL_LABEL[approval.status]}</small></button>; })}</div></section>}
             {activeProject.reviewNote && <div className={`review-note ${activeProject.approvalStatus}`}><b>Phản hồi thẩm định từ GMS</b><span>{activeProject.reviewNote}</span><small>Gửi lúc {formatDateTime(activeProject.reviewedAt)} · Vui lòng cập nhật các nội dung được nêu trước khi gửi lại.</small></div>}
 
             <section className="toolbar" aria-label="Công cụ danh sách MTL">
-              <div className="scope-tabs"><span className="active">Tất cả công việc</span></div>
+              <div className="scope-tabs"><span className="active">Tất cả công việc ({scheduled.length})</span></div>
               <label className="search-field"><span>Tìm</span><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Mã WBS hoặc tên công việc" /></label>
               <button className="text-button" onClick={() => setCollapsed(new Set())}>Mở tất cả</button><button className="text-button" onClick={() => setCollapsed(new Set(activeProject.selectedGroups))}>Thu gọn</button>
             </section>
 
             <div className={`planning-area ${selectedTask ? "with-detail" : ""}`}>
               <section className="task-grid" aria-label="Cây công việc Master Timeline">
-                <div className="grid-header"><span>CÔNG VIỆC / WBS</span><span>ĐƠN VỊ</span><span>BẮT ĐẦU</span><span>KẾT THÚC</span><span>THỜI LƯỢNG</span><span>TRẠNG THÁI</span></div>
+                <div className="grid-header" style={{ gridTemplateColumns: "minmax(260px, 1.4fr) 80px 150px 100px 90px 70px" }}>
+                  <span>CÔNG VIỆC / WBS</span>
+                  <span>ĐƠN VỊ</span>
+                  <span>KẾ HOẠCH</span>
+                  <span>% THỰC TẾ</span>
+                  <span>TRẠNG THÁI</span>
+                  <span>TIẾN ĐỘ</span>
+                </div>
                 <div className="grid-body">
                   {visibleTasks.map((task) => {
                     const group = GROUP_BY_CODE[task.groupCode];
                     const isCollapsed = collapsed.has(task.code);
                     return (
-                      <div key={task.code} role="button" tabIndex={0} className={`task-row level-${Math.min(task.level, 4)} ${selectedCode === task.code ? "selected" : ""} ${task.summary ? "summary" : ""}`} onClick={() => setSelectedCode(task.code)} onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") setSelectedCode(task.code); }}>
+                      <div key={task.code} role="button" tabIndex={0} className={`task-row level-${Math.min(task.level, 4)} ${selectedCode === task.code ? "selected" : ""} ${task.summary ? "summary" : ""}`} style={{ gridTemplateColumns: "minmax(260px, 1.4fr) 80px 150px 100px 90px 70px" }} onClick={() => setSelectedCode(task.code)} onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") setSelectedCode(task.code); }}>
                         <span className="task-cell task-title" title="Nhấp chuột phải để thêm, sửa hoặc xóa" onContextMenu={(event) => { event.preventDefault(); event.stopPropagation(); setContextMenu({ code: task.code, x: Math.min(event.clientX, window.innerWidth - 220), y: Math.min(event.clientY, window.innerHeight - 180) }); }} style={{ "--indent": `${(task.level - 1) * 18}px` } as React.CSSProperties}>
                           {task.summary ? <i className="toggle" role="button" aria-label={isCollapsed ? "Mở nhóm" : "Thu gọn nhóm"} onClick={(event) => { event.stopPropagation(); setCollapsed((current) => { const next = new Set(current); if (next.has(task.code)) next.delete(task.code); else next.add(task.code); return next; }); }}>{isCollapsed ? "+" : "−"}</i> : <i className="task-dot" />}
                           <span className="task-inline"><b>{task.code}</b><small>{task.name}</small>{task.custom && <i className="custom-chip">Mới</i>}{task.predecessors.length > 0 && <i className={`dependency-chip ${task.dependencyConflict ? "conflict" : ""}`}>{task.predecessors.map((dependency) => `${dependency.type} · ${dependency.predecessorCode}${dependency.lagDays ? ` + ${dependency.lagDays}d` : ""}`).join(", ")}</i>}</span>
                         </span>
                         <span className="task-cell owner-cell"><b>{group?.short}</b><small>{group?.name}</small></span>
-                        <span className="task-cell date-cell">{formatDate(task.startDate)}</span><span className="task-cell date-cell">{formatDate(task.endDate)}</span><span className="task-cell duration-cell">{task.duration} ngày</span><span className="task-cell task-status-cell"><i className={`task-status status-${taskStatusClass(task.status)}`}>{task.status}</i></span>
+                        <span className="task-cell date-cell" style={{ fontSize: "10px", lineHeight: "1.2" }}>
+                          <b>{formatDate(task.startDate)}</b>
+                          <small style={{ color: "#627d98", display: "block" }}>→ {formatDate(task.endDate)} ({task.duration}d)</small>
+                        </span>
+                        <span className="task-cell" onClick={(e) => { e.stopPropagation(); if (!task.summary) openProgressModal(task); }}>
+                          <div className="progress-cell" style={{ cursor: task.summary ? "default" : "pointer" }}>
+                            <div className="progress-cell-header">
+                              <span className="percent">{task.actualProgress}%</span>
+                            </div>
+                            <div className="progress-bar-track">
+                              <div className={`progress-bar-fill ${task.actualProgress === 100 ? "done" : (task.actualStatus === "Trễ hạn" ? "late" : "running")}`} style={{ width: `${task.actualProgress}%` }} />
+                            </div>
+                          </div>
+                        </span>
+                        <span className="task-cell">
+                          <i className={`actual-status-badge ${task.actualStatus === "Hoàn thành" ? "status-done" : (task.actualStatus === "Trễ hạn" ? "status-late" : (task.actualStatus === "Đang thực hiện" ? "status-running" : "status-idle"))}`}>
+                            {task.actualStatus}
+                          </i>
+                        </span>
+                        <span className="task-cell">
+                          {!task.summary ? (
+                            <button type="button" className="progress-quick-btn" title="Cập nhật tiến độ thực tế" onClick={(e) => { e.stopPropagation(); openProgressModal(task); }}>
+                              <IconSlider />
+                            </button>
+                          ) : (
+                            <span style={{ fontSize: "10px", color: "#829ab1", fontWeight: 700 }}>Tổng hợp</span>
+                          )}
+                        </span>
                       </div>
                     );
                   })}
                   {!visibleTasks.length && <div className="no-results">Không tìm thấy công việc phù hợp.</div>}
                 </div>
-                <footer className="grid-footer"><span>Hiển thị {visibleTasks.length}/{scheduled.length} task · {projectDependencyCount(activeProject)} liên kết</span><span>{activeProject.approvalStatus === "approved" ? `Bản ${activeProject.approvedVersion} đã được GMS phê duyệt và khóa chỉnh sửa.` : "Nhấp chuột phải tại cột Công việc/WBS để thêm con, chỉnh sửa hoặc xóa."}</span></footer>
+                <footer className="grid-footer"><span>Hiển thị {visibleTasks.length}/{scheduled.length} task · {projectDependencyCount(activeProject)} liên kết</span><span>{activeProject.isOfficialApproved ? `Master Timeline chính thức đã khóa Baseline. Bấm vào cột % để cập nhật tiến độ thực tế.` : "Nhấp chuột phải tại cột Công việc/WBS để thêm con, chỉnh sửa hoặc xóa."}</span></footer>
               </section>
 
               {selectedTask && (
                 <aside className="detail-panel">
                   <header><span>CHI TIẾT CÔNG VIỆC</span><button aria-label="Đóng chi tiết" onClick={() => setSelectedCode("")}>Đóng</button></header>
-                  {activeProject.approvalStatus === "approved" && <div className="locked-banner">Bản Hoàn thành thẩm định — chỉ đọc</div>}
+                  {activeProject.isOfficialApproved && <div className="locked-banner" style={{ background: "#102d4b", color: "#9fe3d5" }}>🛡️ Baseline đã khóa · Cập nhật tiến độ thực tế bên dưới</div>}
                   <div className="detail-code">{selectedTask.code}</div><h2>{selectedTask.name}</h2><div className="detail-meta"><span>{GROUP_BY_CODE[selectedTask.groupCode]?.short}</span><b>{selectedTask.summary ? "Summary task" : "Task thực hiện"}</b></div>
-                  <label className="field"><span>PIC phụ trách</span><input disabled={activeProject.approvalStatus === "approved"} value={selectedTask.pic} onChange={(event) => updateTask(selectedTask.code, { pic: event.target.value })} placeholder="Nhập tên người phụ trách" /></label>
-                  <label className="field"><span>Ngày bắt đầu</span><input disabled={activeProject.approvalStatus === "approved" || selectedTask.summary} type="date" value={selectedTask.startDate} max={selectedTask.endDate} onChange={(event) => updateTaskDates(selectedTask.code, event.target.value, selectedTask.endDate)} /></label>
-                  <label className="field"><span>Ngày kết thúc</span><input disabled={activeProject.approvalStatus === "approved" || selectedTask.summary} type="date" value={selectedTask.endDate} min={selectedTask.startDate} onChange={(event) => updateTaskDates(selectedTask.code, selectedTask.startDate, event.target.value)} /></label>
-                  <label className="field field-readonly"><span>Thời lượng tự tính</span><input readOnly value={`${selectedTask.duration} ngày làm việc`} /></label>
-                  <label className="field"><span>Trạng thái</span><select disabled={activeProject.approvalStatus === "approved"} value={selectedTask.status} onChange={(event) => updateTask(selectedTask.code, { status: event.target.value as TaskEdit["status"] })}><option>Đang thực hiện</option><option>Đóng</option><option>Hoàn thành</option></select></label>
-                  <DependencyPicker tasks={scheduled} selectedDependencies={selectedTask.predecessors} successorCode={selectedTask.code} disabled={activeProject.approvalStatus === "approved" || selectedTask.summary} onChange={(dependencies) => updateTaskDependencies(selectedTask.code, dependencies)} />
+                  
+                  {!selectedTask.summary && (
+                    <div style={{ margin: "14px 0", padding: "12px", background: "#f0f7f5", borderRadius: "8px", border: "1px solid #cce8e2" }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
+                        <span style={{ fontSize: "11px", fontWeight: 700, color: "#167664" }}>Tiến độ thực tế:</span>
+                        <b style={{ fontSize: "14px", color: "#167664" }}>{selectedTask.actualProgress}% ({selectedTask.actualStatus})</b>
+                      </div>
+                      <button type="button" className="primary-button" style={{ width: "100%", height: "32px", fontSize: "11px" }} onClick={() => openProgressModal(selectedTask)}>
+                        Cập nhật % & Ngày thực tế
+                      </button>
+                    </div>
+                  )}
+
+                  <label className="field"><span>PIC phụ trách</span><input disabled={activeProject.baselineLocked} value={selectedTask.pic} onChange={(event) => updateTask(selectedTask.code, { pic: event.target.value })} placeholder="Nhập tên người phụ trách" /></label>
+                  <label className="field"><span>Ngày bắt đầu (Kế hoạch)</span><input disabled={activeProject.baselineLocked || selectedTask.summary} type="date" value={selectedTask.startDate} max={selectedTask.endDate} onChange={(event) => updateTaskDates(selectedTask.code, event.target.value, selectedTask.endDate)} /></label>
+                  <label className="field"><span>Ngày kết thúc (Kế hoạch)</span><input disabled={activeProject.baselineLocked || selectedTask.summary} type="date" value={selectedTask.endDate} min={selectedTask.startDate} onChange={(event) => updateTaskDates(selectedTask.code, selectedTask.startDate, event.target.value)} /></label>
+                  <label className="field field-readonly"><span>Thời lượng kế hoạch</span><input readOnly value={`${selectedTask.duration} ngày làm việc`} /></label>
+                  <DependencyPicker tasks={scheduled} selectedDependencies={selectedTask.predecessors} successorCode={selectedTask.code} disabled={activeProject.baselineLocked || selectedTask.summary} onChange={(dependencies) => updateTaskDependencies(selectedTask.code, dependencies)} />
                   {selectedTask.dependencyConflict && <div className="dependency-warning" role="alert"><b>Xung đột liên kết FS</b><span>{selectedTask.dependencyConflict}</span>{selectedTask.suggestedStartDate && <button type="button" onClick={() => updateTaskDates(selectedTask.code, selectedTask.suggestedStartDate!, dateAtWorkingOffset(selectedTask.suggestedStartDate!, selectedTask.duration - 1))}>Áp dụng ngày {formatDate(selectedTask.suggestedStartDate)}</button>}</div>}
                   <div className="detail-summary"><div><span>Bắt đầu</span><b>{formatDate(selectedTask.startDate)}</b></div><div><span>Kết thúc</span><b>{formatDate(selectedTask.endDate)}</b></div></div>
-                  <p className="detail-note">{selectedTask.summary ? "Ngày của task tổng hợp được tự động lấy theo các công việc con." : activeProject.approvalStatus === "approved" ? "Tạo bản điều chỉnh nếu cần cập nhật nội dung." : "Thay đổi được lưu tự động trên thiết bị cho dự án này."}</p>
+                  <p className="detail-note">{selectedTask.summary ? "Ngày của task tổng hợp được tự động lấy theo các công việc con." : activeProject.isOfficialApproved ? "Master Timeline chính thức đã khóa. Bấm 'Tạo bản điều chỉnh' nếu cần thay đổi kế hoạch cơ sở." : "Thay đổi được lưu tự động trên thiết bị cho dự án này."}</p>
                 </aside>
               )}
             </div>
@@ -1700,10 +2671,137 @@ export default function Home() {
 
       {contextMenu && contextTask && activeProject && <section className="task-context-menu" style={{ left: contextMenu.x, top: contextMenu.y }} onPointerDown={(event) => event.stopPropagation()}>
         <header><span>{contextTask.code}</span><b>{contextTask.name}</b></header>
-        <button disabled={contextTask.level >= 4 || activeProject.approvalStatus === "approved"} onClick={() => { setContextMenu(null); openTaskCreator(true, contextTask, true); }}><i>+</i><span><b>Thêm công việc con</b><small>{contextTask.level >= 4 ? "Đã đạt WBS cấp 4" : `Tạo bên dưới ${contextTask.code}`}</small></span></button>
+        <button disabled={contextTask.level >= 4 || activeProject.baselineLocked} onClick={() => { setContextMenu(null); openTaskCreator(true, contextTask, true); }}><i>+</i><span><b>Thêm công việc con</b><small>{contextTask.level >= 4 ? "Đã đạt WBS cấp 4" : `Tạo bên dưới ${contextTask.code}`}</small></span></button>
         <button onClick={() => { setSelectedCode(contextTask.code); setContextMenu(null); }}><i>…</i><span><b>Chỉnh sửa chi tiết</b><small>Mở bảng thông tin bên phải</small></span></button>
-        <button className="context-danger" disabled={activeProject.approvalStatus === "approved"} onClick={() => { setContextMenu(null); removeTaskFromProject(contextTask); }}><i>×</i><span><b>Xóa khỏi dự án</b><small>{contextTask.summary ? "Bao gồm các công việc con" : "Không xóa khỏi danh mục mẫu"}</small></span></button>
+        {!contextTask.summary && <button onClick={() => { setContextMenu(null); openProgressModal(contextTask); }}><i>%</i><span><b>Cập nhật tiến độ</b><small>Nhập % hoàn thành thực tế</small></span></button>}
+        <button className="context-danger" disabled={activeProject.baselineLocked} onClick={() => { setContextMenu(null); removeTaskFromProject(contextTask); }}><i>×</i><span><b>Xóa khỏi dự án</b><small>{contextTask.summary ? "Bao gồm các công việc con" : "Không xóa khỏi danh mục mẫu"}</small></span></button>
       </section>}
+
+      {showEApprovalModal && (
+        <div className="modal-backdrop" onMouseDown={() => setShowEApprovalModal(false)}>
+          <form className="project-modal" style={{ maxWidth: "560px" }} onSubmit={submitEApproval} onMouseDown={(e) => e.stopPropagation()}>
+            <header>
+              <div>
+                <span className="status-badge" style={{ background: "#eaf8f4", color: "#167664" }}>XÁC NHẬN PHÊ DUYỆT MTL</span>
+                <h2>Liên kết phê duyệt từ E-Approval</h2>
+                <p>Khóa Kế hoạch cơ sở (Baseline) và đưa dự án vào Danh mục MTL đã duyệt để theo dõi tiến độ thực tế.</p>
+              </div>
+              <button type="button" onClick={() => setShowEApprovalModal(false)}>Đóng</button>
+            </header>
+            <div className="form-grid">
+              <label className="field field-wide">
+                <span>Dự án cần phê duyệt *</span>
+                <select value={eApprovalForm.projectId} onChange={(e) => setEApprovalForm({ ...eApprovalForm, projectId: e.target.value })}>
+                  <option value="">-- Chọn dự án --</option>
+                  {projects.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      [{p.code}] {p.name} {p.isOfficialApproved ? "(Đã duyệt)" : ""}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="field">
+                <span>Mã hồ sơ trình ký (E-Approval) *</span>
+                <input required autoFocus value={eApprovalForm.code} onChange={(e) => setEApprovalForm({ ...eApprovalForm, code: e.target.value })} placeholder="vd: HS-EAPP-2026-08892 hoặc QĐ-NVL-2026/89" />
+              </label>
+              <label className="field">
+                <span>Phiên bản Baseline</span>
+                <input value={eApprovalForm.version} onChange={(e) => setEApprovalForm({ ...eApprovalForm, version: e.target.value })} placeholder="v1.0" />
+              </label>
+              <label className="field field-wide">
+                <span>Đường dẫn (Link) E-Approval *</span>
+                <div style={{ display: "flex", gap: "8px" }}>
+                  <input required style={{ flex: 1 }} type="url" value={eApprovalForm.url} onChange={(e) => setEApprovalForm({ ...eApprovalForm, url: e.target.value })} placeholder="https://eapproval.novaland.com.vn/document/..." />
+                  {eApprovalForm.url && (
+                    <a href={eApprovalForm.url} target="_blank" rel="noreferrer" className="secondary-button" style={{ height: "38px", display: "inline-flex", alignItems: "center", gap: "4px", padding: "0 12px", textDecoration: "none", fontSize: "11px" }}>
+                      Mở thử ↗
+                    </a>
+                  )}
+                </div>
+              </label>
+              <label className="field">
+                <span>Ngày phê duyệt chính thức</span>
+                <input type="date" value={eApprovalForm.date} onChange={(e) => setEApprovalForm({ ...eApprovalForm, date: e.target.value })} />
+              </label>
+              <label className="field">
+                <span>Cán bộ / Đơn vị xác nhận</span>
+                <input value={eApprovalForm.signer} onChange={(e) => setEApprovalForm({ ...eApprovalForm, signer: e.target.value })} placeholder="PMD - Ban Quản lý Dự án" />
+              </label>
+              <label className="field field-wide">
+                <span>Trích yếu / Quyết định phê duyệt</span>
+                <textarea rows={3} value={eApprovalForm.note} onChange={(e) => setEApprovalForm({ ...eApprovalForm, note: e.target.value })} placeholder="Ghi chú nội dung phê duyệt, số quyết định của Ban Tổng Giám đốc..." />
+              </label>
+            </div>
+            {eApprovalError && <div className="form-error" role="alert">{eApprovalError}</div>}
+            <footer className="modal-actions-only">
+              <button type="button" className="secondary-button" onClick={() => setShowEApprovalModal(false)}>Hủy</button>
+              <button className="primary-button" type="submit">Xác nhận & Chốt Master Timeline</button>
+            </footer>
+          </form>
+        </div>
+      )}
+
+      {showProgressModal && editingProgressTask && (
+        <div className="modal-backdrop" onMouseDown={() => setShowProgressModal(false)}>
+          <form className="project-modal" style={{ maxWidth: "520px" }} onSubmit={saveProgress} onMouseDown={(e) => e.stopPropagation()}>
+            <header>
+              <div>
+                <span className="status-badge">CẬP NHẬT TIẾN ĐỘ THỰC TẾ</span>
+                <h2>{editingProgressTask.code} · {editingProgressTask.name}</h2>
+                <p>Kế hoạch: {formatDate(editingProgressTask.startDate)} → {formatDate(editingProgressTask.endDate)} ({editingProgressTask.duration} ngày)</p>
+              </div>
+              <button type="button" onClick={() => setShowProgressModal(false)}>Đóng</button>
+            </header>
+            <div className="form-grid">
+              <div className="field-wide" style={{ padding: "12px", background: "#f8fafc", borderRadius: "8px", border: "1px solid #e2e8f0" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
+                  <span style={{ fontSize: "11px", fontWeight: 700, color: "#102d4b" }}>% Hoàn thành thực tế</span>
+                  <b style={{ fontSize: "18px", color: progressForm.progress === 100 ? "#2ea44f" : "#102d4b" }}>{progressForm.progress}%</b>
+                </div>
+                <input
+                  type="range"
+                  min={0}
+                  max={100}
+                  step={5}
+                  value={progressForm.progress}
+                  onChange={(e) => setProgressForm({ ...progressForm, progress: Number(e.target.value) })}
+                  style={{ width: "100%", accentColor: progressForm.progress === 100 ? "#2ea44f" : "#168c72", cursor: "pointer" }}
+                />
+                <div style={{ display: "flex", gap: "6px", marginTop: "10px", justifyContent: "space-between" }}>
+                  {[0, 25, 50, 75, 100].map((val) => (
+                    <button
+                      key={val}
+                      type="button"
+                      className="secondary-button"
+                      style={{ height: "26px", padding: "0 8px", fontSize: "10.5px", background: progressForm.progress === val ? "#102d4b" : "#fff", color: progressForm.progress === val ? "#fff" : "#334e68" }}
+                      onClick={() => setProgressForm({ ...progressForm, progress: val, actualEndDate: val === 100 ? (progressForm.actualEndDate || today) : progressForm.actualEndDate })}
+                    >
+                      {val === 100 ? "✓ 100% Hoàn thành" : `${val}%`}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <label className="field">
+                <span>Ngày bắt đầu thực tế</span>
+                <input type="date" value={progressForm.actualStartDate} onChange={(e) => setProgressForm({ ...progressForm, actualStartDate: e.target.value })} />
+              </label>
+              <label className="field">
+                <span>Ngày hoàn thành thực tế</span>
+                <input type="date" value={progressForm.actualEndDate} onChange={(e) => setProgressForm({ ...progressForm, actualEndDate: e.target.value })} />
+              </label>
+              <label className="field field-wide">
+                <span>Ghi chú tiến độ / Bằng chứng nghiệm thu</span>
+                <textarea rows={3} value={progressForm.note} onChange={(e) => setProgressForm({ ...progressForm, note: e.target.value })} placeholder="Nhập lý do chậm trễ, biên bản nghiệm thu, link hồ sơ đính kèm..." />
+              </label>
+            </div>
+            <footer className="modal-actions-only">
+              <button type="button" className="secondary-button" onClick={() => setShowProgressModal(false)}>Hủy</button>
+              <button className="primary-button" type="submit">Lưu tiến độ thực tế</button>
+            </footer>
+          </form>
+        </div>
+      )}
 
       {showCreate && (
         <div className="modal-backdrop" onMouseDown={() => setShowCreate(false)}>
@@ -1755,3 +2853,4 @@ export default function Home() {
     </main>
   );
 }
+

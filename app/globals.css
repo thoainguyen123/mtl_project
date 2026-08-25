@@ -258,8 +258,243 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 .overview-empty b{color:#123a63;font-size:16px}
 .overview-empty span{margin:8px 0 18px;color:#6d8296;font-size:12px}
 
-@media(max-width:1250px){.overview-top{grid-template-columns:1fr 1fr}.overview-grid{grid-template-columns:1fr}}
-@media(max-width:900px){.overview{padding:14px}.overview-top{grid-template-columns:1fr}.overview-title-center{position:static;transform:none}}
+/* Approved Master Timeline and E-Approval Tracking styles */
+
+.eapp-link-badge{display:inline-flex;align-items:center;gap:5px;padding:4px 8px;border:1px solid #99cbbd;border-radius:6px;background:#eef9f6;color:#137865;font-size:10.5px;font-weight:700;text-decoration:none;transition:all .18s;max-width:180px}
+.eapp-link-badge:hover{background:#dcf3ed;border-color:#168c72;color:#0e584a}
+.eapp-link-badge span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.eapp-link-badge i{font-style:normal;font-size:11px;opacity:.85}
+
+.approved-summary-strip{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:14px}
+.approved-metric-card{display:flex;flex-direction:column;padding:12px 16px;border:1px solid #d3dfe9;border-radius:10px;background:#fff;box-shadow:0 1px 3px #00000008}
+.approved-metric-card span{color:#627d98;font-size:9.5px;font-weight:800;letter-spacing:.4px;text-transform:uppercase}
+.approved-metric-card b{color:#102d4b;font-size:20px;font-weight:800;margin-top:4px}
+
+.progress-cell{display:flex;flex-direction:column;gap:4px;min-width:100px}
+.progress-cell-header{display:flex;justify-content:space-between;align-items:center;font-size:9.5px;font-weight:700}
+.progress-cell-header .percent{color:#102d4b}
+.progress-bar-track{width:100%;height:6px;border-radius:3px;background:#e2e8f0;overflow:hidden;display:flex}
+.progress-bar-fill{height:100%;border-radius:3px;transition:width .2s}
+.progress-bar-fill.done{background:#2ea44f}
+.progress-bar-fill.running{background:#102d4b}
+.progress-bar-fill.late{background:#d92b2b}
+
+.baseline-banner{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:10px 24px;background:#102d4b;color:#fff;font-size:11.5px;border-bottom:1px solid #0a2037}
+.baseline-banner-left{display:flex;align-items:center;gap:10px;font-weight:700}
+.baseline-badge{display:inline-flex;align-items:center;gap:5px;padding:3px 8px;border-radius:6px;background:#168c72;color:#fff;font-size:9.5px;font-weight:800;letter-spacing:.4px}
+.baseline-banner-right{display:flex;align-items:center;gap:10px}
+.baseline-banner-right a{color:#9fe3d5;font-weight:700;text-decoration:none;display:inline-flex;align-items:center;gap:4px}
+.baseline-banner-right a:hover{text-decoration:underline}
+
+.actual-status-badge{display:inline-block;padding:3px 7px;border-radius:6px;font-size:9px;font-weight:800;white-space:nowrap}
+.actual-status-badge.status-done{background:#eaf8f4;color:#167664;border:1px solid #a4dfd1}
+.actual-status-badge.status-late{background:#fff0f1;color:#b63d49;border:1px solid #f2bcc2}
+.actual-status-badge.status-running{background:#eef4fa;color:#184a78;border:1px solid #c2d8ed}
+.actual-status-badge.status-idle{background:#f1f5f7;color:#607784;border:1px solid #d4dfe3}
+
+.timeline-progress-fill{position:absolute;left:0;top:0;bottom:0;border-radius:8px;background:#2ea44f;opacity:.9;box-shadow:inset 0 1px #ffffff77}
+.timeline-progress-fill.late{background:#d92b2b}
+.timeline-progress-text{position:absolute;right:6px;top:50%;transform:translateY(-50%);font-size:8px;font-weight:800;color:#fff;text-shadow:0 1px 2px #00000088}
+
+.progress-quick-btn{height:28px;padding:0 8px;border:1px solid #cbd8e2;border-radius:6px;background:#fff;color:#1f3e58;font-size:10px;font-weight:700;display:inline-flex;align-items:center;gap:4px;cursor:pointer;transition:all .15s}
+.progress-quick-btn:hover{background:#f0f7f5;border-color:#168c72;color:#168c72}
+
+.source-toggle{display:inline-flex;align-items:center;background:#e2e8f0;border-radius:7px;padding:2px;gap:2px}
+.source-toggle button{height:26px;padding:0 9px;border:0;border-radius:5px;background:transparent;color:#486581;font-size:10px;font-weight:700;cursor:pointer;transition:all .15s}
+.source-toggle button.active{background:#fff;color:#102d4b;box-shadow:0 1px 3px #0000001a}
+
+@media(max-width:1250px){.overview-top{grid-template-columns:1fr 1fr}.overview-grid{grid-template-columns:1fr}.approved-summary-strip{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:900px){.overview{padding:14px}.overview-top{grid-template-columns:1fr}.overview-title-center{position:static;transform:none}.approved-summary-strip{grid-template-columns:1fr}}
 
 @media(max-width:1250px){.project-table-head,.project-table-row{grid-template-columns:90px 100px minmax(180px,1.5fr) minmax(120px,.8fr) 170px 90px 86px}}
 @media(max-width:900px){.table-filters{padding:12px 14px}.pagination{padding:12px 14px;justify-content:flex-start}.pagination-pages{margin-left:0}.project-table{width:calc(100% - 28px);margin:14px}.project-table-head,.project-table-row{min-width:760px}}
+
+/* ---- GMD kiểm soát (SOP06 mục 6.1 bước 6) ---- */
+.approval-gmd_review{border-color:#bcd0e8;background:#eef4fc;color:#2c5183}
+.approval-gmd_returned{border-color:#efc2c7;background:#fff2f3;color:#aa3945}
+.approval-appraised{border-color:#a7decd;background:#eaf8f4;color:#12765f}
+.gms-status.gmd_review{background:#e7effb;color:#2c5183}
+.gms-status.gmd_returned{background:#fff0f1;color:#a93b46}
+.gms-status.appraised{background:#e8f7f2;color:#14745f}
+.gms-card.status-gmd_review{border-left-color:#4a7ec0}
+.gms-card.status-gmd_returned{border-left-color:#d95b67}
+.gms-card.status-appraised{border-left-color:#26a486}
+
+.gmd-body{min-height:0;flex:1;display:grid;grid-template-columns:minmax(300px,.85fr) minmax(360px,1.15fr);gap:12px;padding:14px 16px;overflow:auto}
+.gmd-panel{min-width:0;display:flex;flex-direction:column;border:1px solid #dbe4ec;border-radius:10px;background:#fff;overflow:hidden}
+.gmd-panel-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 14px;border-bottom:1px solid #e4ebf2;background:#f6f9fb}
+.gmd-panel-head h3{margin:0;color:#173f51;font-size:12px;font-weight:800;letter-spacing:.4px;text-transform:uppercase}
+.gmd-verdict{flex:none;padding:3px 9px;border-radius:20px;font-size:10px;font-weight:700;white-space:nowrap}
+.gmd-verdict.clear{background:#e8f7f2;color:#14745f}
+.gmd-verdict.blocked{background:#fdeaea;color:#b8332f}
+.gmd-panel-note{margin:0;padding:9px 14px;border-bottom:1px solid #eef2f6;background:#fbfdfe;color:#6f838d;font-size:10px;line-height:1.5}
+
+.gmd-checks{list-style:none;margin:0;padding:0;min-height:0;flex:1;overflow:auto}
+.gmd-checks li{display:grid;grid-template-columns:24px minmax(0,1fr) auto;align-items:start;gap:10px;padding:11px 14px;border-bottom:1px solid #eef2f6}
+.gmd-checks li:last-child{border-bottom:0}
+.gmd-check-mark{width:22px;height:22px;display:grid;place-items:center;border-radius:50%;font-size:11px;font-weight:800;line-height:1}
+.gmd-checks li.pass .gmd-check-mark{background:#e8f7f2;color:#14745f}
+.gmd-checks li.hit .gmd-check-mark{background:#fff4dc;color:#946115}
+.gmd-checks li.hit.blocking .gmd-check-mark{background:#fdeaea;color:#b8332f}
+.gmd-check-body{min-width:0}
+.gmd-check-body b,.gmd-check-body small{display:block}
+.gmd-check-body b{color:#274754;font-size:12px;font-weight:600;line-height:1.35}
+.gmd-check-body small{margin-top:3px;color:#71858e;font-size:10px;line-height:1.45}
+.gmd-check-count{font-size:13px;font-weight:800;color:#8a9aa2;white-space:nowrap;font-variant-numeric:tabular-nums}
+.gmd-checks li.hit .gmd-check-count{color:#946115}
+.gmd-checks li.hit.blocking .gmd-check-count{color:#b8332f}
+.gmd-checks li.pass .gmd-check-count{color:#9fb3ac}
+
+.gmd-dept-table{min-height:0;flex:1;display:flex;flex-direction:column;overflow:hidden}
+.gmd-dept-head,.gmd-dept-row{min-width:620px;display:grid;grid-template-columns:44px minmax(130px,1.1fr) minmax(90px,.8fr) 118px minmax(120px,1fr);align-items:center}
+.gmd-dept-head{flex:none;height:32px;border-bottom:1px solid #dde5ec;background:#eff4f7;color:#657984;font-size:9px;font-weight:800;text-transform:uppercase}
+.gmd-dept-head span,.gmd-dept-row>span{min-width:0;padding:0 10px}
+.gmd-dept-body{min-height:0;flex:1;overflow:auto}
+.gmd-dept-row{min-height:46px;border-bottom:1px solid #eef2f6;color:#536d78;font-size:11px;cursor:pointer}
+.gmd-dept-row:hover{background:#f6fafb}
+.gmd-dept-row input[type=checkbox]{width:15px;height:15px}
+.gmd-dept-row input[type=checkbox]:disabled{cursor:not-allowed;opacity:.4}
+.gmd-dept-row.status-approved{box-shadow:inset 3px 0 #26a486}
+.gmd-dept-row.status-changes_requested{box-shadow:inset 3px 0 #d95b67}
+.gmd-dept-row.status-pending{box-shadow:inset 3px 0 #e9a33c}
+.gmd-dept-name b,.gmd-dept-name small{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gmd-dept-name b{color:#274754;font-size:11px}
+.gmd-dept-name small{margin-top:2px;color:#7a8d96;font-size:9px}
+.gmd-dept-note{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:10px}
+.gmd-muted{color:#a3b2bb;font-style:normal;font-size:10px}
+
+.gmd-decision{flex:none;display:grid;grid-template-columns:minmax(300px,1fr) auto;align-items:end;gap:16px;padding:13px 17px;border-top:1px solid #d6e1e5;background:#f7fafb}
+.gmd-decision.is-readonly{grid-template-columns:1fr}
+.gmd-decision-fields{display:grid;grid-template-columns:200px minmax(220px,1fr);gap:12px}
+.gmd-decision-fields .field{margin:0}
+.gmd-decision-fields .field>span{display:flex;align-items:center;gap:7px}
+.gmd-decision-fields .field>span i{color:#71858e;font-size:9px;font-style:normal;font-weight:500}
+.gmd-decision-fields textarea{min-height:70px;max-height:110px}
+.gmd-decision-actions{display:flex;align-items:center;gap:9px}
+.gmd-return-hint{max-width:150px;color:#a93b46;font-size:9px;line-height:1.4}
+
+.gms-return-picker{flex:none;padding:11px 17px;border-top:1px solid #e2e9ec;background:#fbfdfe}
+.gms-return-picker>b{display:flex;align-items:center;gap:8px;margin-bottom:8px;color:#465f6b;font-size:10px}
+.gms-return-picker>b i{color:#71858e;font-size:9px;font-style:normal;font-weight:500}
+.gms-return-picker>div{display:flex;flex-wrap:wrap;gap:6px}
+.gms-return-picker label{display:flex;align-items:center;gap:6px;padding:4px 9px;border:1px solid #d3dfe3;border-radius:16px;background:#fff;color:#526d78;font-size:10px;cursor:pointer}
+.gms-return-picker label.checked{border-color:#d98b93;background:#fff4f5;color:#a93b46}
+.gms-return-picker input{width:13px;height:13px}
+
+@media(max-width:1250px){.gmd-body{grid-template-columns:1fr}.gmd-decision{grid-template-columns:1fr}.gmd-decision-actions{justify-content:flex-end}}
+@media(max-width:900px){.gmd-decision-fields{grid-template-columns:1fr}}
+
+/* ---- Gom 4 khối tiêu đề trang về một dòng gọn ----
+   Breadcrumb trên topbar đã nói người dùng đang ở đâu, nên tiêu đề trang
+   không cần chiếm 120-150px nữa. Nhãn phụ nằm cùng dòng với tiêu đề. */
+.project-index-header,
+.department-header,
+.gms-header,
+.catalog-header{
+  min-height:0;flex:none;display:flex;align-items:center;gap:18px;
+  padding:10px 24px;border-bottom:1px solid var(--line);background:#fff;
+}
+.project-index-header>div:first-child,
+.department-header>div:first-child,
+.gms-header>div:first-child,
+.catalog-header>div:first-child{
+  min-width:0;flex:1;display:grid;grid-template-columns:auto minmax(0,1fr);
+  align-items:center;column-gap:10px;row-gap:1px;
+}
+.project-index-header>div>span:first-child,
+.department-header .status-badge,
+.gms-header .status-badge,
+.catalog-header .status-badge{grid-row:1;grid-column:1;justify-self:start;white-space:nowrap}
+.project-index-header h1,
+.department-header h1,
+.gms-header h1,
+.catalog-header h1{
+  grid-row:1;grid-column:2;margin:0;font-size:18px;line-height:1.3;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.project-index-header p,
+.department-header p,
+.gms-header p,
+.catalog-header p{
+  grid-row:2;grid-column:1/-1;margin:0;color:#8194a0;font-size:10.5px;line-height:1.4;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+
+/* Chỉ số bên phải thu nhỏ theo */
+.gms-metrics>div{min-width:96px;padding:0 14px}
+.gms-metrics b{font-size:17px}
+.gms-metrics span{margin-top:1px;font-size:8px}
+.department-progress{width:210px}
+.department-progress b{font-size:17px}
+.department-progress span{margin-top:1px;font-size:8px}
+.department-progress i{height:5px;margin-top:6px}
+.project-index-search,.catalog-header .search-field{height:36px}
+
+@media(max-width:1050px){
+  .project-index-header,.department-header,.gms-header,.catalog-header{
+    align-items:center;flex-direction:row;flex-wrap:wrap;row-gap:8px;
+  }
+  .gms-metrics,.department-progress{margin-left:auto}
+}
+@media(max-width:900px){
+  .project-index-header,.department-header,.gms-header,.catalog-header{padding:10px 14px}
+  .project-index-header h1,.department-header h1,.gms-header h1,.catalog-header h1{font-size:16px}
+  .project-index-search{width:100%}
+}
+
+/* ---- Khôi phục nút Trả về / Xác nhận ----
+   Hai class này được dùng ở PBCM xác nhận, GMD kiểm soát và Thẩm định
+   nhưng đã mất hết style, khiến nút hiển thị như chữ thường. */
+.danger-button,.approve-button{
+  min-height:40px;border-radius:8px;padding:0 16px;
+  font-size:12px;font-weight:700;white-space:nowrap;transition:.18s;
+}
+.danger-button{border:1px solid #e0b8bc;background:#fff;color:#a63d47}
+.danger-button:hover:not(:disabled){background:#fff4f5;border-color:#cf8f97}
+.approve-button{border:1px solid #147861;background:#168c72;color:#fff;font-weight:800;box-shadow:0 4px 12px #168c7233}
+.approve-button:hover:not(:disabled){background:#12735d;transform:translateY(-1px)}
+.danger-button:disabled,.approve-button:disabled{
+  opacity:.45;cursor:not-allowed;transform:none;box-shadow:none;
+}
+
+/* ---- Brand header: logo giữa phía trên, title xếp dọc bên dưới ---- */
+.brand{
+  height:auto;min-height:104px;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:8px;
+  padding:18px 14px 16px;margin:0 -12px;border-bottom:1px solid #ffffff18;
+}
+.brand-logo{width:56px;height:auto;flex:none;display:block;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.15))}
+.brand-app{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;flex:none;min-width:0;padding:0;border-left:0;color:#fff;
+}
+.brand-app strong{
+  display:flex;flex-direction:column;align-items:center;gap:3px;width:100%;
+  color:#fff;text-align:center;text-transform:uppercase;
+  -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility;
+}
+
+/* ---- Brand header: phóng to cho cân đối với sidebar 264px ---- */
+.brand{min-height:132px;padding:24px 14px 20px;gap:12px}
+.brand-logo{width:76px}
+.brand-app strong span:first-child{font-size:18px;letter-spacing:2px}
+.brand-app strong span:last-child{font-size:11.5px;letter-spacing:.6px}
+
+/* ---- Module "Lập Master Timeline" dạng dropdown: bấm nhãn để sổ/thu gọn ---- */
+.sidebar-section-toggle{
+  width:100%;display:flex;align-items:center;justify-content:space-between;gap:6px;
+  height:36px;padding:18px 8px 4px;border:0;background:transparent;
+  color:#728ea7;font-size:9.5px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;
+  cursor:pointer;transition:color .15s;
+}
+.sidebar-section-toggle:hover{color:#a3c0d6}
+.section-chevron{flex:none;transition:transform .2s ease}
+.sidebar-section-toggle.open .section-chevron{transform:rotate(180deg)}
+.sidebar-collapsible{margin:0 0 3px}
+.sidebar-collapsible.collapsed{display:none}
+
+/* ---- Tiêu đề "PMD | PROJECT MANAGEMENT" xếp ngang: PMD trái, tên đầy đủ phải ---- */
+.brand-app strong{
+  display:flex;flex-direction:row;align-items:baseline;justify-content:center;
+  gap:8px;width:100%;flex-wrap:wrap;
+}
