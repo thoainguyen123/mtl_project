@@ -92,7 +92,9 @@ type Project = {
   baselineLocked?: boolean;
 };
 
-type ProjectForm = Pick<Project, "name" | "code" | "type" | "investor" | "location" | "startDate" | "targetDate" | "area" | "region" | "group">;
+type ProjectForm = Pick<Project, "name" | "code" | "type" | "investor" | "location" | "startDate" | "targetDate" | "area" | "region" | "group"> & {
+  version?: string;
+};
 
 type ScheduledTask = TemplateTask & {
   startDate: string;
@@ -199,6 +201,7 @@ const emptyForm: ProjectForm = {
   region: "Vùng Hồ Chí Minh 1",
   name: "",
   code: "",
+  version: "v1.0",
   investor: "Tập đoàn Novaland",
   group: "Nhóm 1 (Đang nghiên cứu)",
   type: "Khu đô thị sinh thái",
@@ -1376,6 +1379,7 @@ export default function Home() {
         id: crypto.randomUUID(),
         name: form.name.trim(),
         code: form.code.trim().toUpperCase(),
+        officialVersion: form.version?.trim() || "v1.0",
         createdAt: new Date().toISOString(),
         taskEdits: xmlData.taskEdits,
         taskDependencies: xmlData.taskDependencies,
@@ -1394,6 +1398,7 @@ export default function Home() {
         id: crypto.randomUUID(),
         name: form.name.trim(),
         code: form.code.trim().toUpperCase(),
+        officialVersion: form.version?.trim() || "v1.0",
         createdAt: new Date().toISOString(),
         taskEdits: {},
         taskDependencies: defaultDependenciesForCodes(enabledTasks.map((task) => task.code)),
@@ -4523,6 +4528,15 @@ export default function Home() {
               </label>
 
               <label className="field">
+                <span>Phiên bản Master Timeline</span>
+                <input
+                  value={form.version ?? "v1.0"}
+                  onChange={(event) => setForm({ ...form, version: event.target.value })}
+                  placeholder="Ví dụ: v1.0"
+                />
+              </label>
+
+              <label className="field">
                 <span>Vùng quản lý *</span>
                 <select
                   value={form.region || "Vùng Hồ Chí Minh 1"}
@@ -4533,15 +4547,6 @@ export default function Home() {
                   <option value="Vùng Hồ Chí Minh 1">Vùng Hồ Chí Minh 1</option>
                   <option value="Vùng Hồ Tràm 1">Vùng Hồ Tràm 1</option>
                 </select>
-              </label>
-
-              <label className="field">
-                <span>Chủ đầu tư (Pháp nhân)</span>
-                <input
-                  value={form.investor || ""}
-                  onChange={(event) => setForm({ ...form, investor: event.target.value })}
-                  placeholder="Ví dụ: Công ty TNHH BĐS Đà Lạt Valley"
-                />
               </label>
 
               <label className="field">
@@ -4556,6 +4561,15 @@ export default function Home() {
                   <option>Nhóm 4 (Đã bàn giao khách hàng)</option>
                   <option>Nhóm 5 (Thoái vốn)</option>
                 </select>
+              </label>
+
+              <label className="field field-wide">
+                <span>Chủ đầu tư (Pháp nhân)</span>
+                <input
+                  value={form.investor || ""}
+                  onChange={(event) => setForm({ ...form, investor: event.target.value })}
+                  placeholder="Ví dụ: Tập đoàn Novaland / Công ty TNHH BĐS Đà Lạt Valley"
+                />
               </label>
 
               <label className="field">
