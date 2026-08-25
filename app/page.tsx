@@ -1652,7 +1652,18 @@ export default function Home() {
         }
       `}</style>
       <aside className="sidebar">
-        <div className="brand"><img className="brand-logo" src="/nova-group-logo-light.png" alt="Nova Group" /><div className="brand-app"><strong><span>PMD</span><span>PROJECT MANAGEMENT</span></strong></div></div>
+        <div className="brand">
+          <div className="brand-logo-wrap">
+            <img className="brand-logo" src="/nova-group-logo-light.png" alt="Nova Group" />
+          </div>
+          <div className="brand-app">
+            <span className="brand-code">PMD</span>
+            <span className="brand-title">
+              <span>PROJECT</span>
+              <span>MANAGEMENT</span>
+            </span>
+          </div>
+        </div>
         {/* Module 1: LẬP MASTER TIMELINE — sổ ra/thu gọn được */}
         {(() => {
           const lapMtlViews: typeof view[] = ["projects", "workspace", "departments", "gmd", "gms", "confirm_approval", "catalog"];
