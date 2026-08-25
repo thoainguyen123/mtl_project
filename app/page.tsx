@@ -2781,8 +2781,10 @@ export default function Home() {
           </>;
         })()}
 
-        <div className="template-card"><span>MẪU ĐANG DÙNG</span><strong>NVLG MTL 2026.06</strong><small>{fullCatalog.length} task · 14 nhóm · WBS cấp 4</small></div>
-        <div className="sidebar-footer">MTL v1.0 · © 2026 Novaland Group</div>
+        <div className="sidebar-footer" style={{ marginTop: "auto", padding: "16px 18px", borderTop: "1px solid rgba(255, 255, 255, 0.08)", color: "#94a3b8", fontSize: "11px", lineHeight: "1.6" }}>
+          <div>Version 1.0.0</div>
+          <div>© 2026 Novaland Group</div>
+        </div>
       </aside>
 
       <section className="workspace">
