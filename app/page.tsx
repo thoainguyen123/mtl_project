@@ -544,6 +544,12 @@ function IconMore() {
 function IconBuilding() {
   return <svg className="section-header-icon" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"/><line x1="9" y1="22" x2="9" y2="22.01"/><line x1="8" y1="6" x2="10" y2="6"/><line x1="14" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="10" y2="10"/><line x1="14" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="10" y2="14"/><line x1="14" y1="14" x2="16" y2="14"/><line x1="8" y1="18" x2="10" y2="18"/><line x1="14" y1="18" x2="16" y2="18"/></svg>;
 }
+function IconDesignTask() {
+  return <svg className="section-header-icon" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="M2 2l7.586 7.586"/><circle cx="11" cy="11" r="2"/></svg>;
+}
+function IconFS() {
+  return <svg className="section-header-icon" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>;
+}
 function IconUsers() {
   return <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>;
 }
@@ -776,8 +782,10 @@ export default function Home() {
   const [customCatalog, setCustomCatalog] = useState<TemplateTask[]>([]);
   const [enabledCatalogCodes, setEnabledCatalogCodes] = useState<Set<string>>(new Set());
   const [hydrated, setHydrated] = useState(false);
-  const [view, setView] = useState<"overview" | "projects" | "workspace" | "departments" | "gmd" | "gms" | "confirm_approval" | "approved_projects" | "catalog">("projects");
+  const [view, setView] = useState<"overview" | "projects" | "workspace" | "departments" | "gmd" | "gms" | "confirm_approval" | "approved_projects" | "catalog" | "design_task" | "fs_ver2">("projects");
   const [lapMtlOpen, setLapMtlOpen] = useState(true);
+  const [designTaskOpen, setDesignTaskOpen] = useState(false);
+  const [fsVer2Open, setFsVer2Open] = useState(false);
   const [overviewSource, setOverviewSource] = useState<"approved" | "all">("approved");
   const [overviewRegion, setOverviewRegion] = useState("all");
   const [overviewProject, setOverviewProject] = useState("all");
@@ -1889,6 +1897,63 @@ export default function Home() {
             </nav>
           </>;
         })()}
+
+        {/* Module 2: LẬP NHIỆM VỤ THIẾT KẾ */}
+        {(() => {
+          const isSectionOpen = designTaskOpen;
+          return <>
+            <button type="button" className={`sidebar-section-toggle ${isSectionOpen ? "open" : ""}`} onClick={() => setDesignTaskOpen((current) => !current)} aria-expanded={isSectionOpen} title={isSectionOpen ? "Thu gọn menu Lập NVTK" : "Mở rộng menu Lập NVTK"}>
+              <div className="section-toggle-left">
+                <IconDesignTask />
+                <span>Lập Nhiệm Vụ Thiết Kế</span>
+              </div>
+              <IconChevronDown />
+            </button>
+            <nav className={`sidebar-nav sidebar-collapsible ${isSectionOpen ? "" : "collapsed"}`} aria-label="Điều hướng Lập Nhiệm vụ thiết kế" aria-hidden={!isSectionOpen}>
+              <button className={view === "design_task" ? "active" : ""} onClick={() => setView("design_task")} tabIndex={isSectionOpen ? 0 : -1}>
+                <IconTimeline />
+                <span>Lập & Cập nhật NVTK</span>
+              </button>
+              <button className="" onClick={() => setView("design_task")} tabIndex={isSectionOpen ? 0 : -1}>
+                <IconCheck />
+                <span>PBCM góp ý NVTK</span>
+              </button>
+              <button className="" onClick={() => setView("design_task")} tabIndex={isSectionOpen ? 0 : -1}>
+                <IconFileCheck />
+                <span>Thẩm định & Phê duyệt</span>
+              </button>
+            </nav>
+          </>;
+        })()}
+
+        {/* Module 3: LẬP FS THỰC THI (FS-Ver2) */}
+        {(() => {
+          const isSectionOpen = fsVer2Open;
+          return <>
+            <button type="button" className={`sidebar-section-toggle ${isSectionOpen ? "open" : ""}`} onClick={() => setFsVer2Open((current) => !current)} aria-expanded={isSectionOpen} title={isSectionOpen ? "Thu gọn menu Lập FS-Ver2" : "Mở rộng menu Lập FS-Ver2"}>
+              <div className="section-toggle-left">
+                <IconFS />
+                <span>Lập FS Thực Thi (FS-Ver2)</span>
+              </div>
+              <IconChevronDown />
+            </button>
+            <nav className={`sidebar-nav sidebar-collapsible ${isSectionOpen ? "" : "collapsed"}`} aria-label="Điều hướng Lập FS Thực thi" aria-hidden={!isSectionOpen}>
+              <button className={view === "fs_ver2" ? "active" : ""} onClick={() => setView("fs_ver2")} tabIndex={isSectionOpen ? 0 : -1}>
+                <IconTimeline />
+                <span>Lập & Phân tích FS</span>
+              </button>
+              <button className="" onClick={() => setView("fs_ver2")} tabIndex={isSectionOpen ? 0 : -1}>
+                <IconCheck />
+                <span>Đối chiếu số liệu các Ban</span>
+              </button>
+              <button className="" onClick={() => setView("fs_ver2")} tabIndex={isSectionOpen ? 0 : -1}>
+                <IconFileCheck />
+                <span>Phê duyệt FS-Ver2</span>
+              </button>
+            </nav>
+          </>;
+        })()}
+
         <div className="template-card"><span>MẪU ĐANG DÙNG</span><strong>NVLG MTL 2026.06</strong><small>{fullCatalog.length} task · 14 nhóm · WBS cấp 4</small></div>
         <div className="sidebar-footer">MTL v1.0 · © 2026 Novaland Group</div>
       </aside>
@@ -2699,6 +2764,122 @@ export default function Home() {
               )}
               <Pagination total={visibleApprovedProjects.length} pageSize={approvedPageSize} page={approvedPage} onPageChange={setApprovedPage} onPageSizeChange={(size) => { setApprovedPageSize(size); setApprovedPage(1); }} />
             </section>
+          </>
+        ) : view === "design_task" ? (
+          <>
+            <header className="topbar">
+              <div className="breadcrumbs">
+                <span>Lập Nhiệm Vụ Thiết Kế</span>
+                <i>/</i>
+                <strong>Quản lý hồ sơ NVTK</strong>
+              </div>
+              <div className="top-actions">
+                <button type="button" className="secondary-button" onClick={() => setView("projects")}>← Quay lại MTL</button>
+                <button type="button" className="primary-button">+ Tạo Nhiệm Vụ Thiết Kế</button>
+                <UserBadge />
+              </div>
+            </header>
+            <section className="catalog-header">
+              <div>
+                <span className="status-badge">SOP-NVTK · QUY TRÌNH THIẾT KẾ DỰ ÁN</span>
+                <h1>Lập &amp; Quản Lý Nhiệm Vụ Thiết Kế (NVTK)</h1>
+                <p>Chuẩn hóa yêu cầu kỹ thuật, phân kỳ đầu tư, định hướng kiến trúc và tiếp nhận ý kiến đóng góp từ các Phòng Ban Chuyên Môn.</p>
+              </div>
+            </section>
+            <div className="table-filters" style={{ margin: "18px 24px 0", borderRadius: "12px 12px 0 0", border: "1px solid #d6e1e5", borderBottom: 0 }}>
+              <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
+                <span style={{ fontSize: "12px", fontWeight: 700, color: "#102d4b" }}>Danh sách dự án áp dụng NVTK ({projects.length})</span>
+              </div>
+            </div>
+            <div className="project-table" style={{ marginTop: 0, borderRadius: "0 0 12px 12px" }}>
+              <div className="project-table-head">
+                <span>MÃ DỰ ÁN</span>
+                <span>VÙNG</span>
+                <span>TÊN DỰ ÁN</span>
+                <span>TRẠNG THÁI NVTK</span>
+                <span>TIẾN ĐỘ THIẾT KẾ</span>
+                <span>HÀNH ĐỘNG</span>
+              </div>
+              {projects.map((p) => (
+                <div key={p.id} className="project-table-row" onClick={() => { setActiveId(p.id); setView("workspace"); }}>
+                  <span className="project-code">{p.code}</span>
+                  <span className="project-region-cell">{p.region || "Toàn quốc"}</span>
+                  <span className="project-name-cell">
+                    <b>{p.name}</b>
+                    <small>{p.type} · {p.location}</small>
+                  </span>
+                  <span>
+                    <span className="status-badge" style={{ background: "#edf8f5", color: "#167461" }}>Đang lập NVTK</span>
+                  </span>
+                  <span>Đồng bộ từ MTL</span>
+                  <span className="project-action-cell">
+                    <button type="button" className="secondary-button" style={{ height: "30px", fontSize: "11px", padding: "0 10px" }} onClick={(e) => { e.stopPropagation(); setActiveId(p.id); setView("workspace"); }}>
+                      Chi tiết ↗
+                    </button>
+                  </span>
+                </div>
+              ))}
+            </div>
+          </>
+        ) : view === "fs_ver2" ? (
+          <>
+            <header className="topbar">
+              <div className="breadcrumbs">
+                <span>Lập FS Thực Thi (FS-Ver2)</span>
+                <i>/</i>
+                <strong>Phân tích hiệu quả tài chính</strong>
+              </div>
+              <div className="top-actions">
+                <button type="button" className="secondary-button" onClick={() => setView("projects")}>← Quay lại MTL</button>
+                <button type="button" className="primary-button">+ Lập Phương Án FS</button>
+                <UserBadge />
+              </div>
+            </header>
+            <section className="catalog-header">
+              <div>
+                <span className="status-badge">FS-VER2 · FINANCIAL FEASIBILITY STUDY</span>
+                <h1>Lập Phương Án FS Thực Thi (FS-Ver2)</h1>
+                <p>Tổng hợp dữ liệu chi phí từ Master Timeline, tiến độ bán hàng, dòng tiền và phân tích các chỉ số tài chính (IRR, NPV, Payback Period).</p>
+              </div>
+            </section>
+            <div className="table-filters" style={{ margin: "18px 24px 0", borderRadius: "12px 12px 0 0", border: "1px solid #d6e1e5", borderBottom: 0 }}>
+              <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
+                <span style={{ fontSize: "12px", fontWeight: 700, color: "#102d4b" }}>Danh mục dự án tính toán FS ({projects.length})</span>
+              </div>
+            </div>
+            <div className="project-table" style={{ marginTop: 0, borderRadius: "0 0 12px 12px" }}>
+              <div className="project-table-head">
+                <span>MÃ DỰ ÁN</span>
+                <span>VÙNG</span>
+                <span>TÊN DỰ ÁN</span>
+                <span>CHỈ SỐ TÀI CHÍNH</span>
+                <span>TRẠNG THÁI FS</span>
+                <span>HÀNH ĐỘNG</span>
+              </div>
+              {projects.map((p) => (
+                <div key={p.id} className="project-table-row" onClick={() => { setActiveId(p.id); setView("workspace"); }}>
+                  <span className="project-code">{p.code}</span>
+                  <span className="project-region-cell">{p.region || "Toàn quốc"}</span>
+                  <span className="project-name-cell">
+                    <b>{p.name}</b>
+                    <small>{p.type} · {p.location}</small>
+                  </span>
+                  <span>
+                    <span className="status-badge" style={{ background: "#eef4fb", color: "#1a56a8" }}>IRR: 18.5% · NPV &gt; 0</span>
+                  </span>
+                  <span>
+                    <span className="status-badge" style={{ background: p.isOfficialApproved ? "#edf8f5" : "#fff4dc", color: p.isOfficialApproved ? "#167461" : "#976719" }}>
+                      {p.isOfficialApproved ? "FS Đã duyệt" : "Đang tính toán FS-Ver2"}
+                    </span>
+                  </span>
+                  <span className="project-action-cell">
+                    <button type="button" className="secondary-button" style={{ height: "30px", fontSize: "11px", padding: "0 10px" }} onClick={(e) => { e.stopPropagation(); setActiveId(p.id); setView("workspace"); }}>
+                      Xem FS ↗
+                    </button>
+                  </span>
+                </div>
+              ))}
+            </div>
           </>
         ) : !activeProject ? (
           <div className="empty-state">
