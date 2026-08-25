@@ -2685,6 +2685,15 @@ export default function Home() {
           color: #b91c1c !important;
           border-color: #fca5a5 !important;
         }
+        /* ================= CONFIRM APPROVAL TABLE ================= */
+        .confirm-approval-table .project-table-head,
+        .confirm-approval-table .project-table-row {
+          grid-template-columns: 120px minmax(220px, 2fr) 150px 140px 160px 110px 150px !important;
+        }
+        .confirm-approval-table .project-action-cell {
+          justify-content: flex-start !important;
+          gap: 6px !important;
+        }
       `}</style>
       <aside className="sidebar">
         <div className="brand">
@@ -3575,7 +3584,9 @@ export default function Home() {
               <div className="breadcrumbs">
                 <span>Lập Master timeline</span>
                 <i>/</i>
-                <strong>Xác nhận phê duyệt MTL</strong>
+                <strong>Xác nhận phê duyệt</strong>
+                <i>/</i>
+                <span>{projects.length} dự án</span>
               </div>
               <div className="top-actions">
                 <button type="button" className="primary-button" onClick={() => openEApprovalModal()}>
@@ -3587,42 +3598,38 @@ export default function Home() {
             <section className="project-index">
               <header className="project-index-header">
                 <div>
-                  <span className="status-badge">BƯỚC 5/5</span>
-                  <h1>Xác nhận phê duyệt MTL từ E-Approval</h1>
-                  <p>PMD kiểm tra hồ sơ sau thẩm định nội bộ, nhập Mã hồ sơ và Link phê duyệt E-Approval để chốt Master Timeline và đưa vào module MTL Đã Duyệt.</p>
+                  <h1>XÁC NHẬN PHÊ DUYỆT</h1>
                 </div>
                 <label className="search-field project-index-search">
                   <span>Tìm dự án</span>
-                  <input value={confirmSearch} onChange={(event) => { setConfirmSearch(event.target.value); setConfirmPage(1); }} placeholder="Tên, mã dự án hoặc mã E-Approval" />
+                  <input value={confirmSearch} onChange={(event) => { setConfirmSearch(event.target.value); setConfirmPage(1); }} placeholder="Tên, mã dự án hoặc mã E-Approval..." />
                 </label>
               </header>
 
-              <div className="approved-summary-strip" style={{ margin: "0 24px 14px" }}>
-                <div className="approved-metric-card">
-                  <span>CHỜ XÁC NHẬN E-APPROVAL</span>
-                  <b style={{ color: pendingEApprovalCount > 0 ? "#d92b2b" : "#168c72" }}>{pendingEApprovalCount}</b>
-                </div>
-                <div className="approved-metric-card">
-                  <span>ĐÃ QUA GMS THẨM ĐỊNH</span>
-                  <b>{projects.filter((p) => p.approvalStatus === "approved").length}</b>
-                </div>
-                <div className="approved-metric-card">
-                  <span>ĐÃ PHÊ DUYỆT CHÍNH THỨC</span>
-                  <b style={{ color: "#2ea44f" }}>{officialApprovedProjects.length}</b>
-                </div>
-                <div className="approved-metric-card">
-                  <span>TỔNG DỰ ÁN HỆ THỐNG</span>
+              {/* KPI Stats Bar */}
+              <div className="table-stats-bar" style={{ gridTemplateColumns: "repeat(3, 1fr)" }}>
+                <div className="table-stat-card">
+                  <span>TỔNG DỰ ÁN</span>
                   <b>{projects.length}</b>
+                </div>
+                <div className="table-stat-card">
+                  <span>CHỜ XÁC NHẬN E-APPROVAL</span>
+                  <b style={{ color: "#d97706" }}>{projects.filter((p) => !p.isOfficialApproved).length}</b>
+                </div>
+                <div className="table-stat-card">
+                  <span>ĐÃ PHÊ DUYỆT CHÍNH THỨC</span>
+                  <b style={{ color: "#167461" }}>{officialApprovedProjects.length}</b>
                 </div>
               </div>
 
-              <div className="table-filters">
+              {/* Filter Tabs */}
+              <div className="table-filters" style={{ margin: "14px 24px 14px", border: "none" }}>
                 <div className="gms-function-tabs" style={{ margin: 0 }}>
                   <button className={confirmFilter === "all" ? "active" : ""} onClick={() => { setConfirmFilter("all"); setConfirmPage(1); }}>
                     Tất cả dự án <b>{projects.length}</b>
                   </button>
                   <button className={confirmFilter === "pending" ? "active" : ""} onClick={() => { setConfirmFilter("pending"); setConfirmPage(1); }}>
-                    Chưa xác nhận E-Approval <b>{projects.filter((p) => !p.isOfficialApproved).length}</b>
+                    Chưa xác nhận <b>{projects.filter((p) => !p.isOfficialApproved).length}</b>
                   </button>
                   <button className={confirmFilter === "approved" ? "active" : ""} onClick={() => { setConfirmFilter("approved"); setConfirmPage(1); }}>
                     Đã phê duyệt <b>{officialApprovedProjects.length}</b>
@@ -3632,27 +3639,34 @@ export default function Home() {
               </div>
 
               {visibleConfirmProjects.length > 0 ? (
-                <div className="project-table" aria-label="Danh sách xác nhận phê duyệt MTL">
-                  <div className="project-table-head" style={{ gridTemplateColumns: "80px 100px minmax(180px, 1.4fr) 130px 150px 80px 110px 160px" }}>
-                    <span>Vùng</span>
-                    <span>Mã DA</span>
+                <div className="project-table confirm-approval-table" aria-label="Danh sách xác nhận phê duyệt MTL">
+                  <div className="project-table-head">
+                    <span>Mã dự án</span>
                     <span>Tên dự án</span>
-                    <span>Thẩm định GMS</span>
+                    <span>Vùng</span>
+                    <span>Trạng thái</span>
                     <span>Mã E-Approval</span>
-                    <span>Bản</span>
                     <span>Ngày duyệt</span>
                     <span>Hành động</span>
                   </div>
                   <div className="project-table-body">
                     {pagedConfirmProjects.map((project) => (
-                      <div key={project.id} className="project-table-row" style={{ gridTemplateColumns: "80px 100px minmax(180px, 1.4fr) 130px 150px 80px 110px 160px" }}>
-                        <span className="project-region-cell">{project.region || project.area || "—"}</span>
+                      <div key={project.id} className="project-table-row">
                         <span className="project-code">{project.code}</span>
-                        <span className="project-name-cell"><b>{project.name}</b><small>{project.type}</small></span>
+                        <span className="project-name-cell">
+                          <b>{project.name}</b>
+                        </span>
+                        <span className="project-region-cell">{project.region || project.area || "—"}</span>
                         <span>
-                          <span className={`status-badge approval-${project.approvalStatus}`}>
-                            {projectApprovalLabel(project)}
-                          </span>
+                          {project.isOfficialApproved ? (
+                            <span className="status-badge" style={{ background: "#edf8f5", color: "#167461", border: "1px solid #a4dfd1" }}>
+                              ✓ ĐÃ DUYỆT {project.officialVersion || "v1.0"}
+                            </span>
+                          ) : (
+                            <span className="status-badge" style={{ background: "#fef3c7", color: "#92400e", border: "1px solid #fde68a" }}>
+                              CHỜ E-APPROVAL
+                            </span>
+                          )}
                         </span>
                         <span>
                           {project.eApprovalUrl ? (
@@ -3661,42 +3675,39 @@ export default function Home() {
                               <IconExternalLink />
                             </a>
                           ) : (
-                            <span style={{ color: "#829ab1", fontSize: "11px" }}>{project.eApprovalCode || "Chưa nhập"}</span>
+                            <span style={{ color: "#94a3b8", fontSize: "12px" }}>{project.eApprovalCode || "Chưa nhập"}</span>
                           )}
                         </span>
-                        <span><b>{project.officialVersion || (project.isOfficialApproved ? "v1.0" : "—")}</b></span>
-                        <span>{project.eApprovalDate ? formatDate(project.eApprovalDate) : "—"}</span>
-                        <span className="project-action-cell" style={{ gap: "6px" }}>
+                        <span>{project.eApprovalDate ? formatDate(project.eApprovalDate) : <span style={{ color: "#94a3b8" }}>—</span>}</span>
+                        <span className="project-action-cell" onClick={(event) => event.stopPropagation()}>
                           {!project.isOfficialApproved ? (
                             <button
                               type="button"
                               className="primary-button"
-                              style={{ height: "28px", fontSize: "11px", padding: "0 10px" }}
+                              style={{ height: "30px", fontSize: "11.5px", padding: "0 12px", background: "#73b52d", borderColor: "#64a024" }}
                               onClick={() => openEApprovalModal(project)}
                             >
-                              Xác nhận E-Approval
+                              ✓ Xác nhận
                             </button>
                           ) : (
-                            <>
-                              <button
-                                type="button"
-                                className="secondary-button"
-                                style={{ height: "28px", fontSize: "11px", padding: "0 8px" }}
-                                title="Sửa thông tin E-Approval"
-                                onClick={() => openEApprovalModal(project)}
-                              >
-                                Sửa
-                              </button>
-                              <button
-                                type="button"
-                                className="action-btn view-btn"
-                                title="Xem trong MTL đã duyệt"
-                                onClick={() => { setActiveId(project.id); setView("approved_projects"); }}
-                              >
-                                <IconEye />
-                              </button>
-                            </>
+                            <button
+                              type="button"
+                              className="secondary-button"
+                              style={{ height: "30px", fontSize: "11.5px", padding: "0 10px" }}
+                              title="Sửa thông tin E-Approval"
+                              onClick={() => openEApprovalModal(project)}
+                            >
+                              Sửa
+                            </button>
                           )}
+                          <button
+                            type="button"
+                            className="action-btn view-btn"
+                            title="Xem chi tiết dự án"
+                            onClick={() => { setActiveId(project.id); setView("workspace"); }}
+                          >
+                            <IconEye />
+                          </button>
                         </span>
                       </div>
                     ))}
