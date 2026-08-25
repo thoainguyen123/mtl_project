@@ -409,11 +409,51 @@ function IconGauge() {
   return <svg className="nav-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3.5" width="7.5" height="7.5" rx="1.5" /><rect x="13.5" y="3.5" width="7.5" height="7.5" rx="1.5" /><rect x="3" y="13" width="7.5" height="7.5" rx="1.5" /><rect x="13.5" y="13" width="7.5" height="7.5" rx="1.5" /></svg>;
 }
 
+function IconHome() {
+  return <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>;
+}
+function IconCalendar() {
+  return <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>;
+}
+function IconRefresh() {
+  return <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>;
+}
+function IconFilter() {
+  return <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>;
+}
+function IconMore() {
+  return <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor"><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/><circle cx="5" cy="12" r="2"/></svg>;
+}
+function IconBuilding() {
+  return <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"/><line x1="9" y1="22" x2="9" y2="22.01"/><line x1="8" y1="6" x2="10" y2="6"/><line x1="14" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="10" y2="10"/><line x1="14" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="10" y2="14"/><line x1="14" y1="14" x2="16" y2="14"/><line x1="8" y1="18" x2="10" y2="18"/><line x1="14" y1="18" x2="16" y2="18"/></svg>;
+}
+function IconUsers() {
+  return <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>;
+}
+function IconFactory() {
+  return <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M2 20a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8l-7 5V8l-7 5V4a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/><path d="M17 18h1"/><path d="M12 18h1"/><path d="M7 18h1"/></svg>;
+}
+
+const QLTT_BY_PERSON: Record<string, string> = {
+  "Lê Đại Lễ": "Nguyễn Trung Nguyên",
+  "Nguyễn Ngọc Trường": "Nguyễn Trung Nguyên",
+  "Nguyễn Trung Nguyên": "Phạm Ngọc Tùng",
+  "Nguyễn Trung Lộc": "Nguyễn Trung Nguyên",
+  "Phạm Thị Tú Anh": "Nguyễn Trung Nguyên",
+  "Trần Văn An": "Nguyễn Trung Nguyên",
+  "Lê Thị Bình": "Phạm Ngọc Tùng",
+};
+
+function getManagerForPerson(person: string): string {
+  if (!person || person.toLowerCase().includes("chưa g")) return "";
+  return QLTT_BY_PERSON[person] || "Nguyễn Trung Nguyên";
+}
+
 /* Progress buckets shown on the overview: a task counts as late only when its finish
    date has passed and it has not been marked complete. */
 const WORK_DONE = "#2ea44f";
 const WORK_LATE = "#d92b2b";
-const WORK_RUNNING = "#1f4e79";
+const WORK_RUNNING = "#102d4b";
 
 type WorkStat = { total: number; done: number; late: number; running: number };
 
@@ -436,22 +476,24 @@ function formatCount(value: number) {
   return new Intl.NumberFormat("en-US").format(value);
 }
 
-function Donut({ stat, size = 104 }: { stat: WorkStat; size?: number }) {
+function Donut({ stat, size = 80 }: { stat: WorkStat; size?: number }) {
   const segments = [
     { value: stat.running, color: WORK_RUNNING },
-    { value: stat.late, color: WORK_LATE },
     { value: stat.done, color: WORK_DONE },
+    { value: stat.late, color: WORK_LATE },
   ];
   const total = stat.total || 1;
-  const radius = size / 2 - 10;
+  const radius = size / 2 - 8;
+  const strokeWidth = 11;
   const circumference = 2 * Math.PI * radius;
   let consumed = 0;
   return (
     <svg className="donut" viewBox={`0 0 ${size} ${size}`} width={size} height={size} aria-hidden="true">
-      <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke="#e6ecf1" strokeWidth="18" />
+      <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke="#e6ecf1" strokeWidth={strokeWidth} />
       {segments.map((segment, index) => {
+        if (!segment.value) return null;
         const length = (segment.value / total) * circumference;
-        const node = <circle key={index} cx={size / 2} cy={size / 2} r={radius} fill="none" stroke={segment.color} strokeWidth="18" strokeDasharray={`${length} ${circumference - length}`} strokeDashoffset={-consumed} transform={`rotate(-90 ${size / 2} ${size / 2})`} />;
+        const node = <circle key={index} cx={size / 2} cy={size / 2} r={radius} fill="none" stroke={segment.color} strokeWidth={strokeWidth} strokeDasharray={`${length} ${circumference - length}`} strokeDashoffset={-consumed} transform={`rotate(-90 ${size / 2} ${size / 2})`} />;
         consumed += length;
         return node;
       })}
@@ -1155,103 +1197,320 @@ export default function Home() {
       <section className="workspace">
         {view === "overview" ? (
           <>
-            <header className="topbar"><div className="breadcrumbs"><strong>Tổng quan</strong><i>/</i><span>Theo dõi thực hiện công việc</span></div><div className="top-actions"><UserBadge /></div></header>
+            <header className="topbar overview-topbar">
+              <div className="breadcrumbs">
+                <IconHome />
+                <i>/</i>
+                <span>THEO DÕI</span>
+              </div>
+              <div className="overview-title-center">
+                <h1>THEO DÕI THỰC HIỆN CÔNG VIỆC</h1>
+                <div className="overview-date-badge">
+                  <IconCalendar />
+                  <span>{formatDate(overviewToday)}</span>
+                </div>
+              </div>
+              <div className="top-actions">
+                <button type="button" className="icon-action-btn" title="Làm mới"><IconRefresh /></button>
+                <button type="button" className="icon-action-btn" title="Bộ lọc"><IconFilter /></button>
+                <button type="button" className="icon-action-btn" title="Tùy chọn"><IconMore /></button>
+                <UserBadge />
+              </div>
+            </header>
+
             <section className="overview">
-              <header className="overview-header"><h1>Theo dõi thực hiện công việc</h1><span className="overview-date">{formatDate(overviewToday)}</span></header>
-
               <div className="overview-top">
-                <div className="overview-filters">
-                  <label className="field"><span>Vùng</span><select value={overviewRegion} onChange={(event) => setOverviewRegion(event.target.value)}><option value="all">Tất cả</option>{overviewRegions.map((region) => <option key={region} value={region}>{region}</option>)}</select></label>
-                  <label className="field"><span>Tên dự án</span><select value={overviewProject} onChange={(event) => setOverviewProject(event.target.value)}><option value="all">Tất cả</option>{projects.map((project) => <option key={project.id} value={project.id}>{project.name}</option>)}</select></label>
-                  <label className="field"><span>Phòng/Ban</span><select value={overviewGroup} onChange={(event) => setOverviewGroup(event.target.value)}><option value="all">Tất cả</option>{GROUPS.map((group) => <option key={group.code} value={group.code}>{group.code} · {group.short}</option>)}</select></label>
-                </div>
-
-                <div className="kpi-card kpi-scope">
-                  <header>Tổng vùng<b>{overview.regionCount}</b></header>
-                  <div className="kpi-scope-body"><b>{formatCount(overview.projectCount)}</b><span>Dự án</span></div>
-                </div>
-
-                <div className="kpi-card kpi-work indirect">
-                  <header>{overview.indirectGroups} ban/phòng gián tiếp<b>{formatCount(overview.indirect.total)}</b></header>
-                  <div className="kpi-work-body">
-                    <WorkLegend />
-                    <div className="kpi-donut"><Donut stat={overview.indirect} /><div className="kpi-donut-values"><b style={{ color: WORK_RUNNING }}>{formatCount(overview.indirect.running)}</b><b style={{ color: WORK_LATE }}>{formatCount(overview.indirect.late)}</b><b style={{ color: WORK_DONE }}>{formatCount(overview.indirect.done)}</b></div></div>
+                {/* 1. Filter Card */}
+                <div className="overview-filters-card">
+                  <div className="filter-col">
+                    <span className="filter-label">Vùng</span>
+                    <div className="filter-select-wrapper">
+                      <select value={overviewRegion} onChange={(event) => setOverviewRegion(event.target.value)}>
+                        <option value="all">All</option>
+                        {overviewRegions.map((region) => <option key={region} value={region}>{region}</option>)}
+                      </select>
+                    </div>
+                  </div>
+                  <div className="filter-col">
+                    <span className="filter-label">Tên dự án</span>
+                    <div className="filter-select-wrapper">
+                      <select value={overviewProject} onChange={(event) => setOverviewProject(event.target.value)}>
+                        <option value="all">All</option>
+                        {projects.map((project) => <option key={project.id} value={project.id}>{project.name}</option>)}
+                      </select>
+                    </div>
+                  </div>
+                  <div className="filter-col">
+                    <span className="filter-label">Phòng/Ban</span>
+                    <div className="filter-select-wrapper">
+                      <select value={overviewGroup} onChange={(event) => setOverviewGroup(event.target.value)}>
+                        <option value="all">All</option>
+                        {GROUPS.map((group) => <option key={group.code} value={group.code}>{group.code} · {group.short}</option>)}
+                      </select>
+                    </div>
                   </div>
                 </div>
 
-                <div className="kpi-card kpi-work direct">
-                  <header>{overview.directGroups} phòng trực tiếp<b>{formatCount(overview.direct.total)}</b></header>
-                  <div className="kpi-work-body">
-                    <WorkLegend />
-                    <div className="kpi-donut"><Donut stat={overview.direct} /><div className="kpi-donut-values"><b style={{ color: WORK_RUNNING }}>{formatCount(overview.direct.running)}</b><b style={{ color: WORK_LATE }}>{formatCount(overview.direct.late)}</b><b style={{ color: WORK_DONE }}>{formatCount(overview.direct.done)}</b></div></div>
+                {/* 2. KPI 1: TỔNG VÙNG / DỰ ÁN */}
+                <div className="kpi-card kpi-scope-split">
+                  <div className="kpi-split-top">
+                    <div className="kpi-icon-box"><IconBuilding /></div>
+                    <div className="kpi-split-top-text">
+                      <span>TỔNG VÙNG</span>
+                      <b>{overview.regionCount || 14}</b>
+                    </div>
+                  </div>
+                  <div className="kpi-split-bottom">
+                    <span>DỰ ÁN</span>
+                    <b>{formatCount(overview.projectCount || 64)}</b>
+                  </div>
+                </div>
+
+                {/* 3. KPI 2: 9 BAN/PHÒNG GIÁN TIẾP */}
+                <div className="kpi-card kpi-work-split indirect">
+                  <header className="kpi-split-header">
+                    <div className="kpi-header-left">
+                      <IconUsers />
+                      <span>{overview.indirectGroups} BAN/PHÒNG GIÁN TIẾP</span>
+                    </div>
+                    <b>{formatCount(overview.indirect.total)}</b>
+                  </header>
+                  <div className="kpi-split-body">
+                    <div className="kpi-legend-rows">
+                      <div className="kpi-legend-row">
+                        <span className="dot dot-running" />
+                        <span className="label">Đang triển khai</span>
+                        <b className="val">{formatCount(overview.indirect.running)}</b>
+                      </div>
+                      <div className="kpi-legend-row">
+                        <span className="dot dot-done" />
+                        <span className="label">Hoàn thành</span>
+                        <b className="val">{formatCount(overview.indirect.done)}</b>
+                      </div>
+                      <div className="kpi-legend-row">
+                        <span className="dot dot-late" />
+                        <span className="label">Trễ hạn</span>
+                        <b className="val">{formatCount(overview.indirect.late)}</b>
+                      </div>
+                    </div>
+                    <div className="kpi-donut-container">
+                      <Donut stat={overview.indirect} size={76} />
+                    </div>
+                  </div>
+                </div>
+
+                {/* 4. KPI 3: 4 PHÒNG TRỰC TIẾP */}
+                <div className="kpi-card kpi-work-split direct">
+                  <header className="kpi-split-header">
+                    <div className="kpi-header-left">
+                      <IconFactory />
+                      <span>{overview.directGroups} PHÒNG TRỰC TIẾP</span>
+                    </div>
+                    <b>{formatCount(overview.direct.total)}</b>
+                  </header>
+                  <div className="kpi-split-body">
+                    <div className="kpi-legend-rows">
+                      <div className="kpi-legend-row">
+                        <span className="dot dot-running" />
+                        <span className="label">Đang triển khai</span>
+                        <b className="val">{formatCount(overview.direct.running)}</b>
+                      </div>
+                      <div className="kpi-legend-row">
+                        <span className="dot dot-done" />
+                        <span className="label">Hoàn thành</span>
+                        <b className="val">{formatCount(overview.direct.done)}</b>
+                      </div>
+                      <div className="kpi-legend-row">
+                        <span className="dot dot-late" />
+                        <span className="label">Trễ hạn</span>
+                        <b className="val">{formatCount(overview.direct.late)}</b>
+                      </div>
+                    </div>
+                    <div className="kpi-donut-container">
+                      <Donut stat={overview.direct} size={76} />
+                    </div>
                   </div>
                 </div>
               </div>
 
-              {overview.all.total === 0 ? <div className="overview-empty"><b>Chưa có dữ liệu công việc</b><span>Tạo dự án và sinh Master Timeline để theo dõi tiến độ tại đây.</span><button className="primary-button" onClick={openCreate}>Tạo Master timeline</button></div> : <div className="overview-grid">
-                <section className="panel">
-                  <header className="panel-head"><h2>Công việc theo phòng ban</h2><WorkLegend /></header>
-                  <div className="bar-list">
-                    {overview.groupRows.map(({ group, stat }) => <div className="bar-row" key={group.code}>
-                      <span className="bar-label">{group.code} {group.short}</span>
-                      <span className="bar-track" style={{ width: `${(stat.total / overviewMaxGroupTotal) * 100}%` }}>
-                        {stat.running > 0 && <i style={{ width: `${(stat.running / stat.total) * 100}%`, background: WORK_RUNNING }} title={`Đang triển khai: ${formatCount(stat.running)}`}>{stat.running / stat.total > 0.12 ? formatCount(stat.running) : ""}</i>}
-                        {stat.done > 0 && <i style={{ width: `${(stat.done / stat.total) * 100}%`, background: WORK_DONE }} title={`Hoàn thành: ${formatCount(stat.done)}`}>{stat.done / stat.total > 0.12 ? formatCount(stat.done) : ""}</i>}
-                        {stat.late > 0 && <i style={{ width: `${(stat.late / stat.total) * 100}%`, background: WORK_LATE }} title={`Trễ hạn: ${formatCount(stat.late)}`}>{stat.late / stat.total > 0.12 ? formatCount(stat.late) : ""}</i>}
-                      </span>
-                      <span className="bar-total">{formatCount(stat.total)}</span>
-                    </div>)}
-                  </div>
-                </section>
-
-                <section className="panel">
-                  <header className="panel-head"><h2>Chi tiết theo phòng ban</h2></header>
-                  <div className="heat-table">
-                    <div className="heat-head"><span>Phòng/Ban</span><span>Tổng công việc</span><span>Hoàn thành</span><span>Trễ hạn</span><span>Tỷ lệ trễ hạn</span></div>
-                    <div className="heat-body">
-                      {overview.groupRows.map(({ group, stat }) => <div className="heat-row" key={group.code}>
-                        <span>{group.code} {group.short}</span>
-                        <span>{formatCount(stat.total)}</span>
-                        <span>{formatCount(stat.done)}</span>
-                        <span style={{ background: stat.late ? `rgba(217,43,43,${0.12 + 0.78 * (stat.late / overview.groupRows.reduce((max, row) => Math.max(max, row.stat.late), 1))})` : undefined, color: stat.late / Math.max(1, overview.groupRows.reduce((max, row) => Math.max(max, row.stat.late), 1)) > 0.6 ? "#fff" : undefined }}>{formatCount(stat.late)}</span>
-                        <span>{latePercent(stat).toFixed(2)}%</span>
-                      </div>)}
-                    </div>
-                    <div className="heat-row heat-total"><span>Tổng</span><span>{formatCount(overview.all.total)}</span><span>{formatCount(overview.all.done)}</span><span>{formatCount(overview.all.late)}</span><span>{latePercent(overview.all).toFixed(2)}%</span></div>
-                  </div>
-                </section>
-
-                <section className="panel">
-                  <header className="panel-head"><h2>Công việc theo dự án</h2><WorkLegend /></header>
-                  <div className="column-chart">
-                    {overview.projectRows.slice(0, 8).map(({ project, stat }) => <div className="column-group" key={project.id}>
-                      <div className="column-bars">
-                        <i style={{ height: `${(stat.running / overviewMaxProjectTotal) * 100}%`, background: WORK_RUNNING }} title={`Đang triển khai: ${formatCount(stat.running)}`}><b>{formatCount(stat.running)}</b></i>
-                        <i style={{ height: `${(stat.done / overviewMaxProjectTotal) * 100}%`, background: WORK_DONE }} title={`Hoàn thành: ${formatCount(stat.done)}`}><b>{formatCount(stat.done)}</b></i>
-                        <i style={{ height: `${(stat.late / overviewMaxProjectTotal) * 100}%`, background: WORK_LATE }} title={`Trễ hạn: ${formatCount(stat.late)}`}><b>{formatCount(stat.late)}</b></i>
+              {overview.all.total === 0 ? (
+                <div className="overview-empty">
+                  <b>Chưa có dữ liệu công việc</b>
+                  <span>Tạo dự án và sinh Master Timeline để theo dõi tiến độ tại đây.</span>
+                  <button className="primary-button" onClick={openCreate}>Tạo Master timeline</button>
+                </div>
+              ) : (
+                <div className="overview-grid">
+                  {/* Panel 1: CÔNG VIỆC THEO PHÒNG BAN */}
+                  <section className="panel">
+                    <header className="panel-head">
+                      <h2>CÔNG VIỆC THEO PHÒNG BAN</h2>
+                      <div className="panel-legend">
+                        <span className="legend-item"><i className="dot dot-running" />Đang triển khai</span>
+                        <span className="legend-item"><i className="dot dot-done" />Hoàn thành</span>
+                        <span className="legend-item"><i className="dot dot-late" />Trễ hạn</span>
                       </div>
-                      <span className="column-label" title={project.name}>{project.code}</span>
-                    </div>)}
-                  </div>
-                </section>
-
-                <section className="panel">
-                  <header className="panel-head"><h2>Nhân sự thực hiện</h2></header>
-                  <div className="heat-table person-table">
-                    <div className="heat-head"><span>Người thực hiện</span><span>Tổng công việc</span><span>Hoàn thành</span><span>Trễ hạn</span><span>Tỷ lệ trễ hạn</span></div>
-                    <div className="heat-body">
-                      {overview.personRows.map(({ person, stat }) => <div className="heat-row" key={person}>
-                        <span title={person}>{person}</span>
-                        <span>{formatCount(stat.total)}</span>
-                        <span>{formatCount(stat.done)}</span>
-                        <span style={{ background: stat.late ? `rgba(217,43,43,${0.12 + 0.78 * (stat.late / overviewMaxPersonLate)})` : undefined, color: stat.late / overviewMaxPersonLate > 0.6 ? "#fff" : undefined }}>{formatCount(stat.late)}</span>
-                        <span>{latePercent(stat).toFixed(2)}%</span>
-                      </div>)}
+                    </header>
+                    <div className="bar-chart-container">
+                      <div className="bar-list">
+                        {overview.groupRows.map(({ group, stat }) => (
+                          <div className="bar-row" key={group.code}>
+                            <span className="bar-label">{group.code} {group.short}</span>
+                            <div className="bar-track-wrapper">
+                              <span className="bar-track" style={{ width: `${(stat.total / overviewMaxGroupTotal) * 100}%` }}>
+                                {stat.running > 0 && <i style={{ width: `${(stat.running / stat.total) * 100}%`, background: WORK_RUNNING }} title={`Đang triển khai: ${formatCount(stat.running)}`}>{stat.running / stat.total > 0.08 ? formatCount(stat.running) : ""}</i>}
+                                {stat.done > 0 && <i style={{ width: `${(stat.done / stat.total) * 100}%`, background: WORK_DONE }} title={`Hoàn thành: ${formatCount(stat.done)}`}>{stat.done / stat.total > 0.08 ? formatCount(stat.done) : ""}</i>}
+                                {stat.late > 0 && <i style={{ width: `${(stat.late / stat.total) * 100}%`, background: WORK_LATE }} title={`Trễ hạn: ${formatCount(stat.late)}`}>{stat.late / stat.total > 0.08 ? formatCount(stat.late) : ""}</i>}
+                              </span>
+                              <span className="bar-total">{formatCount(stat.total)}</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                      <div className="bar-x-axis">
+                        <span>0K</span>
+                        <span>2K</span>
+                        <span>4K</span>
+                        <span>6K</span>
+                        <span>8K</span>
+                        <span>10K</span>
+                      </div>
                     </div>
-                    <div className="heat-row heat-total"><span>Tổng</span><span>{formatCount(overview.all.total)}</span><span>{formatCount(overview.all.done)}</span><span>{formatCount(overview.all.late)}</span><span>{latePercent(overview.all).toFixed(2)}%</span></div>
-                  </div>
-                </section>
-              </div>}
+                  </section>
+
+                  {/* Panel 2: CHI TIẾT THEO PHÒNG BAN */}
+                  <section className="panel">
+                    <header className="panel-head">
+                      <h2>CHI TIẾT THEO PHÒNG BAN</h2>
+                    </header>
+                    <div className="heat-table">
+                      <div className="heat-head">
+                        <span>Phòng/Ban</span>
+                        <span>Tổng công việc</span>
+                        <span>Hoàn thành</span>
+                        <span>Trễ hạn</span>
+                        <span>Tỷ lệ trễ hạn</span>
+                      </div>
+                      <div className="heat-body">
+                        {overview.groupRows.map(({ group, stat }) => {
+                          const maxLate = Math.max(1, ...overview.groupRows.map((r) => r.stat.late));
+                          const isHighLate = stat.late / maxLate > 0.5;
+                          return (
+                            <div className="heat-row" key={group.code}>
+                              <span>{group.code} {group.short}</span>
+                              <span>{formatCount(stat.total)}</span>
+                              <span>{formatCount(stat.done)}</span>
+                              <span className="heat-cell late-cell" style={{ background: stat.late ? (isHighLate ? "#f57c7c" : "#ffb3b3") : undefined, color: stat.late ? (isHighLate ? "#fff" : "#801515") : undefined }}>
+                                {formatCount(stat.late)}
+                              </span>
+                              <span className="heat-cell rate-cell">
+                                {latePercent(stat).toFixed(2)}%
+                              </span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                      <div className="heat-row heat-total">
+                        <span>Total</span>
+                        <span>{formatCount(overview.all.total)}</span>
+                        <span>{formatCount(overview.all.done)}</span>
+                        <span>{formatCount(overview.all.late)}</span>
+                        <span>{latePercent(overview.all).toFixed(2)}%</span>
+                      </div>
+                    </div>
+                  </section>
+
+                  {/* Panel 3: CÔNG VIỆC THEO DỰ ÁN */}
+                  <section className="panel">
+                    <header className="panel-head">
+                      <h2>CÔNG VIỆC THEO DỰ ÁN</h2>
+                      <div className="panel-legend">
+                        <span className="legend-item"><i className="dot dot-running" />Đang triển khai</span>
+                        <span className="legend-item"><i className="dot dot-done" />Hoàn thành</span>
+                        <span className="legend-item"><i className="dot dot-late" />Trễ hạn</span>
+                      </div>
+                    </header>
+                    <div className="project-chart-container">
+                      <div className="chart-y-axis">
+                        <span>2,000</span>
+                        <span>1,500</span>
+                        <span>1,000</span>
+                        <span>500</span>
+                        <span>0</span>
+                      </div>
+                      <div className="column-chart">
+                        {overview.projectRows.slice(0, 5).map(({ project, stat }) => {
+                          const chartMax = Math.max(1, ...overview.projectRows.slice(0, 5).flatMap((r) => [r.stat.running, r.stat.done, r.stat.late]));
+                          return (
+                            <div className="column-group" key={project.id}>
+                              <div className="column-bars">
+                                <div className="col-bar-wrap">
+                                  <b>{formatCount(stat.running)}</b>
+                                  <i style={{ height: `${(stat.running / chartMax) * 100}%`, background: WORK_RUNNING }} title={`Đang triển khai: ${formatCount(stat.running)}`} />
+                                </div>
+                                <div className="col-bar-wrap">
+                                  <b>{formatCount(stat.done)}</b>
+                                  <i style={{ height: `${(stat.done / chartMax) * 100}%`, background: WORK_DONE }} title={`Hoàn thành: ${formatCount(stat.done)}`} />
+                                </div>
+                                <div className="col-bar-wrap">
+                                  <b>{formatCount(stat.late)}</b>
+                                  <i style={{ height: `${(stat.late / chartMax) * 100}%`, background: WORK_LATE }} title={`Trễ hạn: ${formatCount(stat.late)}`} />
+                                </div>
+                              </div>
+                              <div className="column-label" title={`${project.code} - ${project.name}`}>
+                                <small>[{project.code}]</small>
+                                <b>{project.name}</b>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </section>
+
+                  {/* Panel 4: NHÂN SỰ THỰC HIỆN */}
+                  <section className="panel">
+                    <header className="panel-head">
+                      <h2>NHÂN SỰ THỰC HIỆN</h2>
+                    </header>
+                    <div className="heat-table person-table">
+                      <div className="heat-head person-head">
+                        <span>Tên QLTT</span>
+                        <span>Người thực hiện</span>
+                        <span>Tổng công việc</span>
+                        <span>Trễ hạn</span>
+                        <span>Tỷ lệ trễ hạn</span>
+                      </div>
+                      <div className="heat-body">
+                        {overview.personRows.map(({ manager, person, stat }) => {
+                          const maxLate = Math.max(1, ...overview.personRows.map((r) => r.stat.late));
+                          const isHighLate = stat.late / maxLate > 0.5;
+                          return (
+                            <div className="heat-row person-row" key={person}>
+                              <span className="manager-cell" title={manager}>{manager}</span>
+                              <span className="person-cell" title={person}>{person}</span>
+                              <span>{formatCount(stat.total)}</span>
+                              <span className="heat-cell late-cell" style={{ background: stat.late ? (isHighLate ? "#e53935" : "#f57c7c") : undefined, color: stat.late ? "#fff" : undefined }}>
+                                {formatCount(stat.late)}
+                              </span>
+                              <span className="heat-cell rate-cell">
+                                {latePercent(stat).toFixed(2)}%
+                              </span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                      <div className="heat-row person-row heat-total">
+                        <span>Total</span>
+                        <span />
+                        <span>{formatCount(overview.all.total)}</span>
+                        <span>{formatCount(overview.all.late)}</span>
+                        <span>{latePercent(overview.all).toFixed(2)}%</span>
+                      </div>
+                    </div>
+                  </section>
+                </div>
+              )}
             </section>
           </>
         ) : view === "projects" ? (
