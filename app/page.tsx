@@ -3155,26 +3155,18 @@ export default function Home() {
               </header>
 
               {/* KPI Stats Bar */}
-              <div className="table-stats-bar">
+              <div className="table-stats-bar" style={{ gridTemplateColumns: "repeat(3, 1fr)" }}>
                 <div className="table-stat-card">
                   <span>TỔNG DỰ ÁN</span>
                   <b>{projects.length}</b>
                 </div>
                 <div className="table-stat-card">
-                  <span>ĐANG LẬP MTL</span>
-                  <b style={{ color: "#1a56a8" }}>{projects.filter((p) => p.approvalStatus === "draft").length}</b>
+                  <span>ĐANG LẬP / CẬP NHẬT</span>
+                  <b style={{ color: "#1a56a8" }}>{projects.filter((p) => p.approvalStatus !== "approved" && !p.isOfficialApproved).length}</b>
                 </div>
                 <div className="table-stat-card">
-                  <span>GMD KIỂM SOÁT</span>
-                  <b style={{ color: "#7e22ce" }}>{projects.filter((p) => p.approvalStatus === "gmd_review").length}</b>
-                </div>
-                <div className="table-stat-card">
-                  <span>GMS THẨM ĐỊNH</span>
-                  <b style={{ color: "#0369a1" }}>{projects.filter((p) => p.approvalStatus === "submitted" || p.approvalStatus === "appraised").length}</b>
-                </div>
-                <div className="table-stat-card">
-                  <span>ĐÃ DUYỆT BASELINE</span>
-                  <b style={{ color: "#167461" }}>{projects.filter((p) => p.isOfficialApproved).length}</b>
+                  <span>ĐÃ DUYỆT</span>
+                  <b style={{ color: "#167461" }}>{projects.filter((p) => p.approvalStatus === "approved" || p.isOfficialApproved).length}</b>
                 </div>
               </div>
 
