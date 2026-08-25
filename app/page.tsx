@@ -4173,24 +4173,36 @@ export default function Home() {
 
             <section className={`approval-flow state-${activeProject.approvalStatus}`}>
               <div className="approval-steps">
-                <span className="done"><i>1</i><b>Lập MTL</b></span><em />
-                <span className={allDepartmentsApproved(activeProject) ? "done" : ""}><i>2</i><b>Phòng ban xác nhận</b></span><em />
-                <span className={GMS_STAGES.includes(activeProject.approvalStatus) ? "done" : ""}><i>3</i><b>GMD kiểm soát</b></span><em />
-                <span className={activeProject.approvalStatus === "appraised" || activeProject.approvalStatus === "approved" ? "done" : ""}><i>4</i><b>GMS thẩm định</b></span><em />
-                <span className={activeProject.approvalStatus === "approved" ? "done" : ""}><i>5</i><b>Phê duyệt E-Approval</b></span>
+                <span className="done">
+                  <i>1</i>
+                  <b>Lập Master Timeline</b>
+                </span>
+                <em />
+                <span className={activeProject.isOfficialApproved || activeProject.approvalStatus === "approved" ? "done" : ""}>
+                  <i>2</i>
+                  <b>Phê duyệt</b>
+                </span>
               </div>
               <div className="approval-action">
-                {isPlanEditable(activeProject) && !allDepartmentsApproved(activeProject) && <><span>Còn {pbcmGroupsOf(activeProject).length - approvedDepartmentCount(activeProject)} đầu mục chưa xác nhận</span><button className="secondary-button" onClick={() => openDepartmentReview()}>Mở xác nhận phòng ban</button></>}
-                {isPlanEditable(activeProject) && allDepartmentsApproved(activeProject) && <button className="primary-button" onClick={submitToGmd}>Trình GMD kiểm soát</button>}
-                {activeProject.approvalStatus === "gmd_review" && <span>Đã trình {formatDate(activeProject.gmdSubmittedAt)} · Đang chờ GMD kiểm soát</span>}
-                {activeProject.approvalStatus === "submitted" && <span>GMD đã duyệt {formatDate(activeProject.gmdReviewedAt)} · Đang chờ GMS thẩm định</span>}
-                {activeProject.approvalStatus === "appraised" && !activeProject.isOfficialApproved && <button className="primary-button" onClick={() => openEApprovalModal(activeProject)}>Xác nhận duyệt qua E-Approval</button>}
-                {activeProject.isOfficialApproved && <><span>Đã duyệt E-Approval {formatDate(activeProject.eApprovalDate)}</span><button className="secondary-button" onClick={reopenApproved}>Tạo bản điều chỉnh</button></>}
+                {!activeProject.isOfficialApproved ? (
+                  <button
+                    type="button"
+                    className="primary-button"
+                    style={{ background: "#73b52d", borderColor: "#64a024" }}
+                    onClick={() => openEApprovalModal(activeProject)}
+                  >
+                    ✓ Xác nhận phê duyệt
+                  </button>
+                ) : (
+                  <>
+                    <span>Đã phê duyệt {activeProject.eApprovalCode ? `(${activeProject.eApprovalCode})` : ""} · {formatDate(activeProject.eApprovalDate || activeProject.approvedAt)}</span>
+                    <button type="button" className="secondary-button" onClick={reopenApproved}>
+                      Tạo bản điều chỉnh
+                    </button>
+                  </>
+                )}
               </div>
             </section>
-            <section className="department-status-strip" aria-label="Trạng thái xác nhận phòng ban">{PBCM_GROUPS.filter((group) => activeProject.selectedGroups.includes(group.code)).map((group) => { const approval = activeProject.departmentApprovals[group.code]; return <button key={group.code} className={`status-${approval?.status ?? "pending"}`} title={approval?.note || `${group.name} · ${DEPARTMENT_APPROVAL_LABEL[approval?.status ?? "pending"]}`} onClick={() => openDepartmentReview(group.code)}><i>{approval?.status === "approved" ? "✓" : approval?.status === "changes_requested" ? "!" : "·"}</i><span><b>{group.code}</b><small>{group.short}</small></span></button>; })}</section>
-            {activeProject.selectedGroups.some((code) => activeProject.departmentApprovals[code]?.note) && <section className="department-feedback-list"><b>Ý kiến xác nhận phòng ban</b><div>{GROUPS.filter((group) => activeProject.departmentApprovals[group.code]?.note).map((group) => { const approval = activeProject.departmentApprovals[group.code]; return <button key={group.code} onClick={() => openDepartmentReview(group.code)}><span>{group.code} · {group.short}</span><p>{approval.note}</p><small>{approval.reviewer || "Chưa gán người xác nhận"} · {DEPARTMENT_APPROVAL_LABEL[approval.status]}</small></button>; })}</div></section>}
-            {activeProject.reviewNote && <div className={`review-note ${activeProject.approvalStatus}`}><b>Phản hồi thẩm định từ GMS</b><span>{activeProject.reviewNote}</span><small>Gửi lúc {formatDateTime(activeProject.reviewedAt)} · Vui lòng cập nhật các nội dung được nêu trước khi gửi lại.</small></div>}
 
             <section className="toolbar" aria-label="Công cụ danh sách MTL">
               <div className="scope-tabs"><span className="active">Tất cả công việc ({scheduled.length})</span></div>
