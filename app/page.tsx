@@ -500,6 +500,9 @@ function IconCheck() {
 function IconChevronDown() {
   return <svg className="section-chevron" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9" /></svg>;
 }
+function IconBuilding() {
+  return <svg className="section-header-icon" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"><path d="M6 22V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v17" /><path d="M2 22h20" /><path d="M18 9h2a2 2 0 0 1 2 2v11" /><path d="M6 12H4a2 2 0 0 0-2 2v8" /><path d="M10 7h4" /><path d="M10 11h4" /><path d="M10 15h4" /><path d="M10 19h4" /></svg>;
+}
 function IconShield() {
   return <svg className="nav-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3l7 3v5.5c0 4.2-2.9 7.7-7 9-4.1-1.3-7-4.8-7-9V6z" /><path d="M9 12.2l2.2 2.2 4-4.4" /></svg>;
 }
@@ -1728,24 +1731,56 @@ export default function Home() {
           display: flex !important;
           align-items: center !important;
           justify-content: space-between !important;
-          gap: 6px !important;
-          height: 38px !important;
-          padding: 16px 8px 6px !important;
+          gap: 10px !important;
+          height: 48px !important;
+          min-height: 48px !important;
+          padding: 0 14px !important;
+          margin: 14px 0 8px !important;
           border: 0 !important;
-          background: transparent !important;
-          color: #728ea7 !important;
-          font-size: 10.5px !important;
+          border-radius: 8px !important;
+          background: linear-gradient(90deg, #7cb342 0%, #558b2f 100%) !important;
+          color: #ffffff !important;
+          font-size: 13.5px !important;
           font-weight: 700 !important;
-          letter-spacing: 1.2px !important;
-          text-transform: uppercase !important;
+          letter-spacing: 0.3px !important;
           cursor: pointer !important;
-          transition: color 0.15s ease !important;
+          box-shadow: 0 3px 12px rgba(124, 179, 66, 0.38) !important;
+          transition: all 0.18s ease !important;
+          box-sizing: border-box !important;
         }
         .sidebar-section-toggle:hover {
-          color: #b8d5ec !important;
+          background: linear-gradient(90deg, #85c247 0%, #5d9834 100%) !important;
+          box-shadow: 0 5px 16px rgba(124, 179, 66, 0.48) !important;
+          transform: translateY(-1px) !important;
+        }
+        .section-toggle-left {
+          display: flex !important;
+          align-items: center !important;
+          gap: 10px !important;
+          min-width: 0 !important;
+          color: #ffffff !important;
+        }
+        .section-toggle-left span {
+          font-size: 13.5px !important;
+          font-weight: 700 !important;
+          color: #ffffff !important;
+          white-space: nowrap !important;
+          overflow: hidden !important;
+          text-overflow: ellipsis !important;
+          text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25) !important;
+        }
+        .section-header-icon {
+          width: 22px !important;
+          height: 22px !important;
+          flex: none !important;
+          color: #ffffff !important;
+          filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2)) !important;
         }
         .section-chevron {
+          width: 14px !important;
+          height: 14px !important;
           flex: none !important;
+          color: #ffffff !important;
           transition: transform 0.2s ease !important;
         }
         .sidebar-section-toggle.open .section-chevron {
@@ -1788,10 +1823,11 @@ export default function Home() {
           color: #ffffff !important;
         }
         .sidebar-nav button.active {
-          background: linear-gradient(90deg, #8cc63f, #63a532) !important;
+          background: rgba(255, 255, 255, 0.16) !important;
           color: #ffffff !important;
           font-weight: 700 !important;
-          box-shadow: 0 3px 10px rgba(140, 198, 63, 0.33) !important;
+          border-left: 3.5px solid #8cc63f !important;
+          box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.08) !important;
         }
         .sidebar-nav button .nav-icon {
           width: 22px !important;
@@ -1822,7 +1858,10 @@ export default function Home() {
           const lapMtlSectionOpen = lapMtlOpen;
           return <>
             <button type="button" className={`sidebar-section-toggle ${lapMtlSectionOpen ? "open" : ""}`} onClick={() => setLapMtlOpen((current) => !current)} aria-expanded={lapMtlSectionOpen} title={lapMtlSectionOpen ? "Thu gọn menu Lập MTL" : "Mở rộng menu Lập MTL"}>
-              <span>Lập Master Timeline</span>
+              <div className="section-toggle-left">
+                <IconBuilding />
+                <span>Lập Master Timeline</span>
+              </div>
               <IconChevronDown />
             </button>
             <nav className={`sidebar-nav sidebar-collapsible ${lapMtlSectionOpen ? "" : "collapsed"}`} aria-label="Điều hướng Lập MTL" aria-hidden={!lapMtlSectionOpen}>
