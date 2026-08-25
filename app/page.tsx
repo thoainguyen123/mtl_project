@@ -2311,6 +2311,104 @@ export default function Home() {
           color: #0f172a !important;
           line-height: 1.2 !important;
         }
+        /* ================= CONFIRM DELETE MODAL ================= */
+        .confirm-modal {
+          width: min(480px, 94vw) !important;
+          background: #ffffff !important;
+          border-radius: 16px !important;
+          box-shadow: 0 24px 70px rgba(0, 0, 0, 0.35) !important;
+          padding: 28px 24px 22px !important;
+          text-align: center !important;
+          display: flex !important;
+          flex-direction: column !important;
+          align-items: center !important;
+          gap: 12px !important;
+          animation: modal-scale-in 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+        }
+        @keyframes modal-scale-in {
+          from {
+            opacity: 0;
+            transform: scale(0.95) translateY(10px);
+          }
+          to {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+          }
+        }
+        .confirm-modal-icon {
+          width: 56px !important;
+          height: 56px !important;
+          border-radius: 50% !important;
+          background: #fee2e2 !important;
+          color: #dc2626 !important;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+          margin-bottom: 4px !important;
+        }
+        .confirm-modal-icon svg {
+          width: 28px !important;
+          height: 28px !important;
+          stroke: #dc2626 !important;
+        }
+        .confirm-modal h2 {
+          font-size: 19px !important;
+          font-weight: 800 !important;
+          color: #0f172a !important;
+          margin: 0 !important;
+          line-height: 1.3 !important;
+        }
+        .confirm-modal p {
+          font-size: 13.5px !important;
+          color: #475569 !important;
+          margin: 0 !important;
+          line-height: 1.5 !important;
+        }
+        .confirm-modal-project-badge {
+          display: inline-flex !important;
+          align-items: center !important;
+          gap: 6px !important;
+          background: #f1f5f9 !important;
+          border: 1px solid #e2e8f0 !important;
+          padding: 6px 12px !important;
+          border-radius: 8px !important;
+          margin: 4px 0 !important;
+          font-size: 12px !important;
+          color: #1e293b !important;
+        }
+        .confirm-modal-actions {
+          display: flex !important;
+          gap: 10px !important;
+          width: 100% !important;
+          margin-top: 12px !important;
+        }
+        .confirm-modal-actions button {
+          flex: 1 !important;
+          height: 42px !important;
+          border-radius: 8px !important;
+          font-size: 13px !important;
+          font-weight: 700 !important;
+          cursor: pointer !important;
+          transition: all 0.15s ease !important;
+        }
+        .confirm-modal-cancel {
+          background: #f1f5f9 !important;
+          color: #475569 !important;
+          border: 1px solid #cbd5e1 !important;
+        }
+        .confirm-modal-cancel:hover {
+          background: #e2e8f0 !important;
+          color: #0f172a !important;
+        }
+        .confirm-modal-delete {
+          background: #dc2626 !important;
+          color: #ffffff !important;
+          border: 1px solid #b91c1c !important;
+          box-shadow: 0 2px 6px rgba(220, 38, 38, 0.3) !important;
+        }
+        .confirm-modal-delete:hover {
+          background: #b91c1c !important;
+        }
       `}</style>
       <aside className="sidebar">
         <div className="brand">
@@ -3615,6 +3713,9 @@ export default function Home() {
                           <button type="button" className="action-btn view-btn" title="Xem chi tiết NVTK" aria-label="Chi tiết NVTK" onClick={() => { setActiveId(project.id); setView("workspace"); }}>
                             <IconEye />
                           </button>
+                          <button type="button" className="action-btn delete-btn" title="Xóa dự án" aria-label="Xóa dự án" onClick={() => setProjectToDelete(project)}>
+                            <IconTrash />
+                          </button>
                         </span>
                       </div>
                     ))}
@@ -3744,6 +3845,9 @@ export default function Home() {
                         <span className="project-action-cell" onClick={(event) => event.stopPropagation()}>
                           <button type="button" className="action-btn view-btn" title="Xem phân tích FS" aria-label="Xem FS" onClick={() => { setActiveId(project.id); setView("workspace"); }}>
                             <IconEye />
+                          </button>
+                          <button type="button" className="action-btn delete-btn" title="Xóa dự án" aria-label="Xóa dự án" onClick={() => setProjectToDelete(project)}>
+                            <IconTrash />
                           </button>
                         </span>
                       </div>
@@ -4143,9 +4247,71 @@ export default function Home() {
         </form>
       </div>}
 
-      {showDelete && activeProject && <div className="modal-backdrop" onMouseDown={() => setShowDelete(false)}><section className="confirm-modal" onMouseDown={(event) => event.stopPropagation()}><span className="danger-symbol">!</span><h2>Xóa dự án {activeProject.code}?</h2><p>Toàn bộ chỉnh sửa và trạng thái thẩm định của dự án này trên thiết bị sẽ bị xóa.</p><div><button type="button" className="secondary-button" onClick={() => setShowDelete(false)}>Giữ dự án</button><button type="button" className="danger-solid" onClick={deleteProject}>Xóa dự án</button></div></section></div>}
+      {showDelete && activeProject && (
+        <div className="modal-backdrop" onMouseDown={() => setShowDelete(false)}>
+          <section className="confirm-modal" onMouseDown={(event) => event.stopPropagation()} role="dialog" aria-modal="true">
+            <div className="confirm-modal-icon">
+              <IconTrash />
+            </div>
+            <h2>Xác nhận xóa dự án?</h2>
+            <p>
+              Toàn bộ chỉnh sửa WBS và dữ liệu tiến độ của dự án này trên hệ thống sẽ bị xóa vĩnh viễn.
+            </p>
+            <div className="confirm-modal-project-badge">
+              <b>{activeProject.code}</b> — {activeProject.name}
+            </div>
+            <div className="confirm-modal-actions">
+              <button
+                type="button"
+                className="confirm-modal-cancel"
+                onClick={() => setShowDelete(false)}
+              >
+                Hủy bỏ (Giữ lại)
+              </button>
+              <button
+                type="button"
+                className="confirm-modal-delete"
+                onClick={deleteProject}
+              >
+                Xóa dự án
+              </button>
+            </div>
+          </section>
+        </div>
+      )}
 
-      {projectToDelete && <div className="modal-backdrop" onMouseDown={() => setProjectToDelete(null)}><section className="confirm-modal" onMouseDown={(event) => event.stopPropagation()}><span className="danger-symbol">!</span><h2>Xóa dự án {projectToDelete.code}?</h2><p>Dự án <strong>{projectToDelete.name}</strong> và toàn bộ tiến độ liên quan sẽ bị xóa vĩnh viễn.</p><div><button type="button" className="secondary-button" onClick={() => setProjectToDelete(null)}>Hủy</button><button type="button" className="danger-solid" onClick={() => deleteProjectById(projectToDelete.id)}>Xóa dự án</button></div></section></div>}
+      {projectToDelete && (
+        <div className="modal-backdrop" onMouseDown={() => setProjectToDelete(null)}>
+          <section className="confirm-modal" onMouseDown={(event) => event.stopPropagation()} role="dialog" aria-modal="true">
+            <div className="confirm-modal-icon">
+              <IconTrash />
+            </div>
+            <h2>Xác nhận xóa dự án?</h2>
+            <p>
+              Bạn có chắc chắn muốn xóa dự án này? Toàn bộ cây công việc WBS và tiến độ Master Timeline liên quan sẽ bị xóa khỏi hệ thống.
+            </p>
+            <div className="confirm-modal-project-badge">
+              <b>{projectToDelete.code}</b> — {projectToDelete.name}
+            </div>
+            <div className="confirm-modal-actions">
+              <button
+                type="button"
+                className="confirm-modal-cancel"
+                onClick={() => setProjectToDelete(null)}
+              >
+                Hủy bỏ
+              </button>
+              <button
+                type="button"
+                className="confirm-modal-delete"
+                onClick={() => deleteProjectById(projectToDelete.id)}
+              >
+                Xóa dự án
+              </button>
+            </div>
+          </section>
+        </div>
+      )}
 
       {toast && <div className="toast" role="status"><b>Hoàn tất</b><span>{toast}</span></div>}
     </main>
