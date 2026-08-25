@@ -394,19 +394,19 @@ function DependencyPicker({ tasks, selectedDependencies, successorCode, disabled
 }
 
 function IconTimeline() {
-  return <svg className="nav-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M4 6h9M4 12h16M4 18h6" /></svg>;
+  return <svg className="nav-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3.5" width="18" height="17" rx="3" /><line x1="3" y1="9" x2="21" y2="9" /><line x1="8" y1="2" x2="8" y2="5.5" /><line x1="16" y1="2" x2="16" y2="5.5" /><line x1="7" y1="13.5" x2="12" y2="13.5" /><line x1="7" y1="16.5" x2="17" y2="16.5" /></svg>;
 }
 function IconCheck() {
-  return <svg className="nav-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3.5" y="3.5" width="17" height="17" rx="3" /><path d="M8 12.5l2.5 2.5L16 9" /></svg>;
+  return <svg className="nav-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3.5" width="18" height="17" rx="3" /><polyline points="8 12 11 15 16 9" /></svg>;
 }
 function IconSeal() {
-  return <svg className="nav-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="8.5" /><path d="M9 12l2 2 4-4.5" /></svg>;
+  return <svg className="nav-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3.5" width="18" height="17" rx="3" /><circle cx="12" cy="12" r="4.5" /><polyline points="10 12 11.5 13.5 14 10.5" /></svg>;
 }
 function IconList() {
-  return <svg className="nav-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><line x1="9" y1="6" x2="20" y2="6" /><line x1="9" y1="12" x2="20" y2="12" /><line x1="9" y1="18" x2="20" y2="18" /><circle cx="4.5" cy="6" r="1.4" fill="currentColor" stroke="none" /><circle cx="4.5" cy="12" r="1.4" fill="currentColor" stroke="none" /><circle cx="4.5" cy="18" r="1.4" fill="currentColor" stroke="none" /></svg>;
+  return <svg className="nav-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3.5" width="18" height="17" rx="3" /><line x1="8.5" y1="8.5" x2="16" y2="8.5" /><line x1="8.5" y1="12" x2="16" y2="12" /><line x1="8.5" y1="15.5" x2="13" y2="15.5" /><circle cx="5.5" cy="8.5" r="0.75" fill="currentColor" stroke="none" /><circle cx="5.5" cy="12" r="0.75" fill="currentColor" stroke="none" /><circle cx="5.5" cy="15.5" r="0.75" fill="currentColor" stroke="none" /></svg>;
 }
 function IconGauge() {
-  return <svg className="nav-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7.5" height="7.5" rx="1.5" /><rect x="13.5" y="3" width="7.5" height="7.5" rx="1.5" /><rect x="3" y="13.5" width="7.5" height="7.5" rx="1.5" /><rect x="13.5" y="13.5" width="7.5" height="7.5" rx="1.5" /></svg>;
+  return <svg className="nav-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3.5" width="7.5" height="7.5" rx="1.5" /><rect x="13.5" y="3.5" width="7.5" height="7.5" rx="1.5" /><rect x="3" y="13" width="7.5" height="7.5" rx="1.5" /><rect x="13.5" y="13" width="7.5" height="7.5" rx="1.5" /></svg>;
 }
 
 /* Progress buckets shown on the overview: a task counts as late only when its finish
