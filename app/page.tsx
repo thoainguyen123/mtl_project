@@ -393,6 +393,123 @@ function DependencyPicker({ tasks, selectedDependencies, successorCode, disabled
   </div>;
 }
 
+function IconTimeline() {
+  return <svg className="nav-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M4 6h9M4 12h16M4 18h6" /></svg>;
+}
+function IconCheck() {
+  return <svg className="nav-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3.5" y="3.5" width="17" height="17" rx="3" /><path d="M8 12.5l2.5 2.5L16 9" /></svg>;
+}
+function IconSeal() {
+  return <svg className="nav-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="8.5" /><path d="M9 12l2 2 4-4.5" /></svg>;
+}
+function IconList() {
+  return <svg className="nav-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><line x1="9" y1="6" x2="20" y2="6" /><line x1="9" y1="12" x2="20" y2="12" /><line x1="9" y1="18" x2="20" y2="18" /><circle cx="4.5" cy="6" r="1.4" fill="currentColor" stroke="none" /><circle cx="4.5" cy="12" r="1.4" fill="currentColor" stroke="none" /><circle cx="4.5" cy="18" r="1.4" fill="currentColor" stroke="none" /></svg>;
+}
+function IconGauge() {
+  return <svg className="nav-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7.5" height="7.5" rx="1.5" /><rect x="13.5" y="3" width="7.5" height="7.5" rx="1.5" /><rect x="3" y="13.5" width="7.5" height="7.5" rx="1.5" /><rect x="13.5" y="13.5" width="7.5" height="7.5" rx="1.5" /></svg>;
+}
+
+/* Progress buckets shown on the overview: a task counts as late only when its finish
+   date has passed and it has not been marked complete. */
+const WORK_DONE = "#2ea44f";
+const WORK_LATE = "#d92b2b";
+const WORK_RUNNING = "#1f4e79";
+
+type WorkStat = { total: number; done: number; late: number; running: number };
+
+function emptyWorkStat(): WorkStat {
+  return { total: 0, done: 0, late: 0, running: 0 };
+}
+
+function countWork(stat: WorkStat, task: ScheduledTask, today: string) {
+  stat.total += 1;
+  if (task.status === "Hoàn thành") stat.done += 1;
+  else if (task.endDate < today) stat.late += 1;
+  else stat.running += 1;
+}
+
+function latePercent(stat: WorkStat) {
+  return stat.total ? (stat.late / stat.total) * 100 : 0;
+}
+
+function formatCount(value: number) {
+  return new Intl.NumberFormat("en-US").format(value);
+}
+
+function Donut({ stat, size = 104 }: { stat: WorkStat; size?: number }) {
+  const segments = [
+    { value: stat.running, color: WORK_RUNNING },
+    { value: stat.late, color: WORK_LATE },
+    { value: stat.done, color: WORK_DONE },
+  ];
+  const total = stat.total || 1;
+  const radius = size / 2 - 10;
+  const circumference = 2 * Math.PI * radius;
+  let consumed = 0;
+  return (
+    <svg className="donut" viewBox={`0 0 ${size} ${size}`} width={size} height={size} aria-hidden="true">
+      <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke="#e6ecf1" strokeWidth="18" />
+      {segments.map((segment, index) => {
+        const length = (segment.value / total) * circumference;
+        const node = <circle key={index} cx={size / 2} cy={size / 2} r={radius} fill="none" stroke={segment.color} strokeWidth="18" strokeDasharray={`${length} ${circumference - length}`} strokeDashoffset={-consumed} transform={`rotate(-90 ${size / 2} ${size / 2})`} />;
+        consumed += length;
+        return node;
+      })}
+    </svg>
+  );
+}
+
+function WorkLegend() {
+  return <div className="work-legend"><span><i style={{ background: WORK_RUNNING }} />Đang triển khai</span><span><i style={{ background: WORK_DONE }} />Hoàn thành</span><span><i style={{ background: WORK_LATE }} />Trễ hạn</span></div>;
+}
+
+function IconEye() {
+  return <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z" /><circle cx="12" cy="12" r="3" /></svg>;
+}
+
+function UserBadge() {
+  return <div className="user-badge"><span className="avatar">PM</span><span className="user-badge-info"><strong>Project Manager</strong><small>Chủ trì lập MTL</small></span><i className="user-badge-caret">⌄</i></div>;
+}
+
+function paginationPages(current: number, count: number) {
+  const window = 2;
+  const pages = new Set<number>([1, count, current]);
+  for (let i = current - window; i <= current + window; i++) if (i >= 1 && i <= count) pages.add(i);
+  return [...pages].filter((page) => page >= 1 && page <= count).sort((a, b) => a - b);
+}
+
+function Pagination({ total, pageSize, page, onPageChange, onPageSizeChange, pageSizeOptions = [10, 20, 40] }: {
+  total: number;
+  pageSize: number;
+  page: number;
+  onPageChange: (page: number) => void;
+  onPageSizeChange: (size: number) => void;
+  pageSizeOptions?: number[];
+}) {
+  if (total <= pageSize) return null;
+  const pageCount = Math.max(1, Math.ceil(total / pageSize));
+  const currentPage = Math.min(page, pageCount);
+  const from = (currentPage - 1) * pageSize + 1;
+  const to = Math.min(total, currentPage * pageSize);
+  const pages = paginationPages(currentPage, pageCount);
+  return (
+    <div className="pagination">
+      <span>Hiển thị {from}-{to} trong số {total}</span>
+      <label className="pagination-size"><span>Số dòng/trang</span><select value={pageSize} onChange={(event) => onPageSizeChange(Number(event.target.value))}>{pageSizeOptions.map((size) => <option key={size} value={size}>{size}</option>)}</select></label>
+      <div className="pagination-pages">
+        <button type="button" disabled={currentPage <= 1} onClick={() => onPageChange(currentPage - 1)} aria-label="Trang trước">‹</button>
+        {pages.map((pageNumber, index) => (
+          <span key={pageNumber} style={{ display: "contents" }}>
+            {index > 0 && pages[index - 1] !== pageNumber - 1 && <em className="pagination-ellipsis">…</em>}
+            <button type="button" className={pageNumber === currentPage ? "active" : ""} onClick={() => onPageChange(pageNumber)}>{pageNumber}</button>
+          </span>
+        ))}
+        <button type="button" disabled={currentPage >= pageCount} onClick={() => onPageChange(currentPage + 1)} aria-label="Trang sau">›</button>
+      </div>
+    </div>
+  );
+}
+
 function createsDependencyCycle(project: Project, successorCode: string, predecessorCode: string) {
   const visited = new Set<string>();
   const stack = [predecessorCode];
@@ -484,7 +601,10 @@ export default function Home() {
   const [customCatalog, setCustomCatalog] = useState<TemplateTask[]>([]);
   const [enabledCatalogCodes, setEnabledCatalogCodes] = useState<Set<string>>(new Set());
   const [hydrated, setHydrated] = useState(false);
-  const [view, setView] = useState<"projects" | "workspace" | "departments" | "catalog" | "gms">("projects");
+  const [view, setView] = useState<"overview" | "projects" | "workspace" | "departments" | "catalog" | "gms">("overview");
+  const [overviewRegion, setOverviewRegion] = useState("all");
+  const [overviewProject, setOverviewProject] = useState("all");
+  const [overviewGroup, setOverviewGroup] = useState("all");
   const [showCreate, setShowCreate] = useState(false);
   const [showTaskModal, setShowTaskModal] = useState(false);
   const [insertAnchor, setInsertAnchor] = useState<TemplateTask | null>(null);
@@ -499,8 +619,15 @@ export default function Home() {
   const [reviewNote, setReviewNote] = useState("");
   const [search, setSearch] = useState("");
   const [projectSearch, setProjectSearch] = useState("");
+  const [projectStatusFilter, setProjectStatusFilter] = useState<ApprovalStatus | "all">("all");
+  const [projectPage, setProjectPage] = useState(1);
+  const [projectPageSize, setProjectPageSize] = useState(10);
   const [gmsSearch, setGmsSearch] = useState("");
   const [catalogSearch, setCatalogSearch] = useState("");
+  const [catalogGroupFilter, setCatalogGroupFilter] = useState("all");
+  const [catalogSourceFilter, setCatalogSourceFilter] = useState<"all" | "custom" | "standard">("all");
+  const [catalogPage, setCatalogPage] = useState(1);
+  const [catalogPageSize, setCatalogPageSize] = useState(20);
   const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
   const [selectedCode, setSelectedCode] = useState("");
   const [toast, setToast] = useState("");
@@ -573,8 +700,58 @@ export default function Home() {
   const departmentPendingCount = activeProject ? activeProject.selectedGroups.length - departmentApprovedCount : 0;
   const visibleProjects = useMemo(() => {
     const query = projectSearch.trim().toLocaleLowerCase("vi");
-    return projects.filter((project) => !query || `${project.code} ${project.name} ${project.location} ${project.type}`.toLocaleLowerCase("vi").includes(query));
-  }, [projects, projectSearch]);
+    return projects.filter((project) => {
+      const matchesQuery = !query || `${project.code} ${project.name} ${project.location} ${project.type}`.toLocaleLowerCase("vi").includes(query);
+      const matchesStatus = projectStatusFilter === "all" || project.approvalStatus === projectStatusFilter;
+      return matchesQuery && matchesStatus;
+    });
+  }, [projects, projectSearch, projectStatusFilter]);
+  const pagedProjects = useMemo(() => visibleProjects.slice((Math.min(projectPage, Math.max(1, Math.ceil(visibleProjects.length / projectPageSize))) - 1) * projectPageSize, Math.min(projectPage, Math.max(1, Math.ceil(visibleProjects.length / projectPageSize))) * projectPageSize), [visibleProjects, projectPage, projectPageSize]);
+  const overviewToday = new Date().toISOString().slice(0, 10);
+  const overviewRegions = useMemo(() => [...new Set(projects.map((project) => project.region).filter(Boolean) as string[])].sort(), [projects]);
+  const overviewEntries = useMemo(() => projects.flatMap((project) => scheduleTasks(project).filter((task) => !task.summary).map((task) => ({ project, task }))), [projects]);
+  const overviewFiltered = useMemo(() => overviewEntries.filter(({ project, task }) => (overviewRegion === "all" || project.region === overviewRegion)
+    && (overviewProject === "all" || project.id === overviewProject)
+    && (overviewGroup === "all" || task.groupCode === overviewGroup)), [overviewEntries, overviewRegion, overviewProject, overviewGroup]);
+  const overview = useMemo(() => {
+    const byGroup = new Map<string, WorkStat>();
+    const byProject = new Map<string, WorkStat>();
+    const byPerson = new Map<string, WorkStat>();
+    const indirect = emptyWorkStat();
+    const direct = emptyWorkStat();
+    const all = emptyWorkStat();
+    overviewFiltered.forEach(({ project, task }) => {
+      const groupStat = byGroup.get(task.groupCode) ?? emptyWorkStat();
+      countWork(groupStat, task, overviewToday);
+      byGroup.set(task.groupCode, groupStat);
+      const projectStat = byProject.get(project.id) ?? emptyWorkStat();
+      countWork(projectStat, task, overviewToday);
+      byProject.set(project.id, projectStat);
+      const person = task.pic.trim() || "Chưa gán người thực hiện";
+      const personStat = byPerson.get(person) ?? emptyWorkStat();
+      countWork(personStat, task, overviewToday);
+      byPerson.set(person, personStat);
+      countWork(task.groupCode.startsWith("9.") ? indirect : direct, task, overviewToday);
+      countWork(all, task, overviewToday);
+    });
+    const visibleProjectIds = new Set(overviewFiltered.map(({ project }) => project.id));
+    const visibleRegions = new Set(overviewFiltered.map(({ project }) => project.region).filter(Boolean));
+    return {
+      all,
+      indirect,
+      direct,
+      indirectGroups: GROUPS.filter((group) => group.code.startsWith("9.")).length,
+      directGroups: GROUPS.filter((group) => !group.code.startsWith("9.")).length,
+      regionCount: visibleRegions.size,
+      projectCount: visibleProjectIds.size,
+      groupRows: GROUPS.map((group) => ({ group, stat: byGroup.get(group.code) ?? emptyWorkStat() })).filter((row) => row.stat.total > 0),
+      projectRows: projects.filter((project) => byProject.has(project.id)).map((project) => ({ project, stat: byProject.get(project.id)! })).sort((a, b) => b.stat.total - a.stat.total),
+      personRows: [...byPerson.entries()].map(([person, stat]) => ({ person, stat })).sort((a, b) => b.stat.late - a.stat.late || b.stat.total - a.stat.total),
+    };
+  }, [overviewFiltered, overviewToday, projects]);
+  const overviewMaxGroupTotal = Math.max(1, ...overview.groupRows.map((row) => row.stat.total));
+  const overviewMaxProjectTotal = Math.max(1, ...overview.projectRows.map((row) => row.stat.total));
+  const overviewMaxPersonLate = Math.max(1, ...overview.personRows.map((row) => row.stat.late));
   const pendingGmsCount = projects.filter((project) => project.approvalStatus === "submitted").length;
   const reviewedGmsProjects = projects.filter((project) => project.approvalStatus !== "draft").sort((a, b) => {
     if (a.approvalStatus === "submitted" && b.approvalStatus !== "submitted") return -1;
@@ -608,8 +785,18 @@ export default function Home() {
   const enabledCatalogCount = useMemo(() => fullCatalog.filter((task) => enabledCatalogCodes.has(task.code)).length, [fullCatalog, enabledCatalogCodes]);
   const catalogRows = useMemo(() => {
     const query = catalogSearch.trim().toLocaleLowerCase("vi");
-    return fullCatalog.filter((task) => !query || `${task.code} ${task.name} ${GROUP_BY_CODE[task.groupCode]?.name ?? ""}`.toLocaleLowerCase("vi").includes(query));
-  }, [fullCatalog, catalogSearch]);
+    return fullCatalog.filter((task) => {
+      const matchesQuery = !query || `${task.code} ${task.name} ${GROUP_BY_CODE[task.groupCode]?.name ?? ""}`.toLocaleLowerCase("vi").includes(query);
+      const matchesGroup = catalogGroupFilter === "all" || task.groupCode === catalogGroupFilter;
+      const matchesSource = catalogSourceFilter === "all" || (catalogSourceFilter === "custom" ? task.custom : !task.custom);
+      return matchesQuery && matchesGroup && matchesSource;
+    });
+  }, [fullCatalog, catalogSearch, catalogGroupFilter, catalogSourceFilter]);
+  const catalogPageCount = Math.max(1, Math.ceil(catalogRows.length / catalogPageSize));
+  const pagedCatalogRows = useMemo(() => {
+    const currentPage = Math.min(catalogPage, catalogPageCount);
+    return catalogRows.slice((currentPage - 1) * catalogPageSize, currentPage * catalogPageSize);
+  }, [catalogRows, catalogPage, catalogPageSize, catalogPageCount]);
 
   const visibleTasks = useMemo(() => {
     const query = search.trim().toLocaleLowerCase("vi");
@@ -942,37 +1129,161 @@ export default function Home() {
         }
       `}</style>
       <aside className="sidebar">
-        <div className="brand"><div className="brand-mark">M</div><div><strong>Lập và Thẩm định<br />Master Timeline</strong></div></div>
-        <nav className="sidebar-nav" aria-label="Điều hướng"><button className={view === "projects" || view === "workspace" ? "active" : ""} onClick={() => setView("projects")}><span>Lập Master timeline</span><b>{projects.length}</b></button><button className={view === "departments" ? "active" : ""} onClick={() => openDepartmentReview()}><span>PBCM xác nhận Master timeline</span>{departmentPendingCount > 0 && <b>{departmentPendingCount}</b>}</button><button className={view === "gms" ? "active" : ""} onClick={() => setView("gms")}><span>GMS Thẩm định</span>{pendingGmsCount > 0 && <b className="nav-alert">{pendingGmsCount}</b>}</button><button className={view === "catalog" ? "active" : ""} onClick={() => setView("catalog")}><span>Danh mục WBS</span><b>{fullCatalog.length}</b></button></nav>
+        <div className="brand"><img className="brand-logo" src="/nova-group-logo-light.png" alt="Nova Group" /><div className="brand-app"><strong>MTL</strong><span>Master Timeline Management</span></div></div>
+        <nav className="sidebar-nav sidebar-nav-top" aria-label="Điều hướng chính"><button className={view === "overview" ? "active" : ""} onClick={() => setView("overview")}><IconGauge /><span>Tổng quan</span></button></nav>
+        <div className="sidebar-section-label">Lập Master Timeline</div>
+        <nav className="sidebar-nav" aria-label="Điều hướng"><button className={view === "projects" || view === "workspace" ? "active" : ""} onClick={() => setView("projects")}><IconTimeline /><span>Lập Master timeline</span><b>{projects.length}</b></button><button className={view === "departments" ? "active" : ""} onClick={() => openDepartmentReview()}><IconCheck /><span>PBCM xác nhận Master timeline</span>{departmentPendingCount > 0 && <b>{departmentPendingCount}</b>}</button><button className={view === "gms" ? "active" : ""} onClick={() => setView("gms")}><IconSeal /><span>GMS Thẩm định</span>{pendingGmsCount > 0 && <b className="nav-alert">{pendingGmsCount}</b>}</button><button className={view === "catalog" ? "active" : ""} onClick={() => setView("catalog")}><IconList /><span>Danh mục WBS</span><b>{fullCatalog.length}</b></button></nav>
         <div className="template-card"><span>MẪU ĐANG DÙNG</span><strong>NVLG MTL 2026.06</strong><small>{fullCatalog.length} task · 14 nhóm · WBS cấp 4</small></div>
-        <div className="sidebar-user"><span className="avatar">PM</span><span><strong>Project Manager</strong><small>Chủ trì lập MTL</small></span></div>
+        <div className="sidebar-footer">MTL v1.0 · © 2026 Novaland Group</div>
       </aside>
 
       <section className="workspace">
-        {view === "projects" ? (
+        {view === "overview" ? (
           <>
-            <header className="topbar"><div className="breadcrumbs"><strong>Danh mục dự án</strong><i>/</i><span>{projects.length} dự án</span></div><div className="top-actions"><button className="primary-button" onClick={openCreate}>Tạo Master timeline</button></div></header>
-            <section className="project-index">
-              <header className="project-index-header"><div><span>MASTER TIMELINE</span><h1>Danh mục dự án</h1><p>Chọn tên dự án để mở màn hình lập và theo dõi MTL.</p></div><label className="search-field project-index-search"><span>Tìm dự án</span><input value={projectSearch} onChange={(event) => setProjectSearch(event.target.value)} placeholder="Nhập tên hoặc mã dự án" /></label></header>
-              <div className="project-index-list" aria-label="Các dự án hiện có">
-                {visibleProjects.map((project) => <button key={project.id} onClick={() => openProject(project)}><span className="project-index-mark">{project.code.slice(0, 2)}</span><span className="project-index-name"><b>{project.name}</b><small>{project.code}{project.location ? ` · ${project.location}` : ""}</small></span><span className={`status-badge approval-${project.approvalStatus}`}>{projectApprovalLabel(project)}{project.approvedVersion ? ` · ${project.approvedVersion}` : ""}</span><span className="project-index-open">Mở MTL</span></button>)}
-                {!visibleProjects.length && <div className="project-index-empty"><b>{projectSearch ? "Không tìm thấy dự án phù hợp" : "Chưa có dự án nào"}</b><span>{projectSearch ? "Thử tìm bằng tên hoặc mã dự án khác." : "Tạo dự án đầu tiên để hệ thống sinh Master Timeline từ danh mục WBS."}</span>{!projectSearch && <button className="primary-button" onClick={openCreate}>Tạo Master timeline</button>}</div>}
+            <header className="topbar"><div className="breadcrumbs"><strong>Tổng quan</strong><i>/</i><span>Theo dõi thực hiện công việc</span></div><div className="top-actions"><UserBadge /></div></header>
+            <section className="overview">
+              <header className="overview-header"><h1>Theo dõi thực hiện công việc</h1><span className="overview-date">{formatDate(overviewToday)}</span></header>
+
+              <div className="overview-top">
+                <div className="overview-filters">
+                  <label className="field"><span>Vùng</span><select value={overviewRegion} onChange={(event) => setOverviewRegion(event.target.value)}><option value="all">Tất cả</option>{overviewRegions.map((region) => <option key={region} value={region}>{region}</option>)}</select></label>
+                  <label className="field"><span>Tên dự án</span><select value={overviewProject} onChange={(event) => setOverviewProject(event.target.value)}><option value="all">Tất cả</option>{projects.map((project) => <option key={project.id} value={project.id}>{project.name}</option>)}</select></label>
+                  <label className="field"><span>Phòng/Ban</span><select value={overviewGroup} onChange={(event) => setOverviewGroup(event.target.value)}><option value="all">Tất cả</option>{GROUPS.map((group) => <option key={group.code} value={group.code}>{group.code} · {group.short}</option>)}</select></label>
+                </div>
+
+                <div className="kpi-card kpi-scope">
+                  <header>Tổng vùng<b>{overview.regionCount}</b></header>
+                  <div className="kpi-scope-body"><b>{formatCount(overview.projectCount)}</b><span>Dự án</span></div>
+                </div>
+
+                <div className="kpi-card kpi-work indirect">
+                  <header>{overview.indirectGroups} ban/phòng gián tiếp<b>{formatCount(overview.indirect.total)}</b></header>
+                  <div className="kpi-work-body">
+                    <WorkLegend />
+                    <div className="kpi-donut"><Donut stat={overview.indirect} /><div className="kpi-donut-values"><b style={{ color: WORK_RUNNING }}>{formatCount(overview.indirect.running)}</b><b style={{ color: WORK_LATE }}>{formatCount(overview.indirect.late)}</b><b style={{ color: WORK_DONE }}>{formatCount(overview.indirect.done)}</b></div></div>
+                  </div>
+                </div>
+
+                <div className="kpi-card kpi-work direct">
+                  <header>{overview.directGroups} phòng trực tiếp<b>{formatCount(overview.direct.total)}</b></header>
+                  <div className="kpi-work-body">
+                    <WorkLegend />
+                    <div className="kpi-donut"><Donut stat={overview.direct} /><div className="kpi-donut-values"><b style={{ color: WORK_RUNNING }}>{formatCount(overview.direct.running)}</b><b style={{ color: WORK_LATE }}>{formatCount(overview.direct.late)}</b><b style={{ color: WORK_DONE }}>{formatCount(overview.direct.done)}</b></div></div>
+                  </div>
+                </div>
               </div>
+
+              {overview.all.total === 0 ? <div className="overview-empty"><b>Chưa có dữ liệu công việc</b><span>Tạo dự án và sinh Master Timeline để theo dõi tiến độ tại đây.</span><button className="primary-button" onClick={openCreate}>Tạo Master timeline</button></div> : <div className="overview-grid">
+                <section className="panel">
+                  <header className="panel-head"><h2>Công việc theo phòng ban</h2><WorkLegend /></header>
+                  <div className="bar-list">
+                    {overview.groupRows.map(({ group, stat }) => <div className="bar-row" key={group.code}>
+                      <span className="bar-label">{group.code} {group.short}</span>
+                      <span className="bar-track" style={{ width: `${(stat.total / overviewMaxGroupTotal) * 100}%` }}>
+                        {stat.running > 0 && <i style={{ width: `${(stat.running / stat.total) * 100}%`, background: WORK_RUNNING }} title={`Đang triển khai: ${formatCount(stat.running)}`}>{stat.running / stat.total > 0.12 ? formatCount(stat.running) : ""}</i>}
+                        {stat.done > 0 && <i style={{ width: `${(stat.done / stat.total) * 100}%`, background: WORK_DONE }} title={`Hoàn thành: ${formatCount(stat.done)}`}>{stat.done / stat.total > 0.12 ? formatCount(stat.done) : ""}</i>}
+                        {stat.late > 0 && <i style={{ width: `${(stat.late / stat.total) * 100}%`, background: WORK_LATE }} title={`Trễ hạn: ${formatCount(stat.late)}`}>{stat.late / stat.total > 0.12 ? formatCount(stat.late) : ""}</i>}
+                      </span>
+                      <span className="bar-total">{formatCount(stat.total)}</span>
+                    </div>)}
+                  </div>
+                </section>
+
+                <section className="panel">
+                  <header className="panel-head"><h2>Chi tiết theo phòng ban</h2></header>
+                  <div className="heat-table">
+                    <div className="heat-head"><span>Phòng/Ban</span><span>Tổng công việc</span><span>Hoàn thành</span><span>Trễ hạn</span><span>Tỷ lệ trễ hạn</span></div>
+                    <div className="heat-body">
+                      {overview.groupRows.map(({ group, stat }) => <div className="heat-row" key={group.code}>
+                        <span>{group.code} {group.short}</span>
+                        <span>{formatCount(stat.total)}</span>
+                        <span>{formatCount(stat.done)}</span>
+                        <span style={{ background: stat.late ? `rgba(217,43,43,${0.12 + 0.78 * (stat.late / overview.groupRows.reduce((max, row) => Math.max(max, row.stat.late), 1))})` : undefined, color: stat.late / Math.max(1, overview.groupRows.reduce((max, row) => Math.max(max, row.stat.late), 1)) > 0.6 ? "#fff" : undefined }}>{formatCount(stat.late)}</span>
+                        <span>{latePercent(stat).toFixed(2)}%</span>
+                      </div>)}
+                    </div>
+                    <div className="heat-row heat-total"><span>Tổng</span><span>{formatCount(overview.all.total)}</span><span>{formatCount(overview.all.done)}</span><span>{formatCount(overview.all.late)}</span><span>{latePercent(overview.all).toFixed(2)}%</span></div>
+                  </div>
+                </section>
+
+                <section className="panel">
+                  <header className="panel-head"><h2>Công việc theo dự án</h2><WorkLegend /></header>
+                  <div className="column-chart">
+                    {overview.projectRows.slice(0, 8).map(({ project, stat }) => <div className="column-group" key={project.id}>
+                      <div className="column-bars">
+                        <i style={{ height: `${(stat.running / overviewMaxProjectTotal) * 100}%`, background: WORK_RUNNING }} title={`Đang triển khai: ${formatCount(stat.running)}`}><b>{formatCount(stat.running)}</b></i>
+                        <i style={{ height: `${(stat.done / overviewMaxProjectTotal) * 100}%`, background: WORK_DONE }} title={`Hoàn thành: ${formatCount(stat.done)}`}><b>{formatCount(stat.done)}</b></i>
+                        <i style={{ height: `${(stat.late / overviewMaxProjectTotal) * 100}%`, background: WORK_LATE }} title={`Trễ hạn: ${formatCount(stat.late)}`}><b>{formatCount(stat.late)}</b></i>
+                      </div>
+                      <span className="column-label" title={project.name}>{project.code}</span>
+                    </div>)}
+                  </div>
+                </section>
+
+                <section className="panel">
+                  <header className="panel-head"><h2>Nhân sự thực hiện</h2></header>
+                  <div className="heat-table person-table">
+                    <div className="heat-head"><span>Người thực hiện</span><span>Tổng công việc</span><span>Hoàn thành</span><span>Trễ hạn</span><span>Tỷ lệ trễ hạn</span></div>
+                    <div className="heat-body">
+                      {overview.personRows.map(({ person, stat }) => <div className="heat-row" key={person}>
+                        <span title={person}>{person}</span>
+                        <span>{formatCount(stat.total)}</span>
+                        <span>{formatCount(stat.done)}</span>
+                        <span style={{ background: stat.late ? `rgba(217,43,43,${0.12 + 0.78 * (stat.late / overviewMaxPersonLate)})` : undefined, color: stat.late / overviewMaxPersonLate > 0.6 ? "#fff" : undefined }}>{formatCount(stat.late)}</span>
+                        <span>{latePercent(stat).toFixed(2)}%</span>
+                      </div>)}
+                    </div>
+                    <div className="heat-row heat-total"><span>Tổng</span><span>{formatCount(overview.all.total)}</span><span>{formatCount(overview.all.done)}</span><span>{formatCount(overview.all.late)}</span><span>{latePercent(overview.all).toFixed(2)}%</span></div>
+                  </div>
+                </section>
+              </div>}
+            </section>
+          </>
+        ) : view === "projects" ? (
+          <>
+            <header className="topbar"><div className="breadcrumbs"><strong>Danh mục dự án</strong><i>/</i><span>{projects.length} dự án</span></div><div className="top-actions"><button className="primary-button" onClick={openCreate}>Tạo Master timeline</button><UserBadge /></div></header>
+            <section className="project-index">
+              <header className="project-index-header"><div><span>MASTER TIMELINE</span><h1>Danh mục dự án</h1><p>Chọn tên dự án để mở màn hình lập và theo dõi MTL.</p></div><label className="search-field project-index-search"><span>Tìm dự án</span><input value={projectSearch} onChange={(event) => { setProjectSearch(event.target.value); setProjectPage(1); }} placeholder="Nhập tên hoặc mã dự án" /></label></header>
+              <div className="table-filters">
+                <label className="table-filters-select"><span>Trạng thái</span><select value={projectStatusFilter} onChange={(event) => { setProjectStatusFilter(event.target.value as ApprovalStatus | "all"); setProjectPage(1); }}><option value="all">Tất cả trạng thái</option><option value="draft">{APPROVAL_LABEL.draft}</option><option value="submitted">{APPROVAL_LABEL.submitted}</option><option value="approved">{APPROVAL_LABEL.approved}</option><option value="changes_requested">{APPROVAL_LABEL.changes_requested}</option></select></label>
+                <span className="table-filters-count">{visibleProjects.length} dự án</span>
+              </div>
+              {visibleProjects.length > 0 ? <div className="project-table" aria-label="Các dự án hiện có">
+                <div className="project-table-head"><span>Mã dự án</span><span>Tên dự án</span><span>Vị trí</span><span>Trạng thái</span><span>Ngày tạo</span><span>Hành động</span></div>
+                <div className="project-table-body">
+                  {pagedProjects.map((project) => <button type="button" key={project.id} className="project-table-row" onClick={() => openProject(project)}>
+                    <span className="project-code">{project.code}</span>
+                    <span className="project-name-cell"><b>{project.name}</b><small>{project.type}</small></span>
+                    <span>{project.location || "—"}</span>
+                    <span className={`status-badge approval-${project.approvalStatus}`}>{projectApprovalLabel(project)}{project.approvedVersion ? ` · ${project.approvedVersion}` : ""}</span>
+                    <span>{formatDate(project.createdAt)}</span>
+                    <span className="project-action-cell"><i aria-hidden="true"><IconEye /></i></span>
+                  </button>)}
+                </div>
+              </div> : <div className="project-index-empty"><b>{projectSearch || projectStatusFilter !== "all" ? "Không tìm thấy dự án phù hợp" : "Chưa có dự án nào"}</b><span>{projectSearch || projectStatusFilter !== "all" ? "Thử tìm bằng tên/mã khác hoặc đổi bộ lọc trạng thái." : "Tạo dự án đầu tiên để hệ thống sinh Master Timeline từ danh mục WBS."}</span>{!projectSearch && projectStatusFilter === "all" && <button className="primary-button" onClick={openCreate}>Tạo Master timeline</button>}</div>}
+              <Pagination total={visibleProjects.length} pageSize={projectPageSize} page={projectPage} onPageChange={setProjectPage} onPageSizeChange={(size) => { setProjectPageSize(size); setProjectPage(1); }} />
             </section>
           </>
         ) : view === "catalog" ? (
           <>
-            <header className="topbar"><div className="breadcrumbs"><strong>Danh mục WBS chuẩn</strong><i>/</i><span>{fullCatalog.length} công việc</span></div><div className="top-actions"><button className="secondary-button" onClick={toggleAllCatalogTasks}>{enabledCatalogCount === fullCatalog.length ? "Bỏ tích tất cả" : "Tích tất cả"}</button><button className="primary-button" onClick={() => openTaskCreator(false)}>Thêm công việc</button></div></header>
-            <section className="catalog-header"><div><span className="status-badge">{enabledCatalogCount}/{fullCatalog.length} TỰ ĐỘNG SINH</span><h1>Thư viện WBS</h1><p>Công việc được tích “Tự động sinh” sẽ luôn có sẵn khi tạo dự án mới.</p></div><label className="search-field"><span>Tìm</span><input value={catalogSearch} onChange={(event) => setCatalogSearch(event.target.value)} placeholder="Mã WBS hoặc tên công việc" /></label></section>
+            <header className="topbar"><div className="breadcrumbs"><strong>Danh mục WBS chuẩn</strong><i>/</i><span>{fullCatalog.length} công việc</span></div><div className="top-actions"><button className="secondary-button" onClick={toggleAllCatalogTasks}>{enabledCatalogCount === fullCatalog.length ? "Bỏ tích tất cả" : "Tích tất cả"}</button><button className="primary-button" onClick={() => openTaskCreator(false)}>Thêm công việc</button><UserBadge /></div></header>
+            <section className="catalog-header"><div><span className="status-badge">{enabledCatalogCount}/{fullCatalog.length} TỰ ĐỘNG SINH</span><h1>Thư viện WBS</h1><p>Công việc được tích “Tự động sinh” sẽ luôn có sẵn khi tạo dự án mới.</p></div><label className="search-field"><span>Tìm</span><input value={catalogSearch} onChange={(event) => { setCatalogSearch(event.target.value); setCatalogPage(1); }} placeholder="Mã WBS hoặc tên công việc" /></label></section>
             <section className="catalog-groups">{GROUPS.map((group) => <div key={group.code}><span>{group.short}</span><b>{group.code} {group.name}</b><small>{fullCatalog.filter((task) => task.groupCode === group.code).length} task</small></div>)}</section>
+            <div className="table-filters">
+              <label className="table-filters-select"><span>Nhóm WBS</span><select value={catalogGroupFilter} onChange={(event) => { setCatalogGroupFilter(event.target.value); setCatalogPage(1); }}><option value="all">Tất cả nhóm</option>{GROUPS.map((group) => <option key={group.code} value={group.code}>{group.code} · {group.short}</option>)}</select></label>
+              <label className="table-filters-select"><span>Nguồn</span><select value={catalogSourceFilter} onChange={(event) => { setCatalogSourceFilter(event.target.value as "all" | "custom" | "standard"); setCatalogPage(1); }}><option value="all">Tất cả nguồn</option><option value="standard">Mẫu chuẩn</option><option value="custom">Tùy chỉnh</option></select></label>
+              <span className="table-filters-count">{catalogRows.length} công việc</span>
+            </div>
             <section className="catalog-table">
               <div className="catalog-table-head"><span>WBS / CÔNG VIỆC</span><span>ĐƠN VỊ</span><span>CẤP</span><span>THỜI LƯỢNG MẪU</span><span>NGUỒN</span><span>TỰ ĐỘNG SINH</span><span /></div>
-              {catalogRows.map((task) => { const group = GROUP_BY_CODE[task.groupCode]; return <div className={`catalog-row ${enabledCatalogCodes.has(task.code) ? "auto-enabled" : ""}`} key={`${task.custom ? "custom" : "base"}-${task.code}`}><span className="catalog-task"><b>{task.code}</b><span>{task.name}</span></span><span className="catalog-unit"><b>{group?.short}</b><span>{group?.name}</span></span><span>Cấp {task.level}</span><span>{task.defaultDuration} ngày</span><span><i className={task.custom ? "source-custom" : "source-standard"}>{task.custom ? "Tùy chỉnh" : "Mẫu chuẩn"}</i></span><span><label className="auto-generate-check"><input type="checkbox" checked={enabledCatalogCodes.has(task.code)} onChange={() => toggleCatalogTask(task)} aria-label={`Tự động sinh ${task.code}`} /><i /><b>{enabledCatalogCodes.has(task.code) ? "Có" : "Không"}</b></label></span><span>{task.custom && <button className="icon-danger" onClick={() => removeCatalogTask(task.code)} aria-label={`Xóa ${task.code}`}>Xóa</button>}</span></div>})}
+              {pagedCatalogRows.map((task) => { const group = GROUP_BY_CODE[task.groupCode]; return <div className={`catalog-row ${enabledCatalogCodes.has(task.code) ? "auto-enabled" : ""}`} key={`${task.custom ? "custom" : "base"}-${task.code}`}><span className="catalog-task"><b>{task.code}</b><span>{task.name}</span></span><span className="catalog-unit"><b>{group?.short}</b><span>{group?.name}</span></span><span>Cấp {task.level}</span><span>{task.defaultDuration} ngày</span><span><i className={task.custom ? "source-custom" : "source-standard"}>{task.custom ? "Tùy chỉnh" : "Mẫu chuẩn"}</i></span><span><label className="auto-generate-check"><input type="checkbox" checked={enabledCatalogCodes.has(task.code)} onChange={() => toggleCatalogTask(task)} aria-label={`Tự động sinh ${task.code}`} /><i /><b>{enabledCatalogCodes.has(task.code) ? "Có" : "Không"}</b></label></span><span>{task.custom && <button className="icon-danger" onClick={() => removeCatalogTask(task.code)} aria-label={`Xóa ${task.code}`}>Xóa</button>}</span></div>})}
+              {!catalogRows.length && <div className="no-results">Không tìm thấy công việc phù hợp.</div>}
             </section>
+            <Pagination total={catalogRows.length} pageSize={catalogPageSize} page={catalogPage} onPageChange={setCatalogPage} onPageSizeChange={(size) => { setCatalogPageSize(size); setCatalogPage(1); }} pageSizeOptions={[20, 40, 80]} />
           </>
         ) : view === "departments" ? (
           <>
-            <header className="topbar"><div className="breadcrumbs"><strong>Phòng ban xác nhận</strong>{activeProject && <><i>/</i><span>{activeProject.code}</span></>}</div><div className="top-actions">{activeProject && <label className="department-project-select"><span>Dự án</span><select value={activeProject.id} onChange={(event) => { const project = projects.find((item) => item.id === event.target.value); if (project) { setActiveId(project.id); setDepartmentCode(project.selectedGroups[0] ?? GROUPS[0].code); } }}>{projects.map((project) => <option key={project.id} value={project.id}>{project.name}</option>)}</select></label>}</div></header>
+            <header className="topbar"><div className="breadcrumbs"><strong>Phòng ban xác nhận</strong>{activeProject && <><i>/</i><span>{activeProject.code}</span></>}</div><div className="top-actions">{activeProject && <label className="department-project-select"><span>Dự án</span><select value={activeProject.id} onChange={(event) => { const project = projects.find((item) => item.id === event.target.value); if (project) { setActiveId(project.id); setDepartmentCode(project.selectedGroups[0] ?? GROUPS[0].code); } }}>{projects.map((project) => <option key={project.id} value={project.id}>{project.name}</option>)}</select></label>}<UserBadge /></div></header>
             {activeProject ? <>
               <section className="department-header"><div><span className="status-badge">BƯỚC 2/4</span><h1>Xác nhận MTL theo phòng ban</h1><p>Mỗi đơn vị chỉ xem và xác nhận toàn bộ cây công việc thuộc đầu mục WBS của mình.</p></div><div className="department-progress"><b>{departmentApprovedCount}/{activeProject.selectedGroups.length}</b><span>ĐẦU MỤC ĐÃ XÁC NHẬN</span><i><em style={{ width: `${(departmentApprovedCount / Math.max(activeProject.selectedGroups.length, 1)) * 100}%` }} /></i></div></section>
               <section className="department-review-layout">
@@ -993,7 +1304,7 @@ export default function Home() {
           </>
         ) : view === "gms" ? (
           <>
-            <header className="topbar"><div className="breadcrumbs"><strong>GMS Thẩm định</strong></div><div className="top-actions"></div></header>
+            <header className="topbar"><div className="breadcrumbs"><strong>GMS Thẩm định</strong></div><div className="top-actions"><UserBadge /></div></header>
             <section className="gms-header"><div><h1>Danh mục dự án MTL cần thẩm định</h1><p>Tìm và chọn dự án để xem toàn bộ công việc, nhập ý kiến rồi gửi phản hồi cho người lập.</p></div><div className="gms-metrics"><div><b>{pendingGmsCount}</b><span>CHỜ THẨM ĐỊNH</span></div><div><b>{projects.filter((project) => project.approvalStatus === "approved").length}</b><span>ĐÃ XÁC NHẬN</span></div><div><b>{projects.filter((project) => project.approvalStatus === "changes_requested").length}</b><span>YÊU CẦU ĐIỀU CHỈNH</span></div></div></section>
             <section className="gms-queue">
               <div className="gms-directory-toolbar">
@@ -1032,7 +1343,7 @@ export default function Home() {
           <>
             <header className="topbar">
               <div className="breadcrumbs"><button className="breadcrumb-back" onClick={() => setView("projects")}>Danh mục dự án</button><i>/</i><strong>{activeProject.code}</strong></div>
-              <div className="top-actions"><span className="saved-state"><i />Đã lưu trên thiết bị</span><button className="danger-button" onClick={() => setShowDelete(true)}>Xóa dự án</button><button className="secondary-button project-export" onClick={exportMicrosoftProject}>Xuất Microsoft Project <small>.xml → .mpp</small></button><button className="primary-button" onClick={openCreate}>Tạo Master timeline</button></div>
+              <div className="top-actions"><span className="saved-state"><i />Đã lưu trên thiết bị</span><button className="danger-button" onClick={() => setShowDelete(true)}>Xóa dự án</button><button className="secondary-button project-export" onClick={exportMicrosoftProject}>Xuất Microsoft Project <small>.xml → .mpp</small></button><button className="primary-button" onClick={openCreate}>Tạo Master timeline</button><UserBadge /></div>
             </header>
 
             <section className="project-header">
