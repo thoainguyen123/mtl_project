@@ -1723,6 +1723,86 @@ export default function Home() {
           padding: 0 !important;
           display: block !important;
         }
+        .sidebar-section-toggle {
+          width: 100% !important;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: space-between !important;
+          gap: 6px !important;
+          height: 38px !important;
+          padding: 16px 8px 6px !important;
+          border: 0 !important;
+          background: transparent !important;
+          color: #728ea7 !important;
+          font-size: 10.5px !important;
+          font-weight: 700 !important;
+          letter-spacing: 1.2px !important;
+          text-transform: uppercase !important;
+          cursor: pointer !important;
+          transition: color 0.15s ease !important;
+        }
+        .sidebar-section-toggle:hover {
+          color: #b8d5ec !important;
+        }
+        .section-chevron {
+          flex: none !important;
+          transition: transform 0.2s ease !important;
+        }
+        .sidebar-section-toggle.open .section-chevron {
+          transform: rotate(180deg) !important;
+        }
+        .sidebar-collapsible {
+          display: flex !important;
+          flex-direction: column !important;
+          gap: 3px !important;
+          margin: 4px 0 0 !important;
+          padding: 0 !important;
+          border: 0 !important;
+          background: transparent !important;
+        }
+        .sidebar-collapsible.collapsed {
+          display: none !important;
+        }
+        .sidebar-nav button {
+          width: 100% !important;
+          min-height: 44px !important;
+          height: 44px !important;
+          display: flex !important;
+          align-items: center !important;
+          gap: 12px !important;
+          padding: 0 12px !important;
+          justify-content: flex-start !important;
+          border: 0 !important;
+          border-radius: 8px !important;
+          background: transparent !important;
+          color: #dbe4ef !important;
+          font-size: 13px !important;
+          font-weight: 600 !important;
+          text-align: left !important;
+          box-sizing: border-box !important;
+          cursor: pointer !important;
+          transition: all 0.15s !important;
+        }
+        .sidebar-nav button:hover {
+          background: rgba(255, 255, 255, 0.08) !important;
+          color: #ffffff !important;
+        }
+        .sidebar-nav button.active {
+          background: linear-gradient(90deg, #8cc63f, #63a532) !important;
+          color: #ffffff !important;
+          font-weight: 700 !important;
+          box-shadow: 0 3px 10px rgba(140, 198, 63, 0.33) !important;
+        }
+        .sidebar-nav button .nav-icon {
+          width: 22px !important;
+          height: 22px !important;
+          min-width: 22px !important;
+          max-width: 22px !important;
+          flex: none !important;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+        }
       `}</style>
       <aside className="sidebar">
         <div className="brand">
@@ -1739,10 +1819,9 @@ export default function Home() {
         </div>
         {/* Module 1: LẬP MASTER TIMELINE — sổ ra/thu gọn được */}
         {(() => {
-          const lapMtlViews: typeof view[] = ["projects", "workspace", "departments", "gmd", "gms", "confirm_approval", "catalog"];
-          const lapMtlSectionOpen = lapMtlOpen || lapMtlViews.includes(view);
+          const lapMtlSectionOpen = lapMtlOpen;
           return <>
-            <button type="button" className={`sidebar-section-toggle ${lapMtlSectionOpen ? "open" : ""}`} onClick={() => setLapMtlOpen((current) => !current)} aria-expanded={lapMtlSectionOpen}>
+            <button type="button" className={`sidebar-section-toggle ${lapMtlSectionOpen ? "open" : ""}`} onClick={() => setLapMtlOpen((current) => !current)} aria-expanded={lapMtlSectionOpen} title={lapMtlSectionOpen ? "Thu gọn menu Lập MTL" : "Mở rộng menu Lập MTL"}>
               <span>Lập Master Timeline</span>
               <IconChevronDown />
             </button>
