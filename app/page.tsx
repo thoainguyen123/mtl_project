@@ -170,9 +170,25 @@ const GROUP_ORDER = Object.fromEntries(GROUPS.map((group, index) => [group.code,
 const today = new Date().toISOString().slice(0, 10);
 const nextYear = new Date(Date.now() + 365 * 86400000).toISOString().slice(0, 10);
 
+const REGIONS = [
+  "Vùng Đồng Nai 1",
+  "Vùng Phan Thiết 1",
+  "Vùng Hồ Chí Minh 1",
+  "Vùng Hồ Tràm 1",
+] as const;
+
+function normalizeRegion(region?: string, location?: string, name?: string): string {
+  const text = `${region ?? ""} ${location ?? ""} ${name ?? ""}`.toLowerCase();
+  if (text.includes("đồng nai") || text.includes("dong nai") || text.includes("aqua") || text.includes("vùng 2")) return "Vùng Đồng Nai 1";
+  if (text.includes("phan thiết") || text.includes("phan thiet") || text.includes("bình thuận") || text.includes("binh thuan") || text.includes("vùng 3")) return "Vùng Phan Thiết 1";
+  if (text.includes("hồ tràm") || text.includes("ho tram") || text.includes("vũng tàu") || text.includes("vung tau") || text.includes("xuyên mộc") || text.includes("vùng 4")) return "Vùng Hồ Tràm 1";
+  if (text.includes("hồ chí minh") || text.includes("ho chi minh") || text.includes("tp.hcm") || text.includes("tphcm") || text.includes("hcm") || text.includes("quận") || text.includes("vùng 1")) return "Vùng Hồ Chí Minh 1";
+  return region || "Vùng Hồ Chí Minh 1";
+}
+
 const emptyForm: ProjectForm = {
   area: "Khu vực 1",
-  region: "Vùng 1 (TP.HCM)",
+  region: "Vùng Hồ Chí Minh 1",
   name: "",
   code: "",
   investor: "Tập đoàn Novaland",
@@ -192,7 +208,7 @@ const DEFAULT_INITIAL_PROJECTS: Partial<Project>[] = [
     investor: "Công ty TNHH BĐS Đà Lạt Valley",
     location: "Biên Hòa, Đồng Nai",
     area: "Đồng Nai",
-    region: "Vùng 2 (Đông Nam Bộ)",
+    region: "Vùng Đồng Nai 1",
     group: "Nhóm 1 (Đang triển khai)",
     approvalStatus: "approved",
     isOfficialApproved: true,
@@ -212,7 +228,7 @@ const DEFAULT_INITIAL_PROJECTS: Partial<Project>[] = [
     investor: "Công ty CP Đầu tư Địa ốc No Va",
     location: "Phan Thiết, Bình Thuận",
     area: "Bình Thuận",
-    region: "Vùng 3 (Nam Trung Bộ)",
+    region: "Vùng Phan Thiết 1",
     group: "Nhóm 1 (Đang triển khai)",
     approvalStatus: "gmd_review",
     designTaskStatus: "pbcm_gop_y",
@@ -228,7 +244,7 @@ const DEFAULT_INITIAL_PROJECTS: Partial<Project>[] = [
     investor: "Công ty CP Đất Ngọc",
     location: "Quận 1, TP. Hồ Chí Minh",
     area: "TP.HCM",
-    region: "Vùng 1 (TP.HCM)",
+    region: "Vùng Hồ Chí Minh 1",
     group: "Nhóm 1 (Đang triển khai)",
     approvalStatus: "draft",
     designTaskStatus: "dang_lap",
@@ -244,7 +260,7 @@ const DEFAULT_INITIAL_PROJECTS: Partial<Project>[] = [
     investor: "Công ty CP BĐS Nova Lexington",
     location: "Xuyên Mộc, Bà Rịa - Vũng Tàu",
     area: "Bà Rịa - Vũng Tàu",
-    region: "Vùng 4 (Bà Rịa - Vũng Tàu)",
+    region: "Vùng Hồ Tràm 1",
     group: "Nhóm 2 (Chuẩn bị đầu tư)",
     approvalStatus: "submitted",
     designTaskStatus: "pbcm_gop_y",
@@ -323,7 +339,7 @@ function normalizeProject(project: Partial<Project>): Project {
     investor: project.investor ?? "Tập đoàn Novaland",
     location: project.location ?? "",
     area: project.area ?? "Khu vực 1",
-    region: project.region ?? "",
+    region: normalizeRegion(project.region, project.location, project.name),
     group: project.group ?? "Nhóm 1 (Đang nghiên cứu)",
     startDate: project.startDate ?? today,
     targetDate: project.targetDate ?? nextYear,
@@ -4066,13 +4082,11 @@ export default function Home() {
             <div className="form-grid">
               <label className="field">
                 <span>Vùng quản lý *</span>
-                <select autoFocus value={form.region || "Vùng 1 (TP.HCM)"} onChange={(event) => setForm({ ...form, region: event.target.value })}>
-                  <option value="Vùng 1 (TP.HCM)">Vùng 1 (TP.HCM)</option>
-                  <option value="Vùng 2 (Đông Nam Bộ / Đồng Nai)">Vùng 2 (Đông Nam Bộ / Đồng Nai)</option>
-                  <option value="Vùng 3 (Nam Trung Bộ / Bình Thuận)">Vùng 3 (Nam Trung Bộ / Bình Thuận)</option>
-                  <option value="Vùng 4 (Bà Rịa - Vũng Tàu)">Vùng 4 (Bà Rịa - Vũng Tàu)</option>
-                  <option value="Vùng 5 (Tây Nguyên / Lâm Đồng / Khánh Hòa)">Vùng 5 (Tây Nguyên / Lâm Đồng / Khánh Hòa)</option>
-                  <option value="Toàn quốc">Toàn quốc</option>
+                <select autoFocus value={form.region || "Vùng Hồ Chí Minh 1"} onChange={(event) => setForm({ ...form, region: event.target.value })}>
+                  <option value="Vùng Đồng Nai 1">Vùng Đồng Nai 1</option>
+                  <option value="Vùng Phan Thiết 1">Vùng Phan Thiết 1</option>
+                  <option value="Vùng Hồ Chí Minh 1">Vùng Hồ Chí Minh 1</option>
+                  <option value="Vùng Hồ Tràm 1">Vùng Hồ Tràm 1</option>
                 </select>
               </label>
               <label className="field">
