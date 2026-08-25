@@ -186,6 +186,14 @@ function normalizeRegion(region?: string, location?: string, name?: string): str
   return region || "Vùng Hồ Chí Minh 1";
 }
 
+const PROJECT_GROUPS = [
+  "Nhóm 1 (Đang nghiên cứu)",
+  "Nhóm 2 (Đã mua đang thiết kế)",
+  "Nhóm 3 (Đang xây dựng)",
+  "Nhóm 4 (Đã bàn giao khách hàng)",
+  "Nhóm 5 (Thoái vốn)",
+] as const;
+
 const emptyForm: ProjectForm = {
   area: "Khu vực 1",
   region: "Vùng Hồ Chí Minh 1",
@@ -209,7 +217,7 @@ const DEFAULT_INITIAL_PROJECTS: Partial<Project>[] = [
     location: "Biên Hòa, Đồng Nai",
     area: "Đồng Nai",
     region: "Vùng Đồng Nai 1",
-    group: "Nhóm 1 (Đang triển khai)",
+    group: "Nhóm 3 (Đang xây dựng)",
     approvalStatus: "approved",
     isOfficialApproved: true,
     eApprovalCode: "QĐ-NVL-2026/892",
@@ -229,7 +237,7 @@ const DEFAULT_INITIAL_PROJECTS: Partial<Project>[] = [
     location: "Phan Thiết, Bình Thuận",
     area: "Bình Thuận",
     region: "Vùng Phan Thiết 1",
-    group: "Nhóm 1 (Đang triển khai)",
+    group: "Nhóm 3 (Đang xây dựng)",
     approvalStatus: "gmd_review",
     designTaskStatus: "pbcm_gop_y",
     fsStatus: "dang_tinh_toan",
@@ -245,7 +253,7 @@ const DEFAULT_INITIAL_PROJECTS: Partial<Project>[] = [
     location: "Quận 1, TP. Hồ Chí Minh",
     area: "TP.HCM",
     region: "Vùng Hồ Chí Minh 1",
-    group: "Nhóm 1 (Đang triển khai)",
+    group: "Nhóm 3 (Đang xây dựng)",
     approvalStatus: "draft",
     designTaskStatus: "dang_lap",
     fsStatus: "dang_tinh_toan",
@@ -261,7 +269,7 @@ const DEFAULT_INITIAL_PROJECTS: Partial<Project>[] = [
     location: "Xuyên Mộc, Bà Rịa - Vũng Tàu",
     area: "Bà Rịa - Vũng Tàu",
     region: "Vùng Hồ Tràm 1",
-    group: "Nhóm 2 (Chuẩn bị đầu tư)",
+    group: "Nhóm 2 (Đã mua đang thiết kế)",
     approvalStatus: "submitted",
     designTaskStatus: "pbcm_gop_y",
     fsStatus: "cho_doi_chieu",
@@ -4332,8 +4340,6 @@ export default function Home() {
                   value={form.group}
                   onChange={(event) => setForm({ ...form, group: event.target.value })}
                 >
-                  <option>Nhóm 1 (Đang triển khai)</option>
-                  <option>Nhóm 2 (Chuẩn bị đầu tư)</option>
                   <option>Nhóm 1 (Đang nghiên cứu)</option>
                   <option>Nhóm 2 (Đã mua đang thiết kế)</option>
                   <option>Nhóm 3 (Đang xây dựng)</option>
