@@ -2531,6 +2531,160 @@ export default function Home() {
           border-top: 1px solid #f1f5f9 !important;
           background: #ffffff !important;
         }
+        /* ================= 7-COLUMN MASTER TIMELINE TASK GRID ================= */
+        .task-grid {
+          background: #ffffff !important;
+          border-radius: 10px !important;
+          border: 1px solid #e2e8f0 !important;
+          overflow: hidden !important;
+          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
+        }
+        .task-grid .grid-header {
+          display: grid !important;
+          grid-template-columns: 120px minmax(280px, 2.5fr) 130px 120px 120px minmax(140px, 1.2fr) minmax(140px, 1.2fr) !important;
+          align-items: center !important;
+          min-width: 1050px !important;
+          height: 42px !important;
+          background: #f8fafc !important;
+          border-bottom: 1px solid #e2e8f0 !important;
+          font-size: 11px !important;
+          font-weight: 800 !important;
+          color: #475569 !important;
+          letter-spacing: 0.4px !important;
+          text-transform: uppercase !important;
+        }
+        .task-grid .grid-header > span {
+          padding: 0 12px !important;
+          border-right: 1px solid #edf2f7 !important;
+          display: flex !important;
+          align-items: center !important;
+          height: 100% !important;
+        }
+        .task-grid .grid-header > span:last-child {
+          border-right: none !important;
+        }
+        .task-grid .task-row {
+          display: grid !important;
+          grid-template-columns: 120px minmax(280px, 2.5fr) 130px 120px 120px minmax(140px, 1.2fr) minmax(140px, 1.2fr) !important;
+          align-items: center !important;
+          min-width: 1050px !important;
+          min-height: 44px !important;
+          border-bottom: 1px solid #f1f5f9 !important;
+          color: #1e293b !important;
+          font-size: 12.5px !important;
+          transition: background 0.12s ease !important;
+          cursor: pointer !important;
+        }
+        .task-grid .task-row:hover {
+          background: #f8fafc !important;
+        }
+        .task-grid .task-row.selected {
+          background: #eff6ff !important;
+          box-shadow: inset 3px 0 #1a56a8 !important;
+        }
+        .task-grid .task-row.summary {
+          background: #fafafa !important;
+          font-weight: 700 !important;
+        }
+        .task-grid .task-row.level-1 {
+          background: #f1f5f9 !important;
+          font-weight: 800 !important;
+        }
+        .task-cell-wbs {
+          display: flex !important;
+          align-items: center !important;
+          gap: 6px !important;
+          padding-left: calc(10px + var(--indent, 0px)) !important;
+          padding-right: 8px !important;
+          height: 100% !important;
+        }
+        .wbs-tag {
+          font-size: 11px !important;
+          font-weight: 800 !important;
+          color: #0f172a !important;
+          background: #e2e8f0 !important;
+          padding: 2px 6px !important;
+          border-radius: 4px !important;
+          white-space: nowrap !important;
+        }
+        .task-row.level-1 .wbs-tag {
+          background: #cbd5e1 !important;
+          color: #0f172a !important;
+        }
+        .task-cell-name {
+          display: flex !important;
+          align-items: center !important;
+          gap: 8px !important;
+          padding: 6px 12px !important;
+          white-space: nowrap !important;
+          overflow: hidden !important;
+          text-overflow: ellipsis !important;
+          font-size: 12.5px !important;
+        }
+        .task-row.summary .task-cell-name {
+          font-weight: 800 !important;
+          color: #0f172a !important;
+        }
+        .task-cell-duration {
+          padding: 0 12px !important;
+          font-size: 12px !important;
+          font-weight: 600 !important;
+          color: #475569 !important;
+        }
+        .duration-badge {
+          display: inline-block !important;
+          padding: 2px 8px !important;
+          background: #f1f5f9 !important;
+          border-radius: 6px !important;
+          font-size: 11.5px !important;
+          font-weight: 700 !important;
+          color: #334155 !important;
+        }
+        .task-cell-date {
+          padding: 0 12px !important;
+          font-size: 12px !important;
+          font-weight: 600 !important;
+          color: #334155 !important;
+          white-space: nowrap !important;
+        }
+        .task-cell-note {
+          padding: 0 12px !important;
+          font-size: 12px !important;
+          color: #64748b !important;
+          white-space: nowrap !important;
+          overflow: hidden !important;
+          text-overflow: ellipsis !important;
+        }
+        .task-cell-links {
+          padding: 0 12px !important;
+          display: flex !important;
+          align-items: center !important;
+          gap: 4px !important;
+          flex-wrap: wrap !important;
+        }
+        .link-chips-wrap {
+          display: flex !important;
+          align-items: center !important;
+          gap: 4px !important;
+          flex-wrap: wrap !important;
+        }
+        .link-chip {
+          display: inline-flex !important;
+          align-items: center !important;
+          padding: 1px 6px !important;
+          background: #eff6ff !important;
+          color: #1d4ed8 !important;
+          border: 1px solid #bfdbfe !important;
+          border-radius: 4px !important;
+          font-size: 10px !important;
+          font-weight: 700 !important;
+          white-space: nowrap !important;
+        }
+        .link-chip.conflict {
+          background: #fef2f2 !important;
+          color: #b91c1c !important;
+          border-color: #fca5a5 !important;
+        }
       `}</style>
       <aside className="sidebar">
         <div className="brand">
@@ -4059,51 +4213,108 @@ export default function Home() {
 
             <div className={`planning-area ${selectedTask ? "with-detail" : ""}`}>
               <section className="task-grid" aria-label="Cây công việc Master Timeline">
-                <div className="grid-header" style={{ gridTemplateColumns: "minmax(260px, 1.4fr) 80px 150px 100px 90px 70px" }}>
-                  <span>CÔNG VIỆC / WBS</span>
-                  <span>ĐƠN VỊ</span>
-                  <span>KẾ HOẠCH</span>
-                  <span>% THỰC TẾ</span>
-                  <span>TRẠNG THÁI</span>
-                  <span>TIẾN ĐỘ</span>
+                <div className="grid-header" style={{ gridTemplateColumns: "120px minmax(280px, 2.5fr) 130px 120px 120px minmax(140px, 1.2fr) minmax(140px, 1.2fr)" }}>
+                  <span>WBS</span>
+                  <span>HẠNG MỤC</span>
+                  <span>THỜI GIAN THỰC HIỆN</span>
+                  <span>NGÀY BẮT ĐẦU</span>
+                  <span>NGÀY KẾT THÚC</span>
+                  <span>GHI CHÚ</span>
+                  <span>LIÊN KẾT</span>
                 </div>
                 <div className="grid-body">
                   {visibleTasks.map((task) => {
-                    const group = GROUP_BY_CODE[task.groupCode];
                     const isCollapsed = collapsed.has(task.code);
+                    const taskNote = activeProject.taskEdits[task.code]?.note || activeProject.taskEdits[task.code]?.actualNote || "";
                     return (
-                      <div key={task.code} role="button" tabIndex={0} className={`task-row level-${Math.min(task.level, 4)} ${selectedCode === task.code ? "selected" : ""} ${task.summary ? "summary" : ""}`} style={{ gridTemplateColumns: "minmax(260px, 1.4fr) 80px 150px 100px 90px 70px" }} onClick={() => setSelectedCode(task.code)} onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") setSelectedCode(task.code); }}>
-                        <span className="task-cell task-title" title="Nhấp chuột phải để thêm, sửa hoặc xóa" onContextMenu={(event) => { event.preventDefault(); event.stopPropagation(); setContextMenu({ code: task.code, x: Math.min(event.clientX, window.innerWidth - 220), y: Math.min(event.clientY, window.innerHeight - 180) }); }} style={{ "--indent": `${(task.level - 1) * 18}px` } as React.CSSProperties}>
-                          {task.summary ? <i className="toggle" role="button" aria-label={isCollapsed ? "Mở nhóm" : "Thu gọn nhóm"} onClick={(event) => { event.stopPropagation(); setCollapsed((current) => { const next = new Set(current); if (next.has(task.code)) next.delete(task.code); else next.add(task.code); return next; }); }}>{isCollapsed ? "+" : "−"}</i> : <i className="task-dot" />}
-                          <span className="task-inline"><b>{task.code}</b><small>{task.name}</small>{task.custom && <i className="custom-chip">Mới</i>}{task.predecessors.length > 0 && <i className={`dependency-chip ${task.dependencyConflict ? "conflict" : ""}`}>{task.predecessors.map((dependency) => `${dependency.type} · ${dependency.predecessorCode}${dependency.lagDays ? ` + ${dependency.lagDays}d` : ""}`).join(", ")}</i>}</span>
-                        </span>
-                        <span className="task-cell owner-cell"><b>{group?.short}</b><small>{group?.name}</small></span>
-                        <span className="task-cell date-cell" style={{ fontSize: "10px", lineHeight: "1.2" }}>
-                          <b>{formatDate(task.startDate)}</b>
-                          <small style={{ color: "#627d98", display: "block" }}>→ {formatDate(task.endDate)} ({task.duration}d)</small>
-                        </span>
-                        <span className="task-cell" onClick={(e) => { e.stopPropagation(); if (!task.summary) openProgressModal(task); }}>
-                          <div className="progress-cell" style={{ cursor: task.summary ? "default" : "pointer" }}>
-                            <div className="progress-cell-header">
-                              <span className="percent">{task.actualProgress}%</span>
-                            </div>
-                            <div className="progress-bar-track">
-                              <div className={`progress-bar-fill ${task.actualProgress === 100 ? "done" : (task.actualStatus === "Trễ hạn" ? "late" : "running")}`} style={{ width: `${task.actualProgress}%` }} />
-                            </div>
-                          </div>
-                        </span>
-                        <span className="task-cell">
-                          <i className={`actual-status-badge ${task.actualStatus === "Hoàn thành" ? "status-done" : (task.actualStatus === "Trễ hạn" ? "status-late" : (task.actualStatus === "Đang thực hiện" ? "status-running" : "status-idle"))}`}>
-                            {task.actualStatus}
-                          </i>
-                        </span>
-                        <span className="task-cell">
-                          {!task.summary ? (
-                            <button type="button" className="progress-quick-btn" title="Cập nhật tiến độ thực tế" onClick={(e) => { e.stopPropagation(); openProgressModal(task); }}>
-                              <IconSlider />
-                            </button>
+                      <div
+                        key={task.code}
+                        role="button"
+                        tabIndex={0}
+                        className={`task-row level-${Math.min(task.level, 4)} ${selectedCode === task.code ? "selected" : ""} ${task.summary ? "summary" : ""}`}
+                        style={{ gridTemplateColumns: "120px minmax(280px, 2.5fr) 130px 120px 120px minmax(140px, 1.2fr) minmax(140px, 1.2fr)" }}
+                        onClick={() => setSelectedCode(task.code)}
+                        onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") setSelectedCode(task.code); }}
+                      >
+                        {/* 1. WBS */}
+                        <span className="task-cell task-cell-wbs" style={{ "--indent": `${(task.level - 1) * 14}px` } as React.CSSProperties}>
+                          {task.summary ? (
+                            <i
+                              className="toggle"
+                              role="button"
+                              aria-label={isCollapsed ? "Mở nhóm" : "Thu gọn nhóm"}
+                              onClick={(event) => {
+                                event.stopPropagation();
+                                setCollapsed((current) => {
+                                  const next = new Set(current);
+                                  if (next.has(task.code)) next.delete(task.code);
+                                  else next.add(task.code);
+                                  return next;
+                                });
+                              }}
+                            >
+                              {isCollapsed ? "+" : "−"}
+                            </i>
                           ) : (
-                            <span style={{ fontSize: "10px", color: "#829ab1", fontWeight: 700 }}>Tổng hợp</span>
+                            <i className="task-dot" />
+                          )}
+                          <span className="wbs-tag">{task.code}</span>
+                        </span>
+
+                        {/* 2. Hạng mục */}
+                        <span
+                          className="task-cell task-cell-name"
+                          title={task.name}
+                          onContextMenu={(event) => {
+                            event.preventDefault();
+                            event.stopPropagation();
+                            setContextMenu({
+                              code: task.code,
+                              x: Math.min(event.clientX, window.innerWidth - 220),
+                              y: Math.min(event.clientY, window.innerHeight - 180),
+                            });
+                          }}
+                        >
+                          <span className="task-name-text">{task.name}</span>
+                          {task.custom && <i className="custom-chip">Mới</i>}
+                        </span>
+
+                        {/* 3. Thời gian thực hiện */}
+                        <span className="task-cell task-cell-duration">
+                          <span className="duration-badge">{task.duration} ngày</span>
+                        </span>
+
+                        {/* 4. Ngày bắt đầu */}
+                        <span className="task-cell task-cell-date">
+                          <b>{formatDate(task.startDate)}</b>
+                        </span>
+
+                        {/* 5. Ngày kết thúc */}
+                        <span className="task-cell task-cell-date">
+                          <b>{formatDate(task.endDate)}</b>
+                        </span>
+
+                        {/* 6. Ghi chú */}
+                        <span className="task-cell task-cell-note" title={taskNote || "Chưa có ghi chú"}>
+                          {taskNote ? <span>{taskNote}</span> : <span style={{ color: "#cbd5e1" }}>—</span>}
+                        </span>
+
+                        {/* 7. Liên kết */}
+                        <span className="task-cell task-cell-links">
+                          {task.predecessors.length > 0 ? (
+                            <div className="link-chips-wrap">
+                              {task.predecessors.map((dep) => (
+                                <span
+                                  key={dep.predecessorCode}
+                                  className={`link-chip ${task.dependencyConflict ? "conflict" : ""}`}
+                                  title={`Liên kết ${dep.type} từ ${dep.predecessorCode}${dep.lagDays ? ` (+${dep.lagDays} ngày)` : ""}`}
+                                >
+                                  {dep.predecessorCode} ({dep.type}{dep.lagDays ? `+${dep.lagDays}d` : ""})
+                                </span>
+                              ))}
+                            </div>
+                          ) : (
+                            <span style={{ color: "#cbd5e1" }}>—</span>
                           )}
                         </span>
                       </div>
@@ -4111,7 +4322,7 @@ export default function Home() {
                   })}
                   {!visibleTasks.length && <div className="no-results">Không tìm thấy công việc phù hợp.</div>}
                 </div>
-                <footer className="grid-footer"><span>Hiển thị {visibleTasks.length}/{scheduled.length} task · {projectDependencyCount(activeProject)} liên kết</span><span>{activeProject.isOfficialApproved ? `Master Timeline chính thức đã khóa Baseline. Bấm vào cột % để cập nhật tiến độ thực tế.` : "Nhấp chuột phải tại cột Công việc/WBS để thêm con, chỉnh sửa hoặc xóa."}</span></footer>
+                <footer className="grid-footer"><span>Hiển thị {visibleTasks.length}/{scheduled.length} task · {projectDependencyCount(activeProject)} liên kết</span><span>Nhấp chuột vào dòng để chỉnh sửa chi tiết, ngày tháng, liên kết hoặc nhấp chuột phải để thêm/xóa công việc.</span></footer>
               </section>
 
               {selectedTask && (
