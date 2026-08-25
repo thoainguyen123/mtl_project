@@ -1129,7 +1129,7 @@ export default function Home() {
         }
       `}</style>
       <aside className="sidebar">
-        <div className="brand"><img className="brand-logo" src="/nova-group-logo-light.png" alt="Nova Group" /><div className="brand-app"><strong>MTL</strong><span>Master Timeline Management</span></div></div>
+        <div className="brand"><img className="brand-logo" src="/nova-group-logo-light.png" alt="Nova Group" /><div className="brand-app"><strong>Master Timeline Management</strong></div></div>
         <nav className="sidebar-nav sidebar-nav-top" aria-label="Điều hướng chính"><button className={view === "overview" ? "active" : ""} onClick={() => setView("overview")}><IconGauge /><span>Tổng quan</span></button></nav>
         <div className="sidebar-section-label">Lập Master Timeline</div>
         <nav className="sidebar-nav" aria-label="Điều hướng"><button className={view === "projects" || view === "workspace" ? "active" : ""} onClick={() => setView("projects")}><IconTimeline /><span>Lập Master timeline</span><b>{projects.length}</b></button><button className={view === "departments" ? "active" : ""} onClick={() => openDepartmentReview()}><IconCheck /><span>PBCM xác nhận Master timeline</span>{departmentPendingCount > 0 && <b>{departmentPendingCount}</b>}</button><button className={view === "gms" ? "active" : ""} onClick={() => setView("gms")}><IconSeal /><span>GMS Thẩm định</span>{pendingGmsCount > 0 && <b className="nav-alert">{pendingGmsCount}</b>}</button><button className={view === "catalog" ? "active" : ""} onClick={() => setView("catalog")}><IconList /><span>Danh mục WBS</span><b>{fullCatalog.length}</b></button></nav>
