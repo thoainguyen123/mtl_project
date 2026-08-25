@@ -1731,59 +1731,68 @@ export default function Home() {
           padding: 0 !important;
           display: block !important;
         }
+        .sidebar {
+          width: 275px !important;
+        }
         .sidebar-section-toggle {
           width: 100% !important;
           display: flex !important;
           align-items: center !important;
           justify-content: space-between !important;
-          gap: 10px !important;
-          height: 48px !important;
-          min-height: 48px !important;
-          padding: 0 14px !important;
-          margin: 14px 0 8px !important;
+          gap: 8px !important;
+          height: 44px !important;
+          min-height: 44px !important;
+          padding: 0 10px !important;
+          margin: 10px 0 6px !important;
           border: 0 !important;
           border-radius: 8px !important;
           background: linear-gradient(90deg, #7cb342 0%, #558b2f 100%) !important;
           color: #ffffff !important;
-          font-size: 13.5px !important;
-          font-weight: 700 !important;
-          letter-spacing: 0.3px !important;
+          font-size: 11.5px !important;
+          font-weight: 800 !important;
+          letter-spacing: 0.1px !important;
           cursor: pointer !important;
-          box-shadow: 0 3px 12px rgba(124, 179, 66, 0.38) !important;
+          box-shadow: 0 3px 10px rgba(124, 179, 66, 0.32) !important;
           transition: all 0.18s ease !important;
           box-sizing: border-box !important;
         }
         .sidebar-section-toggle:hover {
           background: linear-gradient(90deg, #85c247 0%, #5d9834 100%) !important;
-          box-shadow: 0 5px 16px rgba(124, 179, 66, 0.48) !important;
+          box-shadow: 0 5px 14px rgba(124, 179, 66, 0.42) !important;
           transform: translateY(-1px) !important;
         }
         .section-toggle-left {
           display: flex !important;
           align-items: center !important;
-          gap: 10px !important;
+          gap: 8px !important;
           min-width: 0 !important;
+          flex: 1 !important;
           color: #ffffff !important;
         }
         .section-toggle-left span {
-          font-size: 13.5px !important;
-          font-weight: 700 !important;
+          font-size: 11.5px !important;
+          font-weight: 800 !important;
           color: #ffffff !important;
           white-space: nowrap !important;
-          overflow: hidden !important;
-          text-overflow: ellipsis !important;
+          overflow: visible !important;
           text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25) !important;
+          letter-spacing: 0.1px !important;
+          text-transform: uppercase !important;
         }
         .section-header-icon {
-          width: 22px !important;
-          height: 22px !important;
+          width: 19px !important;
+          height: 19px !important;
+          min-width: 19px !important;
+          max-width: 19px !important;
           flex: none !important;
           color: #ffffff !important;
           filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2)) !important;
         }
         .section-chevron {
-          width: 14px !important;
-          height: 14px !important;
+          width: 12px !important;
+          height: 12px !important;
+          min-width: 12px !important;
+          max-width: 12px !important;
           flex: none !important;
           color: #ffffff !important;
           transition: transform 0.2s ease !important;

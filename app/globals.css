@@ -82,7 +82,7 @@ button, input, select, textarea {
 /* Novaland OM palette: flat deep navy sidebar, green accent, blue record links */
 :root{--navy:#0d2444;--navy-2:#0d2444;--green:#8cc63f;--green-2:#63a532;--link:#1a56a8}
 body{background:#f5f7f9}
-.sidebar{padding:0 12px 16px;background:var(--navy);display:flex;flex-direction:column;width:264px;box-sizing:border-box}
+.sidebar{padding:0 12px 16px;background:var(--navy);display:flex;flex-direction:column;width:275px;box-sizing:border-box}
 .workspace{background:#f5f7f9}
 
 .brand{height:auto;min-height:142px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:22px 14px 18px;margin:0 -12px;border-bottom:1px solid #ffffff18;box-sizing:border-box}
