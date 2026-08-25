@@ -1770,6 +1770,19 @@ export default function Home() {
   return (
     <main className="app-shell">
       <style>{`
+        *, *::before, *::after,
+        html, body, div, span,
+        h1, h2, h3, h4, h5, h6, p,
+        a, em, small, strong, b, u, i,
+        dl, dt, dd, ol, ul, li,
+        fieldset, form, label, legend,
+        table, caption, tbody, tfoot, thead, tr, th, td,
+        article, aside, canvas, details,
+        figcaption, figure, footer, header, hgroup,
+        menu, nav, section, summary,
+        input, button, select, textarea, optgroup, option {
+          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Inter", "Roboto", "Helvetica Neue", Arial, sans-serif !important;
+        }
         .file-input-styled::file-selector-button {
           height: 38px;
           padding: 0 16px;
@@ -2123,7 +2136,6 @@ export default function Home() {
           padding: 2px 6px !important;
           border-radius: 4px !important;
           flex: none !important;
-          font-family: ui-monospace, monospace !important;
         }
         .catalog-task span {
           font-size: 12.5px !important;
