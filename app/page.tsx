@@ -2438,6 +2438,91 @@ export default function Home() {
         .confirm-modal-delete:hover {
           background: #b91c1c !important;
         }
+        /* ================= ELEGANT CREATE PROJECT MODAL ================= */
+        .create-project-modal {
+          width: min(640px, 94vw) !important;
+          border-radius: 16px !important;
+          background: #ffffff !important;
+          box-shadow: 0 24px 80px rgba(0, 0, 0, 0.28) !important;
+          overflow: hidden !important;
+        }
+        .create-project-modal header {
+          padding: 22px 28px 18px !important;
+          border-bottom: 1px solid #e2e8f0 !important;
+          background: #f8fafc !important;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: space-between !important;
+        }
+        .create-project-modal header span {
+          font-size: 10px !important;
+          font-weight: 800 !important;
+          color: #167461 !important;
+          letter-spacing: 1px !important;
+          text-transform: uppercase !important;
+        }
+        .create-project-modal header h2 {
+          font-size: 20px !important;
+          font-weight: 800 !important;
+          color: #0f172a !important;
+          margin: 4px 0 0 !important;
+        }
+        .create-project-modal .form-grid {
+          display: grid !important;
+          grid-template-columns: 1fr 1fr !important;
+          gap: 16px !important;
+          padding: 24px 28px 12px !important;
+        }
+        .create-project-modal .field {
+          display: flex !important;
+          flex-direction: column !important;
+          gap: 6px !important;
+          margin-bottom: 0 !important;
+        }
+        .create-project-modal .field > span {
+          font-size: 12px !important;
+          font-weight: 700 !important;
+          color: #334155 !important;
+          margin-bottom: 0 !important;
+        }
+        .create-project-modal .field input,
+        .create-project-modal .field select {
+          height: 42px !important;
+          padding: 0 14px !important;
+          border: 1px solid #cbd5e1 !important;
+          border-radius: 8px !important;
+          font-size: 13px !important;
+          color: #0f172a !important;
+          background: #ffffff !important;
+          transition: all 0.15s ease !important;
+        }
+        .create-project-modal .field input:focus,
+        .create-project-modal .field select:focus {
+          border-color: #167461 !important;
+          box-shadow: 0 0 0 3px rgba(22, 116, 97, 0.15) !important;
+          outline: none !important;
+        }
+        .create-project-modal .field-wide {
+          grid-column: 1 / -1 !important;
+        }
+        .create-project-modal .file-upload-box {
+          padding: 12px 16px !important;
+          background: #f8fafc !important;
+          border: 1px dashed #cbd5e1 !important;
+          border-radius: 8px !important;
+          display: flex !important;
+          flex-direction: column !important;
+          gap: 6px !important;
+        }
+        .create-project-modal footer {
+          padding: 16px 28px 22px !important;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: flex-end !important;
+          gap: 12px !important;
+          border-top: 1px solid #f1f5f9 !important;
+          background: #ffffff !important;
+        }
       `}</style>
       <aside className="sidebar">
         <div className="brand">
@@ -4191,36 +4276,64 @@ export default function Home() {
       {showCreate && (
         <div className="modal-backdrop" onMouseDown={() => setShowCreate(false)}>
           <form className="project-modal create-project-modal" onSubmit={createProject} onMouseDown={(event) => event.stopPropagation()}>
-            <header><div><span>TẠO MASTER TIMELINE</span><h2>Thông tin dự án</h2></div><button type="button" onClick={() => setShowCreate(false)}>Đóng</button></header>
+            <header>
+              <div>
+                <span>TẠO MASTER TIMELINE</span>
+                <h2>Thông tin dự án</h2>
+              </div>
+              <button type="button" onClick={() => setShowCreate(false)}>Đóng</button>
+            </header>
+
             <div className="form-grid">
+              <label className="field field-wide">
+                <span>Tên dự án *</span>
+                <input
+                  autoFocus
+                  value={form.name}
+                  onChange={(event) => setForm({ ...form, name: event.target.value })}
+                  placeholder="Ví dụ: Aqua City - Đảo Phượng Hoàng"
+                />
+              </label>
+
+              <label className="field">
+                <span>Mã dự án *</span>
+                <input
+                  value={form.code}
+                  onChange={(event) => setForm({ ...form, code: event.target.value })}
+                  placeholder="Ví dụ: NVL-AQH-2026"
+                />
+              </label>
+
               <label className="field">
                 <span>Vùng quản lý *</span>
-                <select autoFocus value={form.region || "Vùng Hồ Chí Minh 1"} onChange={(event) => setForm({ ...form, region: event.target.value })}>
+                <select
+                  value={form.region || "Vùng Hồ Chí Minh 1"}
+                  onChange={(event) => setForm({ ...form, region: event.target.value })}
+                >
                   <option value="Vùng Đồng Nai 1">Vùng Đồng Nai 1</option>
                   <option value="Vùng Phan Thiết 1">Vùng Phan Thiết 1</option>
                   <option value="Vùng Hồ Chí Minh 1">Vùng Hồ Chí Minh 1</option>
                   <option value="Vùng Hồ Tràm 1">Vùng Hồ Tràm 1</option>
                 </select>
               </label>
-              <label className="field">
-                <span>Khu vực / Tỉnh thành *</span>
-                <input value={form.location || ""} onChange={(event) => setForm({ ...form, location: event.target.value })} placeholder="Ví dụ: Biên Hòa, Đồng Nai" />
-              </label>
-              <label className="field field-wide">
-                <span>Tên dự án *</span>
-                <input value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} placeholder="Ví dụ: Aqua City - Đảo Phượng Hoàng" />
-              </label>
-              <label className="field">
-                <span>Mã dự án *</span>
-                <input value={form.code} onChange={(event) => setForm({ ...form, code: event.target.value })} placeholder="Ví dụ: NVL-AQH-2026" />
-              </label>
+
               <label className="field">
                 <span>Chủ đầu tư (Pháp nhân)</span>
-                <input value={form.investor || ""} onChange={(event) => setForm({ ...form, investor: event.target.value })} placeholder="Ví dụ: Công ty TNHH BĐS Đà Lạt Valley" />
+                <input
+                  value={form.investor || ""}
+                  onChange={(event) => setForm({ ...form, investor: event.target.value })}
+                  placeholder="Ví dụ: Công ty TNHH BĐS Đà Lạt Valley"
+                />
               </label>
+
               <label className="field">
                 <span>Nhóm dự án</span>
-                <select value={form.group} onChange={(event) => setForm({ ...form, group: event.target.value })}>
+                <select
+                  value={form.group}
+                  onChange={(event) => setForm({ ...form, group: event.target.value })}
+                >
+                  <option>Nhóm 1 (Đang triển khai)</option>
+                  <option>Nhóm 2 (Chuẩn bị đầu tư)</option>
                   <option>Nhóm 1 (Đang nghiên cứu)</option>
                   <option>Nhóm 2 (Đã mua đang thiết kế)</option>
                   <option>Nhóm 3 (Đang xây dựng)</option>
@@ -4228,23 +4341,63 @@ export default function Home() {
                   <option>Nhóm 5 (Thoái vốn)</option>
                 </select>
               </label>
+
               <label className="field">
-                <span>Loại dự án</span>
-                <select value={form.type} onChange={(event) => setForm({ ...form, type: event.target.value })}>
-                  <option>Khu đô thị sinh thái thông minh</option>
-                  <option>Tổ hợp Du lịch Nghỉ dưỡng Giải trí</option>
-                  <option>Khu phức hợp Căn hộ Cao cấp & Thương mại</option>
-                  <option>Công trình cao tầng</option>
-                  <option>Công trình thấp tầng</option>
-                  <option>Hạ tầng kỹ thuật & Cảnh quan</option>
-                </select>
+                <span>Ngày bắt đầu</span>
+                <input
+                  type="date"
+                  value={form.startDate}
+                  onChange={(event) => setForm({ ...form, startDate: event.target.value })}
+                />
               </label>
-              <label className="field"><span>Ngày bắt đầu</span><input type="date" value={form.startDate} onChange={(event) => setForm({ ...form, startDate: event.target.value })} /></label>
-              <label className="field"><span>Ngày kết thúc dự án</span><input type="date" value={form.targetDate} onChange={(event) => setForm({ ...form, targetDate: event.target.value })} /></label>
-              <label className="field field-wide"><span>Upload Master timeline (.xml)</span><input type="file" accept=".xml" onChange={handleXMLUpload} className="file-input-styled" />{xmlData && <small style={{ color: '#167766', display: 'block', marginTop: '4px' }}><b>✓ Tệp hợp lệ:</b> Tìm thấy {xmlData.customTasks.length} công việc.</small>}</label>
+
+              <label className="field">
+                <span>Ngày kết thúc dự án</span>
+                <input
+                  type="date"
+                  value={form.targetDate}
+                  onChange={(event) => setForm({ ...form, targetDate: event.target.value })}
+                />
+              </label>
+
+              <div className="field field-wide">
+                <div className="file-upload-box">
+                  <span style={{ fontSize: "12px", fontWeight: 700, color: "#334155" }}>
+                    Upload Master timeline (.xml)
+                  </span>
+                  <input
+                    type="file"
+                    accept=".xml"
+                    onChange={handleXMLUpload}
+                    className="file-input-styled"
+                  />
+                  {xmlData && (
+                    <small style={{ color: "#167461", display: "block", marginTop: "4px", fontWeight: 700 }}>
+                      ✓ Tệp hợp lệ: Tìm thấy {xmlData.customTasks.length} công việc.
+                    </small>
+                  )}
+                </div>
+              </div>
             </div>
+
             {formError && <div className="form-error" role="alert">{formError}</div>}
-            <footer className="modal-actions-only"><button type="button" className="secondary-button" onClick={() => setShowCreate(false)}>Hủy</button><button className="primary-button" type="submit">Tạo Master Timeline</button></footer>
+
+            <footer>
+              <button
+                type="button"
+                className="secondary-button"
+                onClick={() => setShowCreate(false)}
+              >
+                Hủy
+              </button>
+              <button
+                className="primary-button"
+                type="submit"
+                style={{ background: "#73b52d", borderColor: "#64a024" }}
+              >
+                Tạo Master Timeline
+              </button>
+            </footer>
           </form>
         </div>
       )}
