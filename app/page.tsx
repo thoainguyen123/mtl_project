@@ -467,6 +467,10 @@ function IconEye() {
   return <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z" /><circle cx="12" cy="12" r="3" /></svg>;
 }
 
+function IconTrash() {
+  return <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" /><line x1="10" y1="11" x2="10" y2="17" /><line x1="14" y1="11" x2="14" y2="17" /></svg>;
+}
+
 function UserBadge() {
   return <div className="user-badge"><span className="avatar">PM</span><span className="user-badge-info"><strong>Project Manager</strong><small>Chủ trì lập MTL</small></span><i className="user-badge-caret">⌄</i></div>;
 }
@@ -609,6 +613,7 @@ export default function Home() {
   const [showTaskModal, setShowTaskModal] = useState(false);
   const [insertAnchor, setInsertAnchor] = useState<TemplateTask | null>(null);
   const [showDelete, setShowDelete] = useState(false);
+  const [projectToDelete, setProjectToDelete] = useState<Project | null>(null);
   const [contextMenu, setContextMenu] = useState<{ code: string; x: number; y: number } | null>(null);
   const [gmsFilter, setGmsFilter] = useState<"pending" | "history">("pending");
   const [gmsSelectedId, setGmsSelectedId] = useState("");
@@ -1037,15 +1042,23 @@ export default function Home() {
     notify(decision === "approved" ? `Đã xác nhận toàn bộ đầu mục ${departmentCode}` : `Đã trả đầu mục ${departmentCode} để điều chỉnh`);
   };
 
+  const deleteProjectById = (projectId: string) => {
+    const target = projects.find((project) => project.id === projectId);
+    if (!target) return;
+    const next = projects.filter((project) => project.id !== projectId);
+    setProjects(next);
+    if (activeId === projectId) {
+      setActiveId(next[0]?.id ?? "");
+      setSelectedCode("");
+    }
+    setProjectToDelete(null);
+    setShowDelete(false);
+    notify(`Đã xóa dự án ${target.code}`);
+  };
+
   const deleteProject = () => {
     if (!activeProject) return;
-    const next = projects.filter((project) => project.id !== activeProject.id);
-    setProjects(next);
-    setActiveId(next[0]?.id ?? "");
-    setSelectedCode("");
-    setShowDelete(false);
-    setView("projects");
-    notify(`Đã xóa dự án ${activeProject.code}`);
+    deleteProjectById(activeProject.id);
   };
 
   const exportMicrosoftProject = () => {
@@ -1253,14 +1266,23 @@ export default function Home() {
               {visibleProjects.length > 0 ? <div className="project-table" aria-label="Các dự án hiện có">
                 <div className="project-table-head"><span>Mã dự án</span><span>Tên dự án</span><span>Vị trí</span><span>Trạng thái</span><span>Ngày tạo</span><span>Hành động</span></div>
                 <div className="project-table-body">
-                  {pagedProjects.map((project) => <button type="button" key={project.id} className="project-table-row" onClick={() => openProject(project)}>
-                    <span className="project-code">{project.code}</span>
-                    <span className="project-name-cell"><b>{project.name}</b><small>{project.type}</small></span>
-                    <span>{project.location || "—"}</span>
-                    <span className={`status-badge approval-${project.approvalStatus}`}>{projectApprovalLabel(project)}{project.approvedVersion ? ` · ${project.approvedVersion}` : ""}</span>
-                    <span>{formatDate(project.createdAt)}</span>
-                    <span className="project-action-cell"><i aria-hidden="true"><IconEye /></i></span>
-                  </button>)}
+                  {pagedProjects.map((project) => (
+                    <div key={project.id} className="project-table-row" onClick={() => openProject(project)}>
+                      <span className="project-code">{project.code}</span>
+                      <span className="project-name-cell"><b>{project.name}</b><small>{project.type}</small></span>
+                      <span>{project.location || "—"}</span>
+                      <span><span className={`status-badge approval-${project.approvalStatus}`}>{projectApprovalLabel(project)}{project.approvedVersion ? ` · ${project.approvedVersion}` : ""}</span></span>
+                      <span>{formatDate(project.createdAt)}</span>
+                      <span className="project-action-cell">
+                        <button type="button" className="action-btn view-btn" title="Mở dự án" aria-label="Mở dự án" onClick={(event) => { event.stopPropagation(); openProject(project); }}>
+                          <IconEye />
+                        </button>
+                        <button type="button" className="action-btn delete-btn" title="Xóa dự án" aria-label="Xóa dự án" onClick={(event) => { event.stopPropagation(); setProjectToDelete(project); }}>
+                          <IconTrash />
+                        </button>
+                      </span>
+                    </div>
+                  ))}
                 </div>
               </div> : <div className="project-index-empty"><b>{projectSearch || projectStatusFilter !== "all" ? "Không tìm thấy dự án phù hợp" : "Chưa có dự án nào"}</b><span>{projectSearch || projectStatusFilter !== "all" ? "Thử tìm bằng tên/mã khác hoặc đổi bộ lọc trạng thái." : "Tạo dự án đầu tiên để hệ thống sinh Master Timeline từ danh mục WBS."}</span>{!projectSearch && projectStatusFilter === "all" && <button className="primary-button" onClick={openCreate}>Tạo Master timeline</button>}</div>}
               <Pagination total={visibleProjects.length} pageSize={projectPageSize} page={projectPage} onPageChange={setProjectPage} onPageSizeChange={(size) => { setProjectPageSize(size); setProjectPage(1); }} />
@@ -1465,7 +1487,9 @@ export default function Home() {
         </form>
       </div>}
 
-      {showDelete && activeProject && <div className="modal-backdrop" onMouseDown={() => setShowDelete(false)}><section className="confirm-modal" onMouseDown={(event) => event.stopPropagation()}><span className="danger-symbol">!</span><h2>Xóa dự án {activeProject.code}?</h2><p>Toàn bộ chỉnh sửa và trạng thái thẩm định của dự án này trên thiết bị sẽ bị xóa.</p><div><button className="secondary-button" onClick={() => setShowDelete(false)}>Giữ dự án</button><button className="danger-solid" onClick={deleteProject}>Xóa dự án</button></div></section></div>}
+      {showDelete && activeProject && <div className="modal-backdrop" onMouseDown={() => setShowDelete(false)}><section className="confirm-modal" onMouseDown={(event) => event.stopPropagation()}><span className="danger-symbol">!</span><h2>Xóa dự án {activeProject.code}?</h2><p>Toàn bộ chỉnh sửa và trạng thái thẩm định của dự án này trên thiết bị sẽ bị xóa.</p><div><button type="button" className="secondary-button" onClick={() => setShowDelete(false)}>Giữ dự án</button><button type="button" className="danger-solid" onClick={deleteProject}>Xóa dự án</button></div></section></div>}
+
+      {projectToDelete && <div className="modal-backdrop" onMouseDown={() => setProjectToDelete(null)}><section className="confirm-modal" onMouseDown={(event) => event.stopPropagation()}><span className="danger-symbol">!</span><h2>Xóa dự án {projectToDelete.code}?</h2><p>Dự án <strong>{projectToDelete.name}</strong> và toàn bộ tiến độ liên quan sẽ bị xóa vĩnh viễn.</p><div><button type="button" className="secondary-button" onClick={() => setProjectToDelete(null)}>Hủy</button><button type="button" className="danger-solid" onClick={() => deleteProjectById(projectToDelete.id)}>Xóa dự án</button></div></section></div>}
 
       {toast && <div className="toast" role="status"><b>Hoàn tất</b><span>{toast}</span></div>}
     </main>

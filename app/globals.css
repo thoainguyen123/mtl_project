@@ -117,7 +117,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 
 /* Project index as a real data table, matching reference: Mã | Tên | Vị trí | Trạng thái | Ngày tạo | Hành động */
 .project-table{width:calc(100% - 48px);max-height:calc(100vh - 430px);margin:18px 24px 0;border:1px solid #d6e1e5;border-radius:12px;background:#fff;overflow:auto}
-.project-table-head,.project-table-row{min-width:920px;display:grid;grid-template-columns:130px minmax(220px,1.6fr) minmax(140px,1fr) 200px 110px 70px;align-items:center}
+.project-table-head,.project-table-row{min-width:920px;display:grid;grid-template-columns:130px minmax(220px,1.6fr) minmax(140px,1fr) 200px 110px 96px;align-items:center}
 .project-table-head{height:44px;position:sticky;top:0;z-index:2;border-bottom:1px solid var(--line);background:#eef3f5;color:#657984;font-size:9px;font-weight:800;letter-spacing:.5px;text-transform:uppercase}
 .project-table-head span,.project-table-row>span{min-width:0;padding:0 14px}
 .project-table-row{width:100%;min-height:60px;border:0;border-bottom:1px solid #edf1f2;background:#fff;color:inherit;text-align:left;cursor:pointer;transition:background .15s}
@@ -128,9 +128,10 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 .project-name-cell b{color:#173f51;font-size:12px}
 .project-name-cell small{margin-top:3px;color:#7a8c95;font-size:10px}
 .project-table-row .status-badge{max-width:100%;white-space:normal;line-height:1.35}
-.project-action-cell{display:flex;justify-content:center}
-.project-action-cell i{width:32px;height:32px;display:grid;place-items:center;border:1px solid #d6e1e5;border-radius:8px;color:#496471}
-.project-table-row:hover .project-action-cell i{border-color:var(--green);background:#f2f9e8;color:var(--green-2)}
+.project-action-cell{display:flex;align-items:center;justify-content:center;gap:6px}
+.action-btn{width:32px;height:32px;display:grid;place-items:center;border:1px solid #d6e1e5;border-radius:8px;background:#fff;color:#496471;cursor:pointer;transition:all .18s;padding:0}
+.action-btn.view-btn:hover{border-color:var(--green);background:#f2f9e8;color:var(--green-2)}
+.action-btn.delete-btn:hover{border-color:#e0b8bc;background:#fff0f1;color:#b63d49}
 
 /* Overview dashboard: progress tracking across every region and project */
 .sidebar-nav-top{margin-top:8px;border-bottom:1px solid #ffffff12}
@@ -201,5 +202,5 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 @media(max-width:1250px){.overview-top{grid-template-columns:1fr 1fr}.overview-grid{grid-template-columns:1fr}}
 @media(max-width:900px){.overview{padding:14px}.overview-top{grid-template-columns:1fr}.overview-header{flex-wrap:wrap}.heat-head,.heat-row{grid-template-columns:minmax(90px,1.4fr) 72px 70px 64px 74px}}
 
-@media(max-width:1250px){.project-table-head,.project-table-row{grid-template-columns:110px minmax(180px,1.5fr) minmax(120px,.8fr) 170px 90px 60px}}
+@media(max-width:1250px){.project-table-head,.project-table-row{grid-template-columns:110px minmax(180px,1.5fr) minmax(120px,.8fr) 170px 90px 86px}}
 @media(max-width:900px){.table-filters{padding:12px 14px}.pagination{padding:12px 14px;justify-content:flex-start}.pagination-pages{margin-left:0}.project-table{width:calc(100% - 28px);margin:14px}.project-table-head,.project-table-row{min-width:760px}}
