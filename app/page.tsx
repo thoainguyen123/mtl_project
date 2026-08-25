@@ -1264,12 +1264,12 @@ export default function Home() {
                 <span className="table-filters-count">{visibleProjects.length} dự án</span>
               </div>
               {visibleProjects.length > 0 ? <div className="project-table" aria-label="Các dự án hiện có">
-                <div className="project-table-head"><span>Mã dự án</span><span>Vùng</span><span>Tên dự án</span><span>Vị trí</span><span>Trạng thái</span><span>Ngày tạo</span><span>Hành động</span></div>
+                <div className="project-table-head"><span>Vùng</span><span>Mã dự án</span><span>Tên dự án</span><span>Vị trí</span><span>Trạng thái</span><span>Ngày tạo</span><span>Hành động</span></div>
                 <div className="project-table-body">
                   {pagedProjects.map((project) => (
                     <div key={project.id} className="project-table-row" onClick={() => openProject(project)}>
-                      <span className="project-code">{project.code}</span>
                       <span className="project-region-cell">{project.region || project.area || "—"}</span>
+                      <span className="project-code">{project.code}</span>
                       <span className="project-name-cell"><b>{project.name}</b><small>{project.type}</small></span>
                       <span>{project.location || "—"}</span>
                       <span><span className={`status-badge approval-${project.approvalStatus}`}>{projectApprovalLabel(project)}{project.approvedVersion ? ` · ${project.approvedVersion}` : ""}</span></span>
