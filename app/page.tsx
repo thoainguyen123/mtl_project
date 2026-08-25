@@ -2237,7 +2237,7 @@ export default function Home() {
         .auto-generate-check input:checked ~ b {
           color: #15803d !important;
         }
-        /* ================= 8-COLUMN PROJECT TABLE ================= */
+        /* ================= 7-COLUMN PROJECT TABLE (NO LOẠI DỰ ÁN) ================= */
         .project-table {
           margin: 0 24px 20px !important;
           background: #ffffff !important;
@@ -2248,7 +2248,7 @@ export default function Home() {
         }
         .project-table-head {
           display: grid !important;
-          grid-template-columns: 130px minmax(200px, 1.8fr) 150px minmax(180px, 1.3fr) 140px 110px 170px 90px !important;
+          grid-template-columns: 140px minmax(220px, 2fr) minmax(200px, 1.6fr) minmax(160px, 1.2fr) 140px 180px 90px !important;
           align-items: center !important;
           gap: 12px !important;
           padding: 12px 18px !important;
@@ -2262,7 +2262,7 @@ export default function Home() {
         }
         .project-table-row {
           display: grid !important;
-          grid-template-columns: 130px minmax(200px, 1.8fr) 150px minmax(180px, 1.3fr) 140px 110px 170px 90px !important;
+          grid-template-columns: 140px minmax(220px, 2fr) minmax(200px, 1.6fr) minmax(160px, 1.2fr) 140px 180px 90px !important;
           align-items: center !important;
           gap: 12px !important;
           padding: 12px 18px !important;
@@ -2807,6 +2807,7 @@ export default function Home() {
               </div>
 
               {/* Table Filters */}
+              {/* Table Filters */}
               <div className="table-filters" style={{ margin: "14px 24px 14px", border: "none" }}>
                 <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", alignItems: "center" }}>
                   <label className="table-filters-select">
@@ -2815,15 +2816,6 @@ export default function Home() {
                       <option value="all">Tất cả vùng</option>
                       {[...new Set(projects.map((p) => p.region).filter(Boolean) as string[])].sort().map((r) => (
                         <option key={r} value={r}>{r}</option>
-                      ))}
-                    </select>
-                  </label>
-                  <label className="table-filters-select">
-                    <span>Loại dự án</span>
-                    <select value={projectTypeFilter} onChange={(event) => { setProjectTypeFilter(event.target.value); setProjectPage(1); }}>
-                      <option value="all">Tất cả loại dự án</option>
-                      {[...new Set(projects.map((p) => p.type).filter(Boolean) as string[])].sort().map((t) => (
-                        <option key={t} value={t}>{t}</option>
                       ))}
                     </select>
                   </label>
@@ -2843,13 +2835,12 @@ export default function Home() {
                 <span className="table-filters-count">{visibleProjects.length} dự án</span>
               </div>
 
-              {/* Exact 8-column Table */}
+              {/* Exact 7-column Table (No Loại Dự Án) */}
               {visibleProjects.length > 0 ? (
                 <div className="project-table" aria-label="Danh sách dự án Master Timeline">
                   <div className="project-table-head">
                     <span>Mã dự án</span>
                     <span>Tên dự án</span>
-                    <span>Loại dự án</span>
                     <span>Chủ đầu tư</span>
                     <span>Khu vực</span>
                     <span>Vùng</span>
@@ -2863,7 +2854,6 @@ export default function Home() {
                         <span className="project-name-cell">
                           <b>{project.name}</b>
                         </span>
-                        <span className="project-table-cell-ellipsis" title={project.type}>{project.type}</span>
                         <span className="project-table-cell-ellipsis" title={project.investor || "Tập đoàn Novaland"}>{project.investor || "Tập đoàn Novaland"}</span>
                         <span className="project-table-cell-ellipsis" title={project.location || project.area || "—"}>{project.location || project.area || "—"}</span>
                         <span className="project-region-cell">{project.region || "Toàn quốc"}</span>
@@ -2886,8 +2876,8 @@ export default function Home() {
                 </div>
               ) : (
                 <div className="project-index-empty">
-                  <b>{projectSearch || projectStatusFilter !== "all" || projectRegionFilter !== "all" || projectTypeFilter !== "all" ? "Không tìm thấy dự án phù hợp" : "Chưa có dự án nào"}</b>
-                  <span>{projectSearch || projectStatusFilter !== "all" || projectRegionFilter !== "all" || projectTypeFilter !== "all" ? "Thử tìm bằng từ khóa khác hoặc thiết lập lại bộ lọc." : "Tạo dự án đầu tiên để hệ thống sinh Master Timeline từ danh mục WBS."}</span>
+                  <b>{projectSearch || projectStatusFilter !== "all" || projectRegionFilter !== "all" ? "Không tìm thấy dự án phù hợp" : "Chưa có dự án nào"}</b>
+                  <span>{projectSearch || projectStatusFilter !== "all" || projectRegionFilter !== "all" ? "Thử tìm bằng từ khóa khác hoặc thiết lập lại bộ lọc." : "Tạo dự án đầu tiên để hệ thống sinh Master Timeline từ danh mục WBS."}</span>
                   {!projectSearch && projectStatusFilter === "all" && <button className="primary-button" onClick={openCreate}>Tạo Master timeline</button>}
                 </div>
               )}
@@ -3588,13 +3578,12 @@ export default function Home() {
                 <span className="table-filters-count">{visibleDesignProjects.length} dự án</span>
               </div>
 
-              {/* Exact 8-column Table */}
+              {/* Exact 7-column Table (No Loại Dự Án) */}
               {visibleDesignProjects.length > 0 ? (
                 <div className="project-table" aria-label="Danh sách dự án Lập Nhiệm Vụ Thiết Kế">
                   <div className="project-table-head">
                     <span>Mã dự án</span>
                     <span>Tên dự án</span>
-                    <span>Loại dự án</span>
                     <span>Chủ đầu tư</span>
                     <span>Khu vực</span>
                     <span>Vùng</span>
@@ -3608,7 +3597,6 @@ export default function Home() {
                         <span className="project-name-cell">
                           <b>{project.name}</b>
                         </span>
-                        <span className="project-table-cell-ellipsis" title={project.type}>{project.type}</span>
                         <span className="project-table-cell-ellipsis" title={project.investor || "Tập đoàn Novaland"}>{project.investor || "Tập đoàn Novaland"}</span>
                         <span className="project-table-cell-ellipsis" title={project.location || project.area || "—"}>{project.location || project.area || "—"}</span>
                         <span className="project-region-cell">{project.region || "Toàn quốc"}</span>
@@ -3720,13 +3708,12 @@ export default function Home() {
                 <span className="table-filters-count">{visibleFsProjects.length} dự án</span>
               </div>
 
-              {/* Exact 8-column Table */}
+              {/* Exact 7-column Table (No Loại Dự Án) */}
               {visibleFsProjects.length > 0 ? (
                 <div className="project-table" aria-label="Danh sách dự án Lập FS Thực Thi">
                   <div className="project-table-head">
                     <span>Mã dự án</span>
                     <span>Tên dự án</span>
-                    <span>Loại dự án</span>
                     <span>Chủ đầu tư</span>
                     <span>Khu vực</span>
                     <span>Vùng</span>
@@ -3740,7 +3727,6 @@ export default function Home() {
                         <span className="project-name-cell">
                           <b>{project.name}</b>
                         </span>
-                        <span className="project-table-cell-ellipsis" title={project.type}>{project.type}</span>
                         <span className="project-table-cell-ellipsis" title={project.investor || "Tập đoàn Novaland"}>{project.investor || "Tập đoàn Novaland"}</span>
                         <span className="project-table-cell-ellipsis" title={project.location || project.area || "—"}>{project.location || project.area || "—"}</span>
                         <span className="project-region-cell">{project.region || "Toàn quốc"}</span>
