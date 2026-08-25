@@ -4064,12 +4064,54 @@ export default function Home() {
           <form className="project-modal create-project-modal" onSubmit={createProject} onMouseDown={(event) => event.stopPropagation()}>
             <header><div><span>TẠO MASTER TIMELINE</span><h2>Thông tin dự án</h2></div><button type="button" onClick={() => setShowCreate(false)}>Đóng</button></header>
             <div className="form-grid">
-              <label className="field"><span>Khu vực</span><select autoFocus value={form.area} onChange={(event) => setForm({ ...form, area: event.target.value })}><option>Khu vực 1</option><option>Khu vực 2</option><option>Khu vực 3</option><option>Khu vực 4</option><option>Khu vực 5</option></select></label>
-              <label className="field"><span>Vùng</span><input value={form.region || ""} onChange={(event) => setForm({ ...form, region: event.target.value })} placeholder="Nhập vùng" /></label>
-              <label className="field field-wide"><span>Tên dự án *</span><input value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} placeholder="Ví dụ: Aqua Riverside" /></label>
-              <label className="field"><span>Mã dự án *</span><input value={form.code} onChange={(event) => setForm({ ...form, code: event.target.value })} placeholder="AQR-01" /></label>
-              <label className="field"><span>Nhóm dự án</span><select value={form.group} onChange={(event) => setForm({ ...form, group: event.target.value })}><option>Nhóm 1 (Đang nghiên cứu)</option><option>Nhóm 2 (Đã mua đang thiết kế)</option><option>Nhóm 3 (Đang xây dựng)</option><option>Nhóm 4 (Đã bàn giao khách hàng)</option><option>Nhóm 5 (Thoái vốn)</option></select></label>
-              <label className="field field-wide"><span>Loại hình</span><select value={form.type} onChange={(event) => setForm({ ...form, type: event.target.value })}><option>Công trình cao tầng</option><option>Công trình thấp tầng</option><option>Stay</option><option>Play</option></select></label>
+              <label className="field">
+                <span>Vùng quản lý *</span>
+                <select autoFocus value={form.region || "Vùng 1 (TP.HCM)"} onChange={(event) => setForm({ ...form, region: event.target.value })}>
+                  <option value="Vùng 1 (TP.HCM)">Vùng 1 (TP.HCM)</option>
+                  <option value="Vùng 2 (Đông Nam Bộ / Đồng Nai)">Vùng 2 (Đông Nam Bộ / Đồng Nai)</option>
+                  <option value="Vùng 3 (Nam Trung Bộ / Bình Thuận)">Vùng 3 (Nam Trung Bộ / Bình Thuận)</option>
+                  <option value="Vùng 4 (Bà Rịa - Vũng Tàu)">Vùng 4 (Bà Rịa - Vũng Tàu)</option>
+                  <option value="Vùng 5 (Tây Nguyên / Lâm Đồng / Khánh Hòa)">Vùng 5 (Tây Nguyên / Lâm Đồng / Khánh Hòa)</option>
+                  <option value="Toàn quốc">Toàn quốc</option>
+                </select>
+              </label>
+              <label className="field">
+                <span>Khu vực / Tỉnh thành *</span>
+                <input value={form.location || ""} onChange={(event) => setForm({ ...form, location: event.target.value })} placeholder="Ví dụ: Biên Hòa, Đồng Nai" />
+              </label>
+              <label className="field field-wide">
+                <span>Tên dự án *</span>
+                <input value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} placeholder="Ví dụ: Aqua City - Đảo Phượng Hoàng" />
+              </label>
+              <label className="field">
+                <span>Mã dự án *</span>
+                <input value={form.code} onChange={(event) => setForm({ ...form, code: event.target.value })} placeholder="Ví dụ: NVL-AQH-2026" />
+              </label>
+              <label className="field">
+                <span>Chủ đầu tư (Pháp nhân)</span>
+                <input value={form.investor || ""} onChange={(event) => setForm({ ...form, investor: event.target.value })} placeholder="Ví dụ: Công ty TNHH BĐS Đà Lạt Valley" />
+              </label>
+              <label className="field">
+                <span>Nhóm dự án</span>
+                <select value={form.group} onChange={(event) => setForm({ ...form, group: event.target.value })}>
+                  <option>Nhóm 1 (Đang nghiên cứu)</option>
+                  <option>Nhóm 2 (Đã mua đang thiết kế)</option>
+                  <option>Nhóm 3 (Đang xây dựng)</option>
+                  <option>Nhóm 4 (Đã bàn giao khách hàng)</option>
+                  <option>Nhóm 5 (Thoái vốn)</option>
+                </select>
+              </label>
+              <label className="field">
+                <span>Loại dự án</span>
+                <select value={form.type} onChange={(event) => setForm({ ...form, type: event.target.value })}>
+                  <option>Khu đô thị sinh thái thông minh</option>
+                  <option>Tổ hợp Du lịch Nghỉ dưỡng Giải trí</option>
+                  <option>Khu phức hợp Căn hộ Cao cấp & Thương mại</option>
+                  <option>Công trình cao tầng</option>
+                  <option>Công trình thấp tầng</option>
+                  <option>Hạ tầng kỹ thuật & Cảnh quan</option>
+                </select>
+              </label>
               <label className="field"><span>Ngày bắt đầu</span><input type="date" value={form.startDate} onChange={(event) => setForm({ ...form, startDate: event.target.value })} /></label>
               <label className="field"><span>Ngày kết thúc dự án</span><input type="date" value={form.targetDate} onChange={(event) => setForm({ ...form, targetDate: event.target.value })} /></label>
               <label className="field field-wide"><span>Upload Master timeline (.xml)</span><input type="file" accept=".xml" onChange={handleXMLUpload} className="file-input-styled" />{xmlData && <small style={{ color: '#167766', display: 'block', marginTop: '4px' }}><b>✓ Tệp hợp lệ:</b> Tìm thấy {xmlData.customTasks.length} công việc.</small>}</label>
