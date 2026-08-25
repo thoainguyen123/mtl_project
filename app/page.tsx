@@ -1853,6 +1853,253 @@ export default function Home() {
           align-items: center !important;
           justify-content: center !important;
         }
+        /* ================= WBS CATALOG ================= */
+        .catalog-header {
+          display: flex !important;
+          align-items: center !important;
+          justify-content: space-between !important;
+          gap: 20px !important;
+          padding: 18px 24px !important;
+          background: #ffffff !important;
+          border-bottom: 1px solid #e2e8f0 !important;
+        }
+        .catalog-header h1 {
+          font-size: 20px !important;
+          font-weight: 800 !important;
+          color: #0f172a !important;
+          margin: 4px 0 2px !important;
+        }
+        .catalog-header p {
+          font-size: 12px !important;
+          color: #64748b !important;
+          margin: 0 !important;
+        }
+        .catalog-groups {
+          display: grid !important;
+          grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)) !important;
+          gap: 8px !important;
+          padding: 16px 24px !important;
+          background: #ffffff !important;
+          border-bottom: 1px solid #e2e8f0 !important;
+        }
+        .catalog-group-card {
+          display: flex !important;
+          flex-direction: column !important;
+          justify-content: space-between !important;
+          gap: 4px !important;
+          padding: 10px 12px !important;
+          border-radius: 8px !important;
+          border: 1px solid #e2e8f0 !important;
+          background: #f8fafc !important;
+          cursor: pointer !important;
+          transition: all 0.15s ease !important;
+          text-align: left !important;
+        }
+        .catalog-group-card:hover {
+          border-color: #cbd5e1 !important;
+          background: #f1f5f9 !important;
+          transform: translateY(-1px) !important;
+        }
+        .catalog-group-card.active {
+          border-color: #8cc63f !important;
+          background: #f4fbf0 !important;
+          box-shadow: 0 2px 8px rgba(140, 198, 63, 0.22) !important;
+        }
+        .catalog-group-card-top {
+          display: flex !important;
+          align-items: center !important;
+          justify-content: space-between !important;
+          gap: 6px !important;
+        }
+        .catalog-group-card-top span {
+          font-size: 10px !important;
+          font-weight: 800 !important;
+          color: #1a56a8 !important;
+          background: #e8f0fe !important;
+          padding: 2px 6px !important;
+          border-radius: 4px !important;
+        }
+        .catalog-group-card-top small {
+          font-size: 10px !important;
+          font-weight: 700 !important;
+          color: #64748b !important;
+        }
+        .catalog-group-card b {
+          font-size: 11.5px !important;
+          font-weight: 700 !important;
+          color: #0f172a !important;
+          line-height: 1.25 !important;
+          white-space: nowrap !important;
+          overflow: hidden !important;
+          text-overflow: ellipsis !important;
+        }
+        .catalog-table {
+          margin: 16px 24px 20px !important;
+          background: #ffffff !important;
+          border-radius: 10px !important;
+          border: 1px solid #e2e8f0 !important;
+          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
+          overflow: hidden !important;
+        }
+        .catalog-table-head {
+          display: grid !important;
+          grid-template-columns: minmax(320px, 2fr) minmax(180px, 1fr) 85px 125px 105px 115px 65px !important;
+          align-items: center !important;
+          gap: 12px !important;
+          padding: 11px 16px !important;
+          background: #f8fafc !important;
+          border-bottom: 1px solid #e2e8f0 !important;
+          font-size: 11px !important;
+          font-weight: 700 !important;
+          color: #64748b !important;
+          letter-spacing: 0.4px !important;
+          text-transform: uppercase !important;
+        }
+        .catalog-row {
+          display: grid !important;
+          grid-template-columns: minmax(320px, 2fr) minmax(180px, 1fr) 85px 125px 105px 115px 65px !important;
+          align-items: center !important;
+          gap: 12px !important;
+          padding: 10px 16px !important;
+          border-bottom: 1px solid #f1f5f9 !important;
+          font-size: 12.5px !important;
+          color: #1e293b !important;
+          transition: background 0.12s ease !important;
+        }
+        .catalog-row:hover {
+          background: #f8fafc !important;
+        }
+        .catalog-row.auto-enabled {
+          background: #ffffff !important;
+        }
+        .catalog-task {
+          display: flex !important;
+          align-items: center !important;
+          gap: 8px !important;
+          min-width: 0 !important;
+        }
+        .catalog-task b {
+          font-size: 11px !important;
+          font-weight: 800 !important;
+          color: #0f172a !important;
+          background: #f1f5f9 !important;
+          padding: 2px 6px !important;
+          border-radius: 4px !important;
+          flex: none !important;
+          font-family: ui-monospace, monospace !important;
+        }
+        .catalog-task span {
+          font-size: 12.5px !important;
+          font-weight: 600 !important;
+          color: #1e293b !important;
+          white-space: nowrap !important;
+          overflow: hidden !important;
+          text-overflow: ellipsis !important;
+        }
+        .catalog-unit {
+          display: flex !important;
+          align-items: center !important;
+          gap: 6px !important;
+          min-width: 0 !important;
+        }
+        .catalog-unit b {
+          font-size: 10px !important;
+          font-weight: 800 !important;
+          color: #1a56a8 !important;
+          background: #eef4ff !important;
+          padding: 1px 5px !important;
+          border-radius: 4px !important;
+          flex: none !important;
+        }
+        .catalog-unit span {
+          font-size: 11.5px !important;
+          color: #475569 !important;
+          white-space: nowrap !important;
+          overflow: hidden !important;
+          text-overflow: ellipsis !important;
+        }
+        .catalog-level-badge {
+          display: inline-flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+          font-size: 10.5px !important;
+          font-weight: 700 !important;
+          padding: 2px 7px !important;
+          border-radius: 4px !important;
+        }
+        .catalog-level-1 { background: #fee2e2 !important; color: #991b1b !important; }
+        .catalog-level-2 { background: #fef3c7 !important; color: #92400e !important; }
+        .catalog-level-3 { background: #dbeafe !important; color: #1e40af !important; }
+        .catalog-level-4 { background: #f1f5f9 !important; color: #475569 !important; }
+        .source-standard {
+          display: inline-flex !important;
+          align-items: center !important;
+          font-size: 10.5px !important;
+          font-weight: 700 !important;
+          color: #166534 !important;
+          background: #dcfce7 !important;
+          padding: 2px 8px !important;
+          border-radius: 12px !important;
+          font-style: normal !important;
+        }
+        .source-custom {
+          display: inline-flex !important;
+          align-items: center !important;
+          font-size: 10.5px !important;
+          font-weight: 700 !important;
+          color: #854d0e !important;
+          background: #fef9c3 !important;
+          padding: 2px 8px !important;
+          border-radius: 12px !important;
+          font-style: normal !important;
+        }
+        .auto-generate-check {
+          display: inline-flex !important;
+          align-items: center !important;
+          gap: 8px !important;
+          cursor: pointer !important;
+          user-select: none !important;
+        }
+        .auto-generate-check input {
+          position: absolute !important;
+          opacity: 0 !important;
+          pointer-events: none !important;
+        }
+        .auto-generate-check i {
+          width: 32px !important;
+          height: 18px !important;
+          position: relative !important;
+          border-radius: 9px !important;
+          background: #cbd5e1 !important;
+          transition: background 0.18s ease !important;
+          flex: none !important;
+        }
+        .auto-generate-check i:after {
+          content: "" !important;
+          width: 14px !important;
+          height: 14px !important;
+          position: absolute !important;
+          left: 2px !important;
+          top: 2px !important;
+          border-radius: 50% !important;
+          background: #ffffff !important;
+          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25) !important;
+          transition: transform 0.18s ease !important;
+        }
+        .auto-generate-check input:checked + i {
+          background: #8cc63f !important;
+        }
+        .auto-generate-check input:checked + i:after {
+          transform: translateX(14px) !important;
+        }
+        .auto-generate-check b {
+          font-size: 11px !important;
+          font-weight: 700 !important;
+          color: #64748b !important;
+        }
+        .auto-generate-check input:checked ~ b {
+          color: #15803d !important;
+        }
       `}</style>
       <aside className="sidebar">
         <div className="brand">
@@ -2333,20 +2580,192 @@ export default function Home() {
           </>
         ) : view === "catalog" ? (
           <>
-            <header className="topbar"><div className="breadcrumbs"><span>Cấu trúc Master timeline</span><i>/</i><strong>Danh mục WBS</strong><i>/</i><span>{fullCatalog.length} công việc</span></div><div className="top-actions"><button className="secondary-button" onClick={toggleAllCatalogTasks}>{enabledCatalogCount === fullCatalog.length ? "Bỏ tích tất cả" : "Tích tất cả"}</button><button className="primary-button" onClick={() => openTaskCreator(false)}>Thêm công việc</button><UserBadge /></div></header>
-            <section className="catalog-header"><div><span className="status-badge">{enabledCatalogCount}/{fullCatalog.length} TỰ ĐỘNG SINH</span><h1>Danh mục WBS</h1><p>Công việc được tích “Tự động sinh” sẽ luôn có sẵn khi tạo dự án mới.</p></div><label className="search-field"><span>Tìm</span><input value={catalogSearch} onChange={(event) => { setCatalogSearch(event.target.value); setCatalogPage(1); }} placeholder="Mã WBS hoặc tên công việc" /></label></section>
-            <section className="catalog-groups">{GROUPS.map((group) => <div key={group.code}><span>{group.short}</span><b>{group.code} {group.name}</b><small>{fullCatalog.filter((task) => task.groupCode === group.code).length} task</small></div>)}</section>
-            <div className="table-filters">
-              <label className="table-filters-select"><span>Nhóm WBS</span><select value={catalogGroupFilter} onChange={(event) => { setCatalogGroupFilter(event.target.value); setCatalogPage(1); }}><option value="all">Tất cả nhóm</option>{GROUPS.map((group) => <option key={group.code} value={group.code}>{group.code} · {group.short}</option>)}</select></label>
-              <label className="table-filters-select"><span>Nguồn</span><select value={catalogSourceFilter} onChange={(event) => { setCatalogSourceFilter(event.target.value as "all" | "custom" | "standard"); setCatalogPage(1); }}><option value="all">Tất cả nguồn</option><option value="standard">Mẫu chuẩn</option><option value="custom">Tùy chỉnh</option></select></label>
-              <span className="table-filters-count">{catalogRows.length} công việc</span>
-            </div>
-            <section className="catalog-table">
-              <div className="catalog-table-head"><span>WBS / CÔNG VIỆC</span><span>ĐƠN VỊ</span><span>CẤP</span><span>THỜI LƯỢNG MẪU</span><span>NGUỒN</span><span>TỰ ĐỘNG SINH</span><span /></div>
-              {pagedCatalogRows.map((task) => { const group = GROUP_BY_CODE[task.groupCode]; return <div className={`catalog-row ${enabledCatalogCodes.has(task.code) ? "auto-enabled" : ""}`} key={`${task.custom ? "custom" : "base"}-${task.code}`}><span className="catalog-task"><b>{task.code}</b><span>{task.name}</span></span><span className="catalog-unit"><b>{group?.short}</b><span>{group?.name}</span></span><span>Cấp {task.level}</span><span>{task.defaultDuration} ngày</span><span><i className={task.custom ? "source-custom" : "source-standard"}>{task.custom ? "Tùy chỉnh" : "Mẫu chuẩn"}</i></span><span><label className="auto-generate-check"><input type="checkbox" checked={enabledCatalogCodes.has(task.code)} onChange={() => toggleCatalogTask(task)} aria-label={`Tự động sinh ${task.code}`} /><i /><b>{enabledCatalogCodes.has(task.code) ? "Có" : "Không"}</b></label></span><span>{task.custom && <button className="icon-danger" onClick={() => removeCatalogTask(task.code)} aria-label={`Xóa ${task.code}`}>Xóa</button>}</span></div>})}
-              {!catalogRows.length && <div className="no-results">Không tìm thấy công việc phù hợp.</div>}
+            <header className="topbar">
+              <div className="breadcrumbs">
+                <span>Cấu trúc Master Timeline</span>
+                <i>/</i>
+                <strong>Danh mục WBS</strong>
+                <i>/</i>
+                <span>{fullCatalog.length} công việc</span>
+              </div>
+              <div className="top-actions">
+                <button type="button" className="secondary-button" onClick={toggleAllCatalogTasks}>
+                  {enabledCatalogCount === fullCatalog.length ? "Bỏ tích tất cả" : "Tích tất cả"}
+                </button>
+                <button type="button" className="primary-button" onClick={() => openTaskCreator(false)}>
+                  + Thêm công việc
+                </button>
+                <UserBadge />
+              </div>
+            </header>
+
+            <section className="catalog-header">
+              <div>
+                <span className="status-badge" style={{ background: "#edf8f5", color: "#167461" }}>
+                  {enabledCatalogCount}/{fullCatalog.length} TỰ ĐỘNG SINH
+                </span>
+                <h1>Danh Mục WBS Chuẩn</h1>
+                <p>Công việc được tích “Tự động sinh” sẽ luôn có sẵn khi tạo dự án mới theo mẫu NVLG MTL 2026.06.</p>
+              </div>
+              <label className="search-field" style={{ minWidth: "260px" }}>
+                <span>Tìm</span>
+                <input
+                  value={catalogSearch}
+                  onChange={(event) => {
+                    setCatalogSearch(event.target.value);
+                    setCatalogPage(1);
+                  }}
+                  placeholder="Tìm theo mã WBS hoặc tên..."
+                />
+              </label>
             </section>
-            <Pagination total={catalogRows.length} pageSize={catalogPageSize} page={catalogPage} onPageChange={setCatalogPage} onPageSizeChange={(size) => { setCatalogPageSize(size); setCatalogPage(1); }} pageSizeOptions={[20, 40, 80]} />
+
+            <section className="catalog-groups">
+              {GROUPS.map((group) => {
+                const count = fullCatalog.filter((task) => task.groupCode === group.code).length;
+                const isSelected = catalogGroupFilter === group.code;
+                return (
+                  <button
+                    type="button"
+                    key={group.code}
+                    className={`catalog-group-card ${isSelected ? "active" : ""}`}
+                    onClick={() => {
+                      setCatalogGroupFilter((curr) => (curr === group.code ? "all" : group.code));
+                      setCatalogPage(1);
+                    }}
+                  >
+                    <div className="catalog-group-card-top">
+                      <span>{group.code}</span>
+                      <small>{count} task</small>
+                    </div>
+                    <b>{group.short} · {group.name}</b>
+                  </button>
+                );
+              })}
+            </section>
+
+            <div className="table-filters" style={{ margin: "14px 24px 0", borderRadius: "10px 10px 0 0", border: "1px solid #e2e8f0", borderBottom: 0, background: "#fff" }}>
+              <label className="table-filters-select">
+                <span>Nhóm WBS</span>
+                <select
+                  value={catalogGroupFilter}
+                  onChange={(event) => {
+                    setCatalogGroupFilter(event.target.value);
+                    setCatalogPage(1);
+                  }}
+                >
+                  <option value="all">Tất cả nhóm ({GROUPS.length})</option>
+                  {GROUPS.map((group) => (
+                    <option key={group.code} value={group.code}>
+                      {group.code} · {group.short} ({group.name})
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="table-filters-select">
+                <span>Nguồn</span>
+                <select
+                  value={catalogSourceFilter}
+                  onChange={(event) => {
+                    setCatalogSourceFilter(event.target.value as "all" | "custom" | "standard");
+                    setCatalogPage(1);
+                  }}
+                >
+                  <option value="all">Tất cả nguồn</option>
+                  <option value="standard">Mẫu chuẩn</option>
+                  <option value="custom">Tùy chỉnh</option>
+                </select>
+              </label>
+              <span className="table-filters-count" style={{ marginLeft: "auto" }}>
+                Hiển thị <strong>{catalogRows.length}</strong> / {fullCatalog.length} công việc
+              </span>
+            </div>
+
+            <section className="catalog-table" style={{ marginTop: 0, borderRadius: "0 0 10px 10px" }}>
+              <div className="catalog-table-head">
+                <span>WBS / CÔNG VIỆC</span>
+                <span>ĐƠN VỊ</span>
+                <span>CẤP ĐỘ</span>
+                <span>THỜI LƯỢNG MẪU</span>
+                <span>NGUỒN</span>
+                <span>TỰ ĐỘNG SINH</span>
+                <span>HÀNH ĐỘNG</span>
+              </div>
+              {pagedCatalogRows.map((task) => {
+                const group = GROUP_BY_CODE[task.groupCode];
+                return (
+                  <div
+                    className={`catalog-row ${enabledCatalogCodes.has(task.code) ? "auto-enabled" : ""}`}
+                    key={`${task.custom ? "custom" : "base"}-${task.code}`}
+                  >
+                    <span className="catalog-task" style={{ paddingLeft: `${(task.level - 1) * 16}px` }}>
+                      <b>{task.code}</b>
+                      <span>{task.name}</span>
+                    </span>
+                    <span className="catalog-unit">
+                      <b>{group?.short || task.groupCode}</b>
+                      <span>{group?.name}</span>
+                    </span>
+                    <span>
+                      <span className={`catalog-level-badge catalog-level-${Math.min(task.level, 4)}`}>
+                        Cấp {task.level}
+                      </span>
+                    </span>
+                    <span style={{ fontWeight: 600, color: "#334155" }}>
+                      {task.defaultDuration} ngày
+                    </span>
+                    <span>
+                      <i className={task.custom ? "source-custom" : "source-standard"}>
+                        {task.custom ? "Tùy chỉnh" : "Mẫu chuẩn"}
+                      </i>
+                    </span>
+                    <span>
+                      <label className="auto-generate-check">
+                        <input
+                          type="checkbox"
+                          checked={enabledCatalogCodes.has(task.code)}
+                          onChange={() => toggleCatalogTask(task)}
+                          aria-label={`Tự động sinh ${task.code}`}
+                        />
+                        <i />
+                        <b>{enabledCatalogCodes.has(task.code) ? "Có" : "Không"}</b>
+                      </label>
+                    </span>
+                    <span>
+                      {task.custom ? (
+                        <button
+                          type="button"
+                          className="danger-button"
+                          style={{ height: "26px", fontSize: "10.5px", padding: "0 8px" }}
+                          onClick={() => removeCatalogTask(task.code)}
+                          aria-label={`Xóa ${task.code}`}
+                        >
+                          Xóa
+                        </button>
+                      ) : (
+                        <span style={{ color: "#94a3b8", fontSize: "11px" }}>—</span>
+                      )}
+                    </span>
+                  </div>
+                );
+              })}
+              {!catalogRows.length && (
+                <div className="no-results" style={{ padding: "40px 20px", textAlign: "center", color: "#64748b" }}>
+                  Không tìm thấy công việc phù hợp với bộ lọc.
+                </div>
+              )}
+            </section>
+            <Pagination
+              total={catalogRows.length}
+              pageSize={catalogPageSize}
+              page={catalogPage}
+              onPageChange={setCatalogPage}
+              onPageSizeChange={(size) => {
+                setCatalogPageSize(size);
+                setCatalogPage(1);
+              }}
+              pageSizeOptions={[20, 40, 80]}
+            />
           </>
         ) : view === "departments" ? (
           <>
