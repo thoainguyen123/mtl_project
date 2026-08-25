@@ -1650,6 +1650,79 @@ export default function Home() {
           min-width: 900px !important;
           grid-template-columns: minmax(300px, 1fr) 80px 90px 90px 84px 110px !important;
         }
+        .sidebar .brand {
+          height: auto !important;
+          min-height: 142px !important;
+          display: flex !important;
+          flex-direction: column !important;
+          align-items: center !important;
+          justify-content: center !important;
+          gap: 14px !important;
+          padding: 22px 14px 18px !important;
+          margin: 0 -12px !important;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.15) !important;
+          box-sizing: border-box !important;
+        }
+        .brand-logo-wrap {
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+          width: 100% !important;
+        }
+        .brand-logo {
+          width: 120px !important;
+          max-width: 100% !important;
+          height: auto !important;
+          flex: none !important;
+          display: block !important;
+          filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.25)) !important;
+        }
+        .brand-app {
+          display: flex !important;
+          flex-direction: row !important;
+          align-items: center !important;
+          justify-content: center !important;
+          gap: 12px !important;
+          width: 100% !important;
+          padding: 0 !important;
+          border-left: 0 !important;
+        }
+        .brand-code {
+          font-size: 32px !important;
+          font-weight: 900 !important;
+          color: #ffffff !important;
+          line-height: 1 !important;
+          letter-spacing: -0.5px !important;
+          text-transform: uppercase !important;
+          font-family: inherit !important;
+          margin: 0 !important;
+          padding: 0 !important;
+          display: inline-block !important;
+          text-shadow: 0 1px 3px rgba(0, 0, 0, 0.35) !important;
+        }
+        .brand-title {
+          display: flex !important;
+          flex-direction: column !important;
+          align-items: flex-start !important;
+          justify-content: center !important;
+          gap: 2px !important;
+          line-height: 1.15 !important;
+          text-align: left !important;
+          margin: 0 !important;
+          padding: 0 !important;
+        }
+        .brand-title span {
+          font-size: 11px !important;
+          font-weight: 800 !important;
+          letter-spacing: 0.8px !important;
+          color: #4ea1f3 !important;
+          text-transform: uppercase !important;
+          white-space: nowrap !important;
+          line-height: 1.15 !important;
+          margin: 0 !important;
+          padding: 0 !important;
+          display: block !important;
+        }
       `}</style>
       <aside className="sidebar">
         <div className="brand">
@@ -1657,11 +1730,11 @@ export default function Home() {
             <img className="brand-logo" src="/nova-group-logo-light.png" alt="Nova Group" />
           </div>
           <div className="brand-app">
-            <span className="brand-code">PMD</span>
-            <span className="brand-title">
+            <div className="brand-code">PMD</div>
+            <div className="brand-title">
               <span>PROJECT</span>
               <span>MANAGEMENT</span>
-            </span>
+            </div>
           </div>
         </div>
         {/* Module 1: LẬP MASTER TIMELINE — sổ ra/thu gọn được */}

@@ -85,13 +85,13 @@ body{background:#f5f7f9}
 .sidebar{padding:0 12px 16px;background:var(--navy);display:flex;flex-direction:column;width:264px;box-sizing:border-box}
 .workspace{background:#f5f7f9}
 
-.brand{min-height:140px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:22px 14px 18px;margin:0 -12px;border-bottom:1px solid #ffffff18}
+.brand{height:auto;min-height:142px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:22px 14px 18px;margin:0 -12px;border-bottom:1px solid #ffffff18;box-sizing:border-box}
 .brand-logo-wrap{display:flex;align-items:center;justify-content:center;width:100%}
-.brand-logo{width:118px;max-width:100%;height:auto;flex:none;display:block;filter:drop-shadow(0 2px 5px rgba(0,0,0,0.25))}
-.brand-app{display:flex;flex-direction:row;align-items:center;justify-content:center;gap:10px;width:100%;padding:0;border-left:0;color:#fff}
-.brand-code{font-size:30px;font-weight:900;color:#ffffff;line-height:1;letter-spacing:-0.5px;text-transform:uppercase;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility}
-.brand-title{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:1px;line-height:1.15;text-align:left}
-.brand-title span{font-size:10px;font-weight:700;letter-spacing:.7px;color:#5aa4e6;text-transform:uppercase;white-space:nowrap;line-height:1.15}
+.brand-logo{width:120px;max-width:100%;height:auto;flex:none;display:block;filter:drop-shadow(0 2px 6px rgba(0,0,0,0.25))}
+.brand-app{display:flex;flex-direction:row;align-items:center;justify-content:center;gap:12px;width:100%;padding:0;border-left:0;color:#fff}
+.brand-code{font-size:32px;font-weight:900;color:#ffffff!important;line-height:1;letter-spacing:-0.5px;text-transform:uppercase;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility;text-shadow:0 1px 3px rgba(0,0,0,0.35);display:inline-block;margin:0;padding:0}
+.brand-title{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:2px;line-height:1.15;text-align:left;margin:0;padding:0}
+.brand-title span{font-size:11px;font-weight:800;letter-spacing:.8px;color:#4ea1f3!important;text-transform:uppercase;white-space:nowrap;line-height:1.15;margin:0;padding:0;display:block}
 .sidebar-section-label{display:flex;align-items:center;height:36px;padding:18px 8px 4px;color:#728ea7;font-size:9.5px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;line-height:1}
 .sidebar-nav{grid-template-columns:1fr;display:flex;flex-direction:column;gap:3px;margin:0;padding:0;border:0;border-radius:0;background:transparent}
 .sidebar-nav button{grid-column:auto;width:100%;min-height:44px;height:44px;display:grid;grid-template-columns:22px 1fr auto;align-items:center;gap:12px;padding:0 12px;justify-content:flex-start;border:0;border-radius:8px;background:transparent;color:#dbe4ef;font-size:13px;font-weight:600;text-align:left;box-sizing:border-box;transition:all .15s}
