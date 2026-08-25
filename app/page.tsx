@@ -1874,7 +1874,7 @@ export default function Home() {
           font-size: 11px !important;
           font-weight: 800 !important;
           letter-spacing: 0.8px !important;
-          color: #4ea1f3 !important;
+          color: #cbd5e1 !important;
           text-transform: uppercase !important;
           white-space: nowrap !important;
           line-height: 1.15 !important;
