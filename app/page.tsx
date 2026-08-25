@@ -2715,25 +2715,9 @@ export default function Home() {
                 <IconTimeline />
                 <span>Lập & Cập nhật</span>
               </button>
-              <button className={view === "departments" ? "active" : ""} onClick={() => openDepartmentReview()} tabIndex={lapMtlSectionOpen ? 0 : -1}>
-                <IconCheck />
-                <span>PBCM xác nhận</span>
-              </button>
-              <button className={view === "gmd" ? "active" : ""} onClick={() => setView("gmd")} tabIndex={lapMtlSectionOpen ? 0 : -1}>
-                <IconShield />
-                <span>GMD kiểm soát</span>
-              </button>
-              <button className={view === "gms" ? "active" : ""} onClick={() => setView("gms")} tabIndex={lapMtlSectionOpen ? 0 : -1}>
-                <IconSeal />
-                <span>Thẩm định</span>
-              </button>
               <button className={view === "confirm_approval" ? "active" : ""} onClick={() => setView("confirm_approval")} tabIndex={lapMtlSectionOpen ? 0 : -1}>
                 <IconFileCheck />
-                <span>Xác nhận phê duyệt MTL</span>
-              </button>
-              <button className={view === "catalog" ? "active" : ""} onClick={() => setView("catalog")} tabIndex={lapMtlSectionOpen ? 0 : -1}>
-                <IconList />
-                <span>Danh mục WBS</span>
+                <span>Xác nhận phê duyệt</span>
               </button>
             </nav>
           </>;
