@@ -2085,19 +2085,21 @@ export default function Home() {
           text-overflow: ellipsis !important;
         }
         .catalog-table {
-          margin: 16px 24px 20px !important;
+          margin: 14px 24px 24px !important;
           background: #ffffff !important;
           border-radius: 10px !important;
           border: 1px solid #e2e8f0 !important;
           box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
-          overflow: hidden !important;
+          max-height: calc(100vh - 240px) !important;
+          overflow-y: auto !important;
+          overflow-x: auto !important;
         }
         .catalog-table-head {
           display: grid !important;
-          grid-template-columns: minmax(320px, 2fr) minmax(180px, 1fr) 85px 125px 105px 115px 65px !important;
+          grid-template-columns: 130px minmax(280px, 2.2fr) 160px 75px 120px 95px 110px 65px !important;
           align-items: center !important;
           gap: 12px !important;
-          padding: 11px 16px !important;
+          padding: 12px 16px !important;
           background: #f8fafc !important;
           border-bottom: 1px solid #e2e8f0 !important;
           font-size: 11px !important;
@@ -2105,10 +2107,13 @@ export default function Home() {
           color: #64748b !important;
           letter-spacing: 0.4px !important;
           text-transform: uppercase !important;
+          position: sticky !important;
+          top: 0 !important;
+          z-index: 5 !important;
         }
         .catalog-row {
           display: grid !important;
-          grid-template-columns: minmax(320px, 2fr) minmax(180px, 1fr) 85px 125px 105px 115px 65px !important;
+          grid-template-columns: 130px minmax(280px, 2.2fr) 160px 75px 120px 95px 110px 65px !important;
           align-items: center !important;
           gap: 12px !important;
           padding: 10px 16px !important;
@@ -2123,28 +2128,26 @@ export default function Home() {
         .catalog-row.auto-enabled {
           background: #ffffff !important;
         }
-        .catalog-task {
+        .catalog-wbs-cell {
           display: flex !important;
           align-items: center !important;
-          gap: 8px !important;
-          min-width: 0 !important;
+          gap: 6px !important;
         }
-        .catalog-task b {
-          font-size: 11px !important;
+        .catalog-wbs-code {
+          font-size: 11.5px !important;
           font-weight: 800 !important;
           color: #0f172a !important;
           background: #f1f5f9 !important;
-          padding: 2px 6px !important;
-          border-radius: 4px !important;
-          flex: none !important;
+          padding: 3px 7px !important;
+          border-radius: 5px !important;
+          font-family: inherit !important;
+          display: inline-block !important;
         }
-        .catalog-task span {
+        .catalog-name-cell {
           font-size: 12.5px !important;
           font-weight: 600 !important;
           color: #1e293b !important;
-          white-space: nowrap !important;
-          overflow: hidden !important;
-          text-overflow: ellipsis !important;
+          line-height: 1.4 !important;
         }
         .catalog-unit {
           display: flex !important;
@@ -3345,7 +3348,8 @@ export default function Home() {
 
             <section className="catalog-table" style={{ marginTop: 0, borderRadius: "0 0 10px 10px" }}>
               <div className="catalog-table-head">
-                <span>WBS / CÔNG VIỆC</span>
+                <span>WBS</span>
+                <span>HẠNG MỤC</span>
                 <span>ĐƠN VỊ</span>
                 <span>CẤP ĐỘ</span>
                 <span>THỜI LƯỢNG MẪU</span>
@@ -3353,16 +3357,18 @@ export default function Home() {
                 <span>TỰ ĐỘNG SINH</span>
                 <span>HÀNH ĐỘNG</span>
               </div>
-              {pagedCatalogRows.map((task) => {
+              {catalogRows.map((task) => {
                 const group = GROUP_BY_CODE[task.groupCode];
                 return (
                   <div
                     className={`catalog-row ${enabledCatalogCodes.has(task.code) ? "auto-enabled" : ""}`}
                     key={`${task.custom ? "custom" : "base"}-${task.code}`}
                   >
-                    <span className="catalog-task" style={{ paddingLeft: `${(task.level - 1) * 16}px` }}>
-                      <b>{task.code}</b>
-                      <span>{task.name}</span>
+                    <span className="catalog-wbs-cell" style={{ paddingLeft: `${(task.level - 1) * 14}px` }}>
+                      <b className="catalog-wbs-code">{task.code}</b>
+                    </span>
+                    <span className="catalog-name-cell">
+                      {task.name}
                     </span>
                     <span className="catalog-unit">
                       <b>{group?.short || task.groupCode}</b>
@@ -3417,17 +3423,6 @@ export default function Home() {
                 </div>
               )}
             </section>
-            <Pagination
-              total={catalogRows.length}
-              pageSize={catalogPageSize}
-              page={catalogPage}
-              onPageChange={setCatalogPage}
-              onPageSizeChange={(size) => {
-                setCatalogPageSize(size);
-                setCatalogPage(1);
-              }}
-              pageSizeOptions={[20, 40, 80]}
-            />
           </>
         ) : view === "departments" ? (
           <>
