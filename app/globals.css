@@ -69,7 +69,7 @@ body{background:#f5f7f9}
 .sidebar{padding:0 12px 16px;background:var(--navy);display:flex;flex-direction:column;width:264px;box-sizing:border-box}
 .workspace{background:#f5f7f9}
 
-.brand{height:auto;min-height:74px;display:flex;flex-direction:row;align-items:center;justify-content:flex-start;gap:12px;padding:14px 16px 14px 14px;margin:0 -12px;border-bottom:1px solid #ffffff18}
+.brand{height:auto;min-height:76px;display:flex;flex-direction:row;align-items:center;justify-content:flex-start;gap:12px;padding:16px 16px 16px 14px;margin:0 -12px;border-bottom:1px solid #ffffff18}
 .brand-logo{width:52px;height:auto;flex:none;display:block;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.15))}
 .brand-app{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;text-align:left;flex:1;min-width:0;padding-left:12px;border-left:1px solid #ffffff24;color:#fff}
 .brand-app strong{display:flex;flex-direction:column;align-items:flex-start;gap:3px;width:100%;color:#fff;text-align:left;text-transform:uppercase;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility}
@@ -85,7 +85,7 @@ body{background:#f5f7f9}
 .sidebar-nav button span{display:block;text-align:left;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .sidebar-nav button b{justify-self:end;margin-left:auto;padding:2px 7px;border-radius:9px;background:#ffffff24;font-size:9px;font-weight:800;line-height:1.2}
 .sidebar-nav button.active b{background:#ffffff3d}
-.sidebar-nav-top{margin-top:20px;padding-bottom:12px;border-bottom:1px solid #ffffff14}
+.sidebar-nav-top{margin-top:38px;padding-bottom:14px;border-bottom:1px solid #ffffff14}
 .template-card{margin:auto 4px 0;border-color:#ffffff14;background:#ffffff0a}
 .sidebar-footer{margin-top:14px;padding:14px 8px;border-top:1px solid #ffffff12;color:#7189a8;font-size:9px;line-height:1.7}
 .sidebar-user,.avatar{color:#0d2444}
