@@ -2249,6 +2249,23 @@ export default function Home() {
         .auto-generate-check input:checked ~ b {
           color: #15803d !important;
         }
+        /* ================= COMPACT PROJECT INDEX HEADER ================= */
+        .project-index-header {
+          min-height: 68px !important;
+          padding: 16px 24px !important;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: space-between !important;
+          border-bottom: 1px solid #e2e8f0 !important;
+          background: #ffffff !important;
+        }
+        .project-index-header h1 {
+          margin: 0 !important;
+          font-size: 20px !important;
+          font-weight: 800 !important;
+          color: #0f172a !important;
+          letter-spacing: -0.2px !important;
+        }
         /* ================= 7-COLUMN PROJECT TABLE (NO LOẠI DỰ ÁN) ================= */
         .project-table {
           margin: 0 24px 20px !important;
@@ -2882,9 +2899,7 @@ export default function Home() {
             <section className="project-index">
               <header className="project-index-header">
                 <div>
-                  <span className="status-badge" style={{ background: "#edf8f5", color: "#167461", border: "1px solid #a4dfd1" }}>SOP06 · QUẢN LÝ TIẾN ĐỘ TỔNG THỂ</span>
-                  <h1>DANH SÁCH DỰ ÁN MASTER TIMELINE</h1>
-                  <p>Quản lý tiến độ lập, kiểm soát GMD, thẩm định GMS và phê duyệt Baseline chính thức theo chuẩn quy trình SOP06.</p>
+                  <h1>DANH SÁCH DỰ ÁN</h1>
                 </div>
                 <label className="search-field project-index-search">
                   <span>Tìm dự án</span>
@@ -3628,9 +3643,7 @@ export default function Home() {
             <section className="project-index">
               <header className="project-index-header">
                 <div>
-                  <span className="status-badge" style={{ background: "#edf8f5", color: "#167461", border: "1px solid #a4dfd1" }}>SOP-NVTK · QUY TRÌNH THIẾT KẾ DỰ ÁN</span>
                   <h1>DANH SÁCH DỰ ÁN LẬP NHIỆM VỤ THIẾT KẾ (NVTK)</h1>
-                  <p>Chuẩn hóa yêu cầu kỹ thuật, phân kỳ đầu tư, định hướng kiến trúc và tiếp nhận ý kiến đóng góp từ các Phòng Ban Chuyên Môn.</p>
                 </div>
                 <label className="search-field project-index-search">
                   <span>Tìm dự án</span>
@@ -3761,9 +3774,7 @@ export default function Home() {
             <section className="project-index">
               <header className="project-index-header">
                 <div>
-                  <span className="status-badge" style={{ background: "#edf8f5", color: "#167461", border: "1px solid #a4dfd1" }}>FS-VER2 · FINANCIAL FEASIBILITY STUDY</span>
                   <h1>DANH SÁCH DỰ ÁN LẬP FS THỰC THI (FS-VER2)</h1>
-                  <p>Tổng hợp dữ liệu chi phí từ Master Timeline, tiến độ bán hàng, dòng tiền và phân tích các chỉ số tài chính (IRR, NPV, Payback Period).</p>
                 </div>
                 <label className="search-field project-index-search">
                   <span>Tìm dự án</span>
