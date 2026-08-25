@@ -2721,6 +2721,10 @@ export default function Home() {
                 <IconFileCheck />
                 <span>Xác nhận phê duyệt</span>
               </button>
+              <button className={view === "catalog" ? "active" : ""} onClick={() => setView("catalog")} tabIndex={lapMtlSectionOpen ? 0 : -1}>
+                <IconList />
+                <span>Danh mục WBS</span>
+              </button>
             </nav>
           </>;
         })()}
