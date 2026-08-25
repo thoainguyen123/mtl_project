@@ -60,10 +60,10 @@ body{background:#f5f7f9}
 
 .brand{height:auto;min-height:136px;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:18px 16px;border-bottom:1px solid #ffffff14}
 .brand-logo{width:132px;height:auto;display:block}
-.brand-app{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;width:100%;padding:0 4px}
+.brand-app{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;width:100%;padding:0 4px;color:#fff}
 .brand-app strong{display:flex;flex-direction:column;align-items:center;gap:4px;width:100%;color:#fff;text-align:center;text-transform:uppercase}
-.brand-app strong span:first-child{font-size:20px;font-weight:900;letter-spacing:1px;line-height:1.2}
-.brand-app strong span:last-child{font-size:15.5px;font-weight:800;letter-spacing:.2px;line-height:1.25;white-space:nowrap}
+.brand-app strong span:first-child{font-size:20px;font-weight:900;letter-spacing:1px;line-height:1.2;color:#ffffff}
+.brand-app strong span:last-child{font-size:15.5px;font-weight:800;letter-spacing:.2px;line-height:1.25;white-space:nowrap;color:#ffffff}
 .sidebar-section-label{padding:18px 20px 8px;color:#6d86a5;font-size:9px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase}
 .sidebar-nav{grid-template-columns:1fr;display:flex;flex-direction:column;gap:0;margin:0;padding:0;border:0;border-radius:0;background:transparent}
 .sidebar-nav button{grid-column:auto;min-height:50px;display:flex;align-items:center;gap:12px;padding:0 20px;justify-content:flex-start;border:0;border-bottom:1px solid #ffffff0f;border-radius:0;background:transparent;color:#dbe4ef;font-size:13px;font-weight:600;text-align:left}
