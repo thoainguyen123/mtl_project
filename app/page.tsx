@@ -14,6 +14,9 @@ type TemplateTask = {
   level: number;
   summary: boolean;
   defaultDuration: number;
+  gmdReport?: string;
+  workGroup?: string;
+  notes?: string;
   custom?: boolean;
 };
 
@@ -131,7 +134,7 @@ const DEFAULT_DEPENDENCIES = dependencyData as DefaultTaskDependency[];
 const STORAGE_KEY = "mtl-workspace-projects-v1";
 const ACTIVE_KEY = "mtl-workspace-active-project-v1";
 const CATALOG_KEY = "mtl-workspace-custom-catalog-v1";
-const CATALOG_ENABLED_KEY = "mtl-workspace-enabled-catalog-v1";
+const CATALOG_ENABLED_KEY = "mtl-workspace-enabled-catalog-v2";
 
 /* Theo SOP06 mục 2.2, PBCM gồm 9 ban/phòng gián tiếp + 4 phòng trực tiếp = 13 đơn vị.
    PMD là đơn vị chủ trì lập MTL nên có công việc riêng trong kế hoạch, nhưng không
@@ -1299,7 +1302,7 @@ export default function Home() {
   const catalogRows = useMemo(() => {
     const query = catalogSearch.trim().toLocaleLowerCase("vi");
     return fullCatalog.filter((task) => {
-      const matchesQuery = !query || `${task.code} ${task.name} ${GROUP_BY_CODE[task.groupCode]?.name ?? ""}`.toLocaleLowerCase("vi").includes(query);
+      const matchesQuery = !query || `${task.code} ${task.name} ${task.gmdReport ?? ""} ${task.workGroup ?? ""} ${task.notes ?? ""} ${GROUP_BY_CODE[task.groupCode]?.name ?? ""}`.toLocaleLowerCase("vi").includes(query);
       const matchesGroup = catalogGroupFilter === "all" || task.groupCode === catalogGroupFilter;
       const matchesSource = catalogSourceFilter === "all" || (catalogSourceFilter === "custom" ? task.custom : !task.custom);
       return matchesQuery && matchesGroup && matchesSource;
@@ -2096,7 +2099,7 @@ export default function Home() {
         }
         .catalog-table-head {
           display: grid !important;
-          grid-template-columns: 130px minmax(280px, 2.2fr) 160px 75px 120px 95px 110px 65px !important;
+          grid-template-columns: 130px minmax(300px, 1.8fr) minmax(320px, 2fr) 145px 75px minmax(240px, 1.4fr) 110px 65px !important;
           align-items: center !important;
           gap: 12px !important;
           padding: 12px 16px !important;
@@ -2113,7 +2116,7 @@ export default function Home() {
         }
         .catalog-row {
           display: grid !important;
-          grid-template-columns: 130px minmax(280px, 2.2fr) 160px 75px 120px 95px 110px 65px !important;
+          grid-template-columns: 130px minmax(300px, 1.8fr) minmax(320px, 2fr) 145px 75px minmax(240px, 1.4fr) 110px 65px !important;
           align-items: center !important;
           gap: 12px !important;
           padding: 10px 16px !important;
@@ -3270,7 +3273,7 @@ export default function Home() {
                   {enabledCatalogCount}/{fullCatalog.length} TỰ ĐỘNG SINH
                 </span>
                 <h1>Danh Mục WBS Chuẩn</h1>
-                <p>Công việc được tích “Tự động sinh” sẽ luôn có sẵn khi tạo dự án mới theo mẫu NVLG MTL 2026.06.</p>
+                <p>Công việc được tích “Tự động sinh” sẽ luôn có sẵn khi tạo dự án mới theo mẫu MTL hiện hành.</p>
               </div>
               <label className="search-field" style={{ minWidth: "260px" }}>
                 <span>Tìm</span>
@@ -3349,16 +3352,15 @@ export default function Home() {
             <section className="catalog-table" style={{ marginTop: 0, borderRadius: "0 0 10px 10px" }}>
               <div className="catalog-table-head">
                 <span>WBS</span>
-                <span>HẠNG MỤC</span>
-                <span>ĐƠN VỊ</span>
-                <span>CẤP ĐỘ</span>
-                <span>THỜI LƯỢNG MẪU</span>
-                <span>NGUỒN</span>
+                <span>HẠNG MỤC CÔNG VIỆC</span>
+                <span>BÁO CÁO GMD</span>
+                <span>NHÓM CV</span>
+                <span>SUMMARY</span>
+                <span>NOTES</span>
                 <span>TỰ ĐỘNG SINH</span>
                 <span>HÀNH ĐỘNG</span>
               </div>
-              {catalogRows.map((task) => {
-                const group = GROUP_BY_CODE[task.groupCode];
+              {pagedCatalogRows.map((task) => {
                 return (
                   <div
                     className={`catalog-row ${enabledCatalogCodes.has(task.code) ? "auto-enabled" : ""}`}
@@ -3370,22 +3372,19 @@ export default function Home() {
                     <span className="catalog-name-cell">
                       {task.name}
                     </span>
-                    <span className="catalog-unit">
-                      <b>{group?.short || task.groupCode}</b>
-                      <span>{group?.name}</span>
+                    <span className="catalog-name-cell" title={task.gmdReport}>
+                      {task.gmdReport || "—"}
+                    </span>
+                    <span style={{ color: "#475569" }}>
+                      {task.workGroup || "—"}
                     </span>
                     <span>
-                      <span className={`catalog-level-badge catalog-level-${Math.min(task.level, 4)}`}>
-                        Cấp {task.level}
+                      <span className={`catalog-level-badge catalog-level-${task.summary ? 2 : 4}`}>
+                        {task.summary ? "Yes" : "No"}
                       </span>
                     </span>
-                    <span style={{ fontWeight: 600, color: "#334155" }}>
-                      {task.defaultDuration} ngày
-                    </span>
-                    <span>
-                      <i className={task.custom ? "source-custom" : "source-standard"}>
-                        {task.custom ? "Tùy chỉnh" : "Mẫu chuẩn"}
-                      </i>
+                    <span className="catalog-name-cell" title={task.notes}>
+                      {task.notes || "—"}
                     </span>
                     <span>
                       <label className="auto-generate-check">
@@ -3423,6 +3422,7 @@ export default function Home() {
                 </div>
               )}
             </section>
+            <Pagination total={catalogRows.length} pageSize={catalogPageSize} page={Math.min(catalogPage, catalogPageCount)} onPageChange={setCatalogPage} onPageSizeChange={(size) => { setCatalogPageSize(size); setCatalogPage(1); }} pageSizeOptions={[20, 40, 100]} />
           </>
         ) : view === "departments" ? (
           <>
