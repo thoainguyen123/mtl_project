@@ -2150,12 +2150,14 @@ export default function Home() {
         .catalog-wbs-cell {
           display: flex !important;
           align-items: center !important;
-          gap: 6px !important;
+          gap: 4px !important;
+          min-width: 0 !important;
+          overflow: hidden !important;
         }
         .catalog-tree-toggle,
         .catalog-tree-spacer {
-          width: 24px !important;
-          height: 24px !important;
+          width: 18px !important;
+          height: 20px !important;
           flex: none !important;
         }
         .catalog-tree-toggle {
@@ -2165,7 +2167,7 @@ export default function Home() {
           border-radius: 5px !important;
           background: #ffffff !important;
           color: #334155 !important;
-          font-size: 16px !important;
+          font-size: 14px !important;
           font-weight: 700 !important;
           line-height: 1 !important;
         }
@@ -2182,7 +2184,11 @@ export default function Home() {
           padding: 3px 7px !important;
           border-radius: 5px !important;
           font-family: inherit !important;
-          display: inline-block !important;
+          display: block !important;
+          min-width: 0 !important;
+          overflow: hidden !important;
+          text-overflow: ellipsis !important;
+          white-space: nowrap !important;
         }
         .catalog-name-cell {
           font-size: 12.5px !important;
@@ -3422,7 +3428,7 @@ export default function Home() {
                     className={`catalog-row ${enabledCatalogCodes.has(task.code) ? "auto-enabled" : ""}`}
                     key={`${task.custom ? "custom" : "base"}-${task.code}`}
                   >
-                    <span className="catalog-wbs-cell" style={{ paddingLeft: `${(task.level - 1) * 14}px` }}>
+                    <span className="catalog-wbs-cell" style={{ paddingLeft: `${(task.level - 1) * 5}px` }}>
                       {hasChildren ? (
                         <button
                           type="button"
@@ -3440,7 +3446,7 @@ export default function Home() {
                           {isCollapsed ? "+" : "−"}
                         </button>
                       ) : <i className="catalog-tree-spacer" aria-hidden="true" />}
-                      <b className="catalog-wbs-code">{task.code}</b>
+                      <b className="catalog-wbs-code" title={task.code}>{task.code}</b>
                     </span>
                     <span className="catalog-name-cell">
                       {task.name}
