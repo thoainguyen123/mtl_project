@@ -963,6 +963,7 @@ export default function Home() {
   const [gmdSearch, setGmdSearch] = useState("");
   const [catalogSearch, setCatalogSearch] = useState("");
   const [catalogGroupFilter, setCatalogGroupFilter] = useState("all");
+  const [catalogWorkGroupFilter, setCatalogWorkGroupFilter] = useState<"all" | "Báo cáo định kỳ" | "Tracking công việc">("all");
   const [catalogSourceFilter, setCatalogSourceFilter] = useState<"all" | "custom" | "standard">("all");
   const [catalogCollapsed, setCatalogCollapsed] = useState<Set<string>>(new Set());
   const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
@@ -1298,15 +1299,29 @@ export default function Home() {
   const contextTask = contextMenu ? scheduled.find((task) => task.code === contextMenu.code) ?? null : null;
   const fullCatalog = useMemo(() => [...TEMPLATE, ...customCatalog].sort((a, b) => (GROUP_ORDER[a.groupCode] ?? 99) - (GROUP_ORDER[b.groupCode] ?? 99) || a.code.localeCompare(b.code, undefined, { numeric: true })), [customCatalog]);
   const enabledCatalogCount = useMemo(() => fullCatalog.filter((task) => enabledCatalogCodes.has(task.code)).length, [fullCatalog, enabledCatalogCodes]);
+  const catalogWorkGroupCodes = useMemo(() => {
+    if (catalogWorkGroupFilter === "all") return null;
+    const tasksByCode = new Map(fullCatalog.map((task) => [task.code, task]));
+    const includedCodes = new Set<string>();
+    fullCatalog.filter((task) => task.workGroup === catalogWorkGroupFilter).forEach((task) => {
+      let currentTask: TemplateTask | undefined = task;
+      while (currentTask) {
+        includedCodes.add(currentTask.code);
+        currentTask = currentTask.parentCode ? tasksByCode.get(currentTask.parentCode) : undefined;
+      }
+    });
+    return includedCodes;
+  }, [fullCatalog, catalogWorkGroupFilter]);
   const catalogRows = useMemo(() => {
     const query = catalogSearch.trim().toLocaleLowerCase("vi");
     return fullCatalog.filter((task) => {
       const matchesQuery = !query || `${task.code} ${task.name} ${task.gmdReport ?? ""} ${task.workGroup ?? ""} ${task.notes ?? ""} ${GROUP_BY_CODE[task.groupCode]?.name ?? ""}`.toLocaleLowerCase("vi").includes(query);
       const matchesGroup = catalogGroupFilter === "all" || task.groupCode === catalogGroupFilter;
+      const matchesWorkGroup = catalogWorkGroupCodes === null || catalogWorkGroupCodes.has(task.code);
       const matchesSource = catalogSourceFilter === "all" || (catalogSourceFilter === "custom" ? task.custom : !task.custom);
-      return matchesQuery && matchesGroup && matchesSource;
+      return matchesQuery && matchesGroup && matchesWorkGroup && matchesSource;
     });
-  }, [fullCatalog, catalogSearch, catalogGroupFilter, catalogSourceFilter]);
+  }, [fullCatalog, catalogSearch, catalogGroupFilter, catalogWorkGroupCodes, catalogSourceFilter]);
   const catalogParentCodes = useMemo(
     () => new Set(fullCatalog.flatMap((task) => task.parentCode ? [task.parentCode] : [])),
     [fullCatalog],
@@ -3354,6 +3369,20 @@ export default function Home() {
                       {group.code} · {group.short} ({group.name})
                     </option>
                   ))}
+                </select>
+              </label>
+              <label className="table-filters-select">
+                <span>Nhóm CV</span>
+                <select
+                  value={catalogWorkGroupFilter}
+                  onChange={(event) => {
+                    setCatalogWorkGroupFilter(event.target.value as "all" | "Báo cáo định kỳ" | "Tracking công việc");
+                    setCatalogCollapsed(new Set());
+                  }}
+                >
+                  <option value="all">Tất cả nhóm công việc</option>
+                  <option value="Báo cáo định kỳ">Báo cáo định kỳ (gồm công việc cha)</option>
+                  <option value="Tracking công việc">Tracking công việc (gồm công việc cha)</option>
                 </select>
               </label>
               <label className="table-filters-select">
