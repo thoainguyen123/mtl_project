@@ -964,6 +964,7 @@ export default function Home() {
   const [catalogSearch, setCatalogSearch] = useState("");
   const [catalogGroupFilter, setCatalogGroupFilter] = useState("all");
   const [catalogSourceFilter, setCatalogSourceFilter] = useState<"all" | "custom" | "standard">("all");
+  const [catalogCollapsed, setCatalogCollapsed] = useState<Set<string>>(new Set());
   const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
   const [selectedCode, setSelectedCode] = useState("");
   const [toast, setToast] = useState("");
@@ -1306,6 +1307,14 @@ export default function Home() {
       return matchesQuery && matchesGroup && matchesSource;
     });
   }, [fullCatalog, catalogSearch, catalogGroupFilter, catalogSourceFilter]);
+  const catalogParentCodes = useMemo(
+    () => new Set(fullCatalog.flatMap((task) => task.parentCode ? [task.parentCode] : [])),
+    [fullCatalog],
+  );
+  const visibleCatalogRows = useMemo(() => {
+    if (catalogSearch.trim()) return catalogRows;
+    return catalogRows.filter((task) => ![...catalogCollapsed].some((code) => task.code.startsWith(`${code}.`)));
+  }, [catalogRows, catalogSearch, catalogCollapsed]);
   const visibleTasks = useMemo(() => {
     const query = search.trim().toLocaleLowerCase("vi");
     return scheduled.filter((task) => {
@@ -2127,6 +2136,28 @@ export default function Home() {
           display: flex !important;
           align-items: center !important;
           gap: 6px !important;
+        }
+        .catalog-tree-toggle,
+        .catalog-tree-spacer {
+          width: 24px !important;
+          height: 24px !important;
+          flex: none !important;
+        }
+        .catalog-tree-toggle {
+          display: grid !important;
+          place-items: center !important;
+          border: 1px solid #cbd5e1 !important;
+          border-radius: 5px !important;
+          background: #ffffff !important;
+          color: #334155 !important;
+          font-size: 16px !important;
+          font-weight: 700 !important;
+          line-height: 1 !important;
+        }
+        .catalog-tree-toggle:hover {
+          border-color: #0f766e !important;
+          background: #f0fdfa !important;
+          color: #0f766e !important;
         }
         .catalog-wbs-code {
           font-size: 11.5px !important;
@@ -3249,6 +3280,12 @@ export default function Home() {
                 <span>{fullCatalog.length} công việc</span>
               </div>
               <div className="top-actions">
+                <button type="button" className="secondary-button" onClick={() => setCatalogCollapsed(new Set())}>
+                  Expand all
+                </button>
+                <button type="button" className="secondary-button" onClick={() => setCatalogCollapsed(new Set(catalogParentCodes))}>
+                  Collapse all
+                </button>
                 <button type="button" className="secondary-button" onClick={toggleAllCatalogTasks}>
                   {enabledCatalogCount === fullCatalog.length ? "Bỏ tích tất cả" : "Tích tất cả"}
                 </button>
@@ -3333,7 +3370,7 @@ export default function Home() {
                 </select>
               </label>
               <span className="table-filters-count" style={{ marginLeft: "auto" }}>
-                Hiển thị <strong>{catalogRows.length}</strong> / {fullCatalog.length} công việc
+                Hiển thị <strong>{visibleCatalogRows.length}</strong> / {fullCatalog.length} công việc
               </span>
             </div>
 
@@ -3348,13 +3385,32 @@ export default function Home() {
                 <span>TỰ ĐỘNG SINH</span>
                 <span>HÀNH ĐỘNG</span>
               </div>
-              {catalogRows.map((task) => {
+              {visibleCatalogRows.map((task) => {
+                const hasChildren = catalogParentCodes.has(task.code);
+                const isCollapsed = catalogCollapsed.has(task.code);
                 return (
                   <div
                     className={`catalog-row ${enabledCatalogCodes.has(task.code) ? "auto-enabled" : ""}`}
                     key={`${task.custom ? "custom" : "base"}-${task.code}`}
                   >
                     <span className="catalog-wbs-cell" style={{ paddingLeft: `${(task.level - 1) * 14}px` }}>
+                      {hasChildren ? (
+                        <button
+                          type="button"
+                          className="catalog-tree-toggle"
+                          aria-expanded={!isCollapsed}
+                          aria-label={isCollapsed ? `Mở rộng ${task.code}` : `Thu gọn ${task.code}`}
+                          title={isCollapsed ? "Expand" : "Collapse"}
+                          onClick={() => setCatalogCollapsed((current) => {
+                            const next = new Set(current);
+                            if (isCollapsed) next.delete(task.code);
+                            else next.add(task.code);
+                            return next;
+                          })}
+                        >
+                          {isCollapsed ? "+" : "−"}
+                        </button>
+                      ) : <i className="catalog-tree-spacer" aria-hidden="true" />}
                       <b className="catalog-wbs-code">{task.code}</b>
                     </span>
                     <span className="catalog-name-cell">
