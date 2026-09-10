@@ -5,6 +5,8 @@ import templateData from "./mtl-template.json";
 import dependencyData from "./mtl-dependencies.json";
 import { parseMSProjectXML, type ParsedProjectData } from "./xml-parser";
 
+type WorkType = "" | "Báo cáo định kỳ" | "Tracking công việc";
+
 type TemplateTask = {
   id: number;
   code: string;
@@ -15,7 +17,7 @@ type TemplateTask = {
   summary: boolean;
   defaultDuration: number;
   gmdReport?: string;
-  workGroup?: string;
+  workGroup?: WorkType;
   notes?: string;
   custom?: boolean;
 };
@@ -135,6 +137,7 @@ const STORAGE_KEY = "mtl-workspace-projects-v1";
 const ACTIVE_KEY = "mtl-workspace-active-project-v1";
 const CATALOG_KEY = "mtl-workspace-custom-catalog-v1";
 const CATALOG_ENABLED_KEY = "mtl-workspace-enabled-catalog-v2";
+const CATALOG_WORK_TYPE_KEY = "mtl-workspace-catalog-work-type-v1";
 
 /* Theo SOP06 mục 2.2, PBCM gồm 9 ban/phòng gián tiếp + 4 phòng trực tiếp = 13 đơn vị.
    PMD là đơn vị chủ trì lập MTL nên có công việc riêng trong kế hoạch, nhưng không
@@ -880,6 +883,7 @@ export default function Home() {
   const [activeId, setActiveId] = useState("");
   const [customCatalog, setCustomCatalog] = useState<TemplateTask[]>([]);
   const [enabledCatalogCodes, setEnabledCatalogCodes] = useState<Set<string>>(new Set());
+  const [catalogWorkTypeEdits, setCatalogWorkTypeEdits] = useState<Record<string, WorkType>>({});
   const [hydrated, setHydrated] = useState(false);
   const [view, setView] = useState<"overview" | "projects" | "workspace" | "departments" | "gmd" | "gms" | "confirm_approval" | "approved_projects" | "catalog" | "design_task" | "fs_ver2">("projects");
   const [lapMtlOpen, setLapMtlOpen] = useState(true);
@@ -963,7 +967,7 @@ export default function Home() {
   const [gmdSearch, setGmdSearch] = useState("");
   const [catalogSearch, setCatalogSearch] = useState("");
   const [catalogGroupFilter, setCatalogGroupFilter] = useState("all");
-  const [catalogWorkGroupFilter, setCatalogWorkGroupFilter] = useState<"all" | "Báo cáo định kỳ" | "Tracking công việc">("all");
+  const [catalogWorkGroupFilter, setCatalogWorkGroupFilter] = useState<"all" | Exclude<WorkType, "">>("all");
   const [catalogSourceFilter, setCatalogSourceFilter] = useState<"all" | "custom" | "standard">("all");
   const [catalogCollapsed, setCatalogCollapsed] = useState<Set<string>>(new Set());
   const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
@@ -996,10 +1000,12 @@ export default function Home() {
         const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? "[]") as Partial<Project>[];
         const savedCustomCatalog = JSON.parse(localStorage.getItem(CATALOG_KEY) ?? "[]") as TemplateTask[];
         const savedEnabledCodes = localStorage.getItem(CATALOG_ENABLED_KEY);
+        const savedWorkTypeEdits = JSON.parse(localStorage.getItem(CATALOG_WORK_TYPE_KEY) ?? "{}") as Record<string, WorkType>;
         const initialList = (saved && saved.length > 0) ? saved : DEFAULT_INITIAL_PROJECTS;
         const normalized = initialList.map(normalizeProject);
         setProjects(normalized);
         setCustomCatalog(savedCustomCatalog);
+        setCatalogWorkTypeEdits(savedWorkTypeEdits);
         const catalogCodes = new Set([...TEMPLATE, ...savedCustomCatalog].map((task) => task.code));
         setEnabledCatalogCodes(new Set(savedEnabledCodes ? (JSON.parse(savedEnabledCodes) as string[]).filter((code) => catalogCodes.has(code)) : [...catalogCodes]));
         setActiveId(localStorage.getItem(ACTIVE_KEY) ?? normalized[0]?.id ?? "");
@@ -1007,6 +1013,7 @@ export default function Home() {
         const normalized = DEFAULT_INITIAL_PROJECTS.map(normalizeProject);
         setProjects(normalized);
         setCustomCatalog([]);
+        setCatalogWorkTypeEdits({});
         setEnabledCatalogCodes(new Set(TEMPLATE.map((task) => task.code)));
       }
       setHydrated(true);
@@ -1019,8 +1026,9 @@ export default function Home() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(projects));
     localStorage.setItem(CATALOG_KEY, JSON.stringify(customCatalog));
     localStorage.setItem(CATALOG_ENABLED_KEY, JSON.stringify([...enabledCatalogCodes]));
+    localStorage.setItem(CATALOG_WORK_TYPE_KEY, JSON.stringify(catalogWorkTypeEdits));
     if (activeId) localStorage.setItem(ACTIVE_KEY, activeId);
-  }, [projects, activeId, customCatalog, enabledCatalogCodes, hydrated]);
+  }, [projects, activeId, customCatalog, enabledCatalogCodes, catalogWorkTypeEdits, hydrated]);
 
   useEffect(() => {
     const closeMenu = () => setContextMenu(null);
@@ -1297,7 +1305,11 @@ export default function Home() {
   const departmentTasks = useMemo(() => scheduled.filter((task) => task.groupCode === departmentCode), [scheduled, departmentCode]);
   const selectedTask = scheduled.find((task) => task.code === selectedCode) ?? null;
   const contextTask = contextMenu ? scheduled.find((task) => task.code === contextMenu.code) ?? null : null;
-  const fullCatalog = useMemo(() => [...TEMPLATE, ...customCatalog].sort((a, b) => (GROUP_ORDER[a.groupCode] ?? 99) - (GROUP_ORDER[b.groupCode] ?? 99) || a.code.localeCompare(b.code, undefined, { numeric: true })), [customCatalog]);
+  const fullCatalog = useMemo(() => [...TEMPLATE, ...customCatalog]
+    .map((task) => Object.prototype.hasOwnProperty.call(catalogWorkTypeEdits, task.code)
+      ? { ...task, workGroup: catalogWorkTypeEdits[task.code] || undefined }
+      : task)
+    .sort((a, b) => (GROUP_ORDER[a.groupCode] ?? 99) - (GROUP_ORDER[b.groupCode] ?? 99) || a.code.localeCompare(b.code, undefined, { numeric: true })), [customCatalog, catalogWorkTypeEdits]);
   const enabledCatalogCount = useMemo(() => fullCatalog.filter((task) => enabledCatalogCodes.has(task.code)).length, [fullCatalog, enabledCatalogCodes]);
   const catalogWorkGroupCodes = useMemo(() => {
     if (catalogWorkGroupFilter === "all") return null;
@@ -1315,7 +1327,7 @@ export default function Home() {
   const catalogRows = useMemo(() => {
     const query = catalogSearch.trim().toLocaleLowerCase("vi");
     return fullCatalog.filter((task) => {
-      const matchesQuery = !query || `${task.code} ${task.name} ${task.gmdReport ?? ""} ${task.workGroup ?? ""} ${task.notes ?? ""} ${GROUP_BY_CODE[task.groupCode]?.name ?? ""}`.toLocaleLowerCase("vi").includes(query);
+      const matchesQuery = !query || `${task.code} ${task.name} ${task.gmdReport ?? ""} ${task.workGroup ?? ""} ${GROUP_BY_CODE[task.groupCode]?.name ?? ""}`.toLocaleLowerCase("vi").includes(query);
       const matchesGroup = catalogGroupFilter === "all" || task.groupCode === catalogGroupFilter;
       const matchesWorkGroup = catalogWorkGroupCodes === null || catalogWorkGroupCodes.has(task.code);
       const matchesSource = catalogSourceFilter === "all" || (catalogSourceFilter === "custom" ? task.custom : !task.custom);
@@ -1341,6 +1353,17 @@ export default function Home() {
   const notify = (message: string) => {
     setToast(message);
     window.setTimeout(() => setToast(""), 2800);
+  };
+
+  const updateCatalogWorkType = (task: TemplateTask, workType: WorkType) => {
+    const originalTask = [...TEMPLATE, ...customCatalog].find((item) => item.code === task.code);
+    setCatalogWorkTypeEdits((current) => {
+      const next = { ...current };
+      if (workType === (originalTask?.workGroup ?? "")) delete next[task.code];
+      else next[task.code] = workType;
+      return next;
+    });
+    notify(`Đã cập nhật Loại CV cho ${task.code}`);
   };
 
   const openCreate = () => {
@@ -2115,7 +2138,7 @@ export default function Home() {
         }
         .catalog-table-head {
           display: grid !important;
-          grid-template-columns: 130px minmax(300px, 1.8fr) minmax(320px, 2fr) 145px 75px minmax(240px, 1.4fr) 110px 65px !important;
+          grid-template-columns: 130px minmax(300px, 1.8fr) minmax(320px, 2fr) 190px 75px 110px 65px !important;
           align-items: center !important;
           gap: 12px !important;
           padding: 12px 16px !important;
@@ -2132,7 +2155,7 @@ export default function Home() {
         }
         .catalog-row {
           display: grid !important;
-          grid-template-columns: 130px minmax(300px, 1.8fr) minmax(320px, 2fr) 145px 75px minmax(240px, 1.4fr) 110px 65px !important;
+          grid-template-columns: 130px minmax(300px, 1.8fr) minmax(320px, 2fr) 190px 75px 110px 65px !important;
           align-items: center !important;
           gap: 12px !important;
           padding: 10px 16px !important;
@@ -2146,6 +2169,17 @@ export default function Home() {
         }
         .catalog-row.auto-enabled {
           background: #ffffff !important;
+        }
+        .catalog-work-type-select {
+          width: 100% !important;
+          min-width: 0 !important;
+          height: 32px !important;
+          border: 1px solid #cbd5e1 !important;
+          border-radius: 6px !important;
+          background: #ffffff !important;
+          color: #334155 !important;
+          padding: 0 8px !important;
+          font-size: 11.5px !important;
         }
         .catalog-wbs-cell {
           display: flex !important;
@@ -3378,15 +3412,15 @@ export default function Home() {
                 </select>
               </label>
               <label className="table-filters-select">
-                <span>Nhóm CV</span>
+                <span>Loại CV</span>
                 <select
                   value={catalogWorkGroupFilter}
                   onChange={(event) => {
-                    setCatalogWorkGroupFilter(event.target.value as "all" | "Báo cáo định kỳ" | "Tracking công việc");
+                    setCatalogWorkGroupFilter(event.target.value as "all" | Exclude<WorkType, "">);
                     setCatalogCollapsed(new Set());
                   }}
                 >
-                  <option value="all">Tất cả nhóm công việc</option>
+                  <option value="all">Tất cả loại công việc</option>
                   <option value="Báo cáo định kỳ">Báo cáo định kỳ (gồm công việc cha)</option>
                   <option value="Tracking công việc">Tracking công việc (gồm công việc cha)</option>
                 </select>
@@ -3414,9 +3448,8 @@ export default function Home() {
                 <span>WBS</span>
                 <span>HẠNG MỤC CÔNG VIỆC</span>
                 <span>BÁO CÁO GMD</span>
-                <span>NHÓM CV</span>
+                <span>LOẠI CV</span>
                 <span>SUMMARY</span>
-                <span>NOTES</span>
                 <span>TỰ ĐỘNG SINH</span>
                 <span>HÀNH ĐỘNG</span>
               </div>
@@ -3454,16 +3487,22 @@ export default function Home() {
                     <span className="catalog-name-cell" title={task.gmdReport}>
                       {task.gmdReport || "—"}
                     </span>
-                    <span style={{ color: "#475569" }}>
-                      {task.workGroup || "—"}
+                    <span>
+                      <select
+                        className="catalog-work-type-select"
+                        value={task.workGroup ?? ""}
+                        onChange={(event) => updateCatalogWorkType(task, event.target.value as WorkType)}
+                        aria-label={`Loại công việc ${task.code}`}
+                      >
+                        <option value="">Chưa phân loại</option>
+                        <option value="Báo cáo định kỳ">Báo cáo định kỳ</option>
+                        <option value="Tracking công việc">Tracking công việc</option>
+                      </select>
                     </span>
                     <span>
                       <span className={`catalog-level-badge catalog-level-${task.summary ? 2 : 4}`}>
                         {task.summary ? "Yes" : "No"}
                       </span>
-                    </span>
-                    <span className="catalog-name-cell" title={task.notes}>
-                      {task.notes || "—"}
                     </span>
                     <span>
                       <label className="auto-generate-check">
