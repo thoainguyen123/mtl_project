@@ -964,8 +964,6 @@ export default function Home() {
   const [catalogSearch, setCatalogSearch] = useState("");
   const [catalogGroupFilter, setCatalogGroupFilter] = useState("all");
   const [catalogSourceFilter, setCatalogSourceFilter] = useState<"all" | "custom" | "standard">("all");
-  const [catalogPage, setCatalogPage] = useState(1);
-  const [catalogPageSize, setCatalogPageSize] = useState(20);
   const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
   const [selectedCode, setSelectedCode] = useState("");
   const [toast, setToast] = useState("");
@@ -1308,12 +1306,6 @@ export default function Home() {
       return matchesQuery && matchesGroup && matchesSource;
     });
   }, [fullCatalog, catalogSearch, catalogGroupFilter, catalogSourceFilter]);
-  const catalogPageCount = Math.max(1, Math.ceil(catalogRows.length / catalogPageSize));
-  const pagedCatalogRows = useMemo(() => {
-    const currentPage = Math.min(catalogPage, catalogPageCount);
-    return catalogRows.slice((currentPage - 1) * catalogPageSize, currentPage * catalogPageSize);
-  }, [catalogRows, catalogPage, catalogPageSize, catalogPageCount]);
-
   const visibleTasks = useMemo(() => {
     const query = search.trim().toLocaleLowerCase("vi");
     return scheduled.filter((task) => {
@@ -3281,7 +3273,6 @@ export default function Home() {
                   value={catalogSearch}
                   onChange={(event) => {
                     setCatalogSearch(event.target.value);
-                    setCatalogPage(1);
                   }}
                   placeholder="Tìm theo mã WBS hoặc tên..."
                 />
@@ -3299,7 +3290,6 @@ export default function Home() {
                     className={`catalog-group-card ${isSelected ? "active" : ""}`}
                     onClick={() => {
                       setCatalogGroupFilter((curr) => (curr === group.code ? "all" : group.code));
-                      setCatalogPage(1);
                     }}
                   >
                     <div className="catalog-group-card-top">
@@ -3319,7 +3309,6 @@ export default function Home() {
                   value={catalogGroupFilter}
                   onChange={(event) => {
                     setCatalogGroupFilter(event.target.value);
-                    setCatalogPage(1);
                   }}
                 >
                   <option value="all">Tất cả nhóm ({GROUPS.length})</option>
@@ -3336,7 +3325,6 @@ export default function Home() {
                   value={catalogSourceFilter}
                   onChange={(event) => {
                     setCatalogSourceFilter(event.target.value as "all" | "custom" | "standard");
-                    setCatalogPage(1);
                   }}
                 >
                   <option value="all">Tất cả nguồn</option>
@@ -3360,7 +3348,7 @@ export default function Home() {
                 <span>TỰ ĐỘNG SINH</span>
                 <span>HÀNH ĐỘNG</span>
               </div>
-              {pagedCatalogRows.map((task) => {
+              {catalogRows.map((task) => {
                 return (
                   <div
                     className={`catalog-row ${enabledCatalogCodes.has(task.code) ? "auto-enabled" : ""}`}
@@ -3422,7 +3410,6 @@ export default function Home() {
                 </div>
               )}
             </section>
-            <Pagination total={catalogRows.length} pageSize={catalogPageSize} page={Math.min(catalogPage, catalogPageCount)} onPageChange={setCatalogPage} onPageSizeChange={(size) => { setCatalogPageSize(size); setCatalogPage(1); }} pageSizeOptions={[20, 40, 100]} />
           </>
         ) : view === "departments" ? (
           <>
