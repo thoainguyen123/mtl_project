@@ -923,6 +923,7 @@ export default function Home() {
   const [currentAccount, setCurrentAccount] = useState<DemoAccount | null>(null);
   const [loginUsername, setLoginUsername] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
+  const [showLoginPassword, setShowLoginPassword] = useState(false);
   const [loginError, setLoginError] = useState("");
   const [archiveRecords, setArchiveRecords] = useState<ArchiveRecord[]>([]);
   const [archiveFile, setArchiveFile] = useState<File | null>(null);
@@ -1902,22 +1903,23 @@ export default function Home() {
   if (!currentAccount) return (
     <main className="login-screen">
       <style>{`
-        .login-screen{min-height:100vh;display:grid;grid-template-columns:minmax(360px,.9fr) minmax(480px,1.1fr);background:#f3f6f8;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}.login-visual{position:relative;display:flex;flex-direction:column;justify-content:space-between;overflow:hidden;padding:48px;background:linear-gradient(145deg,#092f43,#164f64 58%,#177866);color:#fff}.login-visual:after{content:"";position:absolute;width:440px;height:440px;right:-170px;bottom:-170px;border:80px solid #ffffff0d;border-radius:50%}.login-brand{position:relative;z-index:1;display:flex;align-items:center;gap:24px}.login-brand img{width:176px;height:auto}.login-brand strong{padding-left:24px;border-left:1px solid #ffffff40;color:#fff;font-size:27px;font-weight:500;line-height:1.2}.login-version{position:relative;z-index:1;color:#8eb1bf;font-size:11px}.login-panel{display:grid;place-items:center;padding:48px}.login-card{width:min(430px,100%);padding:38px;border:1px solid #dce5e9;border-radius:18px;background:#fff;box-shadow:0 24px 70px #153b4d1c}.login-card>span{display:block;margin-bottom:26px;color:#e45b36;font-size:10px;font-weight:800;letter-spacing:1.5px}.login-card label{display:block;margin-bottom:16px}.login-card label span{display:block;margin-bottom:7px;color:#385563;font-size:12px;font-weight:700}.login-card input{box-sizing:border-box;width:100%;height:46px;border:1px solid #c9d6db;border-radius:9px;padding:0 13px;font-size:14px;outline:none}.login-card input:focus{border-color:#238d7b;box-shadow:0 0 0 3px #238d7b1a}.login-error{margin:-4px 0 14px;padding:10px 12px;border-radius:7px;background:#fff1f2;color:#b42335;font-size:12px}.login-submit{width:100%;height:46px;border:0;border-radius:9px;background:#e85f38;color:#fff;font-size:13px;font-weight:800;cursor:pointer}.demo-accounts{margin-top:24px;padding-top:20px;border-top:1px solid #e5ecef}.demo-accounts>span{display:block;margin-bottom:9px;color:#7b8e97;font-size:10px;font-weight:800;letter-spacing:.8px}.demo-accounts button{width:100%;display:block;margin-top:7px;padding:9px 10px;border:1px solid #dbe4e8;border-radius:7px;background:#f8fafb;color:#315260;font-size:11px;text-align:left;cursor:pointer}.demo-accounts button b{color:#173f52}@media(max-width:850px){.login-screen{grid-template-columns:1fr}.login-visual{display:none}.login-panel{padding:22px}.login-card{padding:28px}}
+        .login-screen{min-height:100vh;display:grid;place-items:center;padding:24px;background:#f1f4f9;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}.login-card{box-sizing:border-box;width:min(370px,100%);padding:30px 28px 24px;border:1px solid #e2e7ee;border-radius:5px;background:#fff;box-shadow:0 8px 24px #21364a17;text-align:center}.login-logo{height:60px;width:auto;object-fit:contain;margin-bottom:12px}.login-card h1{margin:0;color:#263645;font-size:18px;font-weight:600}.login-card>p{margin:6px 0 20px;color:#8995a2;font-size:11px;line-height:1.5}.login-field{position:relative;display:block;margin-bottom:12px}.login-field input{box-sizing:border-box;width:100%;height:38px;border:1px solid #dce3eb;border-radius:3px;background:#f3f6fb;padding:0 11px;color:#263645;font-size:12px;outline:none;text-align:left}.login-field input:focus{border-color:#78b98b;box-shadow:0 0 0 2px #2db65318;background:#fff}.login-password-toggle{position:absolute;top:0;right:0;width:38px;height:38px;border:0;background:transparent;color:#8a97a3;font-size:12px;cursor:pointer}.login-error{margin:0 0 12px;padding:8px 10px;border-radius:3px;background:#fff1f2;color:#b42335;font-size:11px;text-align:left}.login-submit{width:100%;height:38px;border:0;border-radius:3px;background:#28b34f;color:#fff;font-size:12px;font-weight:600;cursor:pointer;transition:.15s}.login-submit:hover{background:#219a43}.login-divider{display:flex;align-items:center;gap:10px;margin:15px 0;color:#a0aab4;font-size:11px}.login-divider:before,.login-divider:after{content:"";height:1px;flex:1;background:#edf0f3}.office-login{width:100%;height:38px;display:flex;align-items:center;justify-content:center;gap:8px;border:1px solid #dce3e9;border-radius:3px;background:#fff;color:#596773;font-size:11px;cursor:pointer}.office-icon{display:grid;grid-template-columns:repeat(2,5px);gap:1px}.office-icon i{width:5px;height:5px;background:#6f7d88}.login-product{margin-top:18px;color:#a2abb4;font-size:10px}.login-product b{color:#71808c;font-weight:600}@media(max-width:480px){.login-screen{padding:16px}.login-card{padding:26px 20px 22px}}
       `}</style>
-      <section className="login-visual">
-        <div className="login-brand"><img src="/nova-group-logo-light.png" alt="Nova Group" /><strong>Project Management</strong></div>
-        <div className="login-version">PMD · Internal prototype · Version 1.1</div>
-      </section>
-      <section className="login-panel">
-        <form className="login-card" onSubmit={login}>
-          <span>ĐĂNG NHẬP HỆ THỐNG</span>
-          <label><span>Tài khoản</span><input autoFocus autoComplete="username" value={loginUsername} onChange={(event) => setLoginUsername(event.target.value)} placeholder="Nhập tên tài khoản" /></label>
-          <label><span>Mật khẩu</span><input type="password" autoComplete="current-password" value={loginPassword} onChange={(event) => setLoginPassword(event.target.value)} placeholder="Nhập mật khẩu" /></label>
-          {loginError && <div className="login-error" role="alert">{loginError}</div>}
-          <button className="login-submit" type="submit">Đăng nhập</button>
-          <div className="demo-accounts"><span>TÀI KHOẢN DEMO · MẬT KHẨU MTL@2026</span>{DEMO_ACCOUNTS.map((account) => <button type="button" key={account.username} onClick={() => { setLoginUsername(account.username); setLoginPassword(account.password); setLoginError(""); }}><b>{account.username}</b></button>)}</div>
-        </form>
-      </section>
+      <form className="login-card" onSubmit={login}>
+        <img className="login-logo" src="/nova-group-logo.png" alt="Nova Group" />
+        <h1>Đăng nhập Project Management</h1>
+        <p>Sử dụng tài khoản nội bộ Novaland được cấp để truy cập hệ thống</p>
+        <label className="login-field"><input autoFocus autoComplete="username" value={loginUsername} onChange={(event) => setLoginUsername(event.target.value)} placeholder="Tài khoản" aria-label="Tài khoản" /></label>
+        <label className="login-field">
+          <input type={showLoginPassword ? "text" : "password"} autoComplete="current-password" value={loginPassword} onChange={(event) => setLoginPassword(event.target.value)} placeholder="Mật khẩu" aria-label="Mật khẩu" />
+          <button className="login-password-toggle" type="button" onClick={() => setShowLoginPassword((current) => !current)} aria-label={showLoginPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"}>{showLoginPassword ? "Ẩn" : "Hiện"}</button>
+        </label>
+        {loginError && <div className="login-error" role="alert">{loginError}</div>}
+        <button className="login-submit" type="submit">Đăng nhập</button>
+        <div className="login-divider">hoặc</div>
+        <button className="office-login" type="button" onClick={() => setLoginError("Đăng nhập Office 365 chưa được kết nối trong phiên bản hiện tại.")}><span className="office-icon" aria-hidden="true"><i /><i /><i /><i /></span>Đăng nhập bằng Office 365</button>
+        <div className="login-product"><b>Project Management</b> · NovaGroup</div>
+      </form>
     </main>
   );
 
