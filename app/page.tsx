@@ -1906,7 +1906,7 @@ export default function Home() {
       `}</style>
       <section className="login-visual">
         <div className="login-brand"><img src="/nova-group-logo-light.png" alt="Nova Group" /></div>
-        <div className="login-copy"><span>PROJECT MANAGEMENT</span><h1>Master Timeline Workspace</h1><p>Không gian tập trung để lập, kiểm soát, thẩm định và lưu trữ hồ sơ Master Timeline.</p></div>
+        <div className="login-copy"><span>PROJECT MANAGEMENT</span><h1>Project Management</h1><p>Không gian tập trung để lập, kiểm soát, thẩm định và lưu trữ hồ sơ Master Timeline.</p></div>
         <div className="login-version">PMD · Internal prototype · Version 1.1</div>
       </section>
       <section className="login-panel">
