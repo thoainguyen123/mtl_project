@@ -7,6 +7,26 @@ import { parseMSProjectXML, type ParsedProjectData } from "./xml-parser";
 
 type WorkType = "" | "Báo cáo định kỳ" | "Tracking công việc";
 
+type DemoAccount = {
+  username: string;
+  password: string;
+  name: string;
+  role: string;
+  initials: string;
+};
+
+type ArchiveRecord = {
+  id: string;
+  projectId: string;
+  name: string;
+  documentNo: string;
+  category: string;
+  fileName: string;
+  fileSize: number;
+  uploadedAt: string;
+  uploadedBy: string;
+};
+
 type TemplateTask = {
   id: number;
   code: string;
@@ -138,6 +158,14 @@ const ACTIVE_KEY = "mtl-workspace-active-project-v1";
 const CATALOG_KEY = "mtl-workspace-custom-catalog-v1";
 const CATALOG_ENABLED_KEY = "mtl-workspace-enabled-catalog-v2";
 const CATALOG_WORK_TYPE_KEY = "mtl-workspace-catalog-work-type-v1";
+const SESSION_KEY = "mtl-workspace-session-v1";
+const ARCHIVE_KEY = "mtl-workspace-archive-v1";
+
+const DEMO_ACCOUNTS: DemoAccount[] = [
+  { username: "pmd.admin", password: "MTL@2026", name: "PMD Administrator", role: "Chủ trì lập MTL", initials: "PM" },
+  { username: "gmd.reviewer", password: "MTL@2026", name: "GMD Reviewer", role: "Kiểm soát MTL", initials: "GM" },
+  { username: "gms.appraiser", password: "MTL@2026", name: "GMS.P Appraiser", role: "Thẩm định MTL", initials: "GS" },
+];
 
 /* Theo SOP06 mục 2.2, PBCM gồm 9 ban/phòng gián tiếp + 4 phòng trực tiếp = 13 đơn vị.
    PMD là đơn vị chủ trì lập MTL nên có công việc riêng trong kế hoạch, nhưng không
@@ -426,6 +454,12 @@ function formatDate(date?: string) {
 function formatDateTime(date?: string) {
   if (!date) return "—";
   return new Intl.DateTimeFormat("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" }).format(new Date(date));
+}
+
+function formatFileSize(bytes: number) {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
 function taskStatusClass(status: NonNullable<TaskEdit["status"]>) {
@@ -739,7 +773,9 @@ function IconTrash() {
 }
 
 function UserBadge() {
-  return <div className="user-badge"><span className="avatar">PM</span><span className="user-badge-info"><strong>Project Manager</strong><small>Chủ trì lập MTL</small></span><i className="user-badge-caret">⌄</i></div>;
+  const username = typeof window === "undefined" ? "" : localStorage.getItem(SESSION_KEY) ?? "";
+  const account = DEMO_ACCOUNTS.find((item) => item.username === username) ?? DEMO_ACCOUNTS[0];
+  return <div className="user-badge"><span className="avatar">{account.initials}</span><span className="user-badge-info"><strong>{account.name}</strong><small>{account.role}</small></span><i className="user-badge-caret">⌄</i></div>;
 }
 
 function paginationPages(current: number, count: number) {
@@ -884,8 +920,15 @@ export default function Home() {
   const [customCatalog, setCustomCatalog] = useState<TemplateTask[]>([]);
   const [enabledCatalogCodes, setEnabledCatalogCodes] = useState<Set<string>>(new Set());
   const [catalogWorkTypeEdits, setCatalogWorkTypeEdits] = useState<Record<string, WorkType>>({});
+  const [currentAccount, setCurrentAccount] = useState<DemoAccount | null>(null);
+  const [loginUsername, setLoginUsername] = useState("");
+  const [loginPassword, setLoginPassword] = useState("");
+  const [loginError, setLoginError] = useState("");
+  const [archiveRecords, setArchiveRecords] = useState<ArchiveRecord[]>([]);
+  const [archiveFile, setArchiveFile] = useState<File | null>(null);
+  const [archiveForm, setArchiveForm] = useState({ projectId: "", name: "", documentNo: "", category: "Pháp lý" });
   const [hydrated, setHydrated] = useState(false);
-  const [view, setView] = useState<"overview" | "projects" | "workspace" | "departments" | "gmd" | "gms" | "confirm_approval" | "approved_projects" | "catalog" | "design_task" | "fs_ver2">("projects");
+  const [view, setView] = useState<"overview" | "projects" | "workspace" | "departments" | "gmd" | "gms" | "confirm_approval" | "approved_projects" | "catalog" | "archive" | "design_task" | "fs_ver2">("projects");
   const [lapMtlOpen, setLapMtlOpen] = useState(true);
   const [designTaskOpen, setDesignTaskOpen] = useState(false);
   const [fsVer2Open, setFsVer2Open] = useState(false);
@@ -1001,11 +1044,16 @@ export default function Home() {
         const savedCustomCatalog = JSON.parse(localStorage.getItem(CATALOG_KEY) ?? "[]") as TemplateTask[];
         const savedEnabledCodes = localStorage.getItem(CATALOG_ENABLED_KEY);
         const savedWorkTypeEdits = JSON.parse(localStorage.getItem(CATALOG_WORK_TYPE_KEY) ?? "{}") as Record<string, WorkType>;
+        const savedArchiveRecords = JSON.parse(localStorage.getItem(ARCHIVE_KEY) ?? "[]") as ArchiveRecord[];
+        const savedUsername = localStorage.getItem(SESSION_KEY) ?? "";
         const initialList = (saved && saved.length > 0) ? saved : DEFAULT_INITIAL_PROJECTS;
         const normalized = initialList.map(normalizeProject);
         setProjects(normalized);
         setCustomCatalog(savedCustomCatalog);
         setCatalogWorkTypeEdits(savedWorkTypeEdits);
+        setArchiveRecords(savedArchiveRecords);
+        setCurrentAccount(DEMO_ACCOUNTS.find((account) => account.username === savedUsername) ?? null);
+        setArchiveForm((current) => ({ ...current, projectId: normalized[0]?.id ?? "" }));
         const catalogCodes = new Set([...TEMPLATE, ...savedCustomCatalog].map((task) => task.code));
         setEnabledCatalogCodes(new Set(savedEnabledCodes ? (JSON.parse(savedEnabledCodes) as string[]).filter((code) => catalogCodes.has(code)) : [...catalogCodes]));
         setActiveId(localStorage.getItem(ACTIVE_KEY) ?? normalized[0]?.id ?? "");
@@ -1014,6 +1062,8 @@ export default function Home() {
         setProjects(normalized);
         setCustomCatalog([]);
         setCatalogWorkTypeEdits({});
+        setArchiveRecords([]);
+        setCurrentAccount(null);
         setEnabledCatalogCodes(new Set(TEMPLATE.map((task) => task.code)));
       }
       setHydrated(true);
@@ -1027,8 +1077,9 @@ export default function Home() {
     localStorage.setItem(CATALOG_KEY, JSON.stringify(customCatalog));
     localStorage.setItem(CATALOG_ENABLED_KEY, JSON.stringify([...enabledCatalogCodes]));
     localStorage.setItem(CATALOG_WORK_TYPE_KEY, JSON.stringify(catalogWorkTypeEdits));
+    localStorage.setItem(ARCHIVE_KEY, JSON.stringify(archiveRecords));
     if (activeId) localStorage.setItem(ACTIVE_KEY, activeId);
-  }, [projects, activeId, customCatalog, enabledCatalogCodes, catalogWorkTypeEdits, hydrated]);
+  }, [projects, activeId, customCatalog, enabledCatalogCodes, catalogWorkTypeEdits, archiveRecords, hydrated]);
 
   useEffect(() => {
     const closeMenu = () => setContextMenu(null);
@@ -1366,6 +1417,44 @@ export default function Home() {
     notify(`Đã cập nhật Loại CV cho ${task.code}`);
   };
 
+  const login = (event: FormEvent) => {
+    event.preventDefault();
+    const account = DEMO_ACCOUNTS.find((item) => item.username.toLowerCase() === loginUsername.trim().toLowerCase() && item.password === loginPassword);
+    if (!account) return setLoginError("Tài khoản hoặc mật khẩu không đúng.");
+    localStorage.setItem(SESSION_KEY, account.username);
+    setCurrentAccount(account);
+    setLoginPassword("");
+    setLoginError("");
+  };
+
+  const logout = () => {
+    localStorage.removeItem(SESSION_KEY);
+    setCurrentAccount(null);
+    setLoginPassword("");
+    setLoginError("");
+  };
+
+  const addArchiveRecord = (event: FormEvent) => {
+    event.preventDefault();
+    if (!archiveForm.projectId || !archiveForm.name.trim() || !archiveForm.documentNo.trim()) return notify("Vui lòng khai báo dự án, tên và số hiệu hồ sơ");
+    if (!archiveFile) return notify("Vui lòng chọn tệp hồ sơ");
+    const record: ArchiveRecord = {
+      id: crypto.randomUUID(),
+      projectId: archiveForm.projectId,
+      name: archiveForm.name.trim(),
+      documentNo: archiveForm.documentNo.trim().toUpperCase(),
+      category: archiveForm.category,
+      fileName: archiveFile.name,
+      fileSize: archiveFile.size,
+      uploadedAt: new Date().toISOString(),
+      uploadedBy: currentAccount?.name ?? "Người dùng",
+    };
+    setArchiveRecords((current) => [record, ...current]);
+    setArchiveForm((current) => ({ ...current, name: "", documentNo: "" }));
+    setArchiveFile(null);
+    notify(`Đã lưu hồ sơ ${record.documentNo}`);
+  };
+
   const openCreate = () => {
     setForm(emptyForm);
     setFormError("");
@@ -1399,7 +1488,7 @@ export default function Home() {
   const createProject = (event: FormEvent) => {
     event.preventDefault();
     if (!form.name.trim() || !form.code.trim()) return setFormError("Vui lòng nhập tên và mã dự án.");
-    if (form.targetDate < form.startDate) return setFormError("Ngày mục tiêu phải sau ngày bắt đầu.");
+    if (!form.region?.trim() || !form.type.trim() || !form.location.trim()) return setFormError("Vui lòng khai báo vùng quản lý, loại hình và địa điểm dự án.");
     
     let project: Project;
     if (xmlData) {
@@ -1809,6 +1898,31 @@ export default function Home() {
   };
 
   if (!hydrated) return <main className="loading-screen"><div className="loading-mark">MTL</div><p>Đang chuẩn bị không gian dự án…</p></main>;
+
+  if (!currentAccount) return (
+    <main className="login-screen">
+      <style>{`
+        .login-screen{min-height:100vh;display:grid;grid-template-columns:minmax(360px,.9fr) minmax(480px,1.1fr);background:#f3f6f8;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}.login-visual{position:relative;display:flex;flex-direction:column;justify-content:space-between;overflow:hidden;padding:48px;background:linear-gradient(145deg,#092f43,#164f64 58%,#177866);color:#fff}.login-visual:after{content:"";position:absolute;width:440px;height:440px;right:-170px;bottom:-170px;border:80px solid #ffffff0d;border-radius:50%}.login-brand img{width:176px;height:auto}.login-copy{position:relative;z-index:1;max-width:520px}.login-copy span{font-size:11px;font-weight:800;letter-spacing:2px;color:#7ee0c4}.login-copy h1{margin:16px 0;font-size:42px;line-height:1.15}.login-copy p{margin:0;color:#c8dce4;font-size:15px;line-height:1.7}.login-version{position:relative;z-index:1;color:#8eb1bf;font-size:11px}.login-panel{display:grid;place-items:center;padding:48px}.login-card{width:min(430px,100%);padding:38px;border:1px solid #dce5e9;border-radius:18px;background:#fff;box-shadow:0 24px 70px #153b4d1c}.login-card>span{color:#e45b36;font-size:10px;font-weight:800;letter-spacing:1.5px}.login-card h2{margin:9px 0 8px;color:#173f52;font-size:28px}.login-card>p{margin:0 0 26px;color:#71848e;font-size:13px;line-height:1.6}.login-card label{display:block;margin-bottom:16px}.login-card label span{display:block;margin-bottom:7px;color:#385563;font-size:12px;font-weight:700}.login-card input{box-sizing:border-box;width:100%;height:46px;border:1px solid #c9d6db;border-radius:9px;padding:0 13px;font-size:14px;outline:none}.login-card input:focus{border-color:#238d7b;box-shadow:0 0 0 3px #238d7b1a}.login-error{margin:-4px 0 14px;padding:10px 12px;border-radius:7px;background:#fff1f2;color:#b42335;font-size:12px}.login-submit{width:100%;height:46px;border:0;border-radius:9px;background:#e85f38;color:#fff;font-size:13px;font-weight:800;cursor:pointer}.demo-accounts{margin-top:24px;padding-top:20px;border-top:1px solid #e5ecef}.demo-accounts>span{display:block;margin-bottom:9px;color:#7b8e97;font-size:10px;font-weight:800;letter-spacing:.8px}.demo-accounts button{width:100%;display:flex;justify-content:space-between;margin-top:7px;padding:9px 10px;border:1px solid #dbe4e8;border-radius:7px;background:#f8fafb;color:#315260;font-size:11px;cursor:pointer}.demo-accounts button b{color:#173f52}@media(max-width:850px){.login-screen{grid-template-columns:1fr}.login-visual{display:none}.login-panel{padding:22px}.login-card{padding:28px}}
+      `}</style>
+      <section className="login-visual">
+        <div className="login-brand"><img src="/nova-group-logo-light.png" alt="Nova Group" /></div>
+        <div className="login-copy"><span>PROJECT MANAGEMENT</span><h1>Master Timeline Workspace</h1><p>Không gian tập trung để lập, kiểm soát, thẩm định và lưu trữ hồ sơ Master Timeline.</p></div>
+        <div className="login-version">PMD · Internal prototype · Version 1.1</div>
+      </section>
+      <section className="login-panel">
+        <form className="login-card" onSubmit={login}>
+          <span>ĐĂNG NHẬP HỆ THỐNG</span>
+          <h2>Chào mừng trở lại</h2>
+          <p>Sử dụng tài khoản được phân công để truy cập đúng vai trò trong quy trình MTL.</p>
+          <label><span>Tài khoản</span><input autoFocus autoComplete="username" value={loginUsername} onChange={(event) => setLoginUsername(event.target.value)} placeholder="Nhập tên tài khoản" /></label>
+          <label><span>Mật khẩu</span><input type="password" autoComplete="current-password" value={loginPassword} onChange={(event) => setLoginPassword(event.target.value)} placeholder="Nhập mật khẩu" /></label>
+          {loginError && <div className="login-error" role="alert">{loginError}</div>}
+          <button className="login-submit" type="submit">Đăng nhập</button>
+          <div className="demo-accounts"><span>TÀI KHOẢN DEMO · MẬT KHẨU MTL@2026</span>{DEMO_ACCOUNTS.map((account) => <button type="button" key={account.username} onClick={() => { setLoginUsername(account.username); setLoginPassword(account.password); setLoginError(""); }}><b>{account.username}</b><span>{account.role}</span></button>)}</div>
+        </form>
+      </section>
+    </main>
+  );
 
   return (
     <main className="app-shell">
@@ -2525,7 +2639,9 @@ export default function Home() {
         }
         /* ================= ELEGANT CREATE PROJECT MODAL ================= */
         .create-project-modal {
-          width: min(640px, 94vw) !important;
+          width: min(780px, 94vw) !important;
+          max-height: 94vh !important;
+          overflow-y: auto !important;
           border-radius: 16px !important;
           background: #ffffff !important;
           box-shadow: 0 24px 80px rgba(0, 0, 0, 0.28) !important;
@@ -2569,6 +2685,33 @@ export default function Home() {
           font-weight: 700 !important;
           color: #334155 !important;
           margin-bottom: 0 !important;
+        }
+        .create-project-modal .field small {
+          color: #7a8c95 !important;
+          font-size: 10.5px !important;
+          line-height: 1.4 !important;
+        }
+        .create-guide {
+          display: grid !important;
+          grid-template-columns: repeat(3, 1fr) !important;
+          gap: 8px !important;
+          padding: 12px !important;
+          border: 1px solid #cfe2de !important;
+          border-radius: 9px !important;
+          background: #f1faf7 !important;
+        }
+        .create-guide div { display: flex !important; gap: 8px !important; color: #45616d !important; font-size: 10.5px !important; line-height: 1.4 !important; }
+        .create-guide b { width: 22px !important; height: 22px !important; flex: none !important; display: grid !important; place-items: center !important; border-radius: 50% !important; background: #167461 !important; color: #fff !important; font-size: 10px !important; }
+        .create-section-title {
+          grid-column: 1 / -1 !important;
+          margin: 2px 0 -5px !important;
+          padding-bottom: 7px !important;
+          border-bottom: 1px solid #e8eef1 !important;
+          color: #167461 !important;
+          font-size: 10px !important;
+          font-weight: 800 !important;
+          letter-spacing: .8px !important;
+          text-transform: uppercase !important;
         }
         .create-project-modal .field input,
         .create-project-modal .field select {
@@ -2809,6 +2952,10 @@ export default function Home() {
                 <IconList />
                 <span>Danh mục WBS</span>
               </button>
+              <button className={view === "archive" ? "active" : ""} onClick={() => setView("archive")} tabIndex={lapMtlSectionOpen ? 0 : -1}>
+                <IconFileCheck />
+                <span>Lưu trữ hồ sơ</span>
+              </button>
             </nav>
           </>;
         })()}
@@ -2870,8 +3017,9 @@ export default function Home() {
         })()}
 
         <div className="sidebar-footer" style={{ marginTop: "auto", padding: "16px 18px", borderTop: "1px solid rgba(255, 255, 255, 0.08)", color: "#94a3b8", fontSize: "11px", lineHeight: "1.6" }}>
-          <div>Version 1.0.0</div>
-          <div>© 2026 Novaland Group</div>
+          <div style={{ color: "#dbe7ec", fontWeight: 700 }}>{currentAccount.name}</div>
+          <div>{currentAccount.username}</div>
+          <button type="button" onClick={logout} style={{ marginTop: "10px", width: "100%", height: "32px", border: "1px solid #ffffff24", borderRadius: "6px", background: "#ffffff0c", color: "#dbe7ec", fontSize: "11px" }}>Đăng xuất</button>
         </div>
       </aside>
 
@@ -3540,6 +3688,35 @@ export default function Home() {
                 </div>
               )}
             </section>
+          </>
+        ) : view === "archive" ? (
+          <>
+            <header className="topbar">
+              <div className="breadcrumbs"><span>Lập Master timeline</span><i>/</i><strong>Lưu trữ hồ sơ</strong></div>
+              <div className="top-actions"><UserBadge /></div>
+            </header>
+            <div style={{ minHeight: 0, flex: 1, overflow: "auto", padding: "24px", background: "#f5f7f9" }}>
+              <section style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "24px", marginBottom: "18px" }}>
+                <div><span className="status-badge">KHO HỒ SƠ MTL</span><h1 style={{ margin: "10px 0 6px", fontSize: "25px", color: "#173f52" }}>Lưu trữ hồ sơ dự án</h1><p style={{ margin: 0, color: "#71848e", fontSize: "12px" }}>Khai báo và tra cứu hồ sơ theo từng dự án Master Timeline.</p></div>
+                <div style={{ minWidth: "150px", padding: "14px 18px", border: "1px solid #dce5e9", borderRadius: "10px", background: "#fff" }}><b style={{ display: "block", fontSize: "24px", color: "#173f52" }}>{archiveRecords.length}</b><span style={{ color: "#7a8d96", fontSize: "10px", fontWeight: 700 }}>HỒ SƠ ĐÃ LƯU</span></div>
+              </section>
+              <form onSubmit={addArchiveRecord} style={{ display: "grid", gridTemplateColumns: "1.2fr 1.2fr 1fr 1fr", gap: "12px", padding: "18px", border: "1px solid #dce5e9", borderRadius: "12px", background: "#fff", boxShadow: "0 1px 3px #0000000a" }}>
+                <label className="field" style={{ margin: 0 }}><span>Dự án *</span><select value={archiveForm.projectId} onChange={(event) => setArchiveForm({ ...archiveForm, projectId: event.target.value })}><option value="">Chọn dự án</option>{projects.map((project) => <option key={project.id} value={project.id}>{project.code} · {project.name}</option>)}</select></label>
+                <label className="field" style={{ margin: 0 }}><span>Tên hồ sơ *</span><input value={archiveForm.name} onChange={(event) => setArchiveForm({ ...archiveForm, name: event.target.value })} placeholder="Ví dụ: Quyết định phê duyệt MTL" /></label>
+                <label className="field" style={{ margin: 0 }}><span>Số hiệu *</span><input value={archiveForm.documentNo} onChange={(event) => setArchiveForm({ ...archiveForm, documentNo: event.target.value })} placeholder="QĐ-001/2026" /></label>
+                <label className="field" style={{ margin: 0 }}><span>Loại hồ sơ</span><select value={archiveForm.category} onChange={(event) => setArchiveForm({ ...archiveForm, category: event.target.value })}><option>Pháp lý</option><option>Phê duyệt MTL</option><option>Biên bản họp</option><option>Báo cáo</option><option>Hồ sơ thiết kế</option><option>Khác</option></select></label>
+                <label className="field" style={{ margin: 0, gridColumn: "1 / -2" }}><span>Tệp hồ sơ *</span><input key={archiveFile?.name ?? "empty-file"} type="file" onChange={(event) => setArchiveFile(event.target.files?.[0] ?? null)} /></label>
+                <button className="primary-button" type="submit" style={{ alignSelf: "end", height: "42px" }}>+ Lưu hồ sơ</button>
+              </form>
+              <section style={{ marginTop: "16px", border: "1px solid #dce5e9", borderRadius: "12px", overflow: "hidden", background: "#fff" }}>
+                <div style={{ display: "grid", gridTemplateColumns: "130px minmax(260px,1.5fr) 140px minmax(190px,1fr) 150px 150px 70px", gap: "12px", padding: "12px 16px", background: "#eef3f5", color: "#627781", fontSize: "10px", fontWeight: 800 }}><span>DỰ ÁN</span><span>HỒ SƠ</span><span>LOẠI</span><span>TỆP</span><span>NGƯỜI LƯU</span><span>THỜI ĐIỂM</span><span></span></div>
+                {archiveRecords.map((record) => {
+                  const project = projects.find((item) => item.id === record.projectId);
+                  return <div key={record.id} style={{ display: "grid", gridTemplateColumns: "130px minmax(260px,1.5fr) 140px minmax(190px,1fr) 150px 150px 70px", alignItems: "center", gap: "12px", padding: "13px 16px", borderTop: "1px solid #edf1f3", color: "#334155", fontSize: "12px" }}><span><b>{project?.code ?? "Dự án đã xóa"}</b></span><span><b style={{ display: "block", color: "#173f52" }}>{record.name}</b><small style={{ color: "#7a8c95" }}>{record.documentNo}</small></span><span>{record.category}</span><span title={record.fileName}><b style={{ display: "block", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{record.fileName}</b><small style={{ color: "#7a8c95" }}>{formatFileSize(record.fileSize)}</small></span><span>{record.uploadedBy}</span><span>{formatDateTime(record.uploadedAt)}</span><span><button type="button" className="danger-button" onClick={() => setArchiveRecords((current) => current.filter((item) => item.id !== record.id))}>Xóa</button></span></div>;
+                })}
+                {!archiveRecords.length && <div className="no-results"><b>Chưa có hồ sơ nào</b><p>Chọn dự án và khai báo hồ sơ ở biểu mẫu phía trên.</p></div>}
+              </section>
+            </div>
           </>
         ) : view === "departments" ? (
           <>
@@ -4608,12 +4785,19 @@ export default function Home() {
             <header>
               <div>
                 <span>TẠO MASTER TIMELINE</span>
-                <h2>Thông tin dự án</h2>
+                <h2>Khai báo thông tin dự án</h2>
+                <p style={{ margin: "5px 0 0", color: "#71848e", fontSize: "11px" }}>Thông tin này dùng để nhận diện, phân nhóm và sinh cây WBS ban đầu.</p>
               </div>
               <button type="button" onClick={() => setShowCreate(false)}>Đóng</button>
             </header>
 
             <div className="form-grid">
+              <div className="create-guide field-wide">
+                <div><b>1</b><span>Khai báo đúng tên, mã và phiên bản MTL.</span></div>
+                <div><b>2</b><span>Phân loại dự án theo vùng, nhóm và loại hình.</span></div>
+                <div><b>3</b><span>Chọn sinh từ danh mục chuẩn hoặc tải XML.</span></div>
+              </div>
+              <div className="create-section-title">1. Nhận diện Master Timeline</div>
               <label className="field field-wide">
                 <span>Tên dự án *</span>
                 <input
@@ -4622,6 +4806,7 @@ export default function Home() {
                   onChange={(event) => setForm({ ...form, name: event.target.value })}
                   placeholder="Ví dụ: Aqua City - Đảo Phượng Hoàng"
                 />
+                <small>Dùng tên chính thức theo danh mục dự án được phê duyệt.</small>
               </label>
 
               <label className="field">
@@ -4631,6 +4816,7 @@ export default function Home() {
                   onChange={(event) => setForm({ ...form, code: event.target.value })}
                   placeholder="Ví dụ: NVL-AQH-2026"
                 />
+                <small>Mã duy nhất, viết tắt theo quy ước quản trị dự án.</small>
               </label>
 
               <label className="field">
@@ -4640,8 +4826,10 @@ export default function Home() {
                   onChange={(event) => setForm({ ...form, version: event.target.value })}
                   placeholder="Ví dụ: v1.0"
                 />
+                <small>Tăng phiên bản khi MTL được cập nhật hoặc phê duyệt lại.</small>
               </label>
 
+              <div className="create-section-title">2. Phân loại và phạm vi quản lý</div>
               <label className="field">
                 <span>Vùng quản lý *</span>
                 <select
@@ -4669,6 +4857,23 @@ export default function Home() {
                 </select>
               </label>
 
+              <label className="field">
+                <span>Loại hình dự án *</span>
+                <select value={form.type} onChange={(event) => setForm({ ...form, type: event.target.value })}>
+                  <option>Khu đô thị sinh thái</option>
+                  <option>Khu phức hợp căn hộ và thương mại</option>
+                  <option>Tổ hợp du lịch nghỉ dưỡng</option>
+                  <option>Công trình cao tầng</option>
+                  <option>Hạ tầng kỹ thuật</option>
+                  <option>Khác</option>
+                </select>
+              </label>
+
+              <label className="field">
+                <span>Khu vực / Phân khu</span>
+                <input value={form.area || ""} onChange={(event) => setForm({ ...form, area: event.target.value })} placeholder="Ví dụ: Phân khu Phoenix" />
+              </label>
+
               <label className="field field-wide">
                 <span>Chủ đầu tư (Pháp nhân)</span>
                 <input
@@ -4676,31 +4881,22 @@ export default function Home() {
                   onChange={(event) => setForm({ ...form, investor: event.target.value })}
                   placeholder="Ví dụ: Tập đoàn Novaland / Công ty TNHH BĐS Đà Lạt Valley"
                 />
+                <small>Nhập đúng pháp nhân chịu trách nhiệm triển khai dự án.</small>
               </label>
 
-              <label className="field">
-                <span>Ngày bắt đầu</span>
-                <input
-                  type="date"
-                  value={form.startDate}
-                  onChange={(event) => setForm({ ...form, startDate: event.target.value })}
-                />
+              <label className="field field-wide">
+                <span>Địa điểm dự án *</span>
+                <input value={form.location} onChange={(event) => setForm({ ...form, location: event.target.value })} placeholder="Ví dụ: Biên Hòa, Đồng Nai" />
+                <small>Thời gian kế hoạch sẽ được thiết lập tại bước lập và cập nhật công việc, không khai báo tại đây.</small>
               </label>
 
-              <label className="field">
-                <span>Ngày kết thúc dự án</span>
-                <input
-                  type="date"
-                  value={form.targetDate}
-                  onChange={(event) => setForm({ ...form, targetDate: event.target.value })}
-                />
-              </label>
-
+              <div className="create-section-title">3. Nguồn dữ liệu khởi tạo</div>
               <div className="field field-wide">
                 <div className="file-upload-box">
                   <span style={{ fontSize: "12px", fontWeight: 700, color: "#334155" }}>
-                    Upload Master timeline (.xml)
+                    Tải Master Timeline từ Microsoft Project (.xml) — không bắt buộc
                   </span>
+                  <small>Nếu không tải tệp, hệ thống sẽ sinh công việc từ Danh mục WBS đang bật “Tự động sinh”.</small>
                   <input
                     type="file"
                     accept=".xml"
