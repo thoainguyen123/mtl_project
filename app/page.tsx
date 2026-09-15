@@ -5,6 +5,7 @@ import templateData from "./mtl-template.json";
 import dependencyData from "./mtl-dependencies.json";
 import { parseMSProjectXML, type ParsedProjectData } from "./xml-parser";
 import { DEFAULT_PROJECT_PARAMETERS, generateParameterizedMTL, type ParameterImpact, type ProjectParameters } from "./mtl-parameter-engine";
+import { KEY_MILESTONES, decomposeMilestoneDates, type MilestoneDates } from "./mtl-milestones";
 
 type WorkType = "" | "Báo cáo định kỳ" | "Tracking công việc";
 
@@ -78,6 +79,7 @@ type Project = {
   targetDate: string;
   parameters: ProjectParameters;
   parameterImpacts: ParameterImpact[];
+  milestoneDates: MilestoneDates;
   selectedGroups: string[];
   createdAt: string;
   taskEdits: Record<string, TaskEdit>;
@@ -111,6 +113,7 @@ type Project = {
 type ProjectForm = Pick<Project, "name" | "code" | "type" | "investor" | "location" | "startDate" | "targetDate" | "area" | "region" | "group"> & {
   version?: string;
   parameters: ProjectParameters;
+  milestoneDates: MilestoneDates;
 };
 
 type ScheduledTask = TemplateTask & {
@@ -234,6 +237,7 @@ const emptyForm: ProjectForm = {
   startDate: today,
   targetDate: nextYear,
   parameters: { ...DEFAULT_PROJECT_PARAMETERS },
+  milestoneDates: {},
 };
 
 const DEFAULT_INITIAL_PROJECTS: Partial<Project>[] = [
@@ -373,6 +377,7 @@ function normalizeProject(project: Partial<Project>): Project {
     targetDate: project.targetDate ?? nextYear,
     parameters: { ...DEFAULT_PROJECT_PARAMETERS, ...(project.parameters ?? {}), loaiHinhDuAn: project.parameters?.loaiHinhDuAn ?? DEFAULT_PROJECT_PARAMETERS.loaiHinhDuAn },
     parameterImpacts: project.parameterImpacts ?? [],
+    milestoneDates: project.milestoneDates ?? {},
     selectedGroups,
     createdAt: project.createdAt ?? new Date().toISOString(),
     taskEdits,
@@ -478,12 +483,13 @@ function scheduleTasks(project: Project): ScheduledTask[] {
     const groupStart = Math.floor(groupIndex * (totalDays / Math.max(selected.length, 1)));
     const suggestedOffset = task.level === 1 ? groupStart : groupStart + Math.floor((indexInGroup / Math.max(groupTasks.length, 1)) * groupSpan * 0.76);
     const edit = project.taskEdits[task.code] ?? {};
+    const isKeyMilestone = /\.MILE_(?:PLP|PCD|COM|OM)_\d+$/.test(task.code);
     const suggestedDuration = task.level === 1 ? Math.max(2, groupSpan - 2) : task.defaultDuration;
     const startDate = edit.startDate ?? dateAtOffset(project.startDate, suggestedOffset);
-    const duration = edit.endDate
+    const duration = isKeyMilestone ? 0 : edit.endDate
       ? Math.max(1, workingDaysBetween(startDate, edit.endDate))
       : Math.max(1, Number(edit.duration ?? suggestedDuration));
-    const endDate = edit.endDate && edit.endDate >= startDate ? edit.endDate : dateAtWorkingOffset(startDate, duration - 1);
+    const endDate = isKeyMilestone ? startDate : edit.endDate && edit.endDate >= startDate ? edit.endDate : dateAtWorkingOffset(startDate, duration - 1);
     const startOffset = Math.max(0, rawDaysBetween(project.startDate, startDate));
 
     const actualProgress = edit.actualProgress !== undefined ? edit.actualProgress : (edit.status === "Hoàn thành" ? 100 : (edit.status === "Đang thực hiện" ? 30 : 0));
@@ -854,6 +860,7 @@ function projectXml(project: Project, tasks: ScheduledTask[]) {
   const created = new Date().toISOString().slice(0, 19);
   const uidByCode = Object.fromEntries(tasks.map((task, index) => [task.code, index + 1]));
   const taskXml = tasks.map((task, index) => {
+    const isKeyMilestone = /\.MILE_(?:PLP|PCD|COM|OM)_\d+$/.test(task.code);
     const predecessorXml = task.predecessors.map((dependency) => uidByCode[dependency.predecessorCode] ? `
       <PredecessorLink><PredecessorUID>${uidByCode[dependency.predecessorCode]}</PredecessorUID><Type>${PROJECT_LINK_TYPE[dependency.type]}</Type><CrossProject>0</CrossProject><LinkLag>${dependency.lagDays * 4800}</LinkLag><LagFormat>7</LagFormat></PredecessorLink>` : "").join("");
     return `
@@ -861,9 +868,9 @@ function projectXml(project: Project, tasks: ScheduledTask[]) {
       <UID>${index + 1}</UID><ID>${index + 1}</ID><Name>${escapeXml(`${task.code} ${task.name}`)}</Name>
       <Type>1</Type><IsNull>0</IsNull><CreateDate>${created}</CreateDate><WBS>${escapeXml(task.code)}</WBS>
       <OutlineNumber>${escapeXml(task.code)}</OutlineNumber><OutlineLevel>${task.level}</OutlineLevel><Priority>500</Priority>
-      <Start>${task.startDate}T08:00:00</Start><Finish>${task.endDate}T17:00:00</Finish>
+      <Start>${task.startDate}T08:00:00</Start><Finish>${task.endDate}T${isKeyMilestone ? "08:00:00" : "17:00:00"}</Finish>
       <Duration>PT${task.duration * 8}H0M0S</Duration><DurationFormat>7</DurationFormat>
-      <Summary>${task.summary ? 1 : 0}</Summary><Milestone>0</Milestone><PercentComplete>${task.status === "Hoàn thành" ? 100 : 0}</PercentComplete>
+      <Summary>${task.summary ? 1 : 0}</Summary><Milestone>${isKeyMilestone ? 1 : 0}</Milestone><PercentComplete>${task.status === "Hoàn thành" ? 100 : 0}</PercentComplete>
       ${predecessorXml}
       <Active>1</Active><Manual>0</Manual><Notes>${escapeXml(`${GROUP_BY_CODE[task.groupCode]?.short ?? task.groupCode}${task.pic ? ` · PIC: ${task.pic}` : ""}`)}</Notes>
     </Task>`;
@@ -1352,6 +1359,16 @@ export default function Home() {
     DEFAULT_DEPENDENCIES,
     form.parameters,
   ), [fullCatalog, enabledCatalogCodes, form.parameters]);
+  const isLowRiseCreation = form.parameters.loaiHinhDuAn === "Thấp tầng/Biệt thự";
+  const activeMilestoneDates = useMemo(() => isLowRiseCreation
+    ? Object.fromEntries(Object.entries(form.milestoneDates).filter(([code]) => code !== "MILE_PCD_03" && code !== "MILE_PCD_04"))
+    : form.milestoneDates, [isLowRiseCreation, form.milestoneDates]);
+  const milestonePreview = useMemo(() => decomposeMilestoneDates(
+    parameterPreview.tasks,
+    parameterPreview.dependencies,
+    parameterPreview.taskEdits,
+    activeMilestoneDates,
+  ), [parameterPreview, activeMilestoneDates]);
   const catalogWorkGroupCodes = useMemo(() => {
     if (catalogWorkGroupFilter === "all") return null;
     const tasksByCode = new Map(fullCatalog.map((task) => [task.code, task]));
@@ -1488,6 +1505,7 @@ export default function Home() {
       const selectedGroups = ["9.1", "9.2", "9.3", "9.4", "9.5", "9.6", "9.7", "9.8", "9.9", "4.0", "4.1", "4.2", "4.3", "4.4"];
       project = {
         ...form,
+        milestoneDates: activeMilestoneDates,
         id: crypto.randomUUID(),
         name: form.name.trim(),
         code: form.code.trim().toUpperCase(),
@@ -1508,18 +1526,23 @@ export default function Home() {
         }],
       };
     } else {
-      const generatedTasks = parameterPreview.tasks as TemplateTask[];
+      const generatedTasks = [...parameterPreview.tasks, ...milestonePreview.markerTasks, ...milestonePreview.supplementalTasks] as TemplateTask[];
       if (!generatedTasks.length) return setFormError("Danh mục chưa có công việc nào được bật Tự động sinh.");
       const selectedGroups = [...new Set(generatedTasks.map((task) => task.groupCode))];
+      const initialEdits = { ...parameterPreview.taskEdits, ...milestonePreview.taskEdits } as Record<string, TaskEdit>;
+      const initialDates = Object.values(initialEdits).flatMap((edit) => [edit.startDate, edit.endDate].filter((date): date is string => Boolean(date))).sort();
       project = {
         ...form,
+        milestoneDates: activeMilestoneDates,
         id: crypto.randomUUID(),
         name: form.name.trim(),
         code: form.code.trim().toUpperCase(),
         officialVersion: form.version?.trim() || "v1.0",
+        startDate: initialDates[0] && initialDates[0] < form.startDate ? initialDates[0] : form.startDate,
+        targetDate: initialDates.at(-1) && initialDates.at(-1)! > form.targetDate ? initialDates.at(-1)! : form.targetDate,
         createdAt: new Date().toISOString(),
-        taskEdits: parameterPreview.taskEdits as Record<string, TaskEdit>,
-        taskDependencies: dependenciesToRecord(parameterPreview.dependencies),
+        taskEdits: initialEdits,
+        taskDependencies: dependenciesToRecord([...parameterPreview.dependencies, ...milestonePreview.supplementalDependencies]),
         selectedGroups,
         customTasks: generatedTasks.filter((task) => task.custom),
         includedTaskCodes: generatedTasks.map((task) => task.code),
@@ -2731,6 +2754,15 @@ export default function Home() {
         .impact-list article div small { margin-top: 2px !important; color: #8a9b97 !important; font-size: 7.5px !important; }
         .impact-list article p { margin: 0 !important; color: #5f7470 !important; font-size: 9.5px !important; line-height: 1.4 !important; }
         .impact-list article > span { justify-self: end !important; padding: 4px 6px !important; border-radius: 10px !important; background: #eef8f5 !important; color: #167461 !important; font-size: 8.5px !important; font-weight: 800 !important; }
+        .milestone-intro { padding: 11px 13px !important; border: 1px solid #cce5dc !important; border-radius: 8px !important; background: #f3faf7 !important; color: #3a6559 !important; font-size: 10.5px !important; line-height: 1.5 !important; }
+        .milestone-input-list { display: grid !important; grid-template-columns: 1fr 1fr !important; gap: 10px !important; }
+        .milestone-input-list > h3 { grid-column: 1 / -1 !important; margin: 8px 0 0 !important; padding-bottom: 5px !important; border-bottom: 1px solid #dce9e4 !important; color: #167461 !important; font-size: 10px !important; text-transform: uppercase !important; letter-spacing: .5px !important; }
+        .milestone-input-list label { display: grid !important; gap: 5px !important; padding: 10px !important; border: 1px solid #e4ece8 !important; border-radius: 8px !important; background: #fff !important; }
+        .milestone-input-list label span { display: flex !important; justify-content: space-between !important; gap: 6px !important; color: #314d44 !important; font-size: 10.5px !important; font-weight: 700 !important; }
+        .milestone-input-list label small { color: #869992 !important; font-size: 8px !important; }
+        .milestone-input-list label input { width: 100% !important; height: 38px !important; padding: 0 10px !important; border: 1px solid #cbd5e1 !important; border-radius: 7px !important; color: #0f172a !important; }
+        .milestone-result { padding: 10px 12px !important; border-radius: 8px !important; background: #eaf7f3 !important; color: #166456 !important; font-size: 11px !important; font-weight: 700 !important; }
+        .milestone-warning { padding: 9px 11px !important; border: 1px solid #f2d4a1 !important; border-radius: 7px !important; background: #fff8ec !important; color: #815c20 !important; font-size: 10px !important; }
         .create-section-title {
           grid-column: 1 / -1 !important;
           margin: 2px 0 -5px !important;
@@ -2786,6 +2818,7 @@ export default function Home() {
           .create-stepper > div span { display: none !important; }
           .create-stepper > div { justify-content: center !important; }
           .parameter-pair, .parameter-summary { grid-template-columns: 1fr 1fr !important; }
+          .milestone-input-list { grid-template-columns: 1fr !important; }
           .impact-list article { grid-template-columns: 1fr 54px !important; }
           .impact-list article p { grid-column: 1 / -1 !important; grid-row: 2 !important; }
         }
@@ -4935,13 +4968,32 @@ export default function Home() {
               <div className="impact-list field-wide">
                 {parameterPreview.impacts.map((impact) => <article key={impact.parameter}><div><b>{impact.title}</b><small>{impact.parameter}</small></div><p>{impact.detail}</p><span>{impact.affectedTasks} task</span></article>)}
               </div>
+              <div className="create-section-title">Ngày mốc chốt để phân rã tiến độ ban đầu</div>
+              <div className="milestone-intro field-wide">Nhập các ngày mốc đã biết; mốc chưa chốt có thể để trống. Hệ thống gợi ý lịch một lần khi tạo MTL, sau đó anh chỉnh ngày từng task như hiện tại. Lịch đang dùng thứ Hai–thứ Sáu, chưa tính ngày nghỉ lễ hoặc năng lực nguồn lực.</div>
+              <div className="milestone-input-list field-wide">
+                {(["Pháp lý", "Thi công", "Kinh doanh & Bàn giao"] as const).map((group) => <div key={group} style={{ display: "contents" }}>
+                  <h3>{group}</h3>
+                  {KEY_MILESTONES.filter((milestone) => milestone.group === group && (!isLowRiseCreation || (milestone.code !== "MILE_PCD_03" && milestone.code !== "MILE_PCD_04"))).map((milestone) => <label key={milestone.code}>
+                    <span><b>{milestone.name}</b><small>{milestone.code}</small></span>
+                    <input type="date" value={form.milestoneDates[milestone.code] ?? ""} onChange={(event) => setForm((current) => ({ ...current, milestoneDates: { ...current.milestoneDates, [milestone.code]: event.target.value } }))} aria-label={`${milestone.code} · ${milestone.name}`} />
+                    <small>{milestone.mappedCode ? `Neo theo WBS thực: ${milestone.mappedCode}` : "Mốc mới · sinh dòng mốc riêng trong MTL"}</small>
+                  </label>)}
+                </div>)}
+              </div>
+              {Object.values(activeMilestoneDates).some(Boolean) && <>
+                <div className="milestone-result field-wide">{xmlData
+                  ? `Đã nhập ${Object.values(activeMilestoneDates).filter(Boolean).length} mốc · Ngày mốc chỉ được lưu tham chiếu, lịch trong XML sẽ giữ nguyên.`
+                  : `Đã nhập ${Object.values(activeMilestoneDates).filter(Boolean).length}/${isLowRiseCreation ? 15 : 17} mốc · Gợi ý ngày cho ${milestonePreview.scheduledTaskCount} task liên quan · Sinh ${milestonePreview.markerTasks.length} dòng mốc và ${milestonePreview.supplementalTasks.length} task bổ sung.`}</div>
+                {!xmlData && milestonePreview.warnings.slice(0, 8).map((warning) => <div key={warning} className="milestone-warning field-wide" role="alert">⚠ {warning}</div>)}
+                {!xmlData && milestonePreview.warnings.length > 8 && <div className="milestone-warning field-wide">Còn {milestonePreview.warnings.length - 8} cảnh báo khác.</div>}
+              </>}
               <div className="create-section-title">Nguồn dữ liệu khởi tạo thay thế</div>
               <div className="field field-wide">
                 <div className="file-upload-box">
                   <span style={{ fontSize: "12px", fontWeight: 700, color: "#334155" }}>
                     Tải Master Timeline từ Microsoft Project (.xml) — không bắt buộc
                   </span>
-                  <small>Nếu không tải tệp, hệ thống sẽ sinh công việc từ Danh mục WBS đang bật “Tự động sinh”.</small>
+                  <small>Nếu tải XML, tệp sẽ là nguồn task chính; ngày mốc được lưu để tham chiếu nhưng không tự sửa lịch trong XML. Nếu không tải, hệ thống sinh task từ WBS và áp dụng lịch gợi ý theo ngày mốc.</small>
                   <input
                     type="file"
                     accept=".xml"
@@ -4961,7 +5013,7 @@ export default function Home() {
             {formError && <div className="form-error" role="alert">{formError}</div>}
 
             <footer>
-              <div className="create-footer-note">{createStep === 3 && !xmlData ? `${parameterPreview.tasks.length} task · ${parameterPreview.dependencies.length} liên kết sẽ được khởi tạo` : createStep === 3 && xmlData ? `Ưu tiên ${xmlData.customTasks.length} task từ tệp XML` : ""}</div>
+              <div className="create-footer-note">{createStep === 3 && !xmlData ? `${parameterPreview.tasks.length + milestonePreview.markerTasks.length + milestonePreview.supplementalTasks.length} task · ${milestonePreview.scheduledTaskCount} task được gợi ý ngày` : createStep === 3 && xmlData ? `Ưu tiên ${xmlData.customTasks.length} task từ tệp XML` : ""}</div>
               {createStep === 1 ? <button type="button" className="secondary-button" onClick={() => setShowCreate(false)}>Hủy</button> : <button type="button" className="secondary-button" onClick={() => { setFormError(""); setCreateStep((createStep - 1) as 1 | 2); }}>Quay lại</button>}
               {createStep < 3 ? <button className="primary-button" type="button" onClick={continueCreateProject}>Tiếp tục</button> : <button className="primary-button" type="submit" style={{ background: "#73b52d", borderColor: "#64a024" }}>Tạo Master Timeline</button>}
             </footer>

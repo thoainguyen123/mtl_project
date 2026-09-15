@@ -83,3 +83,26 @@
 - ✅ Cây MTL sinh ra không trùng mã, không mất cha, dependency không trỏ tới task bị loại.
 - ✅ Các ví dụ 3 tháp, 0 hầm, 30 tầng và đất sạch cho kết quả đúng theo đặc tả.
 - ✅ `npm test` pass; sẵn sàng commit/push lên `main` sau khi kế hoạch được duyệt.
+
+## Phần mở rộng đã được duyệt: Phân rã ngày ban đầu từ Key Milestones
+
+Người dùng đã duyệt hướng triển khai ở lượt yêu cầu “oki làm đi”: tạo lịch khởi tạo để sau đó chỉnh tay. Không thay đổi ngày của dự án đã lưu hoặc bản MTL đã phê duyệt.
+
+### Group 5.0 — Dữ liệu mốc và đối chiếu WBS
+
+- 🚩 Milestone 5.1: Danh mục 17 mốc chốt có mapping WBS hợp lệ.
+  - Task 5.1.1: Định nghĩa mã, tên, nhóm, WBS thực và ngày tùy chọn. PIC: Frontend | Duration: 0.5 ngày | Dependencies: []. Criteria: Tất cả 17 mốc có mã duy nhất, mapping không dùng mã sai/chưa tồn tại; unit test.
+  - Task 5.1.2: Lưu ngày mốc theo dự án và migrate bản cũ. PIC: Frontend | Duration: 0.5 ngày | Dependencies: [5.1.1 FS]. Criteria: Dự án cũ vẫn mở được; integration test/manual reload.
+
+### Group 6.0 — Lịch khởi tạo
+
+- 🚩 Milestone 6.1: Sinh lịch gợi ý dựa vào mốc, thời lượng và dependency.
+  - Task 6.1.1: Tính lịch làm việc, forward/backward pass trên mạng task liên quan và kiểm tra âm dự trữ. PIC: Frontend logic | Duration: 1.5 ngày | Dependencies: [5.1.1 FS]. Criteria: Mốc được giữ nguyên, task tiền nhiệm tính lùi, task kế tiếp tính xuôi, xung đột được báo; unit test.
+  - Task 6.1.2: Ghi ngày gợi ý vào taskEdits khi tạo MTL, không áp dụng lại sau khi người dùng chỉnh tay. PIC: Frontend | Duration: 0.5 ngày | Dependencies: [6.1.1 FS, 5.1.2 FS]. Criteria: Tạo xong mở workspace thấy ngày gợi ý; sửa task không bị ghi đè; manual UI check.
+
+### Group 7.0 — Form và nghiệm thu
+
+- 🚩 Milestone 7.1: Người dùng nhập và kiểm tra 17 ngày mốc trong wizard.
+  - Task 7.1.1: Thêm 3 nhóm mốc ngày tùy chọn vào bước kiểm tra trước khi tạo. PIC: Frontend | Duration: 1 ngày | Dependencies: [5.1.1 FS]. Criteria: 17 ngày có mã/tên/mapping; form dùng `date`, có thể bỏ trống; manual desktop/mobile check.
+  - Task 7.1.2: Preview số task được phân rã và cảnh báo ngày mốc không khả thi. PIC: Frontend | Duration: 0.5 ngày | Dependencies: [6.1.1 FS, 7.1.1 FS]. Criteria: Preview khớp lịch sau khi tạo; unit/integration test.
+  - Task 7.1.3: Build/test và push. PIC: QA | Duration: 0.5 ngày | Dependencies: [6.1.2 FS, 7.1.2 FS]. Criteria: `npm test` pass, diff sạch, commit/push main.
