@@ -106,3 +106,42 @@ Người dùng đã duyệt hướng triển khai ở lượt yêu cầu “oki 
   - Task 7.1.1: Thêm 3 nhóm mốc ngày tùy chọn vào bước kiểm tra trước khi tạo. PIC: Frontend | Duration: 1 ngày | Dependencies: [5.1.1 FS]. Criteria: 17 ngày có mã/tên/mapping; form dùng `date`, có thể bỏ trống; manual desktop/mobile check.
   - Task 7.1.2: Preview số task được phân rã và cảnh báo ngày mốc không khả thi. PIC: Frontend | Duration: 0.5 ngày | Dependencies: [6.1.1 FS, 7.1.1 FS]. Criteria: Preview khớp lịch sau khi tạo; unit/integration test.
   - Task 7.1.3: Build/test và push. PIC: QA | Duration: 0.5 ngày | Dependencies: [6.1.2 FS, 7.1.2 FS]. Criteria: `npm test` pass, diff sạch, commit/push main.
+
+## Đã duyệt và triển khai: 5 mốc chính và tiến độ mẫu toàn dự án
+
+Người dùng duyệt bằng yêu cầu “code đi”. Nhập 5 mốc chính ở **bước 2 — Tham số**, tạo MTL là có lịch mẫu toàn bộ WBS đang bật và ngày giả định cho các mốc còn lại.
+
+### Quyết định thiết kế đã áp dụng
+
+- Năm trường ngày là: Chủ trương đầu tư, Quy hoạch 1/500, GPXD/Thông báo khởi công, Hoàn thành xây dựng, Hoàn thành bàn giao khách hàng. Cho phép để trống; nếu không nhập ngày nào, lấy ngày tạo MTL làm mốc xuất phát của lịch mẫu.
+- Đối chiếu WBS thực: Chủ trương đầu tư `4.1.2.11` (mốc mới `MILE_PLP_00`); 1/500 `4.1.4.9` (`MILE_PLP_01`); GPXD `4.1.5.13` (`MILE_PLP_05`); Hoàn thành xây dựng dùng mốc vật lý mới `MILE_PCD_07` sau nhánh `4.3.8` hoặc `4.3.7`; Hoàn thành bàn giao dùng mốc kết thúc mới `MILE_OM_04` sau `4.4.1.3`. Mốc *bắt đầu* bàn giao `MILE_OM_02` không bị đổi tên thành mốc kết thúc.
+- Ngày do người dùng nhập là `manual` và được giữ cố định. Mốc phụ và mốc chính còn trống là `assumed`, tính theo chuỗi dependency, thời lượng từ quy mô dự án và khoảng trống giữa các ngày neo. Đây là giả định lập kế hoạch, không phải thời hạn pháp lý chuẩn.
+- Tiến độ mẫu phải có start/end cho **mọi task lá đã bật**. Với nhánh có dependency: tính theo FS/SS/FF và lịch làm việc. Với nhánh thiếu logic: xếp theo giai đoạn gần nhất của 5 mốc, đánh dấu `assumed` để người dùng chỉnh sau; không coi đây là đường găng đã thẩm định.
+- Nếu 5 ngày neo tự mâu thuẫn hoặc ngắn hơn thời lượng tối thiểu, giữ ngày người dùng nhập và hiển thị âm dự trữ/cảnh báo trước khi tạo, không ép ngắn duration. Mốc phụ giả định được hiển thị ở bước 3 kèm nguồn suy ra.
+- Dự án cũ không tự sinh lại. Nếu nhập XML, tệp là nguồn tiến độ chính và 5 ngày chỉ lưu tham chiếu, không ghi đè ngày trong XML.
+
+### Group 8.0 — Schema và giao diện 5 mốc
+
+- 🚩 Milestone 8.1: Bước 2 có đủ 5 ngày neo chính.
+  - Task 8.1.1: Thêm định nghĩa/mapping 3 mốc mới, phân biệt `manual`/`assumed`. PIC: Frontend logic | Duration: 0.5 ngày | Dependencies: []. Criteria: 5 mốc có mã riêng, mapping WBS thật, không trùng mốc 17 ngày cũ; unit test.
+  - Task 8.1.2: Thêm 5 ô ngày tại bước 2 và migrate localStorage. PIC: Frontend | Duration: 0.5 ngày | Dependencies: [8.1.1 FS]. Criteria: Form desktop/mobile rõ ràng; ngày cũ vẫn đọc được; manual UI + integration test.
+
+### Group 9.0 — Sinh giả định và lịch mẫu
+
+- 🚩 Milestone 9.1: MTL mới luôn có lịch mẫu có thể chỉnh.
+  - Task 9.1.1: Suy ra ngày của các mốc phụ từ 5 mốc chính, tham số quy mô và quy tắc phụ thuộc; ghi nguồn giả định. PIC: Frontend logic | Duration: 1 ngày | Dependencies: [8.1.1 FS]. Criteria: Ngày nhập được giữ; thiếu 1–5 mốc vẫn có giả định hợp lệ; cảnh báo mâu thuẫn; unit test.
+  - Task 9.1.2: Phân rã ngày cho mọi task lá đã bật và tổng hợp ngày task cha, giữ duration động. PIC: Frontend logic | Duration: 1.5 ngày | Dependencies: [9.1.1 FS]. Criteria: Không có task lá thiếu ngày, không sinh dependency vòng, ngày mốc khớp; unit/integration test.
+  - Task 9.1.3: Chỉ áp dụng mẫu lúc tạo mới; thao tác chỉnh tay về sau không bị ghi đè. PIC: Frontend | Duration: 0.5 ngày | Dependencies: [9.1.2 FS, 8.1.2 FS]. Criteria: Tạo xong thấy lịch; sửa task rồi reload vẫn giữ ngày; manual UI check.
+
+### Group 10.0 — Preview, kiểm thử, bàn giao
+
+- 🚩 Milestone 10.1: Người dùng thấy rõ phần giả định trước khi tạo.
+  - Task 10.1.1: Bước 3 hiển thị 5 mốc chính, mốc phụ suy ra, số task có ngày và cảnh báo âm dự trữ. PIC: Frontend | Duration: 0.5 ngày | Dependencies: [9.1.1 FS, 9.1.2 FS]. Criteria: Preview khớp dự án vừa tạo; manual UI + integration test.
+  - Task 10.1.2: Test các ca không nhập mốc, nhập 1 mốc, nhập cả 5, dự án cao tầng/thấp tầng, ngày mâu thuẫn, XML, dự án cũ; build/push. PIC: QA | Duration: 1 ngày | Dependencies: [9.1.3 FS, 10.1.1 FS]. Criteria: `npm test` pass, diff sạch, push main sau khi được duyệt.
+
+### Definition of Done
+
+- Bước 2 có 5 trường ngày đúng tên; bước 3 phân biệt `manual` và `assumed`.
+- Tạo MTL không XML luôn sinh lịch mẫu cho toàn bộ task lá đã bật.
+- Ngày người dùng nhập không bị tự đổi; xung đột có cảnh báo rõ ràng.
+- Dự án cũ và luồng XML không bị ghi đè.

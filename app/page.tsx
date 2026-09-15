@@ -5,7 +5,7 @@ import templateData from "./mtl-template.json";
 import dependencyData from "./mtl-dependencies.json";
 import { parseMSProjectXML, type ParsedProjectData } from "./xml-parser";
 import { DEFAULT_PROJECT_PARAMETERS, generateParameterizedMTL, type ParameterImpact, type ProjectParameters } from "./mtl-parameter-engine";
-import { KEY_MILESTONES, decomposeMilestoneDates, type MilestoneDates } from "./mtl-milestones";
+import { CORE_MILESTONE_CODES, KEY_MILESTONES, createInitialSampleSchedule, type MilestoneDates, type MilestoneSources } from "./mtl-milestones";
 
 type WorkType = "" | "Báo cáo định kỳ" | "Tracking công việc";
 
@@ -80,6 +80,7 @@ type Project = {
   parameters: ProjectParameters;
   parameterImpacts: ParameterImpact[];
   milestoneDates: MilestoneDates;
+  milestoneSources?: MilestoneSources;
   selectedGroups: string[];
   createdAt: string;
   taskEdits: Record<string, TaskEdit>;
@@ -1363,12 +1364,14 @@ export default function Home() {
   const activeMilestoneDates = useMemo(() => isLowRiseCreation
     ? Object.fromEntries(Object.entries(form.milestoneDates).filter(([code]) => code !== "MILE_PCD_03" && code !== "MILE_PCD_04"))
     : form.milestoneDates, [isLowRiseCreation, form.milestoneDates]);
-  const milestonePreview = useMemo(() => decomposeMilestoneDates(
+  const milestonePreview = useMemo(() => createInitialSampleSchedule(
     parameterPreview.tasks,
     parameterPreview.dependencies,
     parameterPreview.taskEdits,
     activeMilestoneDates,
-  ), [parameterPreview, activeMilestoneDates]);
+    form.parameters,
+    today,
+  ), [parameterPreview, activeMilestoneDates, form.parameters]);
   const catalogWorkGroupCodes = useMemo(() => {
     if (catalogWorkGroupFilter === "all") return null;
     const tasksByCode = new Map(fullCatalog.map((task) => [task.code, task]));
@@ -1506,6 +1509,7 @@ export default function Home() {
       project = {
         ...form,
         milestoneDates: activeMilestoneDates,
+        milestoneSources: Object.fromEntries(Object.keys(activeMilestoneDates).filter((code) => Boolean(activeMilestoneDates[code])).map((code) => [code, "manual"])) as MilestoneSources,
         id: crypto.randomUUID(),
         name: form.name.trim(),
         code: form.code.trim().toUpperCase(),
@@ -1533,7 +1537,8 @@ export default function Home() {
       const initialDates = Object.values(initialEdits).flatMap((edit) => [edit.startDate, edit.endDate].filter((date): date is string => Boolean(date))).sort();
       project = {
         ...form,
-        milestoneDates: activeMilestoneDates,
+        milestoneDates: milestonePreview.milestoneDates,
+        milestoneSources: milestonePreview.milestoneSources,
         id: crypto.randomUUID(),
         name: form.name.trim(),
         code: form.code.trim().toUpperCase(),
@@ -2761,6 +2766,10 @@ export default function Home() {
         .milestone-input-list label span { display: flex !important; justify-content: space-between !important; gap: 6px !important; color: #314d44 !important; font-size: 10.5px !important; font-weight: 700 !important; }
         .milestone-input-list label small { color: #869992 !important; font-size: 8px !important; }
         .milestone-input-list label input { width: 100% !important; height: 38px !important; padding: 0 10px !important; border: 1px solid #cbd5e1 !important; border-radius: 7px !important; color: #0f172a !important; }
+        .milestone-preview-card { display: flex !important; align-items: center !important; justify-content: space-between !important; gap: 12px !important; padding: 10px !important; border: 1px solid #dce9e4 !important; border-radius: 8px !important; background: #fff !important; }
+        .milestone-preview-card span { display: grid !important; gap: 3px !important; color: #314d44 !important; font-size: 10.5px !important; }
+        .milestone-preview-card small { color: #869992 !important; font-size: 8px !important; }
+        .milestone-preview-card strong { white-space: nowrap !important; color: #167461 !important; font-size: 11px !important; }
         .milestone-result { padding: 10px 12px !important; border-radius: 8px !important; background: #eaf7f3 !important; color: #166456 !important; font-size: 11px !important; font-weight: 700 !important; }
         .milestone-warning { padding: 9px 11px !important; border: 1px solid #f2d4a1 !important; border-radius: 7px !important; background: #fff8ec !important; color: #815c20 !important; font-size: 10px !important; }
         .create-section-title {
@@ -4955,6 +4964,16 @@ export default function Home() {
                 <label className="field"><span>{form.parameters.loaiHinhDuAn === "Thấp tầng/Biệt thự" ? "5" : "7"}. Hiện trạng đất & GPMB</span><select value={form.parameters.hienTrangDat} onChange={(event) => updateProjectParameter("hienTrangDat", event.target.value as ProjectParameters["hienTrangDat"])}><option>Đất sạch 100%</option><option>Đang đền bù GPMB</option><option>Đất nhận chuyển nhượng (M&A)</option></select><small>Đất sạch sẽ bỏ qua nhánh GPMB.</small></label>
                 <label className="field"><span>{form.parameters.loaiHinhDuAn === "Thấp tầng/Biệt thự" ? "6" : "8"}. Mốc pháp lý ban đầu</span><select value={form.parameters.mocPhapLyDau} onChange={(event) => updateProjectParameter("mocPhapLyDau", event.target.value as ProjectParameters["mocPhapLyDau"])}><option>Chưa có 1/500</option><option>Đã duyệt 1/500</option><option>Đã duyệt TKCS</option><option>Đã có GPXD</option></select><small>Tự đóng các task pháp lý đã hoàn thành trước đó.</small></label>
                 <label className="field"><span>{form.parameters.loaiHinhDuAn === "Thấp tầng/Biệt thự" ? "7" : "9"}. Nghĩa vụ tài chính đất</span><select value={form.parameters.nghiaVuTaiChinh} onChange={(event) => updateProjectParameter("nghiaVuTaiChinh", event.target.value as ProjectParameters["nghiaVuTaiChinh"])}><option>Đã hoàn thành tiền SDĐ</option><option>Đang thẩm định giá đất</option><option>Đất thuê hàng năm</option></select><small>Sinh nhánh định giá/nộp tiền tương ứng.</small></label>
+                <div className="create-section-title">5 mốc chính của dự án</div>
+                <div className="milestone-intro field-wide">Nhập ngày đã chốt nếu có. Mốc còn trống sẽ được giả định để tạo tiến độ mẫu cho toàn bộ công việc; sau khi tạo anh có thể chỉnh lại từng ngày.</div>
+                {CORE_MILESTONE_CODES.map((code, index) => {
+                  const milestone = KEY_MILESTONES.find((item) => item.code === code)!;
+                  return <label className="field" key={code}>
+                    <span>{index + 1}. {milestone.name}</span>
+                    <input type="date" value={form.milestoneDates[code] ?? ""} onChange={(event) => setForm((current) => ({ ...current, milestoneDates: { ...current.milestoneDates, [code]: event.target.value } }))} aria-label={`${code} · ${milestone.name}`} />
+                    <small>{milestone.mappedCode ? `Neo WBS ${milestone.mappedCode}` : "Mốc tổng hợp · không thay mốc bắt đầu bàn giao"}</small>
+                  </label>;
+                })}
               </>}
 
               {createStep === 3 && <>
@@ -4968,25 +4987,33 @@ export default function Home() {
               <div className="impact-list field-wide">
                 {parameterPreview.impacts.map((impact) => <article key={impact.parameter}><div><b>{impact.title}</b><small>{impact.parameter}</small></div><p>{impact.detail}</p><span>{impact.affectedTasks} task</span></article>)}
               </div>
-              <div className="create-section-title">Ngày mốc chốt để phân rã tiến độ ban đầu</div>
-              <div className="milestone-intro field-wide">Nhập các ngày mốc đã biết; mốc chưa chốt có thể để trống. Hệ thống gợi ý lịch một lần khi tạo MTL, sau đó anh chỉnh ngày từng task như hiện tại. Lịch đang dùng thứ Hai–thứ Sáu, chưa tính ngày nghỉ lễ hoặc năng lực nguồn lực.</div>
+              <div className="create-section-title">Tiến độ mẫu từ 5 mốc chính</div>
+              <div className="milestone-intro field-wide">Ngày có nhãn “Đã nhập” được giữ nguyên; ngày “Giả định” chỉ là baseline để điều chỉnh. Lịch dùng thứ Hai–thứ Sáu, chưa tính nghỉ lễ hay năng lực nguồn lực.</div>
+              <div className="milestone-input-list field-wide">
+                {CORE_MILESTONE_CODES.map((code) => {
+                  const milestone = KEY_MILESTONES.find((item) => item.code === code)!;
+                  return <div className="milestone-preview-card" key={code}><span><b>{milestone.name}</b><small>{milestonePreview.milestoneSources[code] === "manual" ? "Đã nhập" : "Giả định"}</small></span><strong>{formatDate(milestonePreview.milestoneDates[code])}</strong></div>;
+                })}
+              </div>
+              <div className="milestone-result field-wide">{xmlData ? "Tệp XML giữ nguyên ngày task; 5 mốc chỉ lưu tham chiếu." : `Đã xếp ngày cho ${milestonePreview.datedLeafCount} task thực thi · ${Object.values(milestonePreview.milestoneSources).filter((source) => source === "assumed").length} mốc được giả định.`}</div>
+              <div className="create-section-title">Các mốc chi tiết (có thể nhập thêm)</div>
               <div className="milestone-input-list field-wide">
                 {(["Pháp lý", "Thi công", "Kinh doanh & Bàn giao"] as const).map((group) => <div key={group} style={{ display: "contents" }}>
                   <h3>{group}</h3>
-                  {KEY_MILESTONES.filter((milestone) => milestone.group === group && (!isLowRiseCreation || (milestone.code !== "MILE_PCD_03" && milestone.code !== "MILE_PCD_04"))).map((milestone) => <label key={milestone.code}>
+                  {KEY_MILESTONES.filter((milestone) => milestone.group === group && !CORE_MILESTONE_CODES.includes(milestone.code as typeof CORE_MILESTONE_CODES[number]) && (!isLowRiseCreation || (milestone.code !== "MILE_PCD_03" && milestone.code !== "MILE_PCD_04"))).map((milestone) => <label key={milestone.code}>
                     <span><b>{milestone.name}</b><small>{milestone.code}</small></span>
                     <input type="date" value={form.milestoneDates[milestone.code] ?? ""} onChange={(event) => setForm((current) => ({ ...current, milestoneDates: { ...current.milestoneDates, [milestone.code]: event.target.value } }))} aria-label={`${milestone.code} · ${milestone.name}`} />
-                    <small>{milestone.mappedCode ? `Neo theo WBS thực: ${milestone.mappedCode}` : "Mốc mới · sinh dòng mốc riêng trong MTL"}</small>
+                    <small>{form.milestoneDates[milestone.code] ? "Đã nhập" : `Giả định: ${formatDate(milestonePreview.milestoneDates[milestone.code])}`} · {milestone.mappedCode ? `WBS ${milestone.mappedCode}` : "dòng mốc riêng"}</small>
                   </label>)}
                 </div>)}
               </div>
-              {Object.values(activeMilestoneDates).some(Boolean) && <>
+              <>
                 <div className="milestone-result field-wide">{xmlData
                   ? `Đã nhập ${Object.values(activeMilestoneDates).filter(Boolean).length} mốc · Ngày mốc chỉ được lưu tham chiếu, lịch trong XML sẽ giữ nguyên.`
-                  : `Đã nhập ${Object.values(activeMilestoneDates).filter(Boolean).length}/${isLowRiseCreation ? 15 : 17} mốc · Gợi ý ngày cho ${milestonePreview.scheduledTaskCount} task liên quan · Sinh ${milestonePreview.markerTasks.length} dòng mốc và ${milestonePreview.supplementalTasks.length} task bổ sung.`}</div>
+                  : `Đã nhập ${Object.values(activeMilestoneDates).filter(Boolean).length}/${isLowRiseCreation ? 18 : 20} mốc · Sinh ${milestonePreview.markerTasks.length} dòng mốc và ${milestonePreview.supplementalTasks.length} task bổ sung.`}</div>
                 {!xmlData && milestonePreview.warnings.slice(0, 8).map((warning) => <div key={warning} className="milestone-warning field-wide" role="alert">⚠ {warning}</div>)}
                 {!xmlData && milestonePreview.warnings.length > 8 && <div className="milestone-warning field-wide">Còn {milestonePreview.warnings.length - 8} cảnh báo khác.</div>}
-              </>}
+              </>
               <div className="create-section-title">Nguồn dữ liệu khởi tạo thay thế</div>
               <div className="field field-wide">
                 <div className="file-upload-box">
