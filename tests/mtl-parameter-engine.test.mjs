@@ -16,7 +16,6 @@ test("filters incompatible WBS branches and preserves tree integrity", () => {
     loaiHinhDuAn: "Thấp tầng/Biệt thự",
     hienTrangDat: "Đất sạch 100%",
     soTangHam: 0,
-    nhaMauSales: "Không làm",
   });
   const codes = new Set(result.tasks.map((task) => task.code));
 
@@ -46,20 +45,13 @@ test("removes underground construction tasks when the project has no basement", 
   assert.ok(result.tasks.every((task) => !/phần ngầm/i.test(task.name)));
 });
 
-test("clones phased milestones and generates tender and sample-house chains", () => {
-  const result = generate({
-    soPhanKy: 3,
-    moHinhThau: "Chia nhiều gói riêng lẻ",
-    nhaMauSales: "Nhà mẫu bên ngoài",
-  });
+test("clones phased sale, legal and handover milestones", () => {
+  const result = generate({ soPhanKy: 3 });
   const codes = new Set(result.tasks.map((task) => task.code));
 
   assert.ok(codes.has("9.3.7_DOT2"));
   assert.ok(codes.has("4.1.5.13_DOT3"));
   assert.ok(codes.has("4.4.1.3_DOT3"));
-  assert.ok(codes.has("9.5.MHT.4"));
-  assert.ok(codes.has("9.3.NM.4"));
-  assert.ok(result.dependencies.some((link) => link.successorCode === "9.3.NM.4" && link.predecessorCode === "9.3.NM.3"));
 });
 
 test("marks legal history complete from the selected initial milestone", () => {
@@ -81,16 +73,12 @@ test("supports all initial legal milestones", () => {
   assert.ok(counts[3] > counts[2]);
 });
 
-test("supports every tender and sample-house model", () => {
-  const tenderModels = ["Tổng thầu Design & Build", "Tổng thầu Thi công", "Chia nhiều gói riêng lẻ"];
-  const sampleModels = ["Nhà mẫu tại công trường", "Nhà mẫu bên ngoài", "Căn hộ mẫu tầng thực tế", "Không làm"];
+test("uses number of units instead of basement and floor inputs for low-rise projects", () => {
+  const result = generate({ loaiHinhDuAn: "Thấp tầng/Biệt thự", soCanThapTang: 240 });
 
-  tenderModels.forEach((moHinhThau) => {
-    const result = generate({ moHinhThau });
-    assert.ok(result.tasks.some((task) => task.code === "9.5.MHT" && task.name.includes(moHinhThau)));
-  });
-  sampleModels.forEach((nhaMauSales) => {
-    const result = generate({ nhaMauSales });
-    assert.equal(result.tasks.some((task) => task.code === "9.3.NM"), nhaMauSales !== "Không làm");
-  });
+  assert.equal(result.taskEdits["4.3.7.1.1"].duration, 360);
+  assert.equal(result.taskEdits["4.3.7.1.2"].duration, 240);
+  assert.ok(result.impacts.some((impact) => impact.parameter === "PARAM_SO_CAN_THAP_TANG" && impact.title === "240 căn thấp tầng"));
+  assert.ok(result.impacts.every((impact) => impact.parameter !== "PARAM_SO_TANG_NOI"));
+  assert.ok(result.impacts.every((impact) => impact.parameter !== "PARAM_SO_THAP_BLOCK" && impact.parameter !== "PARAM_SO_TANG_HAM"));
 });

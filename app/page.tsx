@@ -1516,9 +1516,11 @@ export default function Home() {
       return;
     }
     if (createStep === 2) {
-      const { dienTichDat, gfa, soPhanKy, soThapBlock, soTangNoi } = form.parameters;
-      if ([dienTichDat, gfa, soPhanKy, soThapBlock, soTangNoi].some((value) => !Number.isFinite(value) || value <= 0)) {
-        return setFormError("Quy mô, số phân kỳ, số tháp và số tầng nổi phải lớn hơn 0.");
+      const { dienTichDat, gfa, soPhanKy, soThapBlock, soCanThapTang, soTangNoi, loaiHinhDuAn } = form.parameters;
+      const constructionScale = loaiHinhDuAn === "Thấp tầng/Biệt thự" ? soCanThapTang : soThapBlock;
+      const values = loaiHinhDuAn === "Thấp tầng/Biệt thự" ? [dienTichDat, gfa, soPhanKy, constructionScale] : [dienTichDat, gfa, soPhanKy, constructionScale, soTangNoi];
+      if (values.some((value) => !Number.isFinite(value) || value <= 0)) {
+        return setFormError("Quy mô và số lượng công trình phải lớn hơn 0.");
       }
       setCreateStep(3);
     }
@@ -1549,7 +1551,7 @@ export default function Home() {
         parameterImpacts: [{
           parameter: "XML_IMPORT",
           title: "Khởi tạo từ Microsoft Project",
-          detail: "Tệp XML được ưu tiên làm nguồn task; 11 tham số được lưu để tham chiếu và điều chỉnh các lần sinh lại sau.",
+          detail: "Tệp XML được ưu tiên làm nguồn task; các tham số khởi tạo được lưu để tham chiếu và điều chỉnh các lần sinh lại sau.",
           affectedTasks: xmlData.customTasks.length,
         }],
       };
@@ -4879,7 +4881,7 @@ export default function Home() {
               <div className="create-stepper field-wide" aria-label={`Bước ${createStep} trên 3`}>
                 {[
                   [1, "Thông tin dự án"],
-                  [2, "11 tham số sinh task"],
+                  [2, "Tham số sinh task"],
                   [3, "Kiểm tra & khởi tạo"],
                 ].map(([step, label]) => (
                   <div key={step} className={createStep >= Number(step) ? "active" : ""}>
@@ -4972,7 +4974,7 @@ export default function Home() {
               </>}
 
               {createStep === 2 && <>
-                <div className="create-section-title">11 tham số hình thành tiến độ dự án</div>
+                <div className="create-section-title">Tham số hình thành tiến độ dự án</div>
                 <div className="parameter-intro field-wide">
                   Các giá trị dưới đây tác động trực tiếp đến cây task ban đầu: chọn nhánh WBS, nhân bản theo phân kỳ/tháp, đóng task quá khứ và tính lại thời lượng.
                 </div>
@@ -4991,15 +4993,16 @@ export default function Home() {
                   <label className="field"><span>Tổng diện tích sàn GFA (m²)</span><input type="number" min="1" step="1000" value={form.parameters.gfa} onChange={(event) => updateProjectParameter("gfa", Number(event.target.value))} /><small>Dùng tính duration thiết kế, QSB và thi công.</small></label>
                 </div>
                 <label className="field"><span>3. Số phân kỳ / Giai đoạn</span><input type="number" min="1" max="20" value={form.parameters.soPhanKy} onChange={(event) => updateProjectParameter("soPhanKy", Number(event.target.value))} /><small>Nhân bản Mở bán, Cấp phép và Bàn giao theo đợt.</small></label>
-                <label className="field"><span>4. Số Tháp / Block / Phân khu</span><input type="number" min="1" max="26" value={form.parameters.soThapBlock} onChange={(event) => updateProjectParameter("soThapBlock", Number(event.target.value))} /><small>Nhân cụm thi công và gối đầu 15 ngày/tháp.</small></label>
-                <label className="field"><span>5. Số tầng hầm</span><select value={form.parameters.soTangHam} onChange={(event) => updateProjectParameter("soTangHam", Number(event.target.value) as ProjectParameters["soTangHam"])}><option value={0}>0 hầm</option><option value={1}>1 hầm</option><option value={2}>2 hầm</option><option value={3}>3+ hầm</option></select><small>Ẩn/hiện thi công ngầm và quan trắc.</small></label>
-                <label className="field"><span>Biện pháp đào</span><select disabled={form.parameters.soTangHam === 0} value={form.parameters.bienPhapDao} onChange={(event) => updateProjectParameter("bienPhapDao", event.target.value as ProjectParameters["bienPhapDao"])}><option>Open-cut</option><option>Top-down</option></select><small>Áp dụng khi dự án có tầng hầm.</small></label>
-                <label className="field"><span>6. Số tầng nổi cao nhất</span><input type="number" min="1" max="120" value={form.parameters.soTangNoi} onChange={(event) => updateProjectParameter("soTangNoi", Number(event.target.value))} /><small>Kết cấu thân = số tầng × 6 ngày/sàn.</small></label>
-                <label className="field"><span>7. Hiện trạng đất & GPMB</span><select value={form.parameters.hienTrangDat} onChange={(event) => updateProjectParameter("hienTrangDat", event.target.value as ProjectParameters["hienTrangDat"])}><option>Đất sạch 100%</option><option>Đang đền bù GPMB</option><option>Đất nhận chuyển nhượng (M&A)</option></select><small>Đất sạch sẽ bỏ qua nhánh GPMB.</small></label>
-                <label className="field"><span>8. Mốc pháp lý ban đầu</span><select value={form.parameters.mocPhapLyDau} onChange={(event) => updateProjectParameter("mocPhapLyDau", event.target.value as ProjectParameters["mocPhapLyDau"])}><option>Chưa có 1/500</option><option>Đã duyệt 1/500</option><option>Đã duyệt TKCS</option><option>Đã có GPXD</option></select><small>Tự đóng các task pháp lý đã hoàn thành trước đó.</small></label>
-                <label className="field"><span>9. Nghĩa vụ tài chính đất</span><select value={form.parameters.nghiaVuTaiChinh} onChange={(event) => updateProjectParameter("nghiaVuTaiChinh", event.target.value as ProjectParameters["nghiaVuTaiChinh"])}><option>Đã hoàn thành tiền SDĐ</option><option>Đang thẩm định giá đất</option><option>Đất thuê hàng năm</option></select><small>Sinh nhánh định giá/nộp tiền tương ứng.</small></label>
-                <label className="field"><span>10. Mô hình triển khai thầu</span><select value={form.parameters.moHinhThau} onChange={(event) => updateProjectParameter("moHinhThau", event.target.value as ProjectParameters["moHinhThau"])}><option>Tổng thầu Design & Build</option><option>Tổng thầu Thi công</option><option>Chia nhiều gói riêng lẻ</option></select><small>Điều chỉnh chuỗi logic đấu thầu và thi công.</small></label>
-                <label className="field field-wide"><span>11. Mô hình Nhà mẫu & Sales Gallery</span><select value={form.parameters.nhaMauSales} onChange={(event) => updateProjectParameter("nhaMauSales", event.target.value as ProjectParameters["nhaMauSales"])}><option>Nhà mẫu tại công trường</option><option>Nhà mẫu bên ngoài</option><option>Căn hộ mẫu tầng thực tế</option><option>Không làm</option></select><small>Sinh chuỗi thiết kế → đấu thầu → thi công → khai trương, liên kết mốc mở bán đợt 1.</small></label>
+                {form.parameters.loaiHinhDuAn === "Thấp tầng/Biệt thự" ? (
+                  <label className="field"><span>4. Số căn thấp tầng</span><input type="number" min="1" max="10000" value={form.parameters.soCanThapTang} onChange={(event) => updateProjectParameter("soCanThapTang", Number(event.target.value))} /><small>Tính quy mô task thi công, hoàn thiện và nội thất theo số căn.</small></label>
+                ) : <>
+                  <label className="field"><span>4. Số Tháp / Block / Phân khu</span><input type="number" min="1" max="26" value={form.parameters.soThapBlock} onChange={(event) => updateProjectParameter("soThapBlock", Number(event.target.value))} /><small>Nhân cụm thi công và gối đầu 15 ngày/tháp.</small></label>
+                  <label className="field"><span>5. Số tầng hầm</span><select value={form.parameters.soTangHam} onChange={(event) => updateProjectParameter("soTangHam", Number(event.target.value) as ProjectParameters["soTangHam"])}><option value={0}>0 hầm</option><option value={1}>1 hầm</option><option value={2}>2 hầm</option><option value={3}>3+ hầm</option></select><small>Chỉ áp dụng cho nhánh nhà cao tầng.</small></label>
+                  <label className="field"><span>6. Số tầng nổi cao nhất</span><input type="number" min="1" max="120" value={form.parameters.soTangNoi} onChange={(event) => updateProjectParameter("soTangNoi", Number(event.target.value))} /><small>Kết cấu thân = số tầng × 6 ngày/sàn.</small></label>
+                </>}
+                <label className="field"><span>{form.parameters.loaiHinhDuAn === "Thấp tầng/Biệt thự" ? "5" : "7"}. Hiện trạng đất & GPMB</span><select value={form.parameters.hienTrangDat} onChange={(event) => updateProjectParameter("hienTrangDat", event.target.value as ProjectParameters["hienTrangDat"])}><option>Đất sạch 100%</option><option>Đang đền bù GPMB</option><option>Đất nhận chuyển nhượng (M&A)</option></select><small>Đất sạch sẽ bỏ qua nhánh GPMB.</small></label>
+                <label className="field"><span>{form.parameters.loaiHinhDuAn === "Thấp tầng/Biệt thự" ? "6" : "8"}. Mốc pháp lý ban đầu</span><select value={form.parameters.mocPhapLyDau} onChange={(event) => updateProjectParameter("mocPhapLyDau", event.target.value as ProjectParameters["mocPhapLyDau"])}><option>Chưa có 1/500</option><option>Đã duyệt 1/500</option><option>Đã duyệt TKCS</option><option>Đã có GPXD</option></select><small>Tự đóng các task pháp lý đã hoàn thành trước đó.</small></label>
+                <label className="field"><span>{form.parameters.loaiHinhDuAn === "Thấp tầng/Biệt thự" ? "7" : "9"}. Nghĩa vụ tài chính đất</span><select value={form.parameters.nghiaVuTaiChinh} onChange={(event) => updateProjectParameter("nghiaVuTaiChinh", event.target.value as ProjectParameters["nghiaVuTaiChinh"])}><option>Đã hoàn thành tiền SDĐ</option><option>Đang thẩm định giá đất</option><option>Đất thuê hàng năm</option></select><small>Sinh nhánh định giá/nộp tiền tương ứng.</small></label>
               </>}
 
               {createStep === 3 && <>
