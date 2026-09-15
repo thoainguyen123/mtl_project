@@ -2866,9 +2866,9 @@ export default function Home() {
         }
         .task-grid .grid-header {
           display: grid !important;
-          grid-template-columns: 150px minmax(280px, 2.5fr) 130px 120px 120px minmax(140px, 1.2fr) minmax(140px, 1.2fr) !important;
+          grid-template-columns: 150px minmax(280px, 2.5fr) 180px 120px 120px minmax(140px, 1.2fr) minmax(140px, 1.2fr) !important;
           align-items: center !important;
-          min-width: 1080px !important;
+          min-width: 1130px !important;
           height: 42px !important;
           background: #f8fafc !important;
           border-bottom: 1px solid #e2e8f0 !important;
@@ -2888,11 +2888,14 @@ export default function Home() {
         .task-grid .grid-header > span:last-child {
           border-right: none !important;
         }
+        .task-grid .grid-header > span:nth-child(3) {
+          padding: 0 8px !important;
+        }
         .task-grid .task-row {
           display: grid !important;
-          grid-template-columns: 150px minmax(280px, 2.5fr) 130px 120px 120px minmax(140px, 1.2fr) minmax(140px, 1.2fr) !important;
+          grid-template-columns: 150px minmax(280px, 2.5fr) 180px 120px 120px minmax(140px, 1.2fr) minmax(140px, 1.2fr) !important;
           align-items: center !important;
-          min-width: 1080px !important;
+          min-width: 1130px !important;
           min-height: 44px !important;
           border-bottom: 1px solid #f1f5f9 !important;
           color: #1e293b !important;
@@ -4583,10 +4586,10 @@ export default function Home() {
 
             <div className={`planning-area ${selectedTask ? "with-detail" : ""}`}>
               <section className="task-grid" aria-label="Cây công việc Master Timeline">
-                <div className="grid-header" style={{ gridTemplateColumns: "150px minmax(280px, 2.5fr) 130px 120px 120px minmax(140px, 1.2fr) minmax(140px, 1.2fr)" }}>
+                <div className="grid-header" style={{ gridTemplateColumns: "150px minmax(280px, 2.5fr) 180px 120px 120px minmax(140px, 1.2fr) minmax(140px, 1.2fr)" }}>
                   <span>WBS</span>
                   <span>HẠNG MỤC</span>
-                  <span><span style={{ whiteSpace: "nowrap", lineHeight: 1.3 }}>THỜI GIAN<br />THỰC HIỆN</span></span>
+                  <span style={{ whiteSpace: "nowrap" }}>THỜI GIAN THỰC HIỆN</span>
                   <span>NGÀY BẮT ĐẦU</span>
                   <span>NGÀY KẾT THÚC</span>
                   <span>GHI CHÚ</span>
@@ -4602,7 +4605,7 @@ export default function Home() {
                         role="button"
                         tabIndex={0}
                         className={`task-row level-${Math.min(task.level, 4)} ${selectedCode === task.code ? "selected" : ""} ${task.summary ? "summary" : ""}`}
-                        style={{ gridTemplateColumns: "150px minmax(280px, 2.5fr) 130px 120px 120px minmax(140px, 1.2fr) minmax(140px, 1.2fr)" }}
+                        style={{ gridTemplateColumns: "150px minmax(280px, 2.5fr) 180px 120px 120px minmax(140px, 1.2fr) minmax(140px, 1.2fr)" }}
                         onClick={() => setSelectedCode(task.code)}
                         onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") setSelectedCode(task.code); }}
                       >
