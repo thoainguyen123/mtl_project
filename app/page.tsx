@@ -2705,6 +2705,13 @@ export default function Home() {
           overflow-y: auto !important;
           overscroll-behavior: contain !important;
         }
+        .create-project-modal .create-slide {
+          display: grid !important;
+          grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important;
+          align-content: start !important;
+          gap: 16px !important;
+          width: 100% !important;
+        }
         .create-project-modal .field {
           display: flex !important;
           flex-direction: column !important;
@@ -2828,10 +2835,11 @@ export default function Home() {
         @media (max-width: 640px) {
           .create-project-modal header { padding: 16px 18px 12px !important; }
           .create-project-modal .form-grid { padding: 16px 18px 12px !important; }
+          .create-project-modal .create-slide { grid-template-columns: minmax(0, 1fr) !important; }
           .create-project-modal footer { padding: 12px 18px calc(12px + env(safe-area-inset-bottom)) !important; flex-wrap: wrap !important; }
           .create-footer-note { flex-basis: 100% !important; margin-right: 0 !important; }
           .create-project-modal footer .secondary-button,
-          .create-project-modal footer .primary-button { flex: 1 1 0 !important; white-space: nowrap !important; }
+          .create-project-modal footer .primary-button { display: inline-flex !important; align-items: center !important; justify-content: center !important; flex: 1 1 0 !important; white-space: nowrap !important; }
           .create-tabs { margin-right: 10px !important; gap: 6px !important; }
           .create-tabs > div { padding: 9px 8px !important; font-size: 11px !important; }
           .parameter-pair, .parameter-summary { grid-template-columns: 1fr 1fr !important; }
@@ -4852,7 +4860,7 @@ export default function Home() {
             </header>
 
             <div className="form-grid" key={createStep}>
-              {createStep === 1 && <>
+              {createStep === 1 && <section className="create-slide field-wide" aria-label="Thông tin dự án">
               <div className="create-section-title">1. Nhận diện Master Timeline</div>
               <label className="field field-wide">
                 <span>Tên dự án *</span>
@@ -4929,9 +4937,9 @@ export default function Home() {
                 <input value={form.location} onChange={(event) => setForm({ ...form, location: event.target.value })} placeholder="Ví dụ: Biên Hòa, Đồng Nai" />
               </label>
 
-              </>}
+              </section>}
 
-              {createStep === 2 && <>
+              {createStep === 2 && <section className="create-slide field-wide" aria-label="Cấu hình và khởi tạo">
                 <div className="create-section-title">Tham số hình thành tiến độ dự án</div>
                 <label className="field field-wide">
                   <span>1. Loại hình dự án & Sản phẩm</span>
@@ -4965,6 +4973,14 @@ export default function Home() {
                     <input type="date" value={form.milestoneDates[code] ?? ""} onChange={(event) => setForm((current) => ({ ...current, milestoneDates: { ...current.milestoneDates, [code]: event.target.value } }))} aria-label={`${code} · ${milestone.name}`} />
                   </label>;
                 })}
+              <div className="create-section-title">Nguồn dữ liệu khởi tạo thay thế</div>
+              <div className="field field-wide">
+                <div className="file-upload-box">
+                  <span style={{ fontSize: "12px", fontWeight: 700, color: "#334155" }}>Tải Master Timeline từ Microsoft Project (.xml) — không bắt buộc</span>
+                  <input type="file" accept=".xml" onChange={handleXMLUpload} className="file-input-styled" />
+                  {xmlData && <small style={{ color: "#167461", fontWeight: 700 }}>✓ Tìm thấy {xmlData.customTasks.length} công việc trong tệp.</small>}
+                </div>
+              </div>
               <div className="create-section-title">Kết quả sinh task dự kiến</div>
               <div className="parameter-summary field-wide">
                 <div><b>{parameterPreview.tasks.length}</b><span>Task sau khởi tạo</span></div>
@@ -4983,43 +4999,7 @@ export default function Home() {
                 })}
               </div>
               <div className="milestone-result field-wide">{xmlData ? "Tệp XML giữ nguyên ngày task; 5 mốc chỉ lưu tham chiếu." : `Đã xếp ngày cho ${milestonePreview.datedLeafCount} task thực thi · ${Object.values(milestonePreview.milestoneSources).filter((source) => source === "assumed").length} mốc được giả định.`}</div>
-              <div className="milestone-input-list field-wide">
-                {(["Pháp lý", "Thi công", "Kinh doanh & Bàn giao"] as const).map((group) => <div key={group} style={{ display: "contents" }}>
-                  <h3>{group}</h3>
-                  {KEY_MILESTONES.filter((milestone) => milestone.group === group && !CORE_MILESTONE_CODES.includes(milestone.code as typeof CORE_MILESTONE_CODES[number]) && (!isLowRiseCreation || (milestone.code !== "MILE_PCD_03" && milestone.code !== "MILE_PCD_04"))).map((milestone) => <label key={milestone.code}>
-                    <span><b>{milestone.name}</b></span>
-                    <input type="date" value={form.milestoneDates[milestone.code] ?? ""} onChange={(event) => setForm((current) => ({ ...current, milestoneDates: { ...current.milestoneDates, [milestone.code]: event.target.value } }))} aria-label={`${milestone.code} · ${milestone.name}`} />
-                    <small>{form.milestoneDates[milestone.code] ? "Đã nhập" : `Giả định: ${formatDate(milestonePreview.milestoneDates[milestone.code])}`}</small>
-                  </label>)}
-                </div>)}
-              </div>
-              <>
-                <div className="milestone-result field-wide">{xmlData
-                  ? `Đã nhập ${Object.values(activeMilestoneDates).filter(Boolean).length} mốc · Ngày mốc chỉ được lưu tham chiếu, lịch trong XML sẽ giữ nguyên.`
-                  : `Đã nhập ${Object.values(activeMilestoneDates).filter(Boolean).length}/${isLowRiseCreation ? 18 : 20} mốc · Sinh ${milestonePreview.markerTasks.length} dòng mốc và ${milestonePreview.supplementalTasks.length} task bổ sung.`}</div>
-                {!xmlData && milestonePreview.warnings.slice(0, 8).map((warning) => <div key={warning} className="milestone-warning field-wide" role="alert">⚠ {warning}</div>)}
-                {!xmlData && milestonePreview.warnings.length > 8 && <div className="milestone-warning field-wide">Còn {milestonePreview.warnings.length - 8} cảnh báo khác.</div>}
-              </>
-              <div className="create-section-title">Nguồn dữ liệu khởi tạo thay thế</div>
-              <div className="field field-wide">
-                <div className="file-upload-box">
-                  <span style={{ fontSize: "12px", fontWeight: 700, color: "#334155" }}>
-                    Tải Master Timeline từ Microsoft Project (.xml) — không bắt buộc
-                  </span>
-                  <input
-                    type="file"
-                    accept=".xml"
-                    onChange={handleXMLUpload}
-                    className="file-input-styled"
-                  />
-                  {xmlData && (
-                    <small style={{ color: "#167461", display: "block", marginTop: "4px", fontWeight: 700 }}>
-                      ✓ Tệp hợp lệ: Tìm thấy {xmlData.customTasks.length} công việc.
-                    </small>
-                  )}
-                </div>
-              </div>
-              </>}
+              </section>}
             </div>
 
             {formError && <div className="form-error" role="alert">{formError}</div>}
