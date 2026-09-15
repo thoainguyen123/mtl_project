@@ -2834,6 +2834,30 @@ export default function Home() {
           .impact-list article { grid-template-columns: 1fr 54px !important; }
         }
         /* ================= 7-COLUMN MASTER TIMELINE TASK GRID ================= */
+        .workspace-topbar {
+          height: auto !important;
+          min-height: 60px !important;
+          flex-wrap: wrap !important;
+          gap: 8px 16px !important;
+          padding-top: 8px !important;
+          padding-bottom: 8px !important;
+        }
+        .workspace-topbar .breadcrumbs {
+          flex: 1 1 220px !important;
+          min-width: 0 !important;
+          white-space: nowrap !important;
+        }
+        .workspace-topbar .top-actions {
+          flex: 0 1 auto !important;
+          flex-wrap: wrap !important;
+          justify-content: flex-end !important;
+          gap: 6px !important;
+        }
+        .workspace-topbar .top-actions button,
+        .workspace-topbar .saved-state {
+          flex: none !important;
+          white-space: nowrap !important;
+        }
         .task-grid {
           background: #ffffff !important;
           border-radius: 10px !important;
@@ -2843,9 +2867,9 @@ export default function Home() {
         }
         .task-grid .grid-header {
           display: grid !important;
-          grid-template-columns: 120px minmax(280px, 2.5fr) 130px 120px 120px minmax(140px, 1.2fr) minmax(140px, 1.2fr) !important;
+          grid-template-columns: 150px minmax(280px, 2.5fr) 130px 120px 120px minmax(140px, 1.2fr) minmax(140px, 1.2fr) !important;
           align-items: center !important;
-          min-width: 1050px !important;
+          min-width: 1080px !important;
           height: 42px !important;
           background: #f8fafc !important;
           border-bottom: 1px solid #e2e8f0 !important;
@@ -2867,9 +2891,9 @@ export default function Home() {
         }
         .task-grid .task-row {
           display: grid !important;
-          grid-template-columns: 120px minmax(280px, 2.5fr) 130px 120px 120px minmax(140px, 1.2fr) minmax(140px, 1.2fr) !important;
+          grid-template-columns: 150px minmax(280px, 2.5fr) 130px 120px 120px minmax(140px, 1.2fr) minmax(140px, 1.2fr) !important;
           align-items: center !important;
-          min-width: 1050px !important;
+          min-width: 1080px !important;
           min-height: 44px !important;
           border-bottom: 1px solid #f1f5f9 !important;
           color: #1e293b !important;
@@ -2899,6 +2923,8 @@ export default function Home() {
           padding-left: calc(10px + var(--indent, 0px)) !important;
           padding-right: 8px !important;
           height: 100% !important;
+          min-width: 0 !important;
+          overflow: hidden !important;
         }
         .wbs-tag {
           font-size: 11px !important;
@@ -2908,6 +2934,9 @@ export default function Home() {
           padding: 2px 6px !important;
           border-radius: 4px !important;
           white-space: nowrap !important;
+          min-width: 0 !important;
+          overflow: hidden !important;
+          text-overflow: ellipsis !important;
         }
         .task-row.level-1 .wbs-tag {
           background: #cbd5e1 !important;
@@ -2922,6 +2951,12 @@ export default function Home() {
           overflow: hidden !important;
           text-overflow: ellipsis !important;
           font-size: 12.5px !important;
+          min-width: 0 !important;
+        }
+        .task-name-text {
+          min-width: 0 !important;
+          overflow: hidden !important;
+          text-overflow: ellipsis !important;
         }
         .task-row.summary .task-cell-name {
           font-weight: 800 !important;
@@ -4487,7 +4522,7 @@ export default function Home() {
               </div>
             )}
 
-            <header className="topbar">
+            <header className="topbar workspace-topbar">
               <div className="breadcrumbs"><span>Lập Master timeline</span><i>/</i><button className="breadcrumb-back" onClick={() => setView("projects")}>Lập & Cập nhật</button><i>/</i><strong>{activeProject.code}</strong></div>
               <div className="top-actions">
                 <span className="saved-state"><i />Đã lưu trên thiết bị</span>
@@ -4549,7 +4584,7 @@ export default function Home() {
 
             <div className={`planning-area ${selectedTask ? "with-detail" : ""}`}>
               <section className="task-grid" aria-label="Cây công việc Master Timeline">
-                <div className="grid-header" style={{ gridTemplateColumns: "120px minmax(280px, 2.5fr) 130px 120px 120px minmax(140px, 1.2fr) minmax(140px, 1.2fr)" }}>
+                <div className="grid-header" style={{ gridTemplateColumns: "150px minmax(280px, 2.5fr) 130px 120px 120px minmax(140px, 1.2fr) minmax(140px, 1.2fr)" }}>
                   <span>WBS</span>
                   <span>HẠNG MỤC</span>
                   <span>THỜI GIAN THỰC HIỆN</span>
@@ -4568,12 +4603,12 @@ export default function Home() {
                         role="button"
                         tabIndex={0}
                         className={`task-row level-${Math.min(task.level, 4)} ${selectedCode === task.code ? "selected" : ""} ${task.summary ? "summary" : ""}`}
-                        style={{ gridTemplateColumns: "120px minmax(280px, 2.5fr) 130px 120px 120px minmax(140px, 1.2fr) minmax(140px, 1.2fr)" }}
+                        style={{ gridTemplateColumns: "150px minmax(280px, 2.5fr) 130px 120px 120px minmax(140px, 1.2fr) minmax(140px, 1.2fr)" }}
                         onClick={() => setSelectedCode(task.code)}
                         onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") setSelectedCode(task.code); }}
                       >
                         {/* 1. WBS */}
-                        <span className="task-cell task-cell-wbs" style={{ "--indent": `${(task.level - 1) * 14}px` } as React.CSSProperties}>
+                        <span className="task-cell task-cell-wbs" style={{ "--indent": `${(task.level - 1) * 6}px` } as React.CSSProperties}>
                           {task.summary ? (
                             <i
                               className="toggle"
@@ -4594,7 +4629,7 @@ export default function Home() {
                           ) : (
                             <i className="task-dot" />
                           )}
-                          <span className="wbs-tag">{task.code}</span>
+                          <span className="wbs-tag" title={task.code}>{task.code}</span>
                         </span>
 
                         {/* 2. Hạng mục */}
