@@ -2660,6 +2660,8 @@ export default function Home() {
         /* ================= ELEGANT CREATE PROJECT MODAL ================= */
         .create-project-modal {
           width: min(780px, 94vw) !important;
+          height: min(860px, 94vh) !important;
+          height: min(860px, 94dvh) !important;
           max-height: 94vh !important;
           max-height: 94dvh !important;
           display: flex !important;
@@ -4845,7 +4847,7 @@ export default function Home() {
               <button type="button" onClick={() => setShowCreate(false)}>Đóng</button>
             </header>
 
-            <div className="form-grid">
+            <div className="form-grid" key={createStep}>
               <div className="create-stepper field-wide" aria-label={`Bước ${createStep} trên 2`}>
                 {[
                   [1, "Thông tin dự án"],
