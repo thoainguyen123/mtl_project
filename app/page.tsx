@@ -2667,13 +2667,16 @@ export default function Home() {
         .create-project-modal {
           width: min(780px, 94vw) !important;
           max-height: 94vh !important;
-          overflow-y: auto !important;
+          max-height: 94dvh !important;
+          display: flex !important;
+          flex-direction: column !important;
           border-radius: 16px !important;
           background: #ffffff !important;
           box-shadow: 0 24px 80px rgba(0, 0, 0, 0.28) !important;
           overflow: hidden !important;
         }
         .create-project-modal header {
+          flex: 0 0 auto !important;
           padding: 22px 28px 18px !important;
           border-bottom: 1px solid #e2e8f0 !important;
           background: #f8fafc !important;
@@ -2697,10 +2700,13 @@ export default function Home() {
         .create-project-modal .form-grid {
           display: grid !important;
           grid-template-columns: 1fr 1fr !important;
+          align-content: start !important;
+          flex: 1 1 auto !important;
+          min-height: 0 !important;
           gap: 16px !important;
           padding: 24px 28px 12px !important;
           overflow-y: auto !important;
-          max-height: calc(94vh - 166px) !important;
+          overscroll-behavior: contain !important;
         }
         .create-project-modal .field {
           display: flex !important;
@@ -2814,6 +2820,7 @@ export default function Home() {
         }
         .create-project-modal footer {
           padding: 16px 28px 22px !important;
+          flex: 0 0 auto !important;
           display: flex !important;
           align-items: center !important;
           justify-content: flex-end !important;
@@ -2823,6 +2830,12 @@ export default function Home() {
         }
         .create-footer-note { margin-right: auto !important; color: #668079 !important; font-size: 10px !important; font-weight: 600 !important; }
         @media (max-width: 640px) {
+          .create-project-modal header { padding: 16px 18px 12px !important; }
+          .create-project-modal .form-grid { padding: 16px 18px 12px !important; }
+          .create-project-modal footer { padding: 12px 18px calc(12px + env(safe-area-inset-bottom)) !important; flex-wrap: wrap !important; }
+          .create-footer-note { flex-basis: 100% !important; margin-right: 0 !important; }
+          .create-project-modal footer .secondary-button,
+          .create-project-modal footer .primary-button { flex: 1 1 0 !important; white-space: nowrap !important; }
           .create-stepper > div { padding: 9px 7px !important; }
           .create-stepper > div span { display: none !important; }
           .create-stepper > div { justify-content: center !important; }
@@ -5040,7 +5053,7 @@ export default function Home() {
             {formError && <div className="form-error" role="alert">{formError}</div>}
 
             <footer>
-              <div className="create-footer-note">{createStep === 3 && !xmlData ? `${parameterPreview.tasks.length + milestonePreview.markerTasks.length + milestonePreview.supplementalTasks.length} task · ${milestonePreview.scheduledTaskCount} task được gợi ý ngày` : createStep === 3 && xmlData ? `Ưu tiên ${xmlData.customTasks.length} task từ tệp XML` : ""}</div>
+              {createStep === 3 && <div className="create-footer-note">{xmlData ? `Ưu tiên ${xmlData.customTasks.length} task từ tệp XML` : `${parameterPreview.tasks.length + milestonePreview.markerTasks.length + milestonePreview.supplementalTasks.length} task · ${milestonePreview.datedLeafCount} task có lịch mẫu`}</div>}
               {createStep === 1 ? <button type="button" className="secondary-button" onClick={() => setShowCreate(false)}>Hủy</button> : <button type="button" className="secondary-button" onClick={() => { setFormError(""); setCreateStep((createStep - 1) as 1 | 2); }}>Quay lại</button>}
               {createStep < 3 ? <button className="primary-button" type="button" onClick={continueCreateProject}>Tiếp tục</button> : <button className="primary-button" type="submit" style={{ background: "#73b52d", borderColor: "#64a024" }}>Tạo Master Timeline</button>}
             </footer>
