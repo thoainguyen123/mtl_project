@@ -934,7 +934,7 @@ export default function Home() {
   const [overviewProject, setOverviewProject] = useState("all");
   const [overviewGroup, setOverviewGroup] = useState("all");
   const [showCreate, setShowCreate] = useState(false);
-  const [createStep, setCreateStep] = useState<1 | 2 | 3>(1);
+  const [createStep, setCreateStep] = useState<1 | 2>(1);
   const [showTaskModal, setShowTaskModal] = useState(false);
   const [insertAnchor, setInsertAnchor] = useState<TemplateTask | null>(null);
   const [showDelete, setShowDelete] = useState(false);
@@ -1481,27 +1481,21 @@ export default function Home() {
 
   const continueCreateProject = () => {
     setFormError("");
-    if (createStep === 1) {
-      if (!form.name.trim() || !form.code.trim()) return setFormError("Vui lòng nhập tên và mã dự án.");
-      if (!form.region?.trim()) return setFormError("Vui lòng khai báo vùng quản lý.");
-      setCreateStep(2);
-      return;
-    }
-    if (createStep === 2) {
-      const { dienTichDat, gfa, soPhanKy, soThapBlock, soCanThapTang, soTangNoi, loaiHinhDuAn } = form.parameters;
-      const constructionScale = loaiHinhDuAn === "Thấp tầng/Biệt thự" ? soCanThapTang : soThapBlock;
-      const values = loaiHinhDuAn === "Thấp tầng/Biệt thự" ? [dienTichDat, gfa, soPhanKy, constructionScale] : [dienTichDat, gfa, soPhanKy, constructionScale, soTangNoi];
-      if (values.some((value) => !Number.isFinite(value) || value <= 0)) {
-        return setFormError("Quy mô và số lượng công trình phải lớn hơn 0.");
-      }
-      setCreateStep(3);
-    }
+    if (!form.name.trim() || !form.code.trim()) return setFormError("Vui lòng nhập tên và mã dự án.");
+    if (!form.region?.trim()) return setFormError("Vui lòng khai báo vùng quản lý.");
+    setCreateStep(2);
   };
 
   const createProject = (event: FormEvent) => {
     event.preventDefault();
+    if (createStep === 1) return continueCreateProject();
+    setFormError("");
     if (!form.name.trim() || !form.code.trim()) return setFormError("Vui lòng nhập tên và mã dự án.");
     if (!form.region?.trim() || !form.type.trim()) return setFormError("Vui lòng khai báo vùng quản lý và loại hình dự án.");
+    const { dienTichDat, gfa, soPhanKy, soThapBlock, soCanThapTang, soTangNoi, loaiHinhDuAn } = form.parameters;
+    const constructionScale = loaiHinhDuAn === "Thấp tầng/Biệt thự" ? soCanThapTang : soThapBlock;
+    const values = loaiHinhDuAn === "Thấp tầng/Biệt thự" ? [dienTichDat, gfa, soPhanKy, constructionScale] : [dienTichDat, gfa, soPhanKy, constructionScale, soTangNoi];
+    if (values.some((value) => !Number.isFinite(value) || value <= 0)) return setFormError("Quy mô và số lượng công trình phải lớn hơn 0.");
     
     let project: Project;
     if (xmlData) {
@@ -2738,7 +2732,7 @@ export default function Home() {
         .create-guide b { width: 22px !important; height: 22px !important; flex: none !important; display: grid !important; place-items: center !important; border-radius: 50% !important; background: #167461 !important; color: #fff !important; font-size: 10px !important; }
         .create-stepper {
           display: grid !important;
-          grid-template-columns: repeat(3, 1fr) !important;
+          grid-template-columns: repeat(2, 1fr) !important;
           gap: 0 !important;
           border: 1px solid #dce7e4 !important;
           border-radius: 10px !important;
@@ -4845,18 +4839,17 @@ export default function Home() {
             <header>
               <div>
                 <span>TẠO MASTER TIMELINE</span>
-                <h2>{createStep === 1 ? "Khai báo thông tin dự án" : createStep === 2 ? "Thiết lập tham số sinh task" : "Kiểm tra cây công việc"}</h2>
-                <p style={{ margin: "5px 0 0", color: "#71848e", fontSize: "11px" }}>Bước {createStep}/3 · Tham số chỉ áp dụng khi khởi tạo cây WBS ban đầu.</p>
+                <h2>{createStep === 1 ? "Khai báo thông tin dự án" : "Cấu hình và khởi tạo"}</h2>
+                <p style={{ margin: "5px 0 0", color: "#71848e", fontSize: "11px" }}>Bước {createStep}/2 · Cấu hình chỉ áp dụng khi khởi tạo cây WBS ban đầu.</p>
               </div>
               <button type="button" onClick={() => setShowCreate(false)}>Đóng</button>
             </header>
 
             <div className="form-grid">
-              <div className="create-stepper field-wide" aria-label={`Bước ${createStep} trên 3`}>
+              <div className="create-stepper field-wide" aria-label={`Bước ${createStep} trên 2`}>
                 {[
                   [1, "Thông tin dự án"],
-                  [2, "Tham số sinh task"],
-                  [3, "Kiểm tra & khởi tạo"],
+                  [2, "Cấu hình và khởi tạo"],
                 ].map(([step, label]) => (
                   <div key={step} className={createStep >= Number(step) ? "active" : ""}>
                     <b>{step}</b><span>{label}</span>
@@ -4987,9 +4980,6 @@ export default function Home() {
                     <small>{milestone.mappedCode ? `Neo WBS ${milestone.mappedCode}` : "Mốc tổng hợp · không thay mốc bắt đầu bàn giao"}</small>
                   </label>;
                 })}
-              </>}
-
-              {createStep === 3 && <>
               <div className="create-section-title">Kết quả sinh task dự kiến</div>
               <div className="parameter-summary field-wide">
                 <div><b>{parameterPreview.tasks.length}</b><span>Task sau khởi tạo</span></div>
@@ -5053,9 +5043,9 @@ export default function Home() {
             {formError && <div className="form-error" role="alert">{formError}</div>}
 
             <footer>
-              {createStep === 3 && <div className="create-footer-note">{xmlData ? `Ưu tiên ${xmlData.customTasks.length} task từ tệp XML` : `${parameterPreview.tasks.length + milestonePreview.markerTasks.length + milestonePreview.supplementalTasks.length} task · ${milestonePreview.datedLeafCount} task có lịch mẫu`}</div>}
-              {createStep === 1 ? <button type="button" className="secondary-button" onClick={() => setShowCreate(false)}>Hủy</button> : <button type="button" className="secondary-button" onClick={() => { setFormError(""); setCreateStep((createStep - 1) as 1 | 2); }}>Quay lại</button>}
-              {createStep < 3 ? <button className="primary-button" type="button" onClick={continueCreateProject}>Tiếp tục</button> : <button className="primary-button" type="submit" style={{ background: "#73b52d", borderColor: "#64a024" }}>Tạo Master Timeline</button>}
+              {createStep === 2 && <div className="create-footer-note">{xmlData ? `Ưu tiên ${xmlData.customTasks.length} task từ tệp XML` : `${parameterPreview.tasks.length + milestonePreview.markerTasks.length + milestonePreview.supplementalTasks.length} task · ${milestonePreview.datedLeafCount} task có lịch mẫu`}</div>}
+              {createStep === 1 ? <button type="button" className="secondary-button" onClick={() => setShowCreate(false)}>Hủy</button> : <button type="button" className="secondary-button" onClick={() => { setFormError(""); setCreateStep(1); }}>Quay lại</button>}
+              {createStep === 1 ? <button className="primary-button" type="button" onClick={continueCreateProject}>Tiếp tục</button> : <button className="primary-button" type="submit" style={{ background: "#73b52d", borderColor: "#64a024" }}>Tạo Master Timeline</button>}
             </footer>
           </form>
         </div>
