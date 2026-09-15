@@ -16,18 +16,6 @@ type DemoAccount = {
   initials: string;
 };
 
-type ArchiveRecord = {
-  id: string;
-  projectId: string;
-  name: string;
-  documentNo: string;
-  category: string;
-  fileName: string;
-  fileSize: number;
-  uploadedAt: string;
-  uploadedBy: string;
-};
-
 type TemplateTask = {
   id: number;
   code: string;
@@ -163,7 +151,6 @@ const CATALOG_KEY = "mtl-workspace-custom-catalog-v1";
 const CATALOG_ENABLED_KEY = "mtl-workspace-enabled-catalog-v2";
 const CATALOG_WORK_TYPE_KEY = "mtl-workspace-catalog-work-type-v1";
 const SESSION_KEY = "mtl-workspace-session-v1";
-const ARCHIVE_KEY = "mtl-workspace-archive-v1";
 
 const DEMO_ACCOUNTS: DemoAccount[] = [
   { username: "pmd.01", password: "MTL@2026", name: "PMD Administrator", role: "Chủ trì lập MTL", initials: "PM" },
@@ -464,12 +451,6 @@ function formatDate(date?: string) {
 function formatDateTime(date?: string) {
   if (!date) return "—";
   return new Intl.DateTimeFormat("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" }).format(new Date(date));
-}
-
-function formatFileSize(bytes: number) {
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`;
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
 function taskStatusClass(status: NonNullable<TaskEdit["status"]>) {
@@ -935,11 +916,8 @@ export default function Home() {
   const [loginPassword, setLoginPassword] = useState("");
   const [showLoginPassword, setShowLoginPassword] = useState(false);
   const [loginError, setLoginError] = useState("");
-  const [archiveRecords, setArchiveRecords] = useState<ArchiveRecord[]>([]);
-  const [archiveFile, setArchiveFile] = useState<File | null>(null);
-  const [archiveForm, setArchiveForm] = useState({ projectId: "", name: "", documentNo: "", category: "Pháp lý" });
   const [hydrated, setHydrated] = useState(false);
-  const [view, setView] = useState<"overview" | "projects" | "workspace" | "departments" | "gmd" | "gms" | "confirm_approval" | "approved_projects" | "catalog" | "archive" | "design_task" | "fs_ver2">("projects");
+  const [view, setView] = useState<"overview" | "projects" | "workspace" | "departments" | "gmd" | "gms" | "confirm_approval" | "approved_projects" | "catalog" | "design_task" | "fs_ver2">("projects");
   const [lapMtlOpen, setLapMtlOpen] = useState(true);
   const [designTaskOpen, setDesignTaskOpen] = useState(false);
   const [fsVer2Open, setFsVer2Open] = useState(false);
@@ -1056,16 +1034,13 @@ export default function Home() {
         const savedCustomCatalog = JSON.parse(localStorage.getItem(CATALOG_KEY) ?? "[]") as TemplateTask[];
         const savedEnabledCodes = localStorage.getItem(CATALOG_ENABLED_KEY);
         const savedWorkTypeEdits = JSON.parse(localStorage.getItem(CATALOG_WORK_TYPE_KEY) ?? "{}") as Record<string, WorkType>;
-        const savedArchiveRecords = JSON.parse(localStorage.getItem(ARCHIVE_KEY) ?? "[]") as ArchiveRecord[];
         const savedUsername = localStorage.getItem(SESSION_KEY) ?? "";
         const initialList = (saved && saved.length > 0) ? saved : DEFAULT_INITIAL_PROJECTS;
         const normalized = initialList.map(normalizeProject);
         setProjects(normalized);
         setCustomCatalog(savedCustomCatalog);
         setCatalogWorkTypeEdits(savedWorkTypeEdits);
-        setArchiveRecords(savedArchiveRecords);
         setCurrentAccount(DEMO_ACCOUNTS.find((account) => account.username === savedUsername) ?? null);
-        setArchiveForm((current) => ({ ...current, projectId: normalized[0]?.id ?? "" }));
         const catalogCodes = new Set([...TEMPLATE, ...savedCustomCatalog].map((task) => task.code));
         setEnabledCatalogCodes(new Set(savedEnabledCodes ? (JSON.parse(savedEnabledCodes) as string[]).filter((code) => catalogCodes.has(code)) : [...catalogCodes]));
         setActiveId(localStorage.getItem(ACTIVE_KEY) ?? normalized[0]?.id ?? "");
@@ -1074,7 +1049,6 @@ export default function Home() {
         setProjects(normalized);
         setCustomCatalog([]);
         setCatalogWorkTypeEdits({});
-        setArchiveRecords([]);
         setCurrentAccount(null);
         setEnabledCatalogCodes(new Set(TEMPLATE.map((task) => task.code)));
       }
@@ -1089,9 +1063,8 @@ export default function Home() {
     localStorage.setItem(CATALOG_KEY, JSON.stringify(customCatalog));
     localStorage.setItem(CATALOG_ENABLED_KEY, JSON.stringify([...enabledCatalogCodes]));
     localStorage.setItem(CATALOG_WORK_TYPE_KEY, JSON.stringify(catalogWorkTypeEdits));
-    localStorage.setItem(ARCHIVE_KEY, JSON.stringify(archiveRecords));
     if (activeId) localStorage.setItem(ACTIVE_KEY, activeId);
-  }, [projects, activeId, customCatalog, enabledCatalogCodes, catalogWorkTypeEdits, archiveRecords, hydrated]);
+  }, [projects, activeId, customCatalog, enabledCatalogCodes, catalogWorkTypeEdits, hydrated]);
 
   useEffect(() => {
     const closeMenu = () => setContextMenu(null);
@@ -1449,27 +1422,6 @@ export default function Home() {
     setCurrentAccount(null);
     setLoginPassword("");
     setLoginError("");
-  };
-
-  const addArchiveRecord = (event: FormEvent) => {
-    event.preventDefault();
-    if (!archiveForm.projectId || !archiveForm.name.trim() || !archiveForm.documentNo.trim()) return notify("Vui lòng khai báo dự án, tên và số hiệu hồ sơ");
-    if (!archiveFile) return notify("Vui lòng chọn tệp hồ sơ");
-    const record: ArchiveRecord = {
-      id: crypto.randomUUID(),
-      projectId: archiveForm.projectId,
-      name: archiveForm.name.trim(),
-      documentNo: archiveForm.documentNo.trim().toUpperCase(),
-      category: archiveForm.category,
-      fileName: archiveFile.name,
-      fileSize: archiveFile.size,
-      uploadedAt: new Date().toISOString(),
-      uploadedBy: currentAccount?.name ?? "Người dùng",
-    };
-    setArchiveRecords((current) => [record, ...current]);
-    setArchiveForm((current) => ({ ...current, name: "", documentNo: "" }));
-    setArchiveFile(null);
-    notify(`Đã lưu hồ sơ ${record.documentNo}`);
   };
 
   const openCreate = () => {
@@ -3038,10 +2990,6 @@ export default function Home() {
                 <IconList />
                 <span>Danh mục WBS</span>
               </button>
-              <button className={view === "archive" ? "active" : ""} onClick={() => setView("archive")} tabIndex={lapMtlSectionOpen ? 0 : -1}>
-                <IconFileCheck />
-                <span>Lưu trữ hồ sơ</span>
-              </button>
             </nav>
           </>;
         })()}
@@ -3774,35 +3722,6 @@ export default function Home() {
                 </div>
               )}
             </section>
-          </>
-        ) : view === "archive" ? (
-          <>
-            <header className="topbar">
-              <div className="breadcrumbs"><span>Lập Master timeline</span><i>/</i><strong>Lưu trữ hồ sơ</strong></div>
-              <div className="top-actions"><UserBadge /></div>
-            </header>
-            <div style={{ minHeight: 0, flex: 1, overflow: "auto", padding: "24px", background: "#f5f7f9" }}>
-              <section style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "24px", marginBottom: "18px" }}>
-                <div><span className="status-badge">KHO HỒ SƠ MTL</span><h1 style={{ margin: "10px 0 6px", fontSize: "25px", color: "#173f52" }}>Lưu trữ hồ sơ dự án</h1><p style={{ margin: 0, color: "#71848e", fontSize: "12px" }}>Khai báo và tra cứu hồ sơ theo từng dự án Master Timeline.</p></div>
-                <div style={{ minWidth: "150px", padding: "14px 18px", border: "1px solid #dce5e9", borderRadius: "10px", background: "#fff" }}><b style={{ display: "block", fontSize: "24px", color: "#173f52" }}>{archiveRecords.length}</b><span style={{ color: "#7a8d96", fontSize: "10px", fontWeight: 700 }}>HỒ SƠ ĐÃ LƯU</span></div>
-              </section>
-              <form onSubmit={addArchiveRecord} style={{ display: "grid", gridTemplateColumns: "1.2fr 1.2fr 1fr 1fr", gap: "12px", padding: "18px", border: "1px solid #dce5e9", borderRadius: "12px", background: "#fff", boxShadow: "0 1px 3px #0000000a" }}>
-                <label className="field" style={{ margin: 0 }}><span>Dự án *</span><select value={archiveForm.projectId} onChange={(event) => setArchiveForm({ ...archiveForm, projectId: event.target.value })}><option value="">Chọn dự án</option>{projects.map((project) => <option key={project.id} value={project.id}>{project.code} · {project.name}</option>)}</select></label>
-                <label className="field" style={{ margin: 0 }}><span>Tên hồ sơ *</span><input value={archiveForm.name} onChange={(event) => setArchiveForm({ ...archiveForm, name: event.target.value })} placeholder="Ví dụ: Quyết định phê duyệt MTL" /></label>
-                <label className="field" style={{ margin: 0 }}><span>Số hiệu *</span><input value={archiveForm.documentNo} onChange={(event) => setArchiveForm({ ...archiveForm, documentNo: event.target.value })} placeholder="QĐ-001/2026" /></label>
-                <label className="field" style={{ margin: 0 }}><span>Loại hồ sơ</span><select value={archiveForm.category} onChange={(event) => setArchiveForm({ ...archiveForm, category: event.target.value })}><option>Pháp lý</option><option>Phê duyệt MTL</option><option>Biên bản họp</option><option>Báo cáo</option><option>Hồ sơ thiết kế</option><option>Khác</option></select></label>
-                <label className="field" style={{ margin: 0, gridColumn: "1 / -2" }}><span>Tệp hồ sơ *</span><input key={archiveFile?.name ?? "empty-file"} type="file" onChange={(event) => setArchiveFile(event.target.files?.[0] ?? null)} /></label>
-                <button className="primary-button" type="submit" style={{ alignSelf: "end", height: "42px" }}>+ Lưu hồ sơ</button>
-              </form>
-              <section style={{ marginTop: "16px", border: "1px solid #dce5e9", borderRadius: "12px", overflow: "hidden", background: "#fff" }}>
-                <div style={{ display: "grid", gridTemplateColumns: "130px minmax(260px,1.5fr) 140px minmax(190px,1fr) 150px 150px 70px", gap: "12px", padding: "12px 16px", background: "#eef3f5", color: "#627781", fontSize: "10px", fontWeight: 800 }}><span>DỰ ÁN</span><span>HỒ SƠ</span><span>LOẠI</span><span>TỆP</span><span>NGƯỜI LƯU</span><span>THỜI ĐIỂM</span><span></span></div>
-                {archiveRecords.map((record) => {
-                  const project = projects.find((item) => item.id === record.projectId);
-                  return <div key={record.id} style={{ display: "grid", gridTemplateColumns: "130px minmax(260px,1.5fr) 140px minmax(190px,1fr) 150px 150px 70px", alignItems: "center", gap: "12px", padding: "13px 16px", borderTop: "1px solid #edf1f3", color: "#334155", fontSize: "12px" }}><span><b>{project?.code ?? "Dự án đã xóa"}</b></span><span><b style={{ display: "block", color: "#173f52" }}>{record.name}</b><small style={{ color: "#7a8c95" }}>{record.documentNo}</small></span><span>{record.category}</span><span title={record.fileName}><b style={{ display: "block", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{record.fileName}</b><small style={{ color: "#7a8c95" }}>{formatFileSize(record.fileSize)}</small></span><span>{record.uploadedBy}</span><span>{formatDateTime(record.uploadedAt)}</span><span><button type="button" className="danger-button" onClick={() => setArchiveRecords((current) => current.filter((item) => item.id !== record.id))}>Xóa</button></span></div>;
-                })}
-                {!archiveRecords.length && <div className="no-results"><b>Chưa có hồ sơ nào</b><p>Chọn dự án và khai báo hồ sơ ở biểu mẫu phía trên.</p></div>}
-              </section>
-            </div>
           </>
         ) : view === "departments" ? (
           <>
