@@ -2753,34 +2753,23 @@ export default function Home() {
         .create-tabs > div.active b { background: #ffffff !important; color: #4f8a1c !important; }
         .create-tabs > div.done { background: #f1f8ea !important; border-color: #cfe5b8 !important; color: #4f8a1c !important; }
         .create-tabs > div.done b { background: #73b52d !important; color: #ffffff !important; }
-        .parameter-intro { padding: 11px 13px !important; border-left: 3px solid #168c72 !important; border-radius: 5px !important; background: #f1faf7 !important; color: #45645d !important; font-size: 11px !important; line-height: 1.55 !important; }
         .parameter-pair { display: grid !important; grid-template-columns: 1fr 1fr !important; gap: 16px !important; }
         .input-with-unit { display: grid !important; grid-template-columns: 1fr 76px !important; gap: 7px !important; }
-        .create-project-modal .field > span small { margin-left: 6px !important; padding: 2px 5px !important; border-radius: 4px !important; background: #eef4f2 !important; color: #608078 !important; font-size: 8px !important; letter-spacing: .35px !important; }
         .parameter-summary { display: grid !important; grid-template-columns: repeat(4, 1fr) !important; gap: 9px !important; }
         .parameter-summary > div { padding: 13px !important; border: 1px solid #dce7e4 !important; border-radius: 9px !important; background: #f8fbfa !important; }
         .parameter-summary b { display: block !important; color: #167461 !important; font-size: 21px !important; }
         .parameter-summary span { color: #6c807b !important; font-size: 9.5px !important; }
         .impact-list { display: grid !important; gap: 7px !important; max-height: 260px !important; overflow-y: auto !important; padding-right: 3px !important; }
-        .impact-list article { display: grid !important; grid-template-columns: minmax(165px, .8fr) 1.5fr 58px !important; align-items: center !important; gap: 12px !important; padding: 9px 11px !important; border: 1px solid #e3ebe9 !important; border-radius: 8px !important; }
-        .impact-list article div b, .impact-list article div small { display: block !important; }
+        .impact-list article { display: grid !important; grid-template-columns: minmax(0, 1fr) 58px !important; align-items: center !important; gap: 12px !important; padding: 9px 11px !important; border: 1px solid #e3ebe9 !important; border-radius: 8px !important; }
+        .impact-list article div b { display: block !important; }
         .impact-list article div b { color: #233f38 !important; font-size: 10.5px !important; }
-        .impact-list article div small { margin-top: 2px !important; color: #8a9b97 !important; font-size: 7.5px !important; }
-        .impact-list article p { margin: 0 !important; color: #5f7470 !important; font-size: 9.5px !important; line-height: 1.4 !important; }
         .impact-list article > span { justify-self: end !important; padding: 4px 6px !important; border-radius: 10px !important; background: #eef8f5 !important; color: #167461 !important; font-size: 8.5px !important; font-weight: 800 !important; }
         .milestone-intro { padding: 11px 13px !important; border: 1px solid #cce5dc !important; border-radius: 8px !important; background: #f3faf7 !important; color: #3a6559 !important; font-size: 10.5px !important; line-height: 1.5 !important; }
         .milestone-input-list { display: grid !important; grid-template-columns: 1fr 1fr !important; gap: 10px !important; }
-        .milestone-input-list > h3 { grid-column: 1 / -1 !important; margin: 8px 0 0 !important; padding-bottom: 5px !important; border-bottom: 1px solid #dce9e4 !important; color: #167461 !important; font-size: 10px !important; text-transform: uppercase !important; letter-spacing: .5px !important; }
-        .milestone-input-list label { display: grid !important; gap: 5px !important; padding: 10px !important; border: 1px solid #e4ece8 !important; border-radius: 8px !important; background: #fff !important; }
-        .milestone-input-list label span { display: flex !important; justify-content: space-between !important; gap: 6px !important; color: #314d44 !important; font-size: 10.5px !important; font-weight: 700 !important; }
-        .milestone-input-list label small { color: #869992 !important; font-size: 8px !important; }
-        .milestone-input-list label input { width: 100% !important; height: 38px !important; padding: 0 10px !important; border: 1px solid #cbd5e1 !important; border-radius: 7px !important; color: #0f172a !important; }
         .milestone-preview-card { display: flex !important; align-items: center !important; justify-content: space-between !important; gap: 12px !important; padding: 10px !important; border: 1px solid #dce9e4 !important; border-radius: 8px !important; background: #fff !important; }
-        .milestone-preview-card span { display: grid !important; gap: 3px !important; color: #314d44 !important; font-size: 10.5px !important; }
-        .milestone-preview-card small { color: #869992 !important; font-size: 8px !important; }
+        .milestone-preview-card span { display: flex !important; align-items: center !important; flex-wrap: wrap !important; min-width: 0 !important; gap: 7px !important; color: #314d44 !important; font-size: 10.5px !important; }
+        .milestone-preview-card em { white-space: nowrap !important; color: #6c807b !important; font-size: 8px !important; font-style: normal !important; }
         .milestone-preview-card strong { white-space: nowrap !important; color: #167461 !important; font-size: 11px !important; }
-        .milestone-result { padding: 10px 12px !important; border-radius: 8px !important; background: #eaf7f3 !important; color: #166456 !important; font-size: 11px !important; font-weight: 700 !important; }
-        .milestone-warning { padding: 9px 11px !important; border: 1px solid #f2d4a1 !important; border-radius: 7px !important; background: #fff8ec !important; color: #815c20 !important; font-size: 10px !important; }
         .create-section-title {
           grid-column: 1 / -1 !important;
           margin: 2px 0 -5px !important;
@@ -2831,13 +2820,11 @@ export default function Home() {
           border-top: 1px solid #f1f5f9 !important;
           background: #ffffff !important;
         }
-        .create-footer-note { margin-right: auto !important; color: #668079 !important; font-size: 10px !important; font-weight: 600 !important; }
         @media (max-width: 640px) {
           .create-project-modal header { padding: 16px 18px 12px !important; }
           .create-project-modal .form-grid { padding: 16px 18px 12px !important; }
           .create-project-modal .create-slide { grid-template-columns: minmax(0, 1fr) !important; }
           .create-project-modal footer { padding: 12px 18px calc(12px + env(safe-area-inset-bottom)) !important; flex-wrap: wrap !important; }
-          .create-footer-note { flex-basis: 100% !important; margin-right: 0 !important; }
           .create-project-modal footer .secondary-button,
           .create-project-modal footer .primary-button { display: inline-flex !important; align-items: center !important; justify-content: center !important; flex: 1 1 0 !important; white-space: nowrap !important; }
           .create-tabs { margin-right: 10px !important; gap: 6px !important; }
@@ -2845,7 +2832,6 @@ export default function Home() {
           .parameter-pair, .parameter-summary { grid-template-columns: 1fr 1fr !important; }
           .milestone-input-list { grid-template-columns: 1fr !important; }
           .impact-list article { grid-template-columns: 1fr 54px !important; }
-          .impact-list article p { grid-column: 1 / -1 !important; grid-row: 2 !important; }
         }
         /* ================= 7-COLUMN MASTER TIMELINE TASK GRID ================= */
         .task-grid {
@@ -4976,9 +4962,8 @@ export default function Home() {
               <div className="create-section-title">Nguồn dữ liệu khởi tạo thay thế</div>
               <div className="field field-wide">
                 <div className="file-upload-box">
-                  <span style={{ fontSize: "12px", fontWeight: 700, color: "#334155" }}>Tải Master Timeline từ Microsoft Project (.xml) — không bắt buộc</span>
+                  <span style={{ fontSize: "12px", fontWeight: 700, color: "#334155" }}>Tải Master Timeline từ Microsoft Project (.xml) — không bắt buộc {xmlData && <em style={{ color: "#167461", fontStyle: "normal" }}>· ✓ {xmlData.customTasks.length} công việc</em>}</span>
                   <input type="file" accept=".xml" onChange={handleXMLUpload} className="file-input-styled" />
-                  {xmlData && <small style={{ color: "#167461", fontWeight: 700 }}>✓ Tìm thấy {xmlData.customTasks.length} công việc trong tệp.</small>}
                 </div>
               </div>
               <div className="create-section-title">Kết quả sinh task dự kiến</div>
@@ -4989,23 +4974,21 @@ export default function Home() {
                 <div><b>{parameterPreview.recalculatedTaskCount}</b><span>Duration tính lại</span></div>
               </div>
               <div className="impact-list field-wide">
-                {parameterPreview.impacts.map((impact) => <article key={impact.parameter}><div><b>{impact.title}</b></div><p>{impact.detail}</p><span>{impact.affectedTasks} task</span></article>)}
+                {parameterPreview.impacts.map((impact) => <article key={impact.parameter} title={impact.detail}><div><b>{impact.title}</b></div><span>{impact.affectedTasks} task</span></article>)}
               </div>
               <div className="create-section-title">Tiến độ mẫu từ 5 mốc chính</div>
               <div className="milestone-input-list field-wide">
                 {CORE_MILESTONE_CODES.map((code) => {
                   const milestone = KEY_MILESTONES.find((item) => item.code === code)!;
-                  return <div className="milestone-preview-card" key={code}><span><b>{milestone.name}</b><small>{milestonePreview.milestoneSources[code] === "manual" ? "Đã nhập" : "Giả định"}</small></span><strong>{formatDate(milestonePreview.milestoneDates[code])}</strong></div>;
+                  return <div className="milestone-preview-card" key={code}><span><b>{milestone.name}</b><em>{milestonePreview.milestoneSources[code] === "manual" ? "Đã nhập" : "Giả định"}</em></span><strong>{formatDate(milestonePreview.milestoneDates[code])}</strong></div>;
                 })}
               </div>
-              <div className="milestone-result field-wide">{xmlData ? "Tệp XML giữ nguyên ngày task; 5 mốc chỉ lưu tham chiếu." : `Đã xếp ngày cho ${milestonePreview.datedLeafCount} task thực thi · ${Object.values(milestonePreview.milestoneSources).filter((source) => source === "assumed").length} mốc được giả định.`}</div>
               </section>}
             </div>
 
             {formError && <div className="form-error" role="alert">{formError}</div>}
 
             <footer>
-              {createStep === 2 && <div className="create-footer-note">{xmlData ? `Ưu tiên ${xmlData.customTasks.length} task từ tệp XML` : `${parameterPreview.tasks.length + milestonePreview.markerTasks.length + milestonePreview.supplementalTasks.length} task · ${milestonePreview.datedLeafCount} task có lịch mẫu`}</div>}
               {createStep === 1 ? <button key="cancel" type="button" className="secondary-button" onClick={() => setShowCreate(false)}>Hủy</button> : <button key="back" type="button" className="secondary-button" onClick={() => { setFormError(""); setCreateStep(1); }}>Quay lại</button>}
               {/* key riêng để React không tái sử dụng nút "Tiếp tục" thành nút submit ngay trong cùng cú click. */}
               {createStep === 1 ? <button key="continue" className="primary-button" type="button" onClick={(event) => { event.preventDefault(); continueCreateProject(); }}>Tiếp tục</button> : <button key="submit" className="primary-button" type="submit" style={{ background: "#73b52d", borderColor: "#64a024" }}>Tạo Master Timeline</button>}
