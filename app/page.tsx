@@ -4586,7 +4586,7 @@ export default function Home() {
                 <div className="grid-header" style={{ gridTemplateColumns: "150px minmax(280px, 2.5fr) 130px 120px 120px minmax(140px, 1.2fr) minmax(140px, 1.2fr)" }}>
                   <span>WBS</span>
                   <span>HẠNG MỤC</span>
-                  <span>THỜI GIAN THỰC HIỆN</span>
+                  <span><span style={{ whiteSpace: "nowrap", lineHeight: 1.3 }}>THỜI GIAN<br />THỰC HIỆN</span></span>
                   <span>NGÀY BẮT ĐẦU</span>
                   <span>NGÀY KẾT THÚC</span>
                   <span>GHI CHÚ</span>
