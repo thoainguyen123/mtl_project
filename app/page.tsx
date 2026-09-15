@@ -1483,7 +1483,7 @@ export default function Home() {
     setFormError("");
     if (createStep === 1) {
       if (!form.name.trim() || !form.code.trim()) return setFormError("Vui lòng nhập tên và mã dự án.");
-      if (!form.region?.trim() || !form.location.trim()) return setFormError("Vui lòng khai báo vùng quản lý và địa điểm dự án.");
+      if (!form.region?.trim()) return setFormError("Vui lòng khai báo vùng quản lý.");
       setCreateStep(2);
       return;
     }
@@ -1501,7 +1501,7 @@ export default function Home() {
   const createProject = (event: FormEvent) => {
     event.preventDefault();
     if (!form.name.trim() || !form.code.trim()) return setFormError("Vui lòng nhập tên và mã dự án.");
-    if (!form.region?.trim() || !form.type.trim() || !form.location.trim()) return setFormError("Vui lòng khai báo vùng quản lý, loại hình và địa điểm dự án.");
+    if (!form.region?.trim() || !form.type.trim()) return setFormError("Vui lòng khai báo vùng quản lý và loại hình dự án.");
     
     let project: Project;
     if (xmlData) {
@@ -4927,9 +4927,9 @@ export default function Home() {
               </label>
 
               <label className="field field-wide">
-                <span>Địa điểm dự án *</span>
+                <span>Địa điểm dự án</span>
                 <input value={form.location} onChange={(event) => setForm({ ...form, location: event.target.value })} placeholder="Ví dụ: Biên Hòa, Đồng Nai" />
-                <small>Thời gian kế hoạch sẽ được thiết lập tại bước lập và cập nhật công việc, không khai báo tại đây.</small>
+                <small>Có thể để trống và bổ sung địa điểm sau.</small>
               </label>
 
               </>}
