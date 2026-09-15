@@ -4,6 +4,7 @@ import { FormEvent, useEffect, useMemo, useState } from "react";
 import templateData from "./mtl-template.json";
 import dependencyData from "./mtl-dependencies.json";
 import { parseMSProjectXML, type ParsedProjectData } from "./xml-parser";
+import { DEFAULT_PROJECT_PARAMETERS, generateParameterizedMTL, type ParameterImpact, type ProjectParameters } from "./mtl-parameter-engine";
 
 type WorkType = "" | "Báo cáo định kỳ" | "Tracking công việc";
 
@@ -87,6 +88,8 @@ type Project = {
   group?: string;
   startDate: string;
   targetDate: string;
+  parameters: ProjectParameters;
+  parameterImpacts: ParameterImpact[];
   selectedGroups: string[];
   createdAt: string;
   taskEdits: Record<string, TaskEdit>;
@@ -119,6 +122,7 @@ type Project = {
 
 type ProjectForm = Pick<Project, "name" | "code" | "type" | "investor" | "location" | "startDate" | "targetDate" | "area" | "region" | "group"> & {
   version?: string;
+  parameters: ProjectParameters;
 };
 
 type ScheduledTask = TemplateTask & {
@@ -238,10 +242,11 @@ const emptyForm: ProjectForm = {
   version: "v1.0",
   investor: "Tập đoàn Novaland",
   group: "Nhóm 1 (Đang nghiên cứu)",
-  type: "Khu đô thị sinh thái",
+  type: DEFAULT_PROJECT_PARAMETERS.loaiHinhDuAn,
   location: "",
   startDate: today,
   targetDate: nextYear,
+  parameters: { ...DEFAULT_PROJECT_PARAMETERS },
 };
 
 const DEFAULT_INITIAL_PROJECTS: Partial<Project>[] = [
@@ -339,8 +344,11 @@ function normalizeTaskStatus(status: unknown): NonNullable<TaskEdit["status"]> {
 
 function defaultDependenciesForCodes(codes: string[]) {
   const included = new Set(codes);
-  return DEFAULT_DEPENDENCIES.reduce<Record<string, TaskDependency[]>>((result, dependency) => {
-    if (!included.has(dependency.successorCode) || !included.has(dependency.predecessorCode)) return result;
+  return dependenciesToRecord(DEFAULT_DEPENDENCIES.filter((dependency) => included.has(dependency.successorCode) && included.has(dependency.predecessorCode)));
+}
+
+function dependenciesToRecord(dependencies: DefaultTaskDependency[]) {
+  return dependencies.reduce<Record<string, TaskDependency[]>>((result, dependency) => {
     const { successorCode, ...link } = dependency;
     result[successorCode] = [...(result[successorCode] ?? []), link];
     return result;
@@ -376,6 +384,8 @@ function normalizeProject(project: Partial<Project>): Project {
     group: project.group ?? "Nhóm 1 (Đang nghiên cứu)",
     startDate: project.startDate ?? today,
     targetDate: project.targetDate ?? nextYear,
+    parameters: { ...DEFAULT_PROJECT_PARAMETERS, ...(project.parameters ?? {}), loaiHinhDuAn: project.parameters?.loaiHinhDuAn ?? DEFAULT_PROJECT_PARAMETERS.loaiHinhDuAn },
+    parameterImpacts: project.parameterImpacts ?? [],
     selectedGroups,
     createdAt: project.createdAt ?? new Date().toISOString(),
     taskEdits,
@@ -938,6 +948,7 @@ export default function Home() {
   const [overviewProject, setOverviewProject] = useState("all");
   const [overviewGroup, setOverviewGroup] = useState("all");
   const [showCreate, setShowCreate] = useState(false);
+  const [createStep, setCreateStep] = useState<1 | 2 | 3>(1);
   const [showTaskModal, setShowTaskModal] = useState(false);
   const [insertAnchor, setInsertAnchor] = useState<TemplateTask | null>(null);
   const [showDelete, setShowDelete] = useState(false);
@@ -1363,6 +1374,11 @@ export default function Home() {
       : task)
     .sort((a, b) => (GROUP_ORDER[a.groupCode] ?? 99) - (GROUP_ORDER[b.groupCode] ?? 99) || a.code.localeCompare(b.code, undefined, { numeric: true })), [customCatalog, catalogWorkTypeEdits]);
   const enabledCatalogCount = useMemo(() => fullCatalog.filter((task) => enabledCatalogCodes.has(task.code)).length, [fullCatalog, enabledCatalogCodes]);
+  const parameterPreview = useMemo(() => generateParameterizedMTL(
+    fullCatalog.filter((task) => enabledCatalogCodes.has(task.code)),
+    DEFAULT_DEPENDENCIES,
+    form.parameters,
+  ), [fullCatalog, enabledCatalogCodes, form.parameters]);
   const catalogWorkGroupCodes = useMemo(() => {
     if (catalogWorkGroupFilter === "all") return null;
     const tasksByCode = new Map(fullCatalog.map((task) => [task.code, task]));
@@ -1459,6 +1475,7 @@ export default function Home() {
   const openCreate = () => {
     setForm(emptyForm);
     setFormError("");
+    setCreateStep(1);
     setShowCreate(true);
   };
 
@@ -1486,6 +1503,27 @@ export default function Home() {
     setShowTaskModal(true);
   };
 
+  const updateProjectParameter = <Key extends keyof ProjectParameters>(key: Key, value: ProjectParameters[Key]) => {
+    setForm((current) => ({ ...current, parameters: { ...current.parameters, [key]: value } }));
+  };
+
+  const continueCreateProject = () => {
+    setFormError("");
+    if (createStep === 1) {
+      if (!form.name.trim() || !form.code.trim()) return setFormError("Vui lòng nhập tên và mã dự án.");
+      if (!form.region?.trim() || !form.location.trim()) return setFormError("Vui lòng khai báo vùng quản lý và địa điểm dự án.");
+      setCreateStep(2);
+      return;
+    }
+    if (createStep === 2) {
+      const { dienTichDat, gfa, soPhanKy, soThapBlock, soTangNoi } = form.parameters;
+      if ([dienTichDat, gfa, soPhanKy, soThapBlock, soTangNoi].some((value) => !Number.isFinite(value) || value <= 0)) {
+        return setFormError("Quy mô, số phân kỳ, số tháp và số tầng nổi phải lớn hơn 0.");
+      }
+      setCreateStep(3);
+    }
+  };
+
   const createProject = (event: FormEvent) => {
     event.preventDefault();
     if (!form.name.trim() || !form.code.trim()) return setFormError("Vui lòng nhập tên và mã dự án.");
@@ -1508,11 +1546,17 @@ export default function Home() {
         includedTaskCodes: xmlData.customTasks.map((t) => t.code),
         departmentApprovals: normalizeDepartmentApprovals(selectedGroups),
         approvalStatus: "draft",
+        parameterImpacts: [{
+          parameter: "XML_IMPORT",
+          title: "Khởi tạo từ Microsoft Project",
+          detail: "Tệp XML được ưu tiên làm nguồn task; 11 tham số được lưu để tham chiếu và điều chỉnh các lần sinh lại sau.",
+          affectedTasks: xmlData.customTasks.length,
+        }],
       };
     } else {
-      const enabledTasks = fullCatalog.filter((task) => enabledCatalogCodes.has(task.code));
-      if (!enabledTasks.length) return setFormError("Danh mục chưa có công việc nào được bật Tự động sinh.");
-      const selectedGroups = [...new Set(enabledTasks.map((task) => task.groupCode))];
+      const generatedTasks = parameterPreview.tasks as TemplateTask[];
+      if (!generatedTasks.length) return setFormError("Danh mục chưa có công việc nào được bật Tự động sinh.");
+      const selectedGroups = [...new Set(generatedTasks.map((task) => task.groupCode))];
       project = {
         ...form,
         id: crypto.randomUUID(),
@@ -1520,13 +1564,14 @@ export default function Home() {
         code: form.code.trim().toUpperCase(),
         officialVersion: form.version?.trim() || "v1.0",
         createdAt: new Date().toISOString(),
-        taskEdits: {},
-        taskDependencies: defaultDependenciesForCodes(enabledTasks.map((task) => task.code)),
+        taskEdits: parameterPreview.taskEdits as Record<string, TaskEdit>,
+        taskDependencies: dependenciesToRecord(parameterPreview.dependencies),
         selectedGroups,
-        customTasks: customCatalog.filter((task) => enabledCatalogCodes.has(task.code)),
-        includedTaskCodes: enabledTasks.map((task) => task.code),
+        customTasks: generatedTasks.filter((task) => task.custom),
+        includedTaskCodes: generatedTasks.map((task) => task.code),
         departmentApprovals: normalizeDepartmentApprovals(selectedGroups),
         approvalStatus: "draft",
+        parameterImpacts: parameterPreview.impacts,
       };
     }
     
@@ -2672,6 +2717,8 @@ export default function Home() {
           grid-template-columns: 1fr 1fr !important;
           gap: 16px !important;
           padding: 24px 28px 12px !important;
+          overflow-y: auto !important;
+          max-height: calc(94vh - 166px) !important;
         }
         .create-project-modal .field {
           display: flex !important;
@@ -2701,6 +2748,35 @@ export default function Home() {
         }
         .create-guide div { display: flex !important; gap: 8px !important; color: #45616d !important; font-size: 10.5px !important; line-height: 1.4 !important; }
         .create-guide b { width: 22px !important; height: 22px !important; flex: none !important; display: grid !important; place-items: center !important; border-radius: 50% !important; background: #167461 !important; color: #fff !important; font-size: 10px !important; }
+        .create-stepper {
+          display: grid !important;
+          grid-template-columns: repeat(3, 1fr) !important;
+          gap: 0 !important;
+          border: 1px solid #dce7e4 !important;
+          border-radius: 10px !important;
+          background: #f8fafc !important;
+          overflow: hidden !important;
+        }
+        .create-stepper > div { display: flex !important; align-items: center !important; gap: 8px !important; padding: 11px 13px !important; color: #84939a !important; font-size: 10.5px !important; font-weight: 700 !important; border-right: 1px solid #e5ecea !important; }
+        .create-stepper > div:last-child { border-right: 0 !important; }
+        .create-stepper b { width: 23px !important; height: 23px !important; display: grid !important; place-items: center !important; flex: none !important; border-radius: 50% !important; background: #dfe7e5 !important; color: #60736e !important; }
+        .create-stepper > div.active { background: #eff9f6 !important; color: #155f51 !important; }
+        .create-stepper > div.active b { background: #167461 !important; color: #fff !important; }
+        .parameter-intro { padding: 11px 13px !important; border-left: 3px solid #168c72 !important; border-radius: 5px !important; background: #f1faf7 !important; color: #45645d !important; font-size: 11px !important; line-height: 1.55 !important; }
+        .parameter-pair { display: grid !important; grid-template-columns: 1fr 1fr !important; gap: 16px !important; }
+        .input-with-unit { display: grid !important; grid-template-columns: 1fr 76px !important; gap: 7px !important; }
+        .create-project-modal .field > span small { margin-left: 6px !important; padding: 2px 5px !important; border-radius: 4px !important; background: #eef4f2 !important; color: #608078 !important; font-size: 8px !important; letter-spacing: .35px !important; }
+        .parameter-summary { display: grid !important; grid-template-columns: repeat(4, 1fr) !important; gap: 9px !important; }
+        .parameter-summary > div { padding: 13px !important; border: 1px solid #dce7e4 !important; border-radius: 9px !important; background: #f8fbfa !important; }
+        .parameter-summary b { display: block !important; color: #167461 !important; font-size: 21px !important; }
+        .parameter-summary span { color: #6c807b !important; font-size: 9.5px !important; }
+        .impact-list { display: grid !important; gap: 7px !important; max-height: 260px !important; overflow-y: auto !important; padding-right: 3px !important; }
+        .impact-list article { display: grid !important; grid-template-columns: minmax(165px, .8fr) 1.5fr 58px !important; align-items: center !important; gap: 12px !important; padding: 9px 11px !important; border: 1px solid #e3ebe9 !important; border-radius: 8px !important; }
+        .impact-list article div b, .impact-list article div small { display: block !important; }
+        .impact-list article div b { color: #233f38 !important; font-size: 10.5px !important; }
+        .impact-list article div small { margin-top: 2px !important; color: #8a9b97 !important; font-size: 7.5px !important; }
+        .impact-list article p { margin: 0 !important; color: #5f7470 !important; font-size: 9.5px !important; line-height: 1.4 !important; }
+        .impact-list article > span { justify-self: end !important; padding: 4px 6px !important; border-radius: 10px !important; background: #eef8f5 !important; color: #167461 !important; font-size: 8.5px !important; font-weight: 800 !important; }
         .create-section-title {
           grid-column: 1 / -1 !important;
           margin: 2px 0 -5px !important;
@@ -2749,6 +2825,15 @@ export default function Home() {
           gap: 12px !important;
           border-top: 1px solid #f1f5f9 !important;
           background: #ffffff !important;
+        }
+        .create-footer-note { margin-right: auto !important; color: #668079 !important; font-size: 10px !important; font-weight: 600 !important; }
+        @media (max-width: 640px) {
+          .create-stepper > div { padding: 9px 7px !important; }
+          .create-stepper > div span { display: none !important; }
+          .create-stepper > div { justify-content: center !important; }
+          .parameter-pair, .parameter-summary { grid-template-columns: 1fr 1fr !important; }
+          .impact-list article { grid-template-columns: 1fr 54px !important; }
+          .impact-list article p { grid-column: 1 / -1 !important; grid-row: 2 !important; }
         }
         /* ================= 7-COLUMN MASTER TIMELINE TASK GRID ================= */
         .task-grid {
@@ -4784,18 +4869,25 @@ export default function Home() {
             <header>
               <div>
                 <span>TẠO MASTER TIMELINE</span>
-                <h2>Khai báo thông tin dự án</h2>
-                <p style={{ margin: "5px 0 0", color: "#71848e", fontSize: "11px" }}>Thông tin này dùng để nhận diện, phân nhóm và sinh cây WBS ban đầu.</p>
+                <h2>{createStep === 1 ? "Khai báo thông tin dự án" : createStep === 2 ? "Thiết lập tham số sinh task" : "Kiểm tra cây công việc"}</h2>
+                <p style={{ margin: "5px 0 0", color: "#71848e", fontSize: "11px" }}>Bước {createStep}/3 · Tham số chỉ áp dụng khi khởi tạo cây WBS ban đầu.</p>
               </div>
               <button type="button" onClick={() => setShowCreate(false)}>Đóng</button>
             </header>
 
             <div className="form-grid">
-              <div className="create-guide field-wide">
-                <div><b>1</b><span>Khai báo đúng tên, mã và phiên bản MTL.</span></div>
-                <div><b>2</b><span>Phân loại dự án theo vùng, nhóm và loại hình.</span></div>
-                <div><b>3</b><span>Chọn sinh từ danh mục chuẩn hoặc tải XML.</span></div>
+              <div className="create-stepper field-wide" aria-label={`Bước ${createStep} trên 3`}>
+                {[
+                  [1, "Thông tin dự án"],
+                  [2, "11 tham số sinh task"],
+                  [3, "Kiểm tra & khởi tạo"],
+                ].map(([step, label]) => (
+                  <div key={step} className={createStep >= Number(step) ? "active" : ""}>
+                    <b>{step}</b><span>{label}</span>
+                  </div>
+                ))}
               </div>
+              {createStep === 1 && <>
               <div className="create-section-title">1. Nhận diện Master Timeline</div>
               <label className="field field-wide">
                 <span>Tên dự án *</span>
@@ -4857,18 +4949,6 @@ export default function Home() {
               </label>
 
               <label className="field">
-                <span>Loại hình dự án *</span>
-                <select value={form.type} onChange={(event) => setForm({ ...form, type: event.target.value })}>
-                  <option>Khu đô thị sinh thái</option>
-                  <option>Khu phức hợp căn hộ và thương mại</option>
-                  <option>Tổ hợp du lịch nghỉ dưỡng</option>
-                  <option>Công trình cao tầng</option>
-                  <option>Hạ tầng kỹ thuật</option>
-                  <option>Khác</option>
-                </select>
-              </label>
-
-              <label className="field">
                 <span>Khu vực / Phân khu</span>
                 <input value={form.area || ""} onChange={(event) => setForm({ ...form, area: event.target.value })} placeholder="Ví dụ: Phân khu Phoenix" />
               </label>
@@ -4889,7 +4969,51 @@ export default function Home() {
                 <small>Thời gian kế hoạch sẽ được thiết lập tại bước lập và cập nhật công việc, không khai báo tại đây.</small>
               </label>
 
-              <div className="create-section-title">3. Nguồn dữ liệu khởi tạo</div>
+              </>}
+
+              {createStep === 2 && <>
+                <div className="create-section-title">11 tham số hình thành tiến độ dự án</div>
+                <div className="parameter-intro field-wide">
+                  Các giá trị dưới đây tác động trực tiếp đến cây task ban đầu: chọn nhánh WBS, nhân bản theo phân kỳ/tháp, đóng task quá khứ và tính lại thời lượng.
+                </div>
+                <label className="field field-wide">
+                  <span>1. Loại hình dự án & Sản phẩm <small>PARAM_LOAI_HINH_DA</small></span>
+                  <select value={form.parameters.loaiHinhDuAn} onChange={(event) => {
+                    const value = event.target.value as ProjectParameters["loaiHinhDuAn"];
+                    setForm((current) => ({ ...current, type: value, parameters: { ...current.parameters, loaiHinhDuAn: value } }));
+                  }}>
+                    <option>Chung cư cao tầng</option><option>Thấp tầng/Biệt thự</option><option>Khu đô thị phức hợp</option><option>Khách sạn/Nghỉ dưỡng</option>
+                  </select>
+                  <small>Chọn bộ WBS gốc tương ứng với sản phẩm dự án.</small>
+                </label>
+                <div className="parameter-pair field-wide">
+                  <label className="field"><span>2. Diện tích đất</span><div className="input-with-unit"><input type="number" min="1" value={form.parameters.dienTichDat} onChange={(event) => updateProjectParameter("dienTichDat", Number(event.target.value))} /><select value={form.parameters.donViDienTichDat} onChange={(event) => updateProjectParameter("donViDienTichDat", event.target.value as ProjectParameters["donViDienTichDat"])}><option>m²</option><option>ha</option></select></div><small>PARAM_QUY_MO_GFA_DAT</small></label>
+                  <label className="field"><span>Tổng diện tích sàn GFA (m²)</span><input type="number" min="1" step="1000" value={form.parameters.gfa} onChange={(event) => updateProjectParameter("gfa", Number(event.target.value))} /><small>Dùng tính duration thiết kế, QSB và thi công.</small></label>
+                </div>
+                <label className="field"><span>3. Số phân kỳ / Giai đoạn</span><input type="number" min="1" max="20" value={form.parameters.soPhanKy} onChange={(event) => updateProjectParameter("soPhanKy", Number(event.target.value))} /><small>Nhân bản Mở bán, Cấp phép và Bàn giao theo đợt.</small></label>
+                <label className="field"><span>4. Số Tháp / Block / Phân khu</span><input type="number" min="1" max="26" value={form.parameters.soThapBlock} onChange={(event) => updateProjectParameter("soThapBlock", Number(event.target.value))} /><small>Nhân cụm thi công và gối đầu 15 ngày/tháp.</small></label>
+                <label className="field"><span>5. Số tầng hầm</span><select value={form.parameters.soTangHam} onChange={(event) => updateProjectParameter("soTangHam", Number(event.target.value) as ProjectParameters["soTangHam"])}><option value={0}>0 hầm</option><option value={1}>1 hầm</option><option value={2}>2 hầm</option><option value={3}>3+ hầm</option></select><small>Ẩn/hiện thi công ngầm và quan trắc.</small></label>
+                <label className="field"><span>Biện pháp đào</span><select disabled={form.parameters.soTangHam === 0} value={form.parameters.bienPhapDao} onChange={(event) => updateProjectParameter("bienPhapDao", event.target.value as ProjectParameters["bienPhapDao"])}><option>Open-cut</option><option>Top-down</option></select><small>Áp dụng khi dự án có tầng hầm.</small></label>
+                <label className="field"><span>6. Số tầng nổi cao nhất</span><input type="number" min="1" max="120" value={form.parameters.soTangNoi} onChange={(event) => updateProjectParameter("soTangNoi", Number(event.target.value))} /><small>Kết cấu thân = số tầng × 6 ngày/sàn.</small></label>
+                <label className="field"><span>7. Hiện trạng đất & GPMB</span><select value={form.parameters.hienTrangDat} onChange={(event) => updateProjectParameter("hienTrangDat", event.target.value as ProjectParameters["hienTrangDat"])}><option>Đất sạch 100%</option><option>Đang đền bù GPMB</option><option>Đất nhận chuyển nhượng (M&A)</option></select><small>Đất sạch sẽ bỏ qua nhánh GPMB.</small></label>
+                <label className="field"><span>8. Mốc pháp lý ban đầu</span><select value={form.parameters.mocPhapLyDau} onChange={(event) => updateProjectParameter("mocPhapLyDau", event.target.value as ProjectParameters["mocPhapLyDau"])}><option>Chưa có 1/500</option><option>Đã duyệt 1/500</option><option>Đã duyệt TKCS</option><option>Đã có GPXD</option></select><small>Tự đóng các task pháp lý đã hoàn thành trước đó.</small></label>
+                <label className="field"><span>9. Nghĩa vụ tài chính đất</span><select value={form.parameters.nghiaVuTaiChinh} onChange={(event) => updateProjectParameter("nghiaVuTaiChinh", event.target.value as ProjectParameters["nghiaVuTaiChinh"])}><option>Đã hoàn thành tiền SDĐ</option><option>Đang thẩm định giá đất</option><option>Đất thuê hàng năm</option></select><small>Sinh nhánh định giá/nộp tiền tương ứng.</small></label>
+                <label className="field"><span>10. Mô hình triển khai thầu</span><select value={form.parameters.moHinhThau} onChange={(event) => updateProjectParameter("moHinhThau", event.target.value as ProjectParameters["moHinhThau"])}><option>Tổng thầu Design & Build</option><option>Tổng thầu Thi công</option><option>Chia nhiều gói riêng lẻ</option></select><small>Điều chỉnh chuỗi logic đấu thầu và thi công.</small></label>
+                <label className="field field-wide"><span>11. Mô hình Nhà mẫu & Sales Gallery</span><select value={form.parameters.nhaMauSales} onChange={(event) => updateProjectParameter("nhaMauSales", event.target.value as ProjectParameters["nhaMauSales"])}><option>Nhà mẫu tại công trường</option><option>Nhà mẫu bên ngoài</option><option>Căn hộ mẫu tầng thực tế</option><option>Không làm</option></select><small>Sinh chuỗi thiết kế → đấu thầu → thi công → khai trương, liên kết mốc mở bán đợt 1.</small></label>
+              </>}
+
+              {createStep === 3 && <>
+              <div className="create-section-title">Kết quả sinh task dự kiến</div>
+              <div className="parameter-summary field-wide">
+                <div><b>{parameterPreview.tasks.length}</b><span>Task sau khởi tạo</span></div>
+                <div><b>+{parameterPreview.generatedTaskCount}</b><span>Task được sinh thêm</span></div>
+                <div><b>-{parameterPreview.removedTaskCount}</b><span>Task được lược bỏ</span></div>
+                <div><b>{parameterPreview.recalculatedTaskCount}</b><span>Duration tính lại</span></div>
+              </div>
+              <div className="impact-list field-wide">
+                {parameterPreview.impacts.map((impact) => <article key={impact.parameter}><div><b>{impact.title}</b><small>{impact.parameter}</small></div><p>{impact.detail}</p><span>{impact.affectedTasks} task</span></article>)}
+              </div>
+              <div className="create-section-title">Nguồn dữ liệu khởi tạo thay thế</div>
               <div className="field field-wide">
                 <div className="file-upload-box">
                   <span style={{ fontSize: "12px", fontWeight: 700, color: "#334155" }}>
@@ -4909,25 +5033,15 @@ export default function Home() {
                   )}
                 </div>
               </div>
+              </>}
             </div>
 
             {formError && <div className="form-error" role="alert">{formError}</div>}
 
             <footer>
-              <button
-                type="button"
-                className="secondary-button"
-                onClick={() => setShowCreate(false)}
-              >
-                Hủy
-              </button>
-              <button
-                className="primary-button"
-                type="submit"
-                style={{ background: "#73b52d", borderColor: "#64a024" }}
-              >
-                Tạo Master Timeline
-              </button>
+              <div className="create-footer-note">{createStep === 3 && !xmlData ? `${parameterPreview.tasks.length} task · ${parameterPreview.dependencies.length} liên kết sẽ được khởi tạo` : createStep === 3 && xmlData ? `Ưu tiên ${xmlData.customTasks.length} task từ tệp XML` : ""}</div>
+              {createStep === 1 ? <button type="button" className="secondary-button" onClick={() => setShowCreate(false)}>Hủy</button> : <button type="button" className="secondary-button" onClick={() => { setFormError(""); setCreateStep((createStep - 1) as 1 | 2); }}>Quay lại</button>}
+              {createStep < 3 ? <button className="primary-button" type="button" onClick={continueCreateProject}>Tiếp tục</button> : <button className="primary-button" type="submit" style={{ background: "#73b52d", borderColor: "#64a024" }}>Tạo Master Timeline</button>}
             </footer>
           </form>
         </div>
