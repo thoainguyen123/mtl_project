@@ -1928,8 +1928,7 @@ export default function Home() {
       `}</style>
       <form className="login-card" onSubmit={login}>
         <img className="login-logo" src="/nova-group-logo.png" alt="Nova Group" />
-        <h1>Đăng nhập Project Management</h1>
-        <p>Sử dụng tài khoản nội bộ Novaland được cấp để truy cập hệ thống</p>
+        <h1 style={{ marginBottom: 20 }}>Đăng nhập Project Management</h1>
         <label className="login-field"><input autoFocus autoComplete="username" value={loginUsername} onChange={(event) => setLoginUsername(event.target.value)} placeholder="Tài khoản" aria-label="Tài khoản" /></label>
         <label className="login-field">
           <input type={showLoginPassword ? "text" : "password"} autoComplete="current-password" value={loginPassword} onChange={(event) => setLoginPassword(event.target.value)} placeholder="Mật khẩu" aria-label="Mật khẩu" />
