@@ -1594,7 +1594,7 @@ export default function Home() {
     }
     setShowTaskModal(false);
     setInsertAnchor(null);
-    notify(taskForm.addToCurrent && activeProject ? "Đã thêm task vào danh mục và dự án hiện tại" : "Đã thêm task vào danh mục WBS");
+    notify(taskForm.addToCurrent && activeProject ? "Đã thêm task vào danh mục và dự án hiện tại" : "Đã thêm task vào Cấu trúc Master Timeline");
   };
 
   const removeCatalogTask = (code: string) => {
@@ -3069,7 +3069,7 @@ export default function Home() {
               </button>
               <button className={view === "catalog" ? "active" : ""} onClick={() => setView("catalog")} tabIndex={lapMtlSectionOpen ? 0 : -1}>
                 <IconList />
-                <span>Danh mục WBS</span>
+                <span>Cấu trúc Master Timeline</span>
               </button>
             </nav>
           </>;
@@ -3471,7 +3471,7 @@ export default function Home() {
           <>
             <header className="topbar">
               <div className="breadcrumbs">
-                <span>Cấu trúc Master Timeline</span>
+                <span>Lập Master Timeline</span>
                 <i>/</i>
                 <strong>Lập & Cập nhật Master Timeline</strong>
                 <i>/</i>
@@ -3580,7 +3580,7 @@ export default function Home() {
               ) : (
                 <div className="project-index-empty">
                   <b>{projectSearch || projectStatusFilter !== "all" || projectRegionFilter !== "all" ? "Không tìm thấy dự án phù hợp" : "Chưa có dự án nào"}</b>
-                  <span>{projectSearch || projectStatusFilter !== "all" || projectRegionFilter !== "all" ? "Thử tìm bằng từ khóa khác hoặc thiết lập lại bộ lọc." : "Tạo dự án đầu tiên để hệ thống sinh Master Timeline từ danh mục WBS."}</span>
+                  <span>{projectSearch || projectStatusFilter !== "all" || projectRegionFilter !== "all" ? "Thử tìm bằng từ khóa khác hoặc thiết lập lại bộ lọc." : "Tạo dự án đầu tiên để hệ thống sinh Master Timeline từ Cấu trúc Master Timeline."}</span>
                   {!projectSearch && projectStatusFilter === "all" && <button className="primary-button" onClick={openCreate}>Tạo Master timeline</button>}
                 </div>
               )}
@@ -3591,9 +3591,9 @@ export default function Home() {
           <>
             <header className="topbar">
               <div className="breadcrumbs">
-                <span>Cấu trúc Master Timeline</span>
+                <span>Lập Master Timeline</span>
                 <i>/</i>
-                <strong>Danh mục WBS</strong>
+                <strong>Cấu trúc Master Timeline</strong>
                 <i>/</i>
                 <span>{fullCatalog.length} công việc</span>
               </div>
@@ -3619,7 +3619,7 @@ export default function Home() {
                 <span className="status-badge" style={{ background: "#edf8f5", color: "#167461" }}>
                   {enabledCatalogCount}/{fullCatalog.length} TỰ ĐỘNG SINH
                 </span>
-                <h1>Danh Mục WBS Chuẩn</h1>
+                <h1>Cấu trúc Master Timeline</h1>
                 <p>Công việc được tích “Tự động sinh” sẽ luôn có sẵn khi tạo dự án mới theo mẫu MTL hiện hành.</p>
               </div>
               <label className="search-field" style={{ minWidth: "260px" }}>
@@ -5036,7 +5036,7 @@ export default function Home() {
 
       {showTaskModal && <div className="modal-backdrop" onMouseDown={() => { setShowTaskModal(false); setInsertAnchor(null); }}>
         <form className="project-modal task-modal" onSubmit={addCatalogTask} onMouseDown={(event) => event.stopPropagation()}>
-          <header><div><span>{insertAnchor ? `THÊM TẠI WBS ${insertAnchor.code}` : "DANH MỤC WBS"}</span><h2>Thêm công việc mới</h2><p>{insertAnchor ? `Mã và WBS cha đã được gợi ý theo vị trí “${insertAnchor.name}”.` : "Công việc được lưu vào danh mục dùng chung cho các dự án sau."}</p></div><button type="button" onClick={() => { setShowTaskModal(false); setInsertAnchor(null); }}>Đóng</button></header>
+          <header><div><span>{insertAnchor ? `THÊM TẠI WBS ${insertAnchor.code}` : "CẤU TRÚC MASTER TIMELINE"}</span><h2>Thêm công việc mới</h2><p>{insertAnchor ? `Mã và WBS cha đã được gợi ý theo vị trí “${insertAnchor.name}”.` : "Công việc được lưu vào danh mục dùng chung cho các dự án sau."}</p></div><button type="button" onClick={() => { setShowTaskModal(false); setInsertAnchor(null); }}>Đóng</button></header>
           <div className="form-grid">
             <label className="field"><span>Nhóm / Đơn vị *</span><select value={taskForm.groupCode} onChange={(event) => setTaskForm({ ...taskForm, groupCode: event.target.value, parentCode: event.target.value, code: `${event.target.value}.` })}>{GROUPS.map((group) => <option key={group.code} value={group.code}>{group.code} · {group.short} · {group.name}</option>)}</select></label>
             <label className="field"><span>WBS cha</span><input value={taskForm.parentCode} onChange={(event) => setTaskForm({ ...taskForm, parentCode: event.target.value })} placeholder={taskForm.groupCode} /></label>
