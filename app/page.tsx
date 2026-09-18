@@ -3970,17 +3970,17 @@ export default function Home() {
               <IconChevronDown />
             </button>
             <nav className={`sidebar-nav sidebar-collapsible ${lapMtlSectionOpen ? "" : "collapsed"}`} aria-label="Điều hướng Lập MTL" aria-hidden={!lapMtlSectionOpen}>
+              <button className={view === "catalog" ? "active" : ""} onClick={() => setView("catalog")} tabIndex={lapMtlSectionOpen ? 0 : -1}>
+                <IconList />
+                <span>Cấu trúc Master Timeline</span>
+              </button>
               <button className={view === "projects" || view === "workspace" ? "active" : ""} onClick={() => setView("projects")} tabIndex={lapMtlSectionOpen ? 0 : -1}>
                 <IconTimeline />
-                <span>Lập & Cập nhật</span>
+                <span>Lập / Cập nhật</span>
               </button>
               <button className={view === "confirm_approval" ? "active" : ""} onClick={() => setView("confirm_approval")} tabIndex={lapMtlSectionOpen ? 0 : -1}>
                 <IconFileCheck />
                 <span>Xác nhận phê duyệt</span>
-              </button>
-              <button className={view === "catalog" ? "active" : ""} onClick={() => setView("catalog")} tabIndex={lapMtlSectionOpen ? 0 : -1}>
-                <IconList />
-                <span>Cấu trúc Master Timeline</span>
               </button>
             </nav>
           </>;
