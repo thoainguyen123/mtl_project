@@ -2558,6 +2558,71 @@ export default function Home() {
           color: #0f172a !important;
           line-height: 1.2 !important;
         }
+        /* ================= UNIFIED PAGE TOP HEADER & CARDS ================= */
+        .page-top-header {
+          min-height: 64px !important;
+          height: auto !important;
+          flex: none !important;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: space-between !important;
+          gap: 12px 20px !important;
+          padding: 10px 24px !important;
+          background: #ffffff !important;
+          border-bottom: 1px solid #e2e8f0 !important;
+          flex-wrap: wrap !important;
+        }
+        .page-top-title-group {
+          display: flex !important;
+          align-items: center !important;
+          gap: 14px !important;
+          flex-wrap: wrap !important;
+        }
+        .page-top-title-group h1 {
+          margin: 0 !important;
+          font-size: 19px !important;
+          font-weight: 800 !important;
+          color: #173f51 !important;
+          letter-spacing: -0.2px !important;
+          white-space: nowrap !important;
+        }
+        .top-stat-cards {
+          display: flex !important;
+          align-items: center !important;
+          gap: 8px !important;
+          flex-wrap: wrap !important;
+        }
+        .top-stat-card {
+          display: flex !important;
+          flex-direction: column !important;
+          gap: 2px !important;
+          padding: 4px 10px !important;
+          background: #f8fafc !important;
+          border: 1px solid #e2e8f0 !important;
+          border-radius: 6px !important;
+          min-width: 76px !important;
+        }
+        .top-stat-card span {
+          font-size: 9px !important;
+          font-weight: 700 !important;
+          color: #64748b !important;
+          text-transform: uppercase !important;
+          letter-spacing: 0.2px !important;
+          line-height: 1 !important;
+        }
+        .top-stat-card b {
+          font-size: 15px !important;
+          font-weight: 800 !important;
+          color: #0f172a !important;
+          line-height: 1.1 !important;
+        }
+        .page-top-actions {
+          margin-left: auto !important;
+          display: flex !important;
+          align-items: center !important;
+          gap: 8px !important;
+          flex-wrap: wrap !important;
+        }
         /* ================= CONFIRM DELETE MODAL ================= */
         .confirm-modal {
           width: min(480px, 94vw) !important;
@@ -3464,37 +3529,33 @@ export default function Home() {
           </>
         ) : view === "projects" ? (
           <>
-            <header className="topbar">
-              <div className="top-actions">
+            <header className="page-top-header">
+              <div className="page-top-title-group">
+                <h1>DANH SÁCH DỰ ÁN</h1>
+                <div className="top-stat-cards">
+                  <div className="top-stat-card">
+                    <span>TỔNG DỰ ÁN</span>
+                    <b>{projects.length}</b>
+                  </div>
+                  <div className="top-stat-card">
+                    <span>ĐANG LẬP / CẬP NHẬT</span>
+                    <b style={{ color: "#1a56a8" }}>{projects.filter((p) => p.approvalStatus !== "approved" && !p.isOfficialApproved).length}</b>
+                  </div>
+                  <div className="top-stat-card">
+                    <span>ĐÃ DUYỆT</span>
+                    <b style={{ color: "#167461" }}>{projects.filter((p) => p.approvalStatus === "approved" || p.isOfficialApproved).length}</b>
+                  </div>
+                </div>
+              </div>
+              <div className="page-top-actions">
+                <label className="search-field" style={{ margin: 0, minWidth: "220px", maxWidth: "300px" }}>
+                  <span>Tìm dự án</span>
+                  <input value={projectSearch} onChange={(event) => { setProjectSearch(event.target.value); setProjectPage(1); }} placeholder="Nhập tên, mã dự án, chủ đầu tư..." />
+                </label>
                 <button className="primary-button" onClick={openCreate}>+ Tạo Master Timeline</button>
               </div>
             </header>
             <section className="project-index">
-              <header className="project-index-header">
-                <div>
-                  <h1>DANH SÁCH DỰ ÁN</h1>
-                </div>
-                <label className="search-field project-index-search">
-                  <span>Tìm dự án</span>
-                  <input value={projectSearch} onChange={(event) => { setProjectSearch(event.target.value); setProjectPage(1); }} placeholder="Nhập tên, mã dự án, chủ đầu tư..." />
-                </label>
-              </header>
-
-              {/* KPI Stats Bar */}
-              <div className="table-stats-bar" style={{ gridTemplateColumns: "repeat(3, 1fr)" }}>
-                <div className="table-stat-card">
-                  <span>TỔNG DỰ ÁN</span>
-                  <b>{projects.length}</b>
-                </div>
-                <div className="table-stat-card">
-                  <span>ĐANG LẬP / CẬP NHẬT</span>
-                  <b style={{ color: "#1a56a8" }}>{projects.filter((p) => p.approvalStatus !== "approved" && !p.isOfficialApproved).length}</b>
-                </div>
-                <div className="table-stat-card">
-                  <span>ĐÃ DUYỆT</span>
-                  <b style={{ color: "#167461" }}>{projects.filter((p) => p.approvalStatus === "approved" || p.isOfficialApproved).length}</b>
-                </div>
-              </div>
 
               {/* Table Filters */}
               {/* Table Filters */}
@@ -3576,8 +3637,21 @@ export default function Home() {
           </>
         ) : view === "catalog" ? (
           <>
-            <header className="topbar">
-              <div className="top-actions">
+            <header className="page-top-header">
+              <div className="page-top-title-group">
+                <h1>Cấu trúc Master Timeline</h1>
+              </div>
+              <div className="page-top-actions">
+                <label className="search-field" style={{ margin: 0, minWidth: "220px", maxWidth: "280px" }}>
+                  <span>Tìm</span>
+                  <input
+                    value={catalogSearch}
+                    onChange={(event) => {
+                      setCatalogSearch(event.target.value);
+                    }}
+                    placeholder="Tìm theo mã WBS hoặc tên..."
+                  />
+                </label>
                 <button type="button" className="secondary-button" onClick={() => setCatalogCollapsed(new Set())}>
                   Expand all
                 </button>
@@ -3592,22 +3666,6 @@ export default function Home() {
                 </button>
               </div>
             </header>
-
-            <section className="catalog-header">
-              <div>
-                <h1>Cấu trúc Master Timeline</h1>
-              </div>
-              <label className="search-field" style={{ minWidth: "260px" }}>
-                <span>Tìm</span>
-                <input
-                  value={catalogSearch}
-                  onChange={(event) => {
-                    setCatalogSearch(event.target.value);
-                  }}
-                  placeholder="Tìm theo mã WBS hoặc tên..."
-                />
-              </label>
-            </section>
 
             <section className="catalog-groups">
               {GROUPS.map((group) => {
@@ -3927,39 +3985,35 @@ export default function Home() {
           </>
         ) : view === "confirm_approval" ? (
           <>
-            <header className="topbar">
-              <div className="top-actions">
+            <header className="page-top-header">
+              <div className="page-top-title-group">
+                <h1>XÁC NHẬN PHÊ DUYỆT</h1>
+                <div className="top-stat-cards">
+                  <div className="top-stat-card">
+                    <span>TỔNG DỰ ÁN</span>
+                    <b>{projects.length}</b>
+                  </div>
+                  <div className="top-stat-card">
+                    <span>CHỜ XÁC NHẬN E-APPROVAL</span>
+                    <b style={{ color: "#d97706" }}>{projects.filter((p) => !p.isOfficialApproved).length}</b>
+                  </div>
+                  <div className="top-stat-card">
+                    <span>ĐÃ PHÊ DUYỆT CHÍNH THỨC</span>
+                    <b style={{ color: "#167461" }}>{officialApprovedProjects.length}</b>
+                  </div>
+                </div>
+              </div>
+              <div className="page-top-actions">
+                <label className="search-field" style={{ margin: 0, minWidth: "220px", maxWidth: "300px" }}>
+                  <span>Tìm dự án</span>
+                  <input value={confirmSearch} onChange={(event) => { setConfirmSearch(event.target.value); setConfirmPage(1); }} placeholder="Tên, mã dự án hoặc mã E-Approval..." />
+                </label>
                 <button type="button" className="primary-button" onClick={() => openEApprovalModal()}>
                   + Nhập phê duyệt E-Approval
                 </button>
               </div>
             </header>
             <section className="project-index">
-              <header className="project-index-header">
-                <div>
-                  <h1>XÁC NHẬN PHÊ DUYỆT</h1>
-                </div>
-                <label className="search-field project-index-search">
-                  <span>Tìm dự án</span>
-                  <input value={confirmSearch} onChange={(event) => { setConfirmSearch(event.target.value); setConfirmPage(1); }} placeholder="Tên, mã dự án hoặc mã E-Approval..." />
-                </label>
-              </header>
-
-              {/* KPI Stats Bar */}
-              <div className="table-stats-bar" style={{ gridTemplateColumns: "repeat(3, 1fr)" }}>
-                <div className="table-stat-card">
-                  <span>TỔNG DỰ ÁN</span>
-                  <b>{projects.length}</b>
-                </div>
-                <div className="table-stat-card">
-                  <span>CHỜ XÁC NHẬN E-APPROVAL</span>
-                  <b style={{ color: "#d97706" }}>{projects.filter((p) => !p.isOfficialApproved).length}</b>
-                </div>
-                <div className="table-stat-card">
-                  <span>ĐÃ PHÊ DUYỆT CHÍNH THỨC</span>
-                  <b style={{ color: "#167461" }}>{officialApprovedProjects.length}</b>
-                </div>
-              </div>
 
               {/* Filter Tabs */}
               <div className="table-filters" style={{ margin: "14px 24px 14px", border: "none" }}>
@@ -4064,23 +4118,21 @@ export default function Home() {
           </>
         ) : view === "approved_projects" ? (
           <>
-            <header className="topbar">
-              <div className="top-actions">
+            <header className="page-top-header">
+              <div className="page-top-title-group">
+                <h1>DANH MỤC MASTER TIMELINE ĐÃ PHÊ DUYỆT</h1>
+              </div>
+              <div className="page-top-actions">
+                <label className="search-field" style={{ margin: 0, minWidth: "220px", maxWidth: "300px" }}>
+                  <span>Tìm dự án</span>
+                  <input value={approvedSearch} onChange={(event) => { setApprovedSearch(event.target.value); setApprovedPage(1); }} placeholder="Tên, mã dự án hoặc mã E-Approval" />
+                </label>
                 <button type="button" className="primary-button" onClick={() => openEApprovalModal()}>
                   + Xác nhận phê duyệt MTL
                 </button>
               </div>
             </header>
             <section className="project-index">
-              <header className="project-index-header">
-                <div>
-                  <h1>DANH MỤC MASTER TIMELINE ĐÃ PHÊ DUYỆT</h1>
-                </div>
-                <label className="search-field project-index-search">
-                  <span>Tìm dự án</span>
-                  <input value={approvedSearch} onChange={(event) => { setApprovedSearch(event.target.value); setApprovedPage(1); }} placeholder="Tên, mã dự án hoặc mã E-Approval" />
-                </label>
-              </header>
 
               <div className="approved-summary-strip" style={{ margin: "0 24px 14px" }}>
                 <div className="approved-metric-card">
@@ -4191,46 +4243,42 @@ export default function Home() {
           </>
         ) : view === "design_task" ? (
           <>
-            <header className="topbar">
-              <div className="top-actions">
+            <header className="page-top-header">
+              <div className="page-top-title-group">
+                <h1>DANH SÁCH DỰ ÁN LẬP NHIỆM VỤ THIẾT KẾ (NVTK)</h1>
+                <div className="top-stat-cards">
+                  <div className="top-stat-card">
+                    <span>TỔNG DỰ ÁN</span>
+                    <b>{projects.length}</b>
+                  </div>
+                  <div className="top-stat-card">
+                    <span>CHƯA LẬP</span>
+                    <b style={{ color: "#64748b" }}>{projects.filter((p) => p.designTaskStatus === "chua_lap").length}</b>
+                  </div>
+                  <div className="top-stat-card">
+                    <span>ĐANG LẬP</span>
+                    <b style={{ color: "#1a56a8" }}>{projects.filter((p) => p.designTaskStatus === "dang_lap").length}</b>
+                  </div>
+                  <div className="top-stat-card">
+                    <span>PBCM GÓP Ý</span>
+                    <b style={{ color: "#d97706" }}>{projects.filter((p) => p.designTaskStatus === "pbcm_gop_y").length}</b>
+                  </div>
+                  <div className="top-stat-card">
+                    <span>ĐÃ DUYỆT</span>
+                    <b style={{ color: "#167461" }}>{projects.filter((p) => p.designTaskStatus === "da_duyet").length}</b>
+                  </div>
+                </div>
+              </div>
+              <div className="page-top-actions">
+                <label className="search-field" style={{ margin: 0, minWidth: "200px", maxWidth: "260px" }}>
+                  <span>Tìm dự án</span>
+                  <input value={designSearch} onChange={(event) => { setDesignSearch(event.target.value); setDesignPage(1); }} placeholder="Nhập tên, mã dự án..." />
+                </label>
                 <button type="button" className="secondary-button" onClick={() => setView("projects")}>← Quay lại MTL</button>
-                <button type="button" className="primary-button">+ Tạo Nhiệm Vụ Thiết Kế</button>
+                <button type="button" className="primary-button">+ Tạo NVTK</button>
               </div>
             </header>
             <section className="project-index">
-              <header className="project-index-header">
-                <div>
-                  <h1>DANH SÁCH DỰ ÁN LẬP NHIỆM VỤ THIẾT KẾ (NVTK)</h1>
-                </div>
-                <label className="search-field project-index-search">
-                  <span>Tìm dự án</span>
-                  <input value={designSearch} onChange={(event) => { setDesignSearch(event.target.value); setDesignPage(1); }} placeholder="Nhập tên, mã dự án, chủ đầu tư..." />
-                </label>
-              </header>
-
-              {/* KPI Stats Bar */}
-              <div className="table-stats-bar">
-                <div className="table-stat-card">
-                  <span>TỔNG DỰ ÁN NVTK</span>
-                  <b>{projects.length}</b>
-                </div>
-                <div className="table-stat-card">
-                  <span>CHƯA LẬP NVTK</span>
-                  <b style={{ color: "#64748b" }}>{projects.filter((p) => p.designTaskStatus === "chua_lap").length}</b>
-                </div>
-                <div className="table-stat-card">
-                  <span>ĐANG LẬP NVTK</span>
-                  <b style={{ color: "#1a56a8" }}>{projects.filter((p) => p.designTaskStatus === "dang_lap").length}</b>
-                </div>
-                <div className="table-stat-card">
-                  <span>PBCM GÓP Ý</span>
-                  <b style={{ color: "#d97706" }}>{projects.filter((p) => p.designTaskStatus === "pbcm_gop_y").length}</b>
-                </div>
-                <div className="table-stat-card">
-                  <span>ĐÃ PHÊ DUYỆT NVTK</span>
-                  <b style={{ color: "#167461" }}>{projects.filter((p) => p.designTaskStatus === "da_duyet").length}</b>
-                </div>
-              </div>
 
               {/* Filters */}
               <div className="table-filters" style={{ margin: "14px 24px 14px", border: "none" }}>
@@ -4314,46 +4362,42 @@ export default function Home() {
           </>
         ) : view === "fs_ver2" ? (
           <>
-            <header className="topbar">
-              <div className="top-actions">
+            <header className="page-top-header">
+              <div className="page-top-title-group">
+                <h1>DANH SÁCH DỰ ÁN LẬP FS THỰC THI (FS-VER2)</h1>
+                <div className="top-stat-cards">
+                  <div className="top-stat-card">
+                    <span>TỔNG DỰ ÁN</span>
+                    <b>{projects.length}</b>
+                  </div>
+                  <div className="top-stat-card">
+                    <span>CHƯA LẬP</span>
+                    <b style={{ color: "#64748b" }}>{projects.filter((p) => p.fsStatus === "chua_lap").length}</b>
+                  </div>
+                  <div className="top-stat-card">
+                    <span>ĐANG TÍNH TOÁN</span>
+                    <b style={{ color: "#1a56a8" }}>{projects.filter((p) => p.fsStatus === "dang_tinh_toan").length}</b>
+                  </div>
+                  <div className="top-stat-card">
+                    <span>ĐỐI CHIẾU</span>
+                    <b style={{ color: "#d97706" }}>{projects.filter((p) => p.fsStatus === "cho_doi_chieu").length}</b>
+                  </div>
+                  <div className="top-stat-card">
+                    <span>ĐÃ DUYỆT</span>
+                    <b style={{ color: "#167461" }}>{projects.filter((p) => p.fsStatus === "da_duyet").length}</b>
+                  </div>
+                </div>
+              </div>
+              <div className="page-top-actions">
+                <label className="search-field" style={{ margin: 0, minWidth: "200px", maxWidth: "260px" }}>
+                  <span>Tìm dự án</span>
+                  <input value={fsSearch} onChange={(event) => { setFsSearch(event.target.value); setFsPage(1); }} placeholder="Nhập tên, mã dự án..." />
+                </label>
                 <button type="button" className="secondary-button" onClick={() => setView("projects")}>← Quay lại MTL</button>
                 <button type="button" className="primary-button">+ Lập Phương Án FS</button>
               </div>
             </header>
             <section className="project-index">
-              <header className="project-index-header">
-                <div>
-                  <h1>DANH SÁCH DỰ ÁN LẬP FS THỰC THI (FS-VER2)</h1>
-                </div>
-                <label className="search-field project-index-search">
-                  <span>Tìm dự án</span>
-                  <input value={fsSearch} onChange={(event) => { setFsSearch(event.target.value); setFsPage(1); }} placeholder="Nhập tên, mã dự án, chủ đầu tư..." />
-                </label>
-              </header>
-
-              {/* KPI Stats Bar */}
-              <div className="table-stats-bar">
-                <div className="table-stat-card">
-                  <span>TỔNG DỰ ÁN FS</span>
-                  <b>{projects.length}</b>
-                </div>
-                <div className="table-stat-card">
-                  <span>CHƯA LẬP FS</span>
-                  <b style={{ color: "#64748b" }}>{projects.filter((p) => p.fsStatus === "chua_lap").length}</b>
-                </div>
-                <div className="table-stat-card">
-                  <span>ĐANG TÍNH TOÁN FS</span>
-                  <b style={{ color: "#1a56a8" }}>{projects.filter((p) => p.fsStatus === "dang_tinh_toan").length}</b>
-                </div>
-                <div className="table-stat-card">
-                  <span>ĐỐI CHIẾU SỐ LIỆU</span>
-                  <b style={{ color: "#d97706" }}>{projects.filter((p) => p.fsStatus === "cho_doi_chieu").length}</b>
-                </div>
-                <div className="table-stat-card">
-                  <span>ĐÃ DUYỆT FS-VER2</span>
-                  <b style={{ color: "#167461" }}>{projects.filter((p) => p.fsStatus === "da_duyet").length}</b>
-                </div>
-              </div>
 
               {/* Filters */}
               <div className="table-filters" style={{ margin: "14px 24px 14px", border: "none" }}>
