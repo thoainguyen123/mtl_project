@@ -25,7 +25,9 @@ test("MTL template contains nine departments and all Part 4 groups", () => {
 
 test("MTL template carries the reporting metadata from the September 2026 workbook", () => {
   assert.equal(template.filter((task) => task.gmdReport).length, 525);
-  assert.equal(template.filter((task) => task.workGroup).length, 785);
+  assert.equal(template.filter((task) => task.workGroup).length, 788);
+  assert.equal(template.filter((task) => task.workGroup === "Báo cáo định kỳ").length, 276);
+  assert.equal(template.filter((task) => task.workGroup === "Tracking công việc").length, 512);
   assert.equal(template.filter((task) => task.notes).length, 61);
   assert.deepEqual(
     [...new Set(template.flatMap((task) => task.workGroup ? [task.workGroup] : []))].sort(),
