@@ -3616,11 +3616,7 @@ export default function Home() {
 
             <section className="catalog-header">
               <div>
-                <span className="status-badge" style={{ background: "#edf8f5", color: "#167461" }}>
-                  {enabledCatalogCount}/{fullCatalog.length} TỰ ĐỘNG SINH
-                </span>
                 <h1>Cấu trúc Master Timeline</h1>
-                <p>Công việc được tích “Tự động sinh” sẽ luôn có sẵn khi tạo dự án mới theo mẫu MTL hiện hành.</p>
               </div>
               <label className="search-field" style={{ minWidth: "260px" }}>
                 <span>Tìm</span>
