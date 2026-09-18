@@ -2623,6 +2623,95 @@ export default function Home() {
           gap: 8px !important;
           flex-wrap: wrap !important;
         }
+        /* ================= COMPACT WORKSPACE HEADER ================= */
+        .workspace-topbar {
+          min-height: 40px !important;
+          height: 40px !important;
+          padding: 0 20px !important;
+          background: #f8fafc !important;
+          border-bottom: 1px solid #e2e8f0 !important;
+        }
+        .workspace-topbar .breadcrumb-back {
+          font-size: 12.5px !important;
+          font-weight: 600 !important;
+          color: #0284c7 !important;
+          padding: 4px 8px !important;
+          border-radius: 4px !important;
+          cursor: pointer !important;
+        }
+        .workspace-topbar .top-actions {
+          gap: 8px !important;
+        }
+        .workspace-topbar .saved-state {
+          font-size: 11px !important;
+          color: #64748b !important;
+        }
+        .project-header {
+          min-height: 52px !important;
+          height: auto !important;
+          padding: 8px 20px !important;
+          background: #ffffff !important;
+          border-bottom: 1px solid #e2e8f0 !important;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: space-between !important;
+          gap: 16px !important;
+          flex-wrap: wrap !important;
+        }
+        .project-header-left {
+          display: flex !important;
+          flex-direction: column !important;
+          gap: 3px !important;
+        }
+        .project-title-row {
+          display: flex !important;
+          align-items: center !important;
+          gap: 8px !important;
+          flex-wrap: wrap !important;
+        }
+        .project-title-row h1 {
+          margin: 0 !important;
+          font-size: 18px !important;
+          font-weight: 800 !important;
+          color: #0f172a !important;
+          line-height: 1.2 !important;
+        }
+        .project-header-left p {
+          margin: 0 !important;
+          font-size: 11.5px !important;
+          color: #64748b !important;
+          line-height: 1.3 !important;
+        }
+        .workspace-stat-cards {
+          margin-left: auto !important;
+          display: flex !important;
+          align-items: center !important;
+          gap: 8px !important;
+        }
+        .workspace-stat-cards .top-stat-card {
+          padding: 4px 10px !important;
+          min-width: 80px !important;
+          background: #f8fafc !important;
+          border: 1px solid #e2e8f0 !important;
+          border-radius: 6px !important;
+        }
+        .workspace-stat-cards .top-stat-card span {
+          font-size: 8.5px !important;
+          font-weight: 700 !important;
+          color: #64748b !important;
+          text-transform: uppercase !important;
+          letter-spacing: 0.3px !important;
+        }
+        .workspace-stat-cards .top-stat-card b {
+          font-size: 15px !important;
+          font-weight: 800 !important;
+          color: #0f172a !important;
+          line-height: 1.1 !important;
+        }
+        .toolbar {
+          min-height: 44px !important;
+          padding: 6px 20px !important;
+        }
         /* ================= CONFIRM DELETE MODAL ================= */
         .confirm-modal {
           width: min(480px, 94vw) !important;
@@ -4481,78 +4570,78 @@ export default function Home() {
           </div>
         ) : (
           <>
-            {activeProject.isOfficialApproved && (
-              <div className="baseline-banner">
-                <div className="baseline-banner-left">
-                  <span className="baseline-badge">🛡️ BASELINE LOCKED</span>
-                  <span>Hồ sơ E-Approval: <strong>{activeProject.eApprovalCode}</strong></span>
-                  <span>· Phiên bản: <strong>{activeProject.officialVersion || "v1.0"}</strong></span>
-                  <span>· Ngày duyệt: <strong>{formatDate(activeProject.eApprovalDate || activeProject.approvedAt)}</strong></span>
-                </div>
-                <div className="baseline-banner-right">
-                  {activeProject.eApprovalUrl && (
-                    <a href={activeProject.eApprovalUrl} target="_blank" rel="noreferrer">
-                      <span>Mở hồ sơ trên E-Approval</span>
-                      <IconExternalLink />
-                    </a>
-                  )}
-                  <button type="button" className="secondary-button" style={{ height: "26px", fontSize: "10.5px", background: "#ffffff22", color: "#fff", borderColor: "#ffffff44" }} onClick={reopenApproved}>
-                    Tạo bản điều chỉnh
-                  </button>
-                </div>
-              </div>
-            )}
-
             <header className="topbar workspace-topbar">
-              <button className="breadcrumb-back" onClick={() => setView("projects")}>Danh sách dự án</button>
+              <button className="breadcrumb-back" onClick={() => setView("projects")}>← Danh sách dự án</button>
               <div className="top-actions">
                 <span className="saved-state"><i />Đã lưu trên thiết bị</span>
-                <button className="danger-button" onClick={() => setShowDelete(true)}>Xóa dự án</button>
-                <button className="secondary-button project-export" onClick={exportMicrosoftProject}>Xuất Microsoft Project <small>.xml → .mpp</small></button>
-                {!activeProject.isOfficialApproved && (
-                  <button className="secondary-button" style={{ borderColor: "#168c72", color: "#168c72", fontWeight: 700 }} onClick={() => openEApprovalModal(activeProject)}>
-                    ✓ Xác nhận E-Approval
-                  </button>
+                <button className="secondary-button project-export" onClick={exportMicrosoftProject}>
+                  Xuất Microsoft Project <small>.xml → .mpp</small>
+                </button>
+                {activeProject.isOfficialApproved && activeProject.eApprovalUrl && (
+                  <a
+                    href={activeProject.eApprovalUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="secondary-button"
+                    style={{ height: "30px", fontSize: "11px", display: "inline-flex", alignItems: "center", gap: "4px" }}
+                  >
+                    <span>E-Approval</span>
+                    <IconExternalLink />
+                  </a>
                 )}
-                <button className="primary-button" onClick={openCreate}>Tạo Master timeline</button>
-              </div>
-            </header>
-
-            <section className="project-header">
-              <div><span className={`status-badge approval-${activeProject.approvalStatus}`}>{projectApprovalLabel(activeProject)}{activeProject.approvedVersion ? ` · ${activeProject.approvedVersion}` : ""}</span><h1>{activeProject.name}</h1><p>{activeProject.code} · {activeProject.type}{activeProject.location ? ` · ${activeProject.location}` : ""}</p></div>
-              <div className="project-metrics"><div><b>{scheduled.length}</b><span>TASK ĐÃ SINH</span></div><div><b>{activeProject.selectedGroups.filter((code) => GROUP_BY_CODE[code]?.role === "indirect").length}/{INDIRECT_COUNT}</b><span>BAN/PHÒNG GIÁN TIẾP</span></div><div><b>{activeProject.selectedGroups.filter((code) => GROUP_BY_CODE[code]?.role === "direct").length}/{DIRECT_COUNT}</b><span>PHÒNG TRỰC TIẾP</span></div><div><b>{formatDate(activeProject.targetDate)}</b><span>NGÀY MỤC TIÊU</span></div></div>
-            </section>
-
-            <section className={`approval-flow state-${activeProject.approvalStatus}`}>
-              <div className="approval-steps">
-                <span className="done">
-                  <i>1</i>
-                  <b>Lập Master Timeline</b>
-                </span>
-                <em />
-                <span className={activeProject.isOfficialApproved || activeProject.approvalStatus === "approved" ? "done" : ""}>
-                  <i>2</i>
-                  <b>Phê duyệt</b>
-                </span>
-              </div>
-              <div className="approval-action">
                 {!activeProject.isOfficialApproved ? (
                   <button
                     type="button"
                     className="primary-button"
-                    style={{ background: "#73b52d", borderColor: "#64a024" }}
+                    style={{ background: "#73b52d", borderColor: "#64a024", height: "30px", fontSize: "12px", fontWeight: 700 }}
                     onClick={() => openEApprovalModal(activeProject)}
                   >
                     ✓ Xác nhận phê duyệt
                   </button>
                 ) : (
-                  <>
-                    <span>Đã phê duyệt {activeProject.eApprovalCode ? `(${activeProject.eApprovalCode})` : ""} · {formatDate(activeProject.eApprovalDate || activeProject.approvedAt)}</span>
-                    <button type="button" className="secondary-button" onClick={reopenApproved}>
-                      Tạo bản điều chỉnh
-                    </button>
-                  </>
+                  <button
+                    type="button"
+                    className="secondary-button"
+                    style={{ height: "30px", fontSize: "12px", fontWeight: 600 }}
+                    onClick={reopenApproved}
+                  >
+                    Tạo bản điều chỉnh
+                  </button>
                 )}
+                <button className="danger-button" onClick={() => setShowDelete(true)}>Xóa dự án</button>
+              </div>
+            </header>
+
+            <section className="project-header">
+              <div className="project-header-left">
+                <div className="project-title-row">
+                  <span className={`status-badge approval-${activeProject.approvalStatus}`}>
+                    {activeProject.isOfficialApproved ? "🛡️ " : ""}{projectApprovalLabel(activeProject)}{activeProject.approvedVersion ? ` · ${activeProject.approvedVersion}` : ""}
+                  </span>
+                  <h1>{activeProject.name}</h1>
+                </div>
+                <p>
+                  {activeProject.code} · {activeProject.type}{activeProject.location ? ` · ${activeProject.location}` : ""}
+                  {activeProject.isOfficialApproved && activeProject.eApprovalCode ? ` · QĐ: ${activeProject.eApprovalCode} (${formatDate(activeProject.eApprovalDate || activeProject.approvedAt)})` : ""}
+                </p>
+              </div>
+              <div className="top-stat-cards workspace-stat-cards">
+                <div className="top-stat-card">
+                  <span>TASK ĐÃ SINH</span>
+                  <b>{scheduled.length}</b>
+                </div>
+                <div className="top-stat-card">
+                  <span>BAN/PHÒNG GIÁN TIẾP</span>
+                  <b>{activeProject.selectedGroups.filter((code) => GROUP_BY_CODE[code]?.role === "indirect").length}/{INDIRECT_COUNT}</b>
+                </div>
+                <div className="top-stat-card">
+                  <span>PHÒNG TRỰC TIẾP</span>
+                  <b>{activeProject.selectedGroups.filter((code) => GROUP_BY_CODE[code]?.role === "direct").length}/{DIRECT_COUNT}</b>
+                </div>
+                <div className="top-stat-card">
+                  <span>NGÀY MỤC TIÊU</span>
+                  <b style={{ fontSize: "13px" }}>{formatDate(activeProject.targetDate)}</b>
+                </div>
               </div>
             </section>
 
