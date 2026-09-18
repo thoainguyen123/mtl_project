@@ -3142,11 +3142,7 @@ export default function Home() {
         {view === "overview" ? (
           <>
             <header className="topbar overview-topbar">
-              <div className="breadcrumbs">
-                <IconHome />
-                <i>/</i>
-                <span>THEO DÕI</span>
-              </div>
+              <div style={{ width: "120px" }} />
               <div className="overview-title-center">
                 <h1>THEO DÕI THỰC HIỆN CÔNG VIỆC</h1>
                 <div style={{ display: "flex", alignItems: "center", gap: "10px", justifyContent: "center", marginTop: "4px" }}>
@@ -3168,7 +3164,6 @@ export default function Home() {
                 <button type="button" className="icon-action-btn" title="Làm mới"><IconRefresh /></button>
                 <button type="button" className="icon-action-btn" title="Bộ lọc"><IconFilter /></button>
                 <button type="button" className="icon-action-btn" title="Tùy chọn"><IconMore /></button>
-                <UserBadge />
               </div>
             </header>
 
@@ -3470,16 +3465,8 @@ export default function Home() {
         ) : view === "projects" ? (
           <>
             <header className="topbar">
-              <div className="breadcrumbs">
-                <span>Lập Master Timeline</span>
-                <i>/</i>
-                <strong>Lập & Cập nhật Master Timeline</strong>
-                <i>/</i>
-                <span>{projects.length} dự án</span>
-              </div>
               <div className="top-actions">
                 <button className="primary-button" onClick={openCreate}>+ Tạo Master Timeline</button>
-                <UserBadge />
               </div>
             </header>
             <section className="project-index">
@@ -3794,9 +3781,9 @@ export default function Home() {
           </>
         ) : view === "departments" ? (
           <>
-            <header className="topbar"><div className="breadcrumbs"><span>Lập Master timeline</span><i>/</i><strong>PBCM xác nhận</strong>{activeProject && <><i>/</i><span>{activeProject.code}</span></>}</div><div className="top-actions">{activeProject && <label className="department-project-select"><span>Dự án</span><select value={activeProject.id} onChange={(event) => { const project = projects.find((item) => item.id === event.target.value); if (project) { setActiveId(project.id); setDepartmentCode(project.selectedGroups[0] ?? GROUPS[0].code); } }}>{projects.map((project) => <option key={project.id} value={project.id}>{project.name}</option>)}</select></label>}<UserBadge /></div></header>
+            <header className="topbar"><div className="top-actions">{activeProject && <label className="department-project-select"><span>Dự án</span><select value={activeProject.id} onChange={(event) => { const project = projects.find((item) => item.id === event.target.value); if (project) { setActiveId(project.id); setDepartmentCode(project.selectedGroups[0] ?? GROUPS[0].code); } }}>{projects.map((project) => <option key={project.id} value={project.id}>{project.name}</option>)}</select></label>}</div></header>
             {activeProject ? <>
-              <section className="department-header"><div><span className="status-badge">BƯỚC 2/5</span><h1>Xác nhận MTL theo phòng ban</h1><p>Mỗi đơn vị chỉ xem và xác nhận toàn bộ cây công việc thuộc đầu mục WBS của mình.</p></div><div className="department-progress"><b>{departmentApprovedCount}/{activeProject.selectedGroups.length}</b><span>ĐẦU MỤC ĐÃ XÁC NHẬN</span><i><em style={{ width: `${(departmentApprovedCount / Math.max(activeProject.selectedGroups.length, 1)) * 100}%` }} /></i></div></section>
+              <section className="department-header"><div><h1>Xác nhận MTL theo phòng ban</h1></div><div className="department-progress"><b>{departmentApprovedCount}/{activeProject.selectedGroups.length}</b><span>ĐẦU MỤC ĐÃ XÁC NHẬN</span><i><em style={{ width: `${(departmentApprovedCount / Math.max(activeProject.selectedGroups.length, 1)) * 100}%` }} /></i></div></section>
               <section className="department-review-layout">
                 <aside className="department-groups" aria-label="Đầu mục phòng ban">
                   <header><span>VAI TRÒ PHÒNG BAN · DEMO</span><b>{departmentPendingCount} đầu mục còn chờ</b></header><p className="department-demo-note">Bản triển khai thật sẽ tự nhận diện tài khoản và chỉ hiện đúng một đầu mục được phân quyền.</p>
@@ -3815,8 +3802,7 @@ export default function Home() {
           </>
         ) : view === "gmd" ? (
           <>
-            <header className="topbar"><div className="breadcrumbs"><span>Lập Master timeline</span><i>/</i><strong>GMD kiểm soát</strong></div><div className="top-actions"><UserBadge /></div></header>
-            <section className="gms-header"><div><span className="status-badge">BƯỚC 3/5</span><h1>Ban điều hành dự án kiểm soát MTL</h1><p>Xem cảnh báo tự động và xác nhận của các phòng ban, sau đó cho ý kiến trước khi MTL đi thẩm định.</p></div><div className="gms-metrics"><div><b>{pendingGmdCount}</b><span>CHỜ KIỂM SOÁT</span></div><div><b>{projects.filter((project) => project.approvalStatus === "gmd_returned").length}</b><span>ĐÃ TRẢ VỀ</span></div><div><b>{projects.filter((project) => Boolean(project.gmdReviewedAt) && project.approvalStatus !== "gmd_returned").length}</b><span>ĐÃ CHO ĐI THẨM ĐỊNH</span></div></div></section>
+            <section className="gms-header"><div><h1>Ban điều hành dự án kiểm soát MTL</h1></div><div className="gms-metrics"><div><b>{pendingGmdCount}</b><span>CHỜ KIỂM SOÁT</span></div><div><b>{projects.filter((project) => project.approvalStatus === "gmd_returned").length}</b><span>ĐÃ TRẢ VỀ</span></div><div><b>{projects.filter((project) => Boolean(project.gmdReviewedAt) && project.approvalStatus !== "gmd_returned").length}</b><span>ĐÃ CHO ĐI THẨM ĐỊNH</span></div></div></section>
 
             <section className="gms-queue">
               <div className="gms-directory-toolbar">
@@ -3904,8 +3890,7 @@ export default function Home() {
           </>
         ) : view === "gms" ? (
           <>
-            <header className="topbar"><div className="breadcrumbs"><span>Lập Master timeline</span><i>/</i><strong>Thẩm định</strong></div><div className="top-actions"><UserBadge /></div></header>
-            <section className="gms-header"><div><span className="status-badge">BƯỚC 4/5</span><h1>Danh mục dự án MTL cần thẩm định</h1><p>Tìm và chọn dự án để xem toàn bộ công việc, nhập ý kiến rồi gửi phản hồi cho người lập.</p></div><div className="gms-metrics"><div><b>{pendingGmsCount}</b><span>CHỜ THẨM ĐỊNH</span></div><div><b>{projects.filter((project) => project.approvalStatus === "approved").length}</b><span>ĐÃ XÁC NHẬN</span></div><div><b>{projects.filter((project) => project.approvalStatus === "changes_requested").length}</b><span>YÊU CẦU ĐIỀU CHỈNH</span></div></div></section>
+            <section className="gms-header"><div><h1>Danh mục dự án MTL cần thẩm định</h1></div><div className="gms-metrics"><div><b>{pendingGmsCount}</b><span>CHỜ THẨM ĐỊNH</span></div><div><b>{projects.filter((project) => project.approvalStatus === "approved").length}</b><span>ĐÃ XÁC NHẬN</span></div><div><b>{projects.filter((project) => project.approvalStatus === "changes_requested").length}</b><span>YÊU CẦU ĐIỀU CHỈNH</span></div></div></section>
             <section className="gms-queue">
               <div className="gms-directory-toolbar">
                 <div className="gms-function-tabs"><button className={gmsFilter === "pending" ? "active" : ""} onClick={() => setGmsFilter("pending")}>Cần phê duyệt <b>{pendingGmsCount}</b></button><button className={gmsFilter === "history" ? "active" : ""} onClick={() => setGmsFilter("history")}>Lịch sử thẩm định</button></div>
@@ -3943,18 +3928,10 @@ export default function Home() {
         ) : view === "confirm_approval" ? (
           <>
             <header className="topbar">
-              <div className="breadcrumbs">
-                <span>Lập Master timeline</span>
-                <i>/</i>
-                <strong>Xác nhận phê duyệt</strong>
-                <i>/</i>
-                <span>{projects.length} dự án</span>
-              </div>
               <div className="top-actions">
                 <button type="button" className="primary-button" onClick={() => openEApprovalModal()}>
                   + Nhập phê duyệt E-Approval
                 </button>
-                <UserBadge />
               </div>
             </header>
             <section className="project-index">
@@ -4088,24 +4065,16 @@ export default function Home() {
         ) : view === "approved_projects" ? (
           <>
             <header className="topbar">
-              <div className="breadcrumbs">
-                <span>MTL đã duyệt</span>
-                <i>/</i>
-                <strong>Danh sách MTL đã phê duyệt ({officialApprovedProjects.length} dự án)</strong>
-              </div>
               <div className="top-actions">
                 <button type="button" className="primary-button" onClick={() => openEApprovalModal()}>
                   + Xác nhận phê duyệt MTL
                 </button>
-                <UserBadge />
               </div>
             </header>
             <section className="project-index">
               <header className="project-index-header">
                 <div>
-                  <span className="status-badge" style={{ background: "#eaf8f4", color: "#167664", border: "1px solid #a4dfd1" }}>OFFICIAL BASELINE · E-APPROVAL</span>
                   <h1>DANH MỤC MASTER TIMELINE ĐÃ PHÊ DUYỆT</h1>
-                  <p>Các Master Timeline đã có quyết định phê duyệt trên phần mềm E-Approval. Dùng làm chuẩn Baseline để theo dõi tiến độ thực tế.</p>
                 </div>
                 <label className="search-field project-index-search">
                   <span>Tìm dự án</span>
@@ -4223,17 +4192,9 @@ export default function Home() {
         ) : view === "design_task" ? (
           <>
             <header className="topbar">
-              <div className="breadcrumbs">
-                <span>Lập Nhiệm Vụ Thiết Kế</span>
-                <i>/</i>
-                <strong>Danh sách hồ sơ NVTK</strong>
-                <i>/</i>
-                <span>{projects.length} dự án</span>
-              </div>
               <div className="top-actions">
                 <button type="button" className="secondary-button" onClick={() => setView("projects")}>← Quay lại MTL</button>
                 <button type="button" className="primary-button">+ Tạo Nhiệm Vụ Thiết Kế</button>
-                <UserBadge />
               </div>
             </header>
             <section className="project-index">
@@ -4354,17 +4315,9 @@ export default function Home() {
         ) : view === "fs_ver2" ? (
           <>
             <header className="topbar">
-              <div className="breadcrumbs">
-                <span>Lập FS Thực Thi (FS-Ver2)</span>
-                <i>/</i>
-                <strong>Phân tích hiệu quả tài chính</strong>
-                <i>/</i>
-                <span>{projects.length} dự án</span>
-              </div>
               <div className="top-actions">
                 <button type="button" className="secondary-button" onClick={() => setView("projects")}>← Quay lại MTL</button>
                 <button type="button" className="primary-button">+ Lập Phương Án FS</button>
-                <UserBadge />
               </div>
             </header>
             <section className="project-index">
@@ -4513,7 +4466,7 @@ export default function Home() {
             )}
 
             <header className="topbar workspace-topbar">
-              <div className="breadcrumbs"><span>Lập Master timeline</span><i>/</i><button className="breadcrumb-back" onClick={() => setView("projects")}>Lập & Cập nhật</button><i>/</i><strong>{activeProject.code}</strong></div>
+              <button className="breadcrumb-back" onClick={() => setView("projects")}>Danh sách dự án</button>
               <div className="top-actions">
                 <span className="saved-state"><i />Đã lưu trên thiết bị</span>
                 <button className="danger-button" onClick={() => setShowDelete(true)}>Xóa dự án</button>
@@ -4524,7 +4477,6 @@ export default function Home() {
                   </button>
                 )}
                 <button className="primary-button" onClick={openCreate}>Tạo Master timeline</button>
-                <UserBadge />
               </div>
             </header>
 
