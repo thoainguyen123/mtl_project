@@ -133,3 +133,11 @@ test("contradictory fixed milestones warn without overwriting manual values", ()
   assert.equal(result.milestoneDates.MILE_PLP_05, "2028-01-01");
   assert.ok(result.warnings.some((warning) => warning.includes("MILE_PLP_05")));
 });
+
+test("sample schedule strictly respects baselineDate as the minimum start date", () => {
+  const baseline = "2026-10-01";
+  const generated = generateParameterizedMTL(tasks, dependencies, DEFAULT_PROJECT_PARAMETERS);
+  const result = createInitialSampleSchedule(generated.tasks, generated.dependencies, generated.taskEdits, {}, DEFAULT_PROJECT_PARAMETERS, baseline);
+  assert.ok(result.earliestDate >= baseline);
+  assert.ok(Object.values(result.taskEdits).every((edit) => !edit.startDate || edit.startDate >= baseline));
+});

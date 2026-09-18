@@ -1468,8 +1468,8 @@ export default function Home() {
     parameterPreview.taskEdits,
     activeMilestoneDates,
     form.parameters,
-    today,
-  ), [parameterPreview, activeMilestoneDates, form.parameters]);
+    form.startDate || today,
+  ), [parameterPreview, activeMilestoneDates, form.parameters, form.startDate]);
   const catalogWorkGroupCodes = useMemo(() => {
     if (catalogWorkGroupFilter === "all") return null;
     const tasksByCode = new Map(fullCatalog.map((task) => [task.code, task]));
@@ -1617,6 +1617,12 @@ export default function Home() {
     setFormError("");
     if (!form.name.trim() || !form.code.trim()) return setFormError("Vui lòng nhập tên và mã dự án.");
     if (!form.region?.trim() || !form.type.trim()) return setFormError("Vui lòng khai báo vùng quản lý và loại hình dự án.");
+    if (!form.startDate) return setFormError("Vui lòng chọn Ngày bắt đầu dự án.");
+    const invalidMilestone = Object.entries(form.milestoneDates).find(([code, date]) => date && date < form.startDate);
+    if (invalidMilestone) {
+      const milestone = KEY_MILESTONES.find((m) => m.code === invalidMilestone[0]);
+      return setFormError(`Ngày của mốc "${milestone?.name ?? invalidMilestone[0]}" không được nhỏ hơn Ngày bắt đầu dự án (${formatDate(form.startDate)}).`);
+    }
     const { dienTichDat, gfa, soPhanKy, soThapBlock, soCanThapTang, soTangNoi, loaiHinhDuAn } = form.parameters;
     const constructionScale = loaiHinhDuAn === "Thấp tầng/Biệt thự" ? soCanThapTang : soThapBlock;
     const values = loaiHinhDuAn === "Thấp tầng/Biệt thự" ? [dienTichDat, gfa, soPhanKy, constructionScale] : [dienTichDat, gfa, soPhanKy, constructionScale, soTangNoi];
@@ -1653,6 +1659,15 @@ export default function Home() {
       if (!generatedTasks.length) return setFormError("Danh mục chưa có công việc nào được bật Tự động sinh.");
       const selectedGroups = [...new Set(generatedTasks.map((task) => task.groupCode))];
       const initialEdits = { ...parameterPreview.taskEdits, ...milestonePreview.taskEdits } as Record<string, TaskEdit>;
+      const minStart = form.startDate || today;
+      Object.keys(initialEdits).forEach((code) => {
+        const edit = initialEdits[code];
+        if (edit?.startDate && edit.startDate < minStart) {
+          const dur = edit.duration ?? Math.max(1, workingDaysBetween(edit.startDate, edit.endDate || edit.startDate));
+          edit.startDate = minStart;
+          edit.endDate = shiftWorking(minStart, Math.max(0, dur - 1));
+        }
+      });
       const initialDates = Object.values(initialEdits).flatMap((edit) => [edit.startDate, edit.endDate].filter((date): date is string => Boolean(date))).sort();
       project = {
         ...form,
@@ -1662,7 +1677,7 @@ export default function Home() {
         name: form.name.trim(),
         code: form.code.trim().toUpperCase(),
         officialVersion: form.version?.trim() || "v1.0",
-        startDate: initialDates[0] && initialDates[0] < form.startDate ? initialDates[0] : form.startDate,
+        startDate: minStart,
         targetDate: initialDates.at(-1) && initialDates.at(-1)! > form.targetDate ? initialDates.at(-1)! : form.targetDate,
         createdAt: new Date().toISOString(),
         taskEdits: initialEdits,
@@ -5794,11 +5809,21 @@ export default function Home() {
                   <label className="field"><span>5. Số tầng hầm</span><select value={form.parameters.soTangHam} onChange={(event) => updateProjectParameter("soTangHam", Number(event.target.value) as ProjectParameters["soTangHam"])}><option value={0}>0 hầm</option><option value={1}>1 hầm</option><option value={2}>2 hầm</option><option value={3}>3+ hầm</option></select></label>
                   <label className="field"><span>6. Số tầng nổi cao nhất</span><input type="number" min="1" max="120" value={form.parameters.soTangNoi} onChange={(event) => updateProjectParameter("soTangNoi", Number(event.target.value))} /></label>
                 </>}
-                <div className="create-section-title">5 mốc chính của dự án</div>
+                <div className="create-section-title">6 mốc chính của dự án</div>
+                <label className="field">
+                  <span>1. Ngày bắt đầu</span>
+                  <input
+                    type="date"
+                    value={form.startDate}
+                    onChange={(event) => setForm((current) => ({ ...current, startDate: event.target.value }))}
+                    aria-label="1. Ngày bắt đầu"
+                    required
+                  />
+                </label>
                 {CORE_MILESTONE_CODES.map((code, index) => {
                   const milestone = KEY_MILESTONES.find((item) => item.code === code)!;
                   return <label className="field" key={code}>
-                    <span>{index + 1}. {milestone.name}</span>
+                    <span>{index + 2}. {milestone.name}</span>
                     <input type="date" value={form.milestoneDates[code] ?? ""} onChange={(event) => setForm((current) => ({ ...current, milestoneDates: { ...current.milestoneDates, [code]: event.target.value } }))} aria-label={`${code} · ${milestone.name}`} />
                   </label>;
                 })}
@@ -5824,9 +5849,13 @@ export default function Home() {
               </div>
               <div className="create-section-title">Tiến độ mẫu</div>
               <div className="milestone-input-list field-wide">
-                {CORE_MILESTONE_CODES.map((code) => {
+                <div className="milestone-preview-card">
+                  <span><b>1. Ngày bắt đầu</b><em>Khởi tạo</em></span>
+                  <strong>{formatDate(form.startDate)}</strong>
+                </div>
+                {CORE_MILESTONE_CODES.map((code, index) => {
                   const milestone = KEY_MILESTONES.find((item) => item.code === code)!;
-                  return <div className="milestone-preview-card" key={code}><span><b>{milestone.name}</b><em>{milestonePreview.milestoneSources[code] === "manual" ? "Đã nhập" : "Giả định"}</em></span><strong>{formatDate(milestonePreview.milestoneDates[code])}</strong></div>;
+                  return <div className="milestone-preview-card" key={code}><span><b>{index + 2}. {milestone.name}</b><em>{milestonePreview.milestoneSources[code] === "manual" ? "Đã nhập" : "Giả định"}</em></span><strong>{formatDate(milestonePreview.milestoneDates[code])}</strong></div>;
                 })}
               </div>
               </details>
