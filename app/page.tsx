@@ -4973,9 +4973,6 @@ export default function Home() {
                   <label className="field"><span>5. Số tầng hầm</span><select value={form.parameters.soTangHam} onChange={(event) => updateProjectParameter("soTangHam", Number(event.target.value) as ProjectParameters["soTangHam"])}><option value={0}>0 hầm</option><option value={1}>1 hầm</option><option value={2}>2 hầm</option><option value={3}>3+ hầm</option></select></label>
                   <label className="field"><span>6. Số tầng nổi cao nhất</span><input type="number" min="1" max="120" value={form.parameters.soTangNoi} onChange={(event) => updateProjectParameter("soTangNoi", Number(event.target.value))} /></label>
                 </>}
-                <label className="field"><span>{form.parameters.loaiHinhDuAn === "Thấp tầng/Biệt thự" ? "5" : "7"}. Hiện trạng đất & GPMB</span><select value={form.parameters.hienTrangDat} onChange={(event) => updateProjectParameter("hienTrangDat", event.target.value as ProjectParameters["hienTrangDat"])}><option>Đất sạch 100%</option><option>Đang đền bù GPMB</option><option>Đất nhận chuyển nhượng (M&A)</option></select></label>
-                <label className="field"><span>{form.parameters.loaiHinhDuAn === "Thấp tầng/Biệt thự" ? "6" : "8"}. Mốc pháp lý ban đầu</span><select value={form.parameters.mocPhapLyDau} onChange={(event) => updateProjectParameter("mocPhapLyDau", event.target.value as ProjectParameters["mocPhapLyDau"])}><option>Chưa có 1/500</option><option>Đã duyệt 1/500</option><option>Đã duyệt TKCS</option><option>Đã có GPXD</option></select></label>
-                <label className="field"><span>{form.parameters.loaiHinhDuAn === "Thấp tầng/Biệt thự" ? "7" : "9"}. Nghĩa vụ tài chính đất</span><select value={form.parameters.nghiaVuTaiChinh} onChange={(event) => updateProjectParameter("nghiaVuTaiChinh", event.target.value as ProjectParameters["nghiaVuTaiChinh"])}><option>Đã hoàn thành tiền SDĐ</option><option>Đang thẩm định giá đất</option><option>Đất thuê hàng năm</option></select></label>
                 <div className="create-section-title">5 mốc chính của dự án</div>
                 {CORE_MILESTONE_CODES.map((code, index) => {
                   const milestone = KEY_MILESTONES.find((item) => item.code === code)!;
@@ -4999,7 +4996,7 @@ export default function Home() {
                 <div><b>{parameterPreview.recalculatedTaskCount}</b><span>Duration tính lại</span></div>
               </div>
               <div className="impact-list field-wide">
-                {parameterPreview.impacts.map((impact) => <article key={impact.parameter} title={impact.detail}><div><b>{impact.title}</b></div><span>{impact.affectedTasks} task</span></article>)}
+                {parameterPreview.impacts.filter((impact) => !["PARAM_HIEN_TRANG_DAT", "PARAM_MOC_PHAP_LY_DAU", "PARAM_NGHIA_VU_TAI_CHINH"].includes(impact.parameter)).map((impact) => <article key={impact.parameter} title={impact.detail}><div><b>{impact.title}</b></div><span>{impact.affectedTasks} task</span></article>)}
               </div>
               <div className="create-section-title">Tiến độ mẫu từ 5 mốc chính</div>
               <div className="milestone-input-list field-wide">
