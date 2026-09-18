@@ -45,3 +45,13 @@ next-env.d.ts
 /.sites-runtime/
 /outputs/
 /work/
+/scratch/
+
+# AI agents and internal artifacts
+/.agents/
+/implementation_plan.md
+/walkthrough.md
+
+# database & logs
+/drizzle/
+*.log

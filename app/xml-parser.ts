@@ -1,7 +1,32 @@
+export type ParsedTask = {
+  id: number;
+  code: string;
+  parentCode: string | null;
+  groupCode: string;
+  name: string;
+  level: number;
+  summary: boolean;
+  defaultDuration: number;
+  custom: boolean;
+};
+
+export type ParsedTaskEdit = {
+  startDate?: string;
+  endDate?: string;
+  duration?: number;
+  status?: string;
+};
+
+export type ParsedDependency = {
+  predecessorCode: string;
+  type: string;
+  lagDays: number;
+};
+
 export type ParsedProjectData = {
-  customTasks: any[];
-  taskEdits: Record<string, any>;
-  taskDependencies: Record<string, any[]>;
+  customTasks: ParsedTask[];
+  taskEdits: Record<string, ParsedTaskEdit>;
+  taskDependencies: Record<string, ParsedDependency[]>;
 };
 
 export async function parseMSProjectXML(xmlString: string): Promise<ParsedProjectData> {
@@ -15,9 +40,9 @@ export async function parseMSProjectXML(xmlString: string): Promise<ParsedProjec
 
   const tasks = Array.from(doc.querySelectorAll("Project > Tasks > Task"));
   
-  const customTasks: any[] = [];
-  const taskEdits: Record<string, any> = {};
-  const taskDependencies: Record<string, any[]> = {};
+  const customTasks: ParsedTask[] = [];
+  const taskEdits: Record<string, ParsedTaskEdit> = {};
+  const taskDependencies: Record<string, ParsedDependency[]> = {};
   
   // Mapping UID to Code for dependencies
   const uidToCode: Record<string, string> = {};

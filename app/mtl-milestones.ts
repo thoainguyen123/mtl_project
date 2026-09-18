@@ -211,6 +211,7 @@ export function createInitialSampleSchedule(
     if (link.type === "FF") return Boolean(predecessor.endDate && successor.endDate && successor.endDate < shiftWorking(predecessor.endDate, link.lagDays));
     return Boolean(predecessor.startDate && successor.endDate && successor.endDate < shiftWorking(predecessor.startDate, link.lagDays));
   }).length;
+  if (dependencyOverrun) warnings.push(`${dependencyOverrun} quan hệ task vẫn xung đột với ngày mốc hoặc thời lượng giả định; cần điều chỉnh thủ công sau khi tạo MTL.`);
   if (validDate(baselineDate)) {
     leaves.forEach((task) => {
       const edit = edits[task.code];
