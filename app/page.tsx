@@ -2286,14 +2286,10 @@ export default function Home() {
           padding-bottom: 16px;
           border-bottom: 1px solid #f1f5f9;
         }
-        .demo-modal-icon {
-          width: 36px;
-          height: 36px;
-          border-radius: 8px;
-          background: #23b26d;
-          display: grid;
-          place-items: center;
-          color: #ffffff;
+        .demo-modal-logo {
+          width: 38px;
+          height: 38px;
+          object-fit: contain;
           flex: none;
         }
         .demo-modal-title {
@@ -2496,7 +2492,7 @@ export default function Home() {
           onClick={() => setShowDemoModal(true)}
         >
           <span className="nova-icon-wrap">
-            <IconNovaEmblem size={16} />
+            <img src="/app-logo.png" alt="Logo" style={{ width: "20px", height: "20px", objectFit: "contain" }} />
           </span>
           <span>Đăng nhập Tài khoản NovaGroup</span>
         </button>
@@ -2586,9 +2582,7 @@ export default function Home() {
         <div className="demo-modal-backdrop" onMouseDown={() => setShowDemoModal(false)}>
           <div className="demo-modal-card" onMouseDown={(e) => e.stopPropagation()}>
             <div className="demo-modal-header">
-              <div className="demo-modal-icon">
-                <IconNovaEmblem size={20} />
-              </div>
+              <img src="/app-logo.png" alt="Logo" className="demo-modal-logo" />
               <div className="demo-modal-title">
                 <h3>Đăng nhập Tài khoản NovaGroup</h3>
                 <p>Môi trường Giả lập & Trải nghiệm (Demo Environment)</p>
