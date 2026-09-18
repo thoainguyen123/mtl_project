@@ -3590,13 +3590,6 @@ export default function Home() {
         ) : view === "catalog" ? (
           <>
             <header className="topbar">
-              <div className="breadcrumbs">
-                <span>Lập Master Timeline</span>
-                <i>/</i>
-                <strong>Cấu trúc Master Timeline</strong>
-                <i>/</i>
-                <span>{fullCatalog.length} công việc</span>
-              </div>
               <div className="top-actions">
                 <button type="button" className="secondary-button" onClick={() => setCatalogCollapsed(new Set())}>
                   Expand all
@@ -3610,7 +3603,6 @@ export default function Home() {
                 <button type="button" className="primary-button" onClick={() => openTaskCreator(false)}>
                   + Thêm công việc
                 </button>
-                <UserBadge />
               </div>
             </header>
 
