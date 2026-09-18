@@ -1944,7 +1944,7 @@ export default function Home() {
   );
 
   return (
-    <main className="app-shell">
+    <main className="app-shell refined-ui">
       <style>{`
         *, *::before, *::after,
         html, body, div, span,
@@ -3620,7 +3620,7 @@ export default function Home() {
           <>
             <header className="page-top-header">
               <div className="page-top-title-group">
-                <h1>DANH SÁCH DỰ ÁN</h1>
+                <h1>Dự án</h1>
                 <div className="top-stat-cards">
                   <div className="top-stat-card">
                     <span>TỔNG DỰ ÁN</span>
@@ -3742,10 +3742,10 @@ export default function Home() {
                   />
                 </label>
                 <button type="button" className="secondary-button" onClick={() => setCatalogCollapsed(new Set())}>
-                  Expand all
+                  Mở tất cả
                 </button>
                 <button type="button" className="secondary-button" onClick={() => setCatalogCollapsed(new Set(catalogParentCodes))}>
-                  Collapse all
+                  Thu gọn
                 </button>
                 <button type="button" className="secondary-button" onClick={toggleAllCatalogTasks}>
                   {enabledCatalogCount === fullCatalog.length ? "Bỏ tích tất cả" : "Tích tất cả"}
@@ -3771,9 +3771,9 @@ export default function Home() {
                   >
                     <div className="catalog-group-card-top">
                       <span>{group.code}</span>
-                      <small>{count} task</small>
+                      <small>{count}</small>
                     </div>
-                    <b>{group.short} · {group.name}</b>
+                    <b title={group.name}>{group.short}</b>
                   </button>
                 );
               })}
@@ -3865,7 +3865,7 @@ export default function Home() {
                       ) : <i className="catalog-tree-spacer" aria-hidden="true" />}
                       <b className="catalog-wbs-code" title={task.code}>{task.code}</b>
                     </span>
-                    <span className="catalog-name-cell">
+                    <span className="catalog-name-cell" title={task.name}>
                       {task.name}
                     </span>
                     <span className="catalog-name-cell" title={task.gmdReport}>
@@ -3927,7 +3927,7 @@ export default function Home() {
               <section className="department-header"><div><h1>Xác nhận MTL theo phòng ban</h1></div><div className="department-progress"><b>{departmentApprovedCount}/{activeProject.selectedGroups.length}</b><span>ĐẦU MỤC ĐÃ XÁC NHẬN</span><i><em style={{ width: `${(departmentApprovedCount / Math.max(activeProject.selectedGroups.length, 1)) * 100}%` }} /></i></div></section>
               <section className="department-review-layout">
                 <aside className="department-groups" aria-label="Đầu mục phòng ban">
-                  <header><span>VAI TRÒ PHÒNG BAN · DEMO</span><b>{departmentPendingCount} đầu mục còn chờ</b></header><p className="department-demo-note">Bản triển khai thật sẽ tự nhận diện tài khoản và chỉ hiện đúng một đầu mục được phân quyền.</p>
+                  <header><span>PHÒNG BAN</span><b>{departmentPendingCount} chờ xác nhận</b></header>
                   <div className="department-group-section"><strong>KHỐI PHÒNG BAN · 9.x</strong>{GROUPS.filter((group) => group.code.startsWith("9.") && activeProject.selectedGroups.includes(group.code)).map((group) => { const approval = activeProject.departmentApprovals[group.code]; return <button key={group.code} className={`${departmentCode === group.code ? "active" : ""} status-${approval?.status ?? "pending"}`} onClick={() => setDepartmentCode(group.code)}><i>{approval?.status === "approved" ? "✓" : approval?.status === "changes_requested" ? "!" : "·"}</i><span><b>{group.code} · {group.short}</b><small>{group.name}</small>{approval?.reviewer && <em>{approval.reviewer}</em>}</span></button>; })}</div>
                   <div className="department-group-section"><strong>PHÒNG TRỰC TIẾP · 4.x</strong>{PBCM_GROUPS.filter((group) => group.code.startsWith("4.") && activeProject.selectedGroups.includes(group.code)).map((group) => { const approval = activeProject.departmentApprovals[group.code]; return <button key={group.code} className={`${departmentCode === group.code ? "active" : ""} status-${approval?.status ?? "pending"}`} onClick={() => setDepartmentCode(group.code)}><i>{approval?.status === "approved" ? "✓" : approval?.status === "changes_requested" ? "!" : "·"}</i><span><b>{group.code} · {group.short}</b><small>{group.name}</small>{approval?.reviewer && <em>{approval.reviewer}</em>}</span></button>; })}</div>
                 </aside>
@@ -4070,7 +4070,7 @@ export default function Home() {
           <>
             <header className="page-top-header">
               <div className="page-top-title-group">
-                <h1>XÁC NHẬN PHÊ DUYỆT</h1>
+                <h1>Xác nhận phê duyệt</h1>
                 <div className="top-stat-cards">
                   <div className="top-stat-card">
                     <span>TỔNG DỰ ÁN</span>
@@ -4203,7 +4203,7 @@ export default function Home() {
           <>
             <header className="page-top-header">
               <div className="page-top-title-group">
-                <h1>DANH MỤC MASTER TIMELINE ĐÃ PHÊ DUYỆT</h1>
+                <h1>Master Timeline đã duyệt</h1>
               </div>
               <div className="page-top-actions">
                 <label className="search-field" style={{ margin: 0, minWidth: "220px", maxWidth: "300px" }}>
@@ -4252,7 +4252,7 @@ export default function Home() {
               </div>
 
               {visibleApprovedProjects.length > 0 ? (
-                <div className="project-table" aria-label="Các dự án MTL đã duyệt">
+                <div className="project-table approved-project-table" aria-label="Các dự án MTL đã duyệt">
                   <div className="project-table-head" style={{ gridTemplateColumns: "90px 100px minmax(170px, 1.4fr) 140px 80px 100px 130px 110px 150px" }}>
                     <span>Vùng</span>
                     <span>Mã DA</span>
@@ -4328,7 +4328,7 @@ export default function Home() {
           <>
             <header className="page-top-header">
               <div className="page-top-title-group">
-                <h1>DANH SÁCH DỰ ÁN LẬP NHIỆM VỤ THIẾT KẾ (NVTK)</h1>
+                <h1>Nhiệm vụ thiết kế</h1>
                 <div className="top-stat-cards">
                   <div className="top-stat-card">
                     <span>TỔNG DỰ ÁN</span>
@@ -4447,7 +4447,7 @@ export default function Home() {
           <>
             <header className="page-top-header">
               <div className="page-top-title-group">
-                <h1>DANH SÁCH DỰ ÁN LẬP FS THỰC THI (FS-VER2)</h1>
+                <h1>FS thực thi</h1>
                 <div className="top-stat-cards">
                   <div className="top-stat-card">
                     <span>TỔNG DỰ ÁN</span>
@@ -4575,7 +4575,7 @@ export default function Home() {
               <div className="top-actions">
                 <span className="saved-state"><i />Đã lưu trên thiết bị</span>
                 <button className="secondary-button project-export" onClick={exportMicrosoftProject}>
-                  Xuất Microsoft Project <small>.xml → .mpp</small>
+                  Xuất Microsoft Project
                 </button>
                 {activeProject.isOfficialApproved && activeProject.eApprovalUrl && (
                   <a
@@ -4627,7 +4627,7 @@ export default function Home() {
               </div>
               <div className="top-stat-cards workspace-stat-cards">
                 <div className="top-stat-card">
-                  <span>TASK ĐÃ SINH</span>
+                  <span>Công việc</span>
                   <b>{scheduled.length}</b>
                 </div>
                 <div className="top-stat-card">
@@ -4762,7 +4762,7 @@ export default function Home() {
                   })}
                   {!visibleTasks.length && <div className="no-results">Không tìm thấy công việc phù hợp.</div>}
                 </div>
-                <footer className="grid-footer"><span>Hiển thị {visibleTasks.length}/{scheduled.length} task · {projectDependencyCount(activeProject)} liên kết</span><span>Nhấp chuột vào dòng để chỉnh sửa chi tiết, ngày tháng, liên kết hoặc nhấp chuột phải để thêm/xóa công việc.</span></footer>
+                <footer className="grid-footer"><span>{visibleTasks.length}/{scheduled.length} công việc</span><span>{projectDependencyCount(activeProject)} liên kết</span></footer>
               </section>
 
               {selectedTask && (
@@ -5030,7 +5030,7 @@ export default function Home() {
               </section>}
 
               {createStep === 2 && <section className="create-slide field-wide" aria-label="Cấu hình và khởi tạo">
-                <div className="create-section-title">Tham số hình thành tiến độ dự án</div>
+                <div className="create-section-title">Tham số dự án</div>
                 <label className="field field-wide">
                   <span>1. Loại hình dự án & Sản phẩm</span>
                   <select value={form.parameters.loaiHinhDuAn} onChange={(event) => {
@@ -5060,14 +5060,17 @@ export default function Home() {
                     <input type="date" value={form.milestoneDates[code] ?? ""} onChange={(event) => setForm((current) => ({ ...current, milestoneDates: { ...current.milestoneDates, [code]: event.target.value } }))} aria-label={`${code} · ${milestone.name}`} />
                   </label>;
                 })}
-              <div className="create-section-title">Nguồn dữ liệu khởi tạo thay thế</div>
+              <details className="create-options field-wide">
+              <summary>Nhập từ Microsoft Project</summary>
               <div className="field field-wide">
                 <div className="file-upload-box">
-                  <span style={{ fontSize: "12px", fontWeight: 700, color: "#334155" }}>Tải Master Timeline từ Microsoft Project (.xml) — không bắt buộc {xmlData && <em style={{ color: "#167461", fontStyle: "normal" }}>· ✓ {xmlData.customTasks.length} công việc</em>}</span>
+                  <span style={{ fontSize: "12px", fontWeight: 600, color: "#334155" }}>Tệp .xml (tùy chọn) {xmlData && <em style={{ color: "#167461", fontStyle: "normal" }}>· ✓ {xmlData.customTasks.length} công việc</em>}</span>
                   <input type="file" accept=".xml" onChange={handleXMLUpload} className="file-input-styled" />
                 </div>
               </div>
-              <div className="create-section-title">Kết quả sinh task dự kiến</div>
+              </details>
+              <details className="create-options field-wide">
+              <summary>{parameterPreview.tasks.length} công việc · Xem tiến độ dự kiến</summary>
               <div className="parameter-summary field-wide">
                 <div><b>{parameterPreview.tasks.length}</b><span>Task sau khởi tạo</span></div>
                 <div><b>+{parameterPreview.generatedTaskCount}</b><span>Task được sinh thêm</span></div>
@@ -5077,13 +5080,14 @@ export default function Home() {
               <div className="impact-list field-wide">
                 {parameterPreview.impacts.filter((impact) => !["PARAM_HIEN_TRANG_DAT", "PARAM_MOC_PHAP_LY_DAU", "PARAM_NGHIA_VU_TAI_CHINH"].includes(impact.parameter)).map((impact) => <article key={impact.parameter} title={impact.detail}><div><b>{impact.title}</b></div><span>{impact.affectedTasks} task</span></article>)}
               </div>
-              <div className="create-section-title">Tiến độ mẫu từ 5 mốc chính</div>
+              <div className="create-section-title">Tiến độ mẫu</div>
               <div className="milestone-input-list field-wide">
                 {CORE_MILESTONE_CODES.map((code) => {
                   const milestone = KEY_MILESTONES.find((item) => item.code === code)!;
                   return <div className="milestone-preview-card" key={code}><span><b>{milestone.name}</b><em>{milestonePreview.milestoneSources[code] === "manual" ? "Đã nhập" : "Giả định"}</em></span><strong>{formatDate(milestonePreview.milestoneDates[code])}</strong></div>;
                 })}
               </div>
+              </details>
               </section>}
             </div>
 
