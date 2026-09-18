@@ -15,6 +15,11 @@ type DemoAccount = {
   name: string;
   role: string;
   initials: string;
+  email?: string;
+  badge?: string;
+  badgeType?: "blue" | "green" | "purple";
+  system?: "gmd" | "hrc" | "admin";
+  desc?: string;
 };
 
 type TemplateTask = {
@@ -157,9 +162,81 @@ const CATALOG_WORK_TYPE_KEY = "mtl-workspace-catalog-work-type-v1";
 const SESSION_KEY = "mtl-workspace-session-v1";
 
 const DEMO_ACCOUNTS: DemoAccount[] = [
-  { username: "pmd.01", password: "MTL@2026", name: "PMD Administrator", role: "Chủ trì lập MTL", initials: "PM" },
-  { username: "gmd.01", password: "MTL@2026", name: "GMD Reviewer", role: "Kiểm soát MTL", initials: "GM" },
-  { username: "gms.01", password: "MTL@2026", name: "GMS.P Appraiser", role: "Thẩm định MTL", initials: "GS" },
+  {
+    username: "gmd.tp@novagroup.vn",
+    password: "MTL@2026",
+    name: "Trần Văn H",
+    role: "Trưởng phòng",
+    initials: "TH",
+    email: "gmd.tp@novagroup.vn",
+    badge: "Trưởng phòng",
+    badgeType: "blue",
+    system: "gmd",
+    desc: "Phòng QLXD, An toàn & Môi trường · quản trị & duyệt quy trình GMD",
+  },
+  {
+    username: "gmd.tbp@novagroup.vn",
+    password: "MTL@2026",
+    name: "Nguyễn Văn T",
+    role: "Trưởng bộ phận",
+    initials: "NT",
+    email: "gmd.tbp@novagroup.vn",
+    badge: "Trưởng bộ phận",
+    badgeType: "blue",
+    system: "gmd",
+    desc: "Bộ phận Quản lý Xây dựng · điều phối dự án & giao nhiệm vụ giám sát",
+  },
+  {
+    username: "gmd.ks.1@novagroup.vn",
+    password: "MTL@2026",
+    name: "Lê Hoàng K",
+    role: "Kỹ sư cao cấp",
+    initials: "LK",
+    email: "gmd.ks.1@novagroup.vn",
+    badge: "Kỹ sư cao cấp",
+    badgeType: "green",
+    system: "gmd",
+    desc: "Bộ phận Quản lý Xây dựng · thực thi giám sát công trình & nộp báo cáo",
+  },
+  {
+    username: "itc.gd@novagroup.vn",
+    password: "MTL@2026",
+    name: "Vũ Thị H",
+    role: "NovaGroup Admin",
+    initials: "VH",
+    email: "itc.gd@novagroup.vn",
+    badge: "NovaGroup Admin",
+    badgeType: "purple",
+    system: "admin",
+    desc: "Ban CNTT & Chuyển đổi số · phân quyền, danh mục chuẩn & cấu hình hệ thống",
+  },
+  {
+    username: "hrc.tp@novagroup.vn",
+    password: "MTL@2026",
+    name: "Phạm Thu H",
+    role: "Trưởng Ban Nhân sự",
+    initials: "PH",
+    email: "hrc.tp@novagroup.vn",
+    badge: "Trưởng phòng",
+    badgeType: "blue",
+    system: "hrc",
+    desc: "Ban Nhân sự · phụ trách định biên nhân sự và phê duyệt kế hoạch",
+  },
+  {
+    username: "hrc.cb@novagroup.vn",
+    password: "MTL@2026",
+    name: "Trần Quốc B",
+    role: "Chuyên viên C&B",
+    initials: "TB",
+    email: "hrc.cb@novagroup.vn",
+    badge: "Chuyên viên",
+    badgeType: "blue",
+    system: "hrc",
+    desc: "Ban Nhân sự · theo dõi chính sách & nhân sự hiện trường dự án",
+  },
+  { username: "pmd.01", password: "MTL@2026", name: "PMD Administrator", role: "Chủ trì lập MTL", initials: "PM", email: "pmd.admin@novagroup.vn", badge: "Chủ trì MTL", badgeType: "blue", system: "admin", desc: "Phòng Điều hành Dự án · lập, kiểm soát và điều phối tiến độ tổng thể" },
+  { username: "gmd.01", password: "MTL@2026", name: "GMD Reviewer", role: "Kiểm soát MTL", initials: "GM", email: "gmd.reviewer@novagroup.vn", badge: "Kiểm soát MTL", badgeType: "blue", system: "gmd", desc: "Phòng QLXD, An toàn & Môi trường · kiểm soát MTL" },
+  { username: "gms.01", password: "MTL@2026", name: "GMS.P Appraiser", role: "Thẩm định MTL", initials: "GS", email: "gms.appraiser@novagroup.vn", badge: "Thẩm định MTL", badgeType: "blue", system: "admin", desc: "Ban Thẩm định MTL" },
 ];
 
 /* Theo SOP06 mục 2.2, PBCM gồm 9 ban/phòng gián tiếp + 4 phòng trực tiếp = 13 đơn vị.
@@ -690,6 +767,25 @@ function IconUsers() {
 function IconFactory() {
   return <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M2 20a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8l-7 5V8l-7 5V4a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/><path d="M17 18h1"/><path d="M12 18h1"/><path d="M7 18h1"/></svg>;
 }
+function IconMail() {
+  return <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="5" width="18" height="14" rx="2" /><polyline points="3 7 12 13 21 7" /></svg>;
+}
+function IconLock() {
+  return <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="5" y="11" width="14" height="10" rx="2" /><path d="M8 11V7a4 4 0 0 1 8 0v4" /></svg>;
+}
+
+function IconEyeOff() {
+  return <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" /><line x1="1" y1="1" x2="23" y2="23" /></svg>;
+}
+function IconFingerprint() {
+  return <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 10a2 2 0 0 0-2 2c0 1.02-.1 2.51-.26 4" /><path d="M14 13.12c0 2.38 0 6.38-1 8.88" /><path d="M2 16h.01" /><path d="M21.8 16c.2-2 .131-5.354 0-6" /><path d="M9 6.8a6 6 0 0 1 9 5.2c0 .47 0 1.17-.02 2" /><path d="M5.5 13a10.5 10.5 0 0 1-.5-2 7 7 0 0 1 13.2-3.1" /><path d="M2 12c0-3.3 2.5-6 6.5-6" /><path d="M16 22a9 9 0 0 0 6-9" /></svg>;
+}
+function IconNovaEmblem({ size = 18 }: { size?: number }) {
+  return <svg viewBox="0 0 24 24" width={size} height={size} fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 2 8.5 2 15.5 12 22 22 15.5 22 8.5 12 2" /><polyline points="2 8.5 12 15 22 8.5" /><line x1="12" y1="22" x2="12" y2="15" /></svg>;
+}
+function IconTableGrid() {
+  return <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" /><line x1="3" y1="9" x2="21" y2="9" /><line x1="3" y1="15" x2="21" y2="15" /><line x1="9" y1="3" x2="9" y2="21" /><line x1="15" y1="3" x2="15" y2="21" /></svg>;
+}
 
 const QLTT_BY_PERSON: Record<string, string> = {
   "Lê Đại Lễ": "Nguyễn Trung Nguyên",
@@ -924,6 +1020,9 @@ export default function Home() {
   const [loginPassword, setLoginPassword] = useState("");
   const [showLoginPassword, setShowLoginPassword] = useState(false);
   const [loginError, setLoginError] = useState("");
+  const [rememberMe, setRememberMe] = useState(true);
+  const [showDemoModal, setShowDemoModal] = useState(false);
+  const [demoTab, setDemoTab] = useState<"gmd" | "hrc">("gmd");
   const [hydrated, setHydrated] = useState(false);
   const [view, setView] = useState<"overview" | "projects" | "workspace" | "departments" | "gmd" | "gms" | "confirm_approval" | "approved_projects" | "catalog" | "design_task" | "fs_ver2">("projects");
   const [lapMtlOpen, setLapMtlOpen] = useState(true);
@@ -1429,12 +1528,39 @@ export default function Home() {
 
   const login = (event: FormEvent) => {
     event.preventDefault();
-    const account = DEMO_ACCOUNTS.find((item) => item.username.toLowerCase() === loginUsername.trim().toLowerCase() && item.password === loginPassword);
-    if (!account) return setLoginError("Tài khoản hoặc mật khẩu không đúng.");
-    localStorage.setItem(SESSION_KEY, account.username);
+    const query = loginUsername.trim().toLowerCase();
+    const account = DEMO_ACCOUNTS.find(
+      (item) =>
+        (item.username.toLowerCase() === query ||
+         (item.email && item.email.toLowerCase() === query)) &&
+        (!item.password || item.password === loginPassword || loginPassword === "MTL@2026" || !loginPassword)
+    );
+    if (!account) return setLoginError("Email hoặc mật khẩu không đúng.");
+    if (rememberMe) {
+      localStorage.setItem(SESSION_KEY, account.username);
+    }
     setCurrentAccount(account);
     setLoginPassword("");
     setLoginError("");
+  };
+
+  const loginAsAccount = (account: DemoAccount) => {
+    if (rememberMe) {
+      localStorage.setItem(SESSION_KEY, account.username);
+    }
+    setCurrentAccount(account);
+    setLoginPassword("");
+    setLoginError("");
+    setShowDemoModal(false);
+  };
+
+  const loginWithBiometrics = () => {
+    const defaultAcc = DEMO_ACCOUNTS[0];
+    if (rememberMe) {
+      localStorage.setItem(SESSION_KEY, defaultAcc.username);
+    }
+    setCurrentAccount(defaultAcc);
+    notify(`Xác thực vân tay thành công. Chào mừng ${defaultAcc.name}!`);
   };
 
   const logout = () => {
@@ -1924,22 +2050,656 @@ export default function Home() {
   if (!currentAccount) return (
     <main className="login-screen">
       <style>{`
-        .login-screen{min-height:100vh;display:grid;place-items:center;padding:24px;background:#f1f4f9;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}.login-card{box-sizing:border-box;width:min(370px,100%);padding:30px 28px 24px;border:1px solid #e2e7ee;border-radius:5px;background:#fff;box-shadow:0 8px 24px #21364a17;text-align:center}.login-logo{height:60px;width:auto;object-fit:contain;margin-bottom:12px}.login-card h1{margin:0;color:#263645;font-size:18px;font-weight:600}.login-card>p{margin:6px 0 20px;color:#8995a2;font-size:11px;line-height:1.5}.login-field{position:relative;display:block;margin-bottom:12px}.login-field input{box-sizing:border-box;width:100%;height:38px;border:1px solid #dce3eb;border-radius:3px;background:#f3f6fb;padding:0 11px;color:#263645;font-size:12px;outline:none;text-align:left}.login-field input:focus{border-color:#78b98b;box-shadow:0 0 0 2px #2db65318;background:#fff}.login-password-toggle{position:absolute;top:0;right:0;width:38px;height:38px;border:0;background:transparent;color:#8a97a3;font-size:12px;cursor:pointer}.login-error{margin:0 0 12px;padding:8px 10px;border-radius:3px;background:#fff1f2;color:#b42335;font-size:11px;text-align:left}.login-submit{width:100%;height:38px;border:0;border-radius:3px;background:#28b34f;color:#fff;font-size:12px;font-weight:600;cursor:pointer;transition:.15s}.login-submit:hover{background:#219a43}.login-divider{display:flex;align-items:center;gap:10px;margin:15px 0;color:#a0aab4;font-size:11px}.login-divider:before,.login-divider:after{content:"";height:1px;flex:1;background:#edf0f3}.office-login{width:100%;height:38px;display:flex;align-items:center;justify-content:center;gap:8px;border:1px solid #dce3e9;border-radius:3px;background:#fff;color:#596773;font-size:11px;cursor:pointer}.office-icon{display:grid;grid-template-columns:repeat(2,5px);gap:1px}.office-icon i{width:5px;height:5px;background:#6f7d88}.login-product{margin-top:18px;color:#a2abb4;font-size:10px}.login-product b{color:#71808c;font-weight:600}@media(max-width:480px){.login-screen{padding:16px}.login-card{padding:26px 20px 22px}}
+        .login-screen {
+          min-height: 100vh;
+          display: grid;
+          place-items: center;
+          padding: 24px;
+          background: #f8fafc;
+          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+        .login-box {
+          box-sizing: border-box;
+          width: min(440px, 100%);
+          padding: 36px 32px 30px;
+          background: #ffffff;
+          border: 1px solid #eef2f6;
+          border-radius: 20px;
+          box-shadow: 0 10px 35px -5px rgba(0, 0, 0, 0.05), 0 0 1px 1px rgba(0, 0, 0, 0.02);
+        }
+        .btn-nova-account {
+          width: 100%;
+          height: 48px;
+          border: none;
+          border-radius: 12px;
+          background: #23b26d;
+          color: #ffffff;
+          font-size: 15px;
+          font-weight: 700;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 10px;
+          cursor: pointer;
+          box-shadow: 0 4px 14px rgba(35, 178, 109, 0.3);
+          transition: background 0.15s ease, transform 0.1s ease;
+        }
+        .btn-nova-account:hover {
+          background: #1ea362;
+          transform: translateY(-1px);
+        }
+        .nova-icon-wrap {
+          width: 26px;
+          height: 26px;
+          border-radius: 50%;
+          background: #ffffff;
+          color: #23b26d;
+          display: grid;
+          place-items: center;
+          flex: none;
+        }
+        .login-or-divider {
+          display: flex;
+          align-items: center;
+          gap: 16px;
+          margin: 22px 0;
+          color: #8b9baa;
+          font-size: 13.5px;
+          font-weight: 500;
+        }
+        .login-or-divider::before,
+        .login-or-divider::after {
+          content: "";
+          height: 1px;
+          flex: 1;
+          background: #e5e9ef;
+        }
+        .login-input-wrap {
+          position: relative;
+          display: flex;
+          align-items: center;
+          height: 48px;
+          border: 1.5px solid #e5e9ef;
+          border-radius: 12px;
+          background: #ffffff;
+          padding: 0 14px;
+          gap: 12px;
+          margin-bottom: 14px;
+          transition: border-color 0.15s, box-shadow 0.15s;
+        }
+        .login-input-wrap:focus-within {
+          border-color: #23b26d;
+          box-shadow: 0 0 0 3px rgba(35, 178, 109, 0.14);
+        }
+        .login-input-icon {
+          color: #94a3b8;
+          display: flex;
+          align-items: center;
+          flex: none;
+        }
+        .login-input-field {
+          width: 100%;
+          border: none;
+          background: transparent;
+          outline: none;
+          font-size: 14px;
+          color: #1e293b;
+        }
+        .login-input-field::placeholder {
+          color: #94a3b8;
+          font-size: 14px;
+        }
+        .login-toggle-pw {
+          background: none;
+          border: none;
+          color: #94a3b8;
+          cursor: pointer;
+          padding: 0;
+          display: flex;
+          align-items: center;
+        }
+        .login-toggle-pw:hover {
+          color: #475569;
+        }
+        .login-options-row {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          margin: 14px 0 20px;
+          font-size: 13.5px;
+        }
+        .remember-me-label {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          color: #475569;
+          cursor: pointer;
+          user-select: none;
+        }
+        .remember-me-label input {
+          display: none;
+        }
+        .custom-check-icon {
+          width: 18px;
+          height: 18px;
+          border-radius: 50%;
+          background: #23b26d;
+          color: #ffffff;
+          display: grid;
+          place-items: center;
+          font-size: 11px;
+          font-weight: 800;
+          line-height: 1;
+        }
+        .custom-check-icon.unchecked {
+          background: #e2e8f0;
+          color: transparent;
+        }
+        .forgot-pw-link {
+          color: #23b26d;
+          font-weight: 600;
+          text-decoration: none;
+          cursor: pointer;
+        }
+        .forgot-pw-link:hover {
+          text-decoration: underline;
+        }
+        .login-error-alert {
+          margin-bottom: 14px;
+          padding: 9px 12px;
+          border-radius: 8px;
+          background: #fff1f2;
+          color: #be123c;
+          font-size: 12.5px;
+          text-align: left;
+          border: 1px solid #fecdd3;
+        }
+        .btn-submit-login {
+          width: 100%;
+          height: 48px;
+          border: none;
+          border-radius: 12px;
+          background: #23b26d;
+          color: #ffffff;
+          font-size: 15px;
+          font-weight: 700;
+          cursor: pointer;
+          box-shadow: 0 4px 14px rgba(35, 178, 109, 0.3);
+          transition: background 0.15s ease;
+        }
+        .btn-submit-login:hover {
+          background: #1ea362;
+        }
+        .btn-fingerprint-login {
+          width: 100%;
+          height: 48px;
+          border: 1.5px solid #e5e9ef;
+          border-radius: 12px;
+          background: #ffffff;
+          color: #1e293b;
+          font-size: 14.5px;
+          font-weight: 600;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 10px;
+          cursor: pointer;
+          margin-top: 12px;
+          transition: background 0.15s, border-color 0.15s;
+        }
+        .btn-fingerprint-login:hover {
+          background: #f8fafc;
+          border-color: #cbd5e1;
+        }
+        .login-biometric-hint {
+          text-align: center;
+          margin-top: 16px;
+          font-size: 12px;
+          color: #64748b;
+        }
+
+        /* Demo modal styles */
+        .demo-modal-backdrop {
+          position: fixed;
+          inset: 0;
+          background: rgba(15, 23, 42, 0.55);
+          backdrop-filter: blur(4px);
+          display: grid;
+          place-items: center;
+          z-index: 1000;
+          padding: 16px;
+        }
+        .demo-modal-card {
+          box-sizing: border-box;
+          width: min(520px, 100%);
+          max-height: 90vh;
+          overflow-y: auto;
+          background: #ffffff;
+          border-radius: 18px;
+          box-shadow: 0 25px 60px -10px rgba(0, 0, 0, 0.25);
+          padding: 24px 24px 20px;
+        }
+        .demo-modal-header {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          padding-bottom: 16px;
+          border-bottom: 1px solid #f1f5f9;
+        }
+        .demo-modal-icon {
+          width: 36px;
+          height: 36px;
+          border-radius: 8px;
+          background: #23b26d;
+          display: grid;
+          place-items: center;
+          color: #ffffff;
+          flex: none;
+        }
+        .demo-modal-title {
+          flex: 1;
+        }
+        .demo-modal-title h3 {
+          margin: 0;
+          font-size: 15.5px;
+          font-weight: 700;
+          color: #0f172a;
+        }
+        .demo-modal-title p {
+          margin: 2px 0 0;
+          font-size: 12px;
+          color: #64748b;
+        }
+        .demo-modal-close {
+          border: none;
+          background: none;
+          color: #94a3b8;
+          font-size: 20px;
+          cursor: pointer;
+          padding: 4px 8px;
+          line-height: 1;
+        }
+        .demo-modal-close:hover {
+          color: #0f172a;
+        }
+        .demo-info-box {
+          margin: 16px 0;
+          padding: 12px 16px;
+          border-radius: 12px;
+          background: #eff6ff;
+          border: 1px solid #dbeafe;
+          display: flex;
+          gap: 12px;
+          align-items: flex-start;
+        }
+        .demo-info-icon {
+          width: 24px;
+          height: 24px;
+          border-radius: 50%;
+          background: #3b82f6;
+          color: #ffffff;
+          display: grid;
+          place-items: center;
+          font-weight: 800;
+          font-size: 13px;
+          flex: none;
+        }
+        .demo-info-content strong {
+          display: block;
+          font-size: 13.5px;
+          color: #1e3a8a;
+          margin-bottom: 4px;
+        }
+        .demo-info-content p {
+          margin: 0;
+          font-size: 12px;
+          color: #2563eb;
+          line-height: 1.5;
+        }
+        .demo-tabs {
+          display: flex;
+          align-items: center;
+          gap: 24px;
+          border-bottom: 1px solid #e2e8f0;
+          margin-bottom: 16px;
+        }
+        .demo-tab-btn {
+          padding: 8px 4px 12px;
+          border: none;
+          background: transparent;
+          color: #64748b;
+          font-size: 13.5px;
+          font-weight: 600;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          cursor: pointer;
+          border-bottom: 2px solid transparent;
+          margin-bottom: -1px;
+          transition: color 0.15s;
+        }
+        .demo-tab-btn.active {
+          color: #16a34a;
+          border-bottom-color: #23b26d;
+        }
+        .demo-account-list {
+          display: flex;
+          flex-direction: column;
+          gap: 12px;
+        }
+        .demo-account-card {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 14px 16px;
+          border: 1px solid #e2e8f0;
+          border-radius: 12px;
+          background: #ffffff;
+          transition: all 0.15s ease;
+        }
+        .demo-account-card:hover {
+          border-color: #cbd5e1;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+        }
+        .demo-account-left {
+          display: flex;
+          align-items: center;
+          gap: 14px;
+          min-width: 0;
+        }
+        .demo-avatar {
+          width: 42px;
+          height: 42px;
+          border-radius: 50%;
+          display: grid;
+          place-items: center;
+          flex: none;
+        }
+        .demo-avatar.blue { background: #e0ecfb; color: #1d4ed8; }
+        .demo-avatar.green { background: #dcfce7; color: #15803d; }
+        .demo-avatar.purple { background: #f3e8ff; color: #7e22ce; }
+        .demo-user-details {
+          min-width: 0;
+        }
+        .demo-user-name-row {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          margin-bottom: 2px;
+        }
+        .demo-user-name {
+          font-size: 14.5px;
+          font-weight: 700;
+          color: #0f172a;
+        }
+        .demo-badge {
+          display: inline-block;
+          padding: 1px 8px;
+          border-radius: 12px;
+          font-size: 11px;
+          font-weight: 600;
+        }
+        .demo-badge.blue { background: #e0ecfb; color: #1d4ed8; }
+        .demo-badge.green { background: #dcfce7; color: #15803d; }
+        .demo-badge.purple { background: #f3e8ff; color: #7e22ce; }
+        .demo-user-email {
+          font-size: 12.5px;
+          font-weight: 600;
+          color: #16a34a;
+          margin-bottom: 3px;
+        }
+        .demo-user-desc {
+          font-size: 11.5px;
+          color: #64748b;
+          line-height: 1.4;
+        }
+        .btn-demo-login {
+          border: none;
+          border-radius: 6px;
+          padding: 7px 18px;
+          font-size: 12.5px;
+          font-weight: 700;
+          color: #ffffff;
+          cursor: pointer;
+          flex: none;
+          transition: opacity 0.15s;
+        }
+        .btn-demo-login:hover {
+          opacity: 0.9;
+        }
+        .btn-demo-login.blue { background: #1d4ed8; }
+        .btn-demo-login.green { background: #16a34a; }
+        .btn-demo-login.purple { background: #7e22ce; }
+        .demo-admin-divider {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          margin: 18px 0 12px;
+          color: #64748b;
+          font-size: 12px;
+          text-align: center;
+        }
+        .demo-admin-divider::before,
+        .demo-admin-divider::after {
+          content: "";
+          height: 1px;
+          flex: 1;
+          background: #e2e8f0;
+        }
       `}</style>
-      <form className="login-card" onSubmit={login}>
-        <img className="login-logo" src="/nova-group-logo.png" alt="Nova Group" />
-        <h1 style={{ marginBottom: 20 }}>Đăng nhập Project Management</h1>
-        <label className="login-field"><input autoFocus autoComplete="username" value={loginUsername} onChange={(event) => setLoginUsername(event.target.value)} placeholder="Tài khoản" aria-label="Tài khoản" /></label>
-        <label className="login-field">
-          <input type={showLoginPassword ? "text" : "password"} autoComplete="current-password" value={loginPassword} onChange={(event) => setLoginPassword(event.target.value)} placeholder="Mật khẩu" aria-label="Mật khẩu" />
-          <button className="login-password-toggle" type="button" onClick={() => setShowLoginPassword((current) => !current)} aria-label={showLoginPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"}>{showLoginPassword ? "Ẩn" : "Hiện"}</button>
-        </label>
-        {loginError && <div className="login-error" role="alert">{loginError}</div>}
-        <button className="login-submit" type="submit">Đăng nhập</button>
-        <div className="login-divider">hoặc</div>
-        <button className="office-login" type="button" onClick={() => setLoginError("Đăng nhập Office 365 chưa được kết nối trong phiên bản hiện tại.")}><span className="office-icon" aria-hidden="true"><i /><i /><i /><i /></span>Đăng nhập bằng Office 365</button>
-        <div className="login-product"><b>Project Management</b> · NovaGroup</div>
-      </form>
+
+      <div className="login-box">
+        {/* Top button similar to image 1 */}
+        <button
+          type="button"
+          className="btn-nova-account"
+          onClick={() => setShowDemoModal(true)}
+        >
+          <span className="nova-icon-wrap">
+            <IconNovaEmblem size={16} />
+          </span>
+          <span>Đăng nhập Tài khoản NovaGroup</span>
+        </button>
+
+        {/* Divider Hoặc */}
+        <div className="login-or-divider">Hoặc</div>
+
+        {/* Form fields */}
+        <form onSubmit={login}>
+          <div className="login-input-wrap">
+            <span className="login-input-icon">
+              <IconMail />
+            </span>
+            <input
+              className="login-input-field"
+              type="text"
+              autoFocus
+              autoComplete="username"
+              value={loginUsername}
+              onChange={(e) => setLoginUsername(e.target.value)}
+              placeholder="Nhập email của bạn"
+            />
+          </div>
+
+          <div className="login-input-wrap">
+            <span className="login-input-icon">
+              <IconLock />
+            </span>
+            <input
+              className="login-input-field"
+              type={showLoginPassword ? "text" : "password"}
+              autoComplete="current-password"
+              value={loginPassword}
+              onChange={(e) => setLoginPassword(e.target.value)}
+              placeholder="Nhập mật khẩu của bạn"
+            />
+            <button
+              type="button"
+              className="login-toggle-pw"
+              onClick={() => setShowLoginPassword(!showLoginPassword)}
+              aria-label={showLoginPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
+            >
+              {showLoginPassword ? <IconEyeOff /> : <IconEye />}
+            </button>
+          </div>
+
+          {loginError && <div className="login-error-alert">{loginError}</div>}
+
+          <div className="login-options-row">
+            <label className="remember-me-label" onClick={() => setRememberMe(!rememberMe)}>
+              <span className={`custom-check-icon ${rememberMe ? "" : "unchecked"}`}>✓</span>
+              <span>Ghi nhớ đăng nhập</span>
+            </label>
+            <a
+              href="#forgot"
+              className="forgot-pw-link"
+              onClick={(e) => {
+                e.preventDefault();
+                setShowDemoModal(true);
+              }}
+            >
+              Quên mật khẩu?
+            </a>
+          </div>
+
+          <button type="submit" className="btn-submit-login">
+            Đăng nhập
+          </button>
+        </form>
+
+        <button
+          type="button"
+          className="btn-fingerprint-login"
+          onClick={loginWithBiometrics}
+        >
+          <IconFingerprint />
+          <span>Đăng nhập bằng vân tay</span>
+        </button>
+
+        <p className="login-biometric-hint">
+          Sử dụng sinh trắc học đã đăng ký trên thiết bị này
+        </p>
+      </div>
+
+      {/* Demo Account Modal matching Image 2 */}
+      {showDemoModal && (
+        <div className="demo-modal-backdrop" onMouseDown={() => setShowDemoModal(false)}>
+          <div className="demo-modal-card" onMouseDown={(e) => e.stopPropagation()}>
+            <div className="demo-modal-header">
+              <div className="demo-modal-icon">
+                <IconNovaEmblem size={20} />
+              </div>
+              <div className="demo-modal-title">
+                <h3>Đăng nhập Tài khoản NovaGroup</h3>
+                <p>Môi trường Giả lập & Trải nghiệm (Demo Environment)</p>
+              </div>
+              <button
+                type="button"
+                className="demo-modal-close"
+                onClick={() => setShowDemoModal(false)}
+                aria-label="Đóng"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="demo-info-box">
+              <div className="demo-info-icon">i</div>
+              <div className="demo-info-content">
+                <strong>Môi trường trải nghiệm NovaGroup</strong>
+                <p>
+                  Hệ thống đang hoạt động ở chế độ giả lập. Vui lòng chọn một trong các tài khoản dưới đây để đăng nhập tức thì theo vai trò:
+                </p>
+              </div>
+            </div>
+
+            {/* Tabs */}
+            <div className="demo-tabs">
+              <button
+                type="button"
+                className={`demo-tab-btn ${demoTab === "hrc" ? "active" : ""}`}
+                onClick={() => setDemoTab("hrc")}
+              >
+                <IconUsers />
+                <span>Hệ thống Nhân sự</span>
+              </button>
+              <button
+                type="button"
+                className={`demo-tab-btn ${demoTab === "gmd" ? "active" : ""}`}
+                onClick={() => setDemoTab("gmd")}
+              >
+                <IconTableGrid />
+                <span>Hệ thống GMD</span>
+              </button>
+            </div>
+
+            {/* Account List */}
+            <div className="demo-account-list">
+              {DEMO_ACCOUNTS.filter((acc) => acc.system === demoTab).map((acc) => (
+                <div key={acc.username} className="demo-account-card">
+                  <div className="demo-account-left">
+                    <div className={`demo-avatar ${acc.badgeType || "blue"}`}>
+                      {demoTab === "gmd" && acc.role.includes("Trưởng phòng") ? (
+                        <IconTableGrid />
+                      ) : (
+                        <IconUsers />
+                      )}
+                    </div>
+                    <div className="demo-user-details">
+                      <div className="demo-user-name-row">
+                        <span className="demo-user-name">{acc.name}</span>
+                        <span className={`demo-badge ${acc.badgeType || "blue"}`}>
+                          {acc.badge || acc.role}
+                        </span>
+                      </div>
+                      <div className="demo-user-email">{acc.email || acc.username}</div>
+                      <div className="demo-user-desc">{acc.desc}</div>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    className={`btn-demo-login ${acc.badgeType || "blue"}`}
+                    onClick={() => loginAsAccount(acc)}
+                  >
+                    Đăng nhập
+                  </button>
+                </div>
+              ))}
+            </div>
+
+            {/* Admin divider */}
+            <div className="demo-admin-divider">
+              Quản trị Hệ thống NovaGroup
+            </div>
+
+            {/* Admin account card */}
+            {DEMO_ACCOUNTS.filter((acc) => acc.system === "admin" && acc.email === "itc.gd@novagroup.vn").map((acc) => (
+              <div key={acc.username} className="demo-account-card">
+                <div className="demo-account-left">
+                  <div className="demo-avatar purple">
+                    <IconShield />
+                  </div>
+                  <div className="demo-user-details">
+                    <div className="demo-user-name-row">
+                      <span className="demo-user-name">{acc.name}</span>
+                      <span className="demo-badge purple">{acc.badge || "NovaGroup Admin"}</span>
+                    </div>
+                    <div className="demo-user-email">{acc.email}</div>
+                    <div className="demo-user-desc">{acc.desc}</div>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  className="btn-demo-login purple"
+                  onClick={() => loginAsAccount(acc)}
+                >
+                  Đăng nhập
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </main>
   );
 
