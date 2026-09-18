@@ -1424,7 +1424,7 @@ export default function Home() {
       else next[task.code] = workType;
       return next;
     });
-    notify(`Đã cập nhật Loại CV cho ${task.code}`);
+    notify(`Đã cập nhật Loại công việc cho ${task.code}`);
   };
 
   const login = (event: FormEvent) => {
@@ -2271,7 +2271,7 @@ export default function Home() {
         }
         .catalog-table-head {
           display: grid !important;
-          grid-template-columns: 130px minmax(300px, 1.8fr) minmax(320px, 2fr) 190px 75px 110px 65px !important;
+          grid-template-columns: 130px minmax(300px, 1.8fr) minmax(320px, 2fr) 200px 110px 65px !important;
           align-items: center !important;
           gap: 12px !important;
           padding: 12px 16px !important;
@@ -2288,7 +2288,7 @@ export default function Home() {
         }
         .catalog-row {
           display: grid !important;
-          grid-template-columns: 130px minmax(300px, 1.8fr) minmax(320px, 2fr) 190px 75px 110px 65px !important;
+          grid-template-columns: 130px minmax(300px, 1.8fr) minmax(320px, 2fr) 200px 110px 65px !important;
           align-items: center !important;
           gap: 12px !important;
           padding: 10px 16px !important;
@@ -3708,7 +3708,7 @@ export default function Home() {
                 </select>
               </label>
               <label className="table-filters-select">
-                <span>Loại CV</span>
+                <span>Loại công việc</span>
                 <select
                   value={catalogWorkGroupFilter}
                   onChange={(event) => {
@@ -3744,9 +3744,8 @@ export default function Home() {
                 <span>WBS</span>
                 <span>HẠNG MỤC CÔNG VIỆC</span>
                 <span>BÁO CÁO GMD</span>
-                <span>LOẠI CV</span>
-                <span>SUMMARY</span>
-                <span>TỰ ĐỘNG SINH</span>
+                <span>LOẠI CÔNG VIỆC</span>
+                <span>TRẠNG THÁI</span>
                 <span>HÀNH ĐỘNG</span>
               </div>
               {visibleCatalogRows.map((task) => {
@@ -3796,17 +3795,12 @@ export default function Home() {
                       </select>
                     </span>
                     <span>
-                      <span className={`catalog-level-badge catalog-level-${task.summary ? 2 : 4}`}>
-                        {task.summary ? "Yes" : "No"}
-                      </span>
-                    </span>
-                    <span>
                       <label className="auto-generate-check">
                         <input
                           type="checkbox"
                           checked={enabledCatalogCodes.has(task.code)}
                           onChange={() => toggleCatalogTask(task)}
-                          aria-label={`Tự động sinh ${task.code}`}
+                          aria-label={`Trạng thái ${task.code}`}
                         />
                         <i />
                         <b>{enabledCatalogCodes.has(task.code) ? "Có" : "Không"}</b>
