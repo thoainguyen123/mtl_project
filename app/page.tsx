@@ -1022,7 +1022,6 @@ export default function Home() {
   const [loginError, setLoginError] = useState("");
   const [rememberMe, setRememberMe] = useState(true);
   const [showDemoModal, setShowDemoModal] = useState(false);
-  const [demoTab, setDemoTab] = useState<"gmd" | "hrc">("gmd");
   const [hydrated, setHydrated] = useState(false);
   const [view, setView] = useState<"overview" | "projects" | "workspace" | "departments" | "gmd" | "gms" | "confirm_approval" | "approved_projects" | "catalog" | "design_task" | "fs_ver2">("projects");
   const [lapMtlOpen, setLapMtlOpen] = useState(true);
@@ -2609,16 +2608,7 @@ export default function Home() {
             <div className="demo-tabs">
               <button
                 type="button"
-                className={`demo-tab-btn ${demoTab === "hrc" ? "active" : ""}`}
-                onClick={() => setDemoTab("hrc")}
-              >
-                <IconUsers />
-                <span>Hệ thống Nhân sự</span>
-              </button>
-              <button
-                type="button"
-                className={`demo-tab-btn ${demoTab === "gmd" ? "active" : ""}`}
-                onClick={() => setDemoTab("gmd")}
+                className="demo-tab-btn active"
               >
                 <IconTableGrid />
                 <span>Hệ thống GMD</span>
@@ -2627,11 +2617,11 @@ export default function Home() {
 
             {/* Account List */}
             <div className="demo-account-list">
-              {DEMO_ACCOUNTS.filter((acc) => acc.system === demoTab).map((acc) => (
+              {DEMO_ACCOUNTS.filter((acc) => acc.system === "gmd").map((acc) => (
                 <div key={acc.username} className="demo-account-card">
                   <div className="demo-account-left">
                     <div className={`demo-avatar ${acc.badgeType || "blue"}`}>
-                      {demoTab === "gmd" && acc.role.includes("Trưởng phòng") ? (
+                      {acc.role.includes("Trưởng phòng") ? (
                         <IconTableGrid />
                       ) : (
                         <IconUsers />
