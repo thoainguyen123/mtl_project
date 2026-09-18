@@ -2089,11 +2089,9 @@ export default function Home() {
           transform: translateY(-1px);
         }
         .nova-icon-wrap {
-          width: 26px;
-          height: 26px;
-          border-radius: 50%;
-          background: #ffffff;
-          color: #23b26d;
+          width: 24px;
+          height: 24px;
+          background: transparent;
           display: grid;
           place-items: center;
           flex: none;
@@ -2492,7 +2490,7 @@ export default function Home() {
           onClick={() => setShowDemoModal(true)}
         >
           <span className="nova-icon-wrap">
-            <img src="/app-logo.png" alt="Logo" style={{ width: "20px", height: "20px", objectFit: "contain" }} />
+            <img src="/app-logo.png" alt="Logo" style={{ width: "24px", height: "24px", objectFit: "contain" }} />
           </span>
           <span>Đăng nhập Tài khoản NovaGroup</span>
         </button>
