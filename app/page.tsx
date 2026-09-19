@@ -1292,6 +1292,7 @@ export default function Home() {
   const [catalogWorkGroupFilter, setCatalogWorkGroupFilter] = useState<"all" | Exclude<WorkType, "">>("all");
   const [catalogSourceFilter, setCatalogSourceFilter] = useState<"all" | "custom" | "standard">("all");
   const [catalogCollapsed, setCatalogCollapsed] = useState<Set<string>>(new Set());
+  const [catalogLevel, setCatalogLevel] = useState<string>("all");
   const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
   const [selectedCode, setSelectedCode] = useState("");
   const [toast, setToast] = useState("");
@@ -1694,6 +1695,23 @@ export default function Home() {
     () => new Set(fullCatalog.flatMap((task) => task.parentCode ? [task.parentCode] : [])),
     [fullCatalog],
   );
+  const applyCatalogLevel = (lvl: string | number) => {
+    if (lvl === "all") {
+      setCatalogCollapsed(new Set());
+      setCatalogLevel("all");
+    } else {
+      const num = typeof lvl === "string" ? Number(lvl) : lvl;
+      if (Number.isFinite(num) && num >= 1) {
+        const toCollapse = new Set(
+          fullCatalog
+            .filter((task) => catalogParentCodes.has(task.code) && task.level >= num)
+            .map((task) => task.code)
+        );
+        setCatalogCollapsed(toCollapse);
+        setCatalogLevel(String(num));
+      }
+    }
+  };
   const visibleCatalogRows = useMemo(() => {
     if (catalogSearch.trim()) return catalogRows;
     return catalogRows.filter((task) => ![...catalogCollapsed].some((code) => task.code.startsWith(`${code}.`)));
@@ -6121,29 +6139,15 @@ export default function Home() {
               }}
             >
               <label className="table-filters-select">
-                <span>Nhóm WBS</span>
-                <select
-                  value={catalogGroupFilter}
-                  onChange={(event) => {
-                    setCatalogGroupFilter(event.target.value);
-                  }}
-                >
-                  <option value="all">Tất cả nhóm ({GROUPS.length})</option>
-                  {GROUPS.map((group) => (
-                    <option key={group.code} value={group.code}>
-                      {group.code} · {group.short} ({group.name})
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <label className="table-filters-select">
                 <span>Loại công việc</span>
                 <select
                   value={catalogWorkGroupFilter}
                   onChange={(event) => {
                     setCatalogWorkGroupFilter(event.target.value as "all" | Exclude<WorkType, "">);
                     setCatalogCollapsed(new Set());
+                    setCatalogLevel("all");
                   }}
+                  style={{ maxWidth: "175px" }}
                 >
                   <option value="all">Tất cả loại công việc</option>
                   <option value="Báo cáo định kỳ">Báo cáo định kỳ (gồm công việc cha)</option>
@@ -6157,6 +6161,7 @@ export default function Home() {
                   onChange={(event) => {
                     setCatalogSourceFilter(event.target.value as "all" | "custom" | "standard");
                   }}
+                  style={{ maxWidth: "125px" }}
                 >
                   <option value="all">Tất cả nguồn</option>
                   <option value="standard">Mẫu chuẩn</option>
@@ -6164,7 +6169,7 @@ export default function Home() {
                 </select>
               </label>
 
-              <label className="search-field" style={{ margin: 0, minWidth: "180px", maxWidth: "240px", height: "34px" }}>
+              <label className="search-field" style={{ margin: 0, minWidth: "160px", maxWidth: "210px", height: "34px" }}>
                 <span>Tìm</span>
                 <input
                   value={catalogSearch}
@@ -6177,23 +6182,42 @@ export default function Home() {
               <button
                 type="button"
                 className="secondary-button"
-                style={{ height: "34px", minHeight: "34px", padding: "0 12px", fontSize: "11.5px", whiteSpace: "nowrap" }}
-                onClick={() => setCatalogCollapsed(new Set())}
+                style={{ height: "34px", minHeight: "34px", padding: "0 11px", fontSize: "11.5px", whiteSpace: "nowrap" }}
+                onClick={() => applyCatalogLevel("all")}
+                title="Mở rộng tất cả các cấp công việc"
               >
                 Mở tất cả
               </button>
               <button
                 type="button"
                 className="secondary-button"
-                style={{ height: "34px", minHeight: "34px", padding: "0 12px", fontSize: "11.5px", whiteSpace: "nowrap" }}
-                onClick={() => setCatalogCollapsed(new Set(catalogParentCodes))}
+                style={{ height: "34px", minHeight: "34px", padding: "0 11px", fontSize: "11.5px", whiteSpace: "nowrap" }}
+                onClick={() => applyCatalogLevel(1)}
+                title="Thu gọn về cấp 1 (Chỉ hiện nhóm WBS)"
               >
                 Thu gọn
               </button>
+              <label className="table-filters-select" style={{ gap: "6px" }}>
+                <span>Level</span>
+                <select
+                  value={catalogLevel}
+                  onChange={(event) => applyCatalogLevel(event.target.value === "all" ? "all" : Number(event.target.value))}
+                  style={{ height: "34px", minWidth: "110px", fontSize: "11.5px" }}
+                  title="Hiển thị theo level công việc"
+                >
+                  <option value="all">Tất cả level</option>
+                  <option value="1">Level 1 (Cấp 1)</option>
+                  <option value="2">Level 2 (Cấp 2)</option>
+                  <option value="3">Level 3 (Cấp 3)</option>
+                  <option value="4">Level 4 (Cấp 4)</option>
+                  <option value="5">Level 5 (Cấp 5)</option>
+                  {catalogLevel === "custom" && <option value="custom">Tùy biến</option>}
+                </select>
+              </label>
               <button
                 type="button"
                 className="secondary-button"
-                style={{ height: "34px", minHeight: "34px", padding: "0 12px", fontSize: "11.5px", whiteSpace: "nowrap" }}
+                style={{ height: "34px", minHeight: "34px", padding: "0 11px", fontSize: "11.5px", whiteSpace: "nowrap" }}
                 onClick={toggleAllCatalogTasks}
               >
                 {enabledCatalogCount === fullCatalog.length ? "Bỏ tích tất cả" : "Tích tất cả"}
@@ -6201,7 +6225,7 @@ export default function Home() {
               <button
                 type="button"
                 className="primary-button"
-                style={{ height: "34px", minHeight: "34px", padding: "0 14px", fontSize: "11.5px", whiteSpace: "nowrap" }}
+                style={{ height: "34px", minHeight: "34px", padding: "0 13px", fontSize: "11.5px", whiteSpace: "nowrap" }}
                 onClick={() => openTaskCreator(false)}
               >
                 + Thêm công việc
@@ -6237,12 +6261,15 @@ export default function Home() {
                           aria-expanded={!isCollapsed}
                           aria-label={isCollapsed ? `Mở rộng ${task.code}` : `Thu gọn ${task.code}`}
                           title={isCollapsed ? "Expand" : "Collapse"}
-                          onClick={() => setCatalogCollapsed((current) => {
-                            const next = new Set(current);
-                            if (isCollapsed) next.delete(task.code);
-                            else next.add(task.code);
-                            return next;
-                          })}
+                          onClick={() => {
+                            setCatalogLevel("custom");
+                            setCatalogCollapsed((current) => {
+                              const next = new Set(current);
+                              if (isCollapsed) next.delete(task.code);
+                              else next.add(task.code);
+                              return next;
+                            });
+                          }}
                         >
                           {isCollapsed ? "+" : "−"}
                         </button>
