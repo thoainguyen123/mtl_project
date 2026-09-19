@@ -3249,36 +3249,26 @@ export default function Home() {
           display: flex;
           flex-direction: column;
           height: 100vh;
-          overflow-y: auto;
+          overflow: hidden;
           background: #f1f5f9;
         }
-        .home-topbar {
-          background: #ffffff;
-          border-bottom: 1px solid #e2e8f0;
-          padding: 12px 28px;
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          flex: none;
-          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
-        }
-        .home-content-wrap {
-          padding: 14px 20px 24px;
-          max-width: 1720px;
-          width: 100%;
-          margin: 0 auto;
-          box-sizing: border-box;
+        @media (max-height: 720px) {
+          .home-dashboard-view {
+            overflow-y: auto;
+          }
         }
         .home-topbar {
           background: #ffffff;
           border-bottom: 1px solid #e2e8f0;
-          padding: 10px 24px;
+          padding: 8px 20px;
           display: flex;
           align-items: center;
           justify-content: space-between;
           flex: none;
           box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
           gap: 16px;
+          height: 52px;
+          box-sizing: border-box;
         }
         .period-chips-group-min {
           display: inline-flex;
@@ -3316,17 +3306,31 @@ export default function Home() {
           font-weight: 600;
         }
 
-        /* 3-Column Landscape Grid (Trang ngang) */
+        /* 3-Column Landscape Grid (Trang ngang full-height) */
+        .home-content-wrap {
+          flex: 1;
+          min-height: 0;
+          padding: 12px 18px 14px;
+          max-width: 100%;
+          width: 100%;
+          margin: 0;
+          box-sizing: border-box;
+          display: flex;
+          flex-direction: column;
+        }
         .home-landscape-grid {
+          flex: 1;
+          min-height: 0;
+          height: 100%;
           display: grid;
-          grid-template-columns: 310px minmax(0, 1.45fr) minmax(0, 1.25fr);
-          gap: 14px;
+          grid-template-columns: 320px minmax(0, 1.42fr) minmax(0, 1.25fr);
+          gap: 12px;
           align-items: stretch;
         }
         @media (max-width: 1300px) {
           .home-landscape-grid {
-            grid-template-columns: 290px minmax(0, 1.3fr) minmax(0, 1.15fr);
-            gap: 12px;
+            grid-template-columns: 295px minmax(0, 1.35fr) minmax(0, 1.2fr);
+            gap: 10px;
           }
         }
         @media (max-width: 1080px) {
@@ -3344,25 +3348,46 @@ export default function Home() {
           display: flex;
           flex-direction: column;
           gap: 12px;
+          height: 100%;
+          min-height: 0;
         }
 
-        /* Executive Base Card - Minimalist */
+        /* Executive Base Card - Full Height Responsive */
         .exec-card {
           background: #ffffff;
           border: 1px solid #e2e8f0;
           border-radius: 10px;
-          padding: 13px 15px;
+          padding: 12px 15px;
           box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03);
           display: flex;
           flex-direction: column;
+          min-height: 0;
         }
+        .exec-card.card-kpi-main {
+          flex: 1;
+        }
+        .exec-card.card-mgmt-main {
+          flex: 1.15;
+        }
+        .exec-card.card-ops-main {
+          height: 100%;
+          flex: 1;
+        }
+        .exec-card.card-tasks-main {
+          flex: 1;
+        }
+        .exec-card.card-overdue-main {
+          flex: 1.1;
+        }
+
         .exec-card-head {
           display: flex;
           align-items: center;
           justify-content: space-between;
-          margin-bottom: 10px;
-          padding-bottom: 8px;
+          margin-bottom: 8px;
+          padding-bottom: 7px;
           border-bottom: 1px solid #f1f5f9;
+          flex: none;
         }
         .exec-card-title {
           display: flex;
@@ -3397,6 +3422,7 @@ export default function Home() {
           border: 1px solid #e2e8f0;
           background: #f8fafc;
           color: #475569;
+          flex: none;
         }
         .exec-link-action {
           display: flex;
@@ -3422,11 +3448,12 @@ export default function Home() {
           align-items: center;
           justify-content: center;
           position: relative;
-          margin: 2px 0 8px;
+          margin: 2px 0 6px;
+          flex: 1;
         }
         .exec-arc-svg {
-          width: 175px;
-          height: 96px;
+          width: 185px;
+          height: 100px;
           overflow: visible;
         }
         .exec-arc-content {
@@ -3435,7 +3462,7 @@ export default function Home() {
           text-align: center;
         }
         .exec-arc-score {
-          font-size: 22px;
+          font-size: 24px;
           font-weight: 900;
           color: #0f172a;
           line-height: 1;
@@ -3443,7 +3470,7 @@ export default function Home() {
         .exec-arc-label {
           display: inline-block;
           margin-top: 3px;
-          padding: 1px 6px;
+          padding: 1px 7px;
           border-radius: 8px;
           background: #ecfdf5;
           color: #047857;
@@ -3454,9 +3481,10 @@ export default function Home() {
           display: grid;
           grid-template-columns: repeat(3, 1fr);
           gap: 6px;
-          margin-top: 6px;
+          margin-top: 4px;
           padding-top: 8px;
           border-top: 1px solid #f1f5f9;
+          flex: none;
         }
         .kpi-sub-tile {
           background: #f8fafc;
@@ -3473,27 +3501,31 @@ export default function Home() {
           font-weight: 600;
         }
         .kpi-sub-tile b {
-          font-size: 12px;
+          font-size: 12.5px;
           color: #0f172a;
           font-weight: 800;
         }
 
-        /* Card 1B: Subordinates Management */
+        /* Card 1B: Subordinates Management - Full Space */
         .mgmt-team-list-compact {
           display: flex;
           flex-direction: column;
+          justify-content: space-between;
           gap: 6px;
+          flex: 1;
+          min-height: 0;
         }
         .mgmt-row-compact {
           display: flex;
           align-items: center;
           justify-content: space-between;
           gap: 8px;
-          padding: 6px 9px;
+          padding: 7px 10px;
           border-radius: 6px;
           background: #f8fafc;
           border: 1px solid #f1f5f9;
           transition: all 0.15s ease;
+          flex: 1;
         }
         .mgmt-row-compact:hover {
           background: #f1f5f9;
@@ -3543,7 +3575,7 @@ export default function Home() {
           border: 1px solid #fed7aa;
         }
 
-        /* Card 2: Operations Matrix - Compact */
+        /* Card 2: Operations Matrix - Full Height */
         .op-filter-group-compact {
           display: flex;
           gap: 4px;
@@ -3571,18 +3603,26 @@ export default function Home() {
           font-size: 10.5px;
           font-weight: 600;
           margin-bottom: 6px;
+          flex: none;
         }
         .op-list-compact {
           display: flex;
           flex-direction: column;
-          gap: 7px;
+          justify-content: space-between;
+          gap: 8px;
+          flex: 1;
+          min-height: 0;
         }
         .op-item-compact {
-          padding: 8px 10px;
-          border-radius: 6px;
+          padding: 9px 12px;
+          border-radius: 8px;
           background: #f8fafc;
           border: 1px solid #e2e8f0;
           transition: all 0.15s;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          flex: 1;
         }
         .op-item-compact:hover {
           border-color: #94a3b8;
@@ -3623,7 +3663,7 @@ export default function Home() {
           color: #d97706;
         }
         .op-quick-btn {
-          padding: 2px 6px;
+          padding: 2px 7px;
           border-radius: 4px;
           border: 1px solid #cbd5e1;
           background: #ffffff;
@@ -3640,15 +3680,15 @@ export default function Home() {
         }
         .op-progress-track {
           width: 100%;
-          height: 6px;
-          border-radius: 3px;
+          height: 7px;
+          border-radius: 4px;
           background: #e2e8f0;
           position: relative;
           overflow: hidden;
         }
         .op-progress-bar {
           height: 100%;
-          border-radius: 3px;
+          border-radius: 4px;
           transition: width 0.3s ease;
         }
         .op-progress-bar.passed {
@@ -3666,22 +3706,26 @@ export default function Home() {
           opacity: 0.6;
         }
 
-        /* Card 3A: Today's Tasks - Compact */
+        /* Card 3A: Today's Tasks - Full Height */
         .today-tasks-compact-list {
           display: flex;
           flex-direction: column;
+          justify-content: space-between;
           gap: 6px;
+          flex: 1;
+          min-height: 0;
         }
         .today-row-compact {
           display: flex;
           align-items: center;
           gap: 8px;
-          padding: 7px 9px;
+          padding: 7px 10px;
           border-radius: 6px;
           border: 1px solid #f1f5f9;
           background: #f8fafc;
           cursor: pointer;
           transition: all 0.15s;
+          flex: 1;
         }
         .today-row-compact:hover {
           background: #f1f5f9;
@@ -3743,7 +3787,7 @@ export default function Home() {
         .today-cat-tag.extra { background: #fff7ed; color: #c2410c; }
         .today-cat-tag.approval { background: #f5f3ff; color: #7c3aed; }
 
-        /* Card 3B: Overdue Tasks - Compact */
+        /* Card 3B: Overdue Tasks - Full Height */
         .exec-card.overdue-style {
           border-color: #fee2e2;
           border-left: 4px solid #dc2626;
@@ -3751,10 +3795,13 @@ export default function Home() {
         .overdue-list-compact {
           display: flex;
           flex-direction: column;
+          justify-content: space-between;
           gap: 6px;
+          flex: 1;
+          min-height: 0;
         }
         .overdue-row-compact {
-          padding: 7px 9px;
+          padding: 8px 10px;
           border-radius: 6px;
           background: #fff5f5;
           border: 1px solid #fed7d7;
@@ -3763,6 +3810,7 @@ export default function Home() {
           justify-content: space-between;
           gap: 8px;
           transition: all 0.15s;
+          flex: 1;
         }
         .overdue-row-compact:hover {
           border-color: #f87171;
@@ -3809,7 +3857,7 @@ export default function Home() {
           flex: none;
         }
         .btn-overdue-mini {
-          padding: 3px 6px;
+          padding: 4px 7px;
           border-radius: 4px;
           font-size: 10px;
           font-weight: 700;
@@ -5288,7 +5336,7 @@ export default function Home() {
                     {/* CỘT 1: TỔNG KPI & TRÁCH NHIỆM QUẢN LÝ */}
                     <div className="home-col">
                       {/* Card 1A: Tổng KPI Hoàn Thành */}
-                      <div className="exec-card">
+                      <div className="exec-card card-kpi-main">
                         <div className="exec-card-head">
                           <div className="exec-card-title">
                             <div className="exec-icon-box kpi">
@@ -5324,7 +5372,7 @@ export default function Home() {
                       </div>
 
                       {/* Card 1B: KPI Trách Nhiệm Quản Lý */}
-                      <div className="exec-card">
+                      <div className="exec-card card-mgmt-main">
                         <div className="exec-card-head">
                           <div className="exec-card-title">
                             <div className="exec-icon-box mgmt">
@@ -5341,13 +5389,14 @@ export default function Home() {
                           {teamMembersList.map((m) => (
                             <div className="mgmt-row-compact" key={m.email}>
                               <div className="mgmt-row-info">
-                                <span className="mgmt-row-role">{m.role}</span>
-                                <span className="mgmt-row-scope">{m.scope}</span>
-                              </div>
-                              <div className="mgmt-row-kpi-wrap">
-                                <span className={`mgmt-kpi-pill ${m.status}`}>
-                                  {m.kpiScore.toFixed(1)} đ
-                                </span>
+                                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "2px" }}>
+                                  <span className="mgmt-row-role">{m.role}</span>
+                                  <span className={`mgmt-kpi-pill ${m.status}`}>{m.kpiScore.toFixed(1)} đ</span>
+                                </div>
+                                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", fontSize: "10px", color: "#64748b" }}>
+                                  <span className="mgmt-row-scope">{m.scope}</span>
+                                  <span style={{ fontWeight: 700, color: m.status === "passed" ? "#059669" : "#d97706" }}>{m.statusText}</span>
+                                </div>
                               </div>
                             </div>
                           ))}
@@ -5357,7 +5406,7 @@ export default function Home() {
 
                     {/* CỘT 2: TIẾN ĐỘ THEO TOÀN BỘ NGHIỆP VỤ */}
                     <div className="home-col">
-                      <div className="exec-card" style={{ height: "100%" }}>
+                      <div className="exec-card card-ops-main">
                         <div className="exec-card-head">
                           <div className="exec-card-title">
                             <div className="exec-icon-box ops">
@@ -5429,6 +5478,10 @@ export default function Home() {
                                   {op.actionLabel} →
                                 </button>
                               </div>
+                              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", fontSize: "10px", color: "#64748b", margin: "2px 0 4px" }}>
+                                <span>{op.dept}</span>
+                                <span>Chỉ tiêu: {op.target}%</span>
+                              </div>
                               <div className="op-progress-track">
                                 <div
                                   className={`op-progress-bar ${op.status}`}
@@ -5449,7 +5502,7 @@ export default function Home() {
                     {/* CỘT 3: CÔNG VIỆC HÔM NAY & CÁC CÔNG VIỆC ĐANG TRỄ HẠN */}
                     <div className="home-col">
                       {/* Card 3A: Công Việc Hôm Nay */}
-                      <div className="exec-card">
+                      <div className="exec-card card-tasks-main">
                         <div className="exec-card-head">
                           <div className="exec-card-title">
                             <div className="exec-icon-box tasks">
@@ -5503,7 +5556,7 @@ export default function Home() {
                       </div>
 
                       {/* Card 3B: Công Việc Đang Trễ Hạn */}
-                      <div className="exec-card overdue-style">
+                      <div className="exec-card card-overdue-main overdue-style">
                         <div className="exec-card-head" style={{ borderBottomColor: "#fee2e2" }}>
                           <div className="exec-card-title" style={{ color: "#991b1b" }}>
                             <div className="exec-icon-box overdue">
