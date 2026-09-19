@@ -845,6 +845,117 @@ function IconClipboardCheck() {
 function IconTableGrid() {
   return <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" /><line x1="3" y1="9" x2="21" y2="9" /><line x1="3" y1="15" x2="21" y2="15" /><line x1="9" y1="3" x2="9" y2="21" /><line x1="15" y1="3" x2="15" y2="21" /></svg>;
 }
+function IconAward() {
+  return (
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="8" r="6" />
+      <path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11" />
+    </svg>
+  );
+}
+function IconAlertTriangle() {
+  return (
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+      <line x1="12" y1="9" x2="12" y2="13" />
+      <line x1="12" y1="17" x2="12.01" y2="17" />
+    </svg>
+  );
+}
+function IconClock() {
+  return (
+    <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="10" />
+      <polyline points="12 6 12 12 16 14" />
+    </svg>
+  );
+}
+function IconTrendingUp() {
+  return (
+    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
+      <polyline points="17 6 23 6 23 12" />
+    </svg>
+  );
+}
+
+function ExecutiveArcGauge({ score = 88.5, max = 100, label = "ĐẠT CHUẨN (≥85%)" }: { score?: number; max?: number; label?: string }) {
+  const percent = Math.min(100, Math.max(0, (score / max) * 100));
+  const arcLength = 235.6;
+  const strokeOffset = arcLength - (arcLength * percent) / 100;
+  return (
+    <div className="exec-arc-container">
+      <svg viewBox="0 0 200 120" className="exec-arc-svg">
+        <defs>
+          <linearGradient id="arcGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="#059669" />
+            <stop offset="55%" stopColor="#10b981" />
+            <stop offset="100%" stopColor="#06b6d4" />
+          </linearGradient>
+          <filter id="arcGlow" x="-20%" y="-20%" width="140%" height="140%">
+            <feDropShadow dx="0" dy="2" stdDeviation="3" floodColor="#10b981" floodOpacity="0.35" />
+          </filter>
+        </defs>
+        <path
+          d="M 25 110 A 75 75 0 0 1 175 110"
+          fill="none"
+          stroke="#e2e8f0"
+          strokeWidth="14"
+          strokeLinecap="round"
+        />
+        <path
+          d="M 25 110 A 75 75 0 0 1 175 110"
+          fill="none"
+          stroke="url(#arcGradient)"
+          strokeWidth="14"
+          strokeDasharray={arcLength}
+          strokeDashoffset={strokeOffset}
+          strokeLinecap="round"
+          filter="url(#arcGlow)"
+        />
+      </svg>
+      <div className="exec-arc-content">
+        <div className="exec-arc-score">{score.toFixed(1)}%</div>
+        <div className="exec-arc-label">{label}</div>
+      </div>
+    </div>
+  );
+}
+
+function ExecutiveDonut({ percent = 75, size = 68, stroke = 7, color = "#059669", trackColor = "#e2e8f0" }: { percent?: number; size?: number; stroke?: number; color?: string; trackColor?: string }) {
+  const radius = (size - stroke) / 2;
+  const circumference = 2 * Math.PI * radius;
+  const offset = circumference - (percent / 100) * circumference;
+  return (
+    <div style={{ position: "relative", width: size, height: size, flex: "none", display: "grid", placeItems: "center" }}>
+      <svg width={size} height={size} style={{ transform: "rotate(-90deg)" }}>
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          fill="transparent"
+          stroke={trackColor}
+          strokeWidth={stroke}
+        />
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          fill="transparent"
+          stroke={color}
+          strokeWidth={stroke}
+          strokeDasharray={circumference}
+          strokeDashoffset={offset}
+          strokeLinecap="round"
+          style={{ transition: "stroke-dashoffset 0.4s ease" }}
+        />
+      </svg>
+      <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "13px", fontWeight: 800, color: "#0f172a" }}>
+        {percent}%
+      </div>
+    </div>
+  );
+}
 
 const QLTT_BY_PERSON: Record<string, string> = {
   "Lê Đại Lễ": "Nguyễn Trung Nguyên",
@@ -1084,6 +1195,16 @@ export default function Home() {
   const [hydrated, setHydrated] = useState(false);
   const [view, setView] = useState<"home" | "overview" | "projects" | "workspace" | "departments" | "gmd" | "gms" | "confirm_approval" | "approved_projects" | "catalog" | "design_task" | "fs_ver2">("home");
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [homePeriod, setHomePeriod] = useState<"6m" | "q3" | "year">("6m");
+  const [homeOpFilter, setHomeOpFilter] = useState<"all" | "passed" | "improve">("all");
+  const [todayTasksList, setTodayTasksList] = useState<Array<{ id: string; title: string; category: "routine" | "extra" | "approval"; time: string; done: boolean; project?: string }>>([
+    { id: "t1", title: "Duyệt xác nhận thẩm định MTL Dự án Aqua City - Phân khu Phoenix", category: "routine", time: "10:30", done: true, project: "Aqua City" },
+    { id: "t2", title: "Rà soát mốc nộp hồ sơ PCCC Dự án NovaWorld Phan Thiet", category: "approval", time: "14:15", done: true, project: "NovaWorld Phan Thiet" },
+    { id: "t3", title: "Họp giao ban tiến độ thi công hầm The Grand Manhattan với nhà thầu", category: "routine", time: "16:30", done: false, project: "The Grand Manhattan" },
+    { id: "t4", title: "Ký nháy tờ trình hiệu chỉnh FS-Ver2 Sunrise Riverside chuyển GMD kiểm soát", category: "approval", time: "17:00", done: false, project: "Sunrise Riverside" },
+    { id: "t5", title: "Đôn đốc Ban QLDA đẩy nhanh tiến độ thi công gói thầu MEP Tháp C", category: "extra", time: "Hôm nay", done: false, project: "NovaWorld Phan Thiet" },
+    { id: "t6", title: "Cập nhật báo cáo điều hành tuần gửi Tổng Giám đốc", category: "extra", time: "Hôm nay", done: false },
+  ]);
   const [homeOpen, setHomeOpen] = useState(true);
   const [lapMtlOpen, setLapMtlOpen] = useState(false);
   const [designTaskOpen, setDesignTaskOpen] = useState(false);
@@ -3123,195 +3244,680 @@ export default function Home() {
           align-items: center !important;
           justify-content: center !important;
         }
-        /* ================= HOME DASHBOARD ================= */
+        /* ================= HOME EXECUTIVE COCKPIT DASHBOARD ================= */
         .home-dashboard-view {
           display: flex;
           flex-direction: column;
           height: 100vh;
           overflow-y: auto;
-          background: #f8fafc;
+          background: #f1f5f9;
         }
         .home-topbar {
           background: #ffffff;
           border-bottom: 1px solid #e2e8f0;
-          padding: 14px 28px;
+          padding: 12px 28px;
           display: flex;
           align-items: center;
           justify-content: space-between;
           flex: none;
+          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
         }
         .home-content-wrap {
-          padding: 24px 28px 40px;
-          max-width: 1400px;
+          padding: 24px 28px 48px;
+          max-width: 1440px;
           width: 100%;
           margin: 0 auto;
           box-sizing: border-box;
         }
-        .home-hero-card {
-          background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #047857 100%);
-          color: #ffffff;
-          padding: 28px 32px;
+        /* Top Executive Header Card */
+        .home-exec-header {
+          background: linear-gradient(135deg, #0b1f33 0%, #112d4a 60%, #1e3a5f 100%);
           border-radius: 14px;
+          padding: 24px 28px;
+          color: #ffffff;
+          margin-bottom: 22px;
+          box-shadow: 0 8px 24px rgba(11, 31, 51, 0.22);
+          border-top: 3px solid #10b981;
           display: flex;
           justify-content: space-between;
           align-items: center;
-          gap: 24px;
-          box-shadow: 0 8px 24px rgba(30, 58, 138, 0.18);
-          margin-bottom: 24px;
+          gap: 20px;
+          flex-wrap: wrap;
         }
-        .home-hero-text h2 {
-          font-size: 20px;
+        .home-exec-greeting h2 {
+          font-size: 21px;
           font-weight: 800;
-          letter-spacing: 0.5px;
-          margin: 0 0 8px;
-        }
-        .home-hero-text p {
-          font-size: 13.5px;
-          opacity: 0.9;
-          margin: 0;
-          max-width: 680px;
-          line-height: 1.5;
-        }
-        .home-hero-meta {
-          display: flex;
-          gap: 14px;
-          flex: none;
-        }
-        .hero-stat-pill {
-          background: rgba(255, 255, 255, 0.15);
-          backdrop-filter: blur(6px);
-          border: 1px solid rgba(255, 255, 255, 0.25);
-          padding: 12px 18px;
-          border-radius: 10px;
-          text-align: center;
-          min-width: 85px;
-        }
-        .hero-stat-pill .pill-num {
-          display: block;
-          font-size: 22px;
-          font-weight: 800;
+          margin: 0 0 6px;
+          letter-spacing: -0.2px;
           color: #ffffff;
         }
-        .hero-stat-pill .pill-lbl {
-          font-size: 11px;
-          opacity: 0.85;
-          text-transform: uppercase;
-          letter-spacing: 0.5px;
+        .home-exec-greeting p {
+          font-size: 13px;
+          color: #94a3b8;
+          margin: 0;
+          line-height: 1.45;
+          max-width: 760px;
         }
-        .home-modules-grid {
+        .home-exec-controls {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          flex-wrap: wrap;
+        }
+        .period-chips-group {
+          display: flex;
+          background: rgba(255, 255, 255, 0.08);
+          padding: 3px;
+          border-radius: 20px;
+          border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+        .period-chip-btn {
+          border: none;
+          background: transparent;
+          color: #cbd5e1;
+          font-size: 11.5px;
+          font-weight: 700;
+          padding: 5px 13px;
+          border-radius: 16px;
+          cursor: pointer;
+          transition: all 0.15s ease;
+        }
+        .period-chip-btn:hover {
+          color: #ffffff;
+        }
+        .period-chip-btn.active {
+          background: linear-gradient(90deg, #10b981, #059669);
+          color: #ffffff;
+          box-shadow: 0 2px 8px rgba(16, 185, 129, 0.4);
+        }
+        .home-today-badge {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          background: rgba(255, 255, 255, 0.1);
+          border: 1px solid rgba(255, 255, 255, 0.18);
+          border-radius: 8px;
+          padding: 6px 12px;
+          font-size: 11.5px;
+          font-weight: 600;
+          color: #e2e8f0;
+        }
+
+        /* 2-Column Grid Layout */
+        .home-dashboard-grid {
           display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-          gap: 18px;
-          margin-bottom: 28px;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 20px;
+          margin-bottom: 22px;
         }
-        .home-module-card {
+        @media (max-width: 1024px) {
+          .home-dashboard-grid {
+            grid-template-columns: 1fr;
+          }
+        }
+
+        /* Executive Base Card */
+        .exec-card {
           background: #ffffff;
           border: 1px solid #e2e8f0;
-          border-radius: 12px;
-          padding: 20px;
+          border-radius: 14px;
+          padding: 22px 24px;
+          box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04);
           display: flex;
-          gap: 16px;
-          cursor: pointer;
-          transition: all 0.2s ease;
-          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+          flex-direction: column;
         }
-        .home-module-card:hover {
-          transform: translateY(-3px);
-          box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
-          border-color: #7cb342;
+        .exec-card-head {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          margin-bottom: 16px;
+          padding-bottom: 14px;
+          border-bottom: 1px solid #f1f5f9;
         }
-        .home-module-icon {
-          width: 44px;
-          height: 44px;
-          border-radius: 10px;
+        .exec-card-title {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          font-size: 13.5px;
+          font-weight: 800;
+          color: #0f2942;
+          text-transform: uppercase;
+          letter-spacing: 0.3px;
+        }
+        .exec-icon-box {
+          width: 32px;
+          height: 32px;
+          border-radius: 8px;
           display: grid;
           place-items: center;
+          color: #ffffff;
           flex: none;
+        }
+        .exec-icon-box.kpi { background: linear-gradient(135deg, #10b981, #059669); }
+        .exec-icon-box.ops { background: linear-gradient(135deg, #2563eb, #1d4ed8); }
+        .exec-icon-box.tasks { background: linear-gradient(135deg, #0ea5e9, #0284c7); }
+        .exec-icon-box.mgmt { background: linear-gradient(135deg, #8b5cf6, #6d28d9); }
+        .exec-icon-box.overdue { background: linear-gradient(135deg, #ef4444, #dc2626); }
+
+        .exec-badge-pill {
+          font-size: 11px;
+          font-weight: 700;
+          padding: 3px 9px;
+          border-radius: 12px;
+          border: 1px solid #cbd5e1;
+          background: #f8fafc;
+          color: #475569;
+        }
+        .exec-link-action {
+          display: flex;
+          align-items: center;
+          gap: 4px;
+          font-size: 12px;
+          font-weight: 700;
+          color: #059669;
+          cursor: pointer;
+          border: none;
+          background: transparent;
+          transition: all 0.15s ease;
+        }
+        .exec-link-action:hover {
+          color: #047857;
+          transform: translateX(2px);
+        }
+
+        /* Card 1: Arc Gauge & Sub-Stats */
+        .exec-arc-container {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          position: relative;
+          margin: 4px 0 16px;
+        }
+        .exec-arc-svg {
+          width: 210px;
+          height: 115px;
+          overflow: visible;
+        }
+        .exec-arc-content {
+          position: absolute;
+          bottom: 4px;
+          text-align: center;
+        }
+        .exec-arc-score {
+          font-size: 26px;
+          font-weight: 900;
+          color: #0f172a;
+          line-height: 1;
+        }
+        .exec-arc-label {
+          display: inline-block;
+          margin-top: 4px;
+          padding: 2px 8px;
+          border-radius: 10px;
+          background: #ecfdf5;
+          color: #047857;
+          font-size: 10px;
+          font-weight: 800;
+        }
+        .kpi-metrics-row {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 10px;
+          margin-top: auto;
+          padding-top: 14px;
+          border-top: 1px solid #f1f5f9;
+        }
+        .kpi-sub-tile {
+          background: #f8fafc;
+          border: 1px solid #e2e8f0;
+          border-radius: 8px;
+          padding: 10px 8px;
+          text-align: center;
+        }
+        .kpi-sub-tile span {
+          display: block;
+          font-size: 10.5px;
+          color: #64748b;
+          margin-bottom: 4px;
+          font-weight: 600;
+        }
+        .kpi-sub-tile b {
+          font-size: 13.5px;
+          color: #0f172a;
+          font-weight: 800;
+        }
+        .kpi-sub-tile small {
+          display: block;
+          font-size: 9.5px;
+          color: #059669;
+          font-weight: 700;
+          margin-top: 2px;
+        }
+
+        /* Card 2: Operations Matrix */
+        .op-filter-row {
+          display: flex;
+          gap: 6px;
+          margin-bottom: 12px;
+        }
+        .op-filter-btn {
+          padding: 4px 10px;
+          border-radius: 6px;
+          font-size: 11px;
+          font-weight: 700;
+          border: 1px solid #cbd5e1;
+          background: #f8fafc;
+          color: #475569;
+          cursor: pointer;
+          transition: all 0.15s ease;
+        }
+        .op-filter-btn.active {
+          background: #0f2942;
+          color: #ffffff;
+          border-color: #0f2942;
+        }
+        .op-list {
+          display: flex;
+          flex-direction: column;
+          gap: 9px;
+          overflow-y: auto;
+          max-height: 290px;
+          padding-right: 2px;
+        }
+        .op-item {
+          padding: 10px 12px;
+          border-radius: 8px;
+          background: #f8fafc;
+          border: 1px solid #e2e8f0;
+          transition: all 0.15s;
+        }
+        .op-item:hover {
+          border-color: #94a3b8;
+          background: #f1f5f9;
+        }
+        .op-item-top {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          margin-bottom: 4px;
+          gap: 10px;
+        }
+        .op-code {
+          padding: 2px 6px;
+          border-radius: 4px;
+          background: #0f2942;
+          color: #ffffff;
+          font-size: 9.5px;
+          font-weight: 800;
+          flex: none;
+        }
+        .op-name {
+          font-size: 12px;
+          font-weight: 700;
+          color: #1e293b;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          flex: 1;
+        }
+        .op-pct {
+          font-size: 12.5px;
+          font-weight: 800;
+          color: #059669;
+          flex: none;
+        }
+        .op-pct.improve {
+          color: #d97706;
+        }
+        .op-track-wrap {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          margin-top: 4px;
+        }
+        .op-track {
+          flex: 1;
+          height: 7px;
+          border-radius: 4px;
+          background: #e2e8f0;
+          position: relative;
+          overflow: hidden;
+        }
+        .op-fill {
+          height: 100%;
+          border-radius: 4px;
+          transition: width 0.4s ease;
+        }
+        .op-fill.passed {
+          background: linear-gradient(90deg, #10b981, #059669);
+        }
+        .op-fill.improve {
+          background: linear-gradient(90deg, #f59e0b, #d97706);
+        }
+        .op-btn-action {
+          padding: 2px 7px;
+          border-radius: 4px;
+          border: 1px solid #cbd5e1;
+          background: #ffffff;
+          color: #2563eb;
+          font-size: 10.5px;
+          font-weight: 700;
+          cursor: pointer;
+          flex: none;
+          transition: all 0.15s;
+        }
+        .op-btn-action:hover {
+          background: #eff6ff;
+          border-color: #93c5fd;
+        }
+
+        /* Card 3: Today's Tasks */
+        .today-summary-strip {
+          display: flex;
+          align-items: center;
+          gap: 16px;
+          padding: 12px 14px;
+          background: #f8fafc;
+          border: 1px solid #e2e8f0;
+          border-radius: 10px;
+          margin-bottom: 12px;
+        }
+        .today-summary-text b {
+          font-size: 14px;
+          color: #0f172a;
+          display: block;
+        }
+        .today-summary-text span {
+          font-size: 11px;
+          color: #64748b;
+        }
+        .today-stats-group {
+          display: flex;
+          gap: 8px;
+          flex-wrap: wrap;
+          margin-left: auto;
+        }
+        .today-tag-chip {
+          padding: 4px 8px;
+          border-radius: 6px;
+          font-size: 11px;
+          font-weight: 700;
+          background: #ffffff;
+          border: 1px solid #e2e8f0;
+          color: #475569;
+        }
+        .today-tag-chip.routine { border-color: #93c5fd; color: #1d4ed8; background: #eff6ff; }
+        .today-tag-chip.extra { border-color: #fed7aa; color: #c2410c; background: #fff7ed; }
+        .today-tag-chip.approval { border-color: #ddd6fe; color: #6d28d9; background: #f5f3ff; }
+
+        .today-list {
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+          max-height: 250px;
+          overflow-y: auto;
+          padding-right: 2px;
+        }
+        .today-task-item {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          padding: 9px 12px;
+          border-radius: 8px;
+          border: 1px solid #f1f5f9;
+          background: #ffffff;
+          transition: all 0.15s;
+          cursor: pointer;
+        }
+        .today-task-item:hover {
+          border-color: #cbd5e1;
+          background: #f8fafc;
+        }
+        .today-task-item.is-done {
+          opacity: 0.65;
+          background: #f8fafc;
+        }
+        .today-task-item.is-done .today-task-title {
+          text-decoration: line-through;
+          color: #94a3b8;
+        }
+        .today-checkbox {
+          width: 19px;
+          height: 19px;
+          border-radius: 5px;
+          border: 2px solid #cbd5e1;
+          display: grid;
+          place-items: center;
+          cursor: pointer;
+          flex: none;
+          transition: all 0.15s;
+          background: #ffffff;
+        }
+        .today-checkbox.checked {
+          background: #059669;
+          border-color: #059669;
           color: #ffffff;
         }
-        .home-module-icon.mtl { background: #1d4ed8; }
-        .home-module-icon.design { background: #ea580c; }
-        .home-module-icon.fs { background: #16a34a; }
-        .home-module-icon.tracking { background: #0891b2; }
-        .home-module-body {
+        .today-task-info {
           min-width: 0;
           flex: 1;
         }
-        .home-module-body h3 {
-          font-size: 14.5px;
-          font-weight: 700;
-          color: #0f172a;
-          margin: 0 0 6px;
-        }
-        .home-module-body p {
+        .today-task-title {
           font-size: 12px;
-          color: #64748b;
-          line-height: 1.45;
-          margin: 0 0 10px;
-        }
-        .home-module-link {
-          font-size: 12px;
-          font-weight: 700;
-          color: #558b2f;
-        }
-        .home-projects-card {
-          background: #ffffff;
-          border: 1px solid #e2e8f0;
-          border-radius: 12px;
-          padding: 22px;
-          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
-        }
-        .home-card-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-bottom: 16px;
-        }
-        .home-card-header h3 {
-          font-size: 15px;
-          font-weight: 700;
-          color: #0f172a;
-          margin: 0;
-        }
-        .home-projects-table-wrap {
-          overflow-x: auto;
-        }
-        .home-projects-table {
-          width: 100%;
-          border-collapse: collapse;
-          font-size: 12.5px;
-        }
-        .home-projects-table th {
-          background: #f8fafc;
-          padding: 10px 14px;
-          text-align: left;
-          font-weight: 700;
-          color: #475569;
-          border-bottom: 1.5px solid #e2e8f0;
-          white-space: nowrap;
-        }
-        .home-projects-table td {
-          padding: 12px 14px;
-          border-bottom: 1px solid #f1f5f9;
+          font-weight: 600;
           color: #1e293b;
-          vertical-align: middle;
+          margin: 0 0 2px;
+          line-height: 1.35;
         }
-        .home-projects-table tr:hover td {
+        .today-task-meta {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          font-size: 10px;
+          color: #64748b;
+        }
+
+        /* Card 4: Management & Subordinate KPI */
+        .mgmt-gauge-row {
+          display: flex;
+          align-items: center;
+          gap: 16px;
+          margin-bottom: 12px;
+          padding: 10px 14px;
           background: #f8fafc;
+          border: 1px solid #e2e8f0;
+          border-radius: 10px;
         }
-        .btn-link-action {
-          background: #e0ecfb;
-          color: #1d4ed8;
-          border: none;
-          padding: 4px 10px;
-          border-radius: 5px;
+        .mgmt-gauge-text b {
+          font-size: 15px;
+          color: #0f172a;
+          display: block;
+        }
+        .mgmt-gauge-text span {
+          font-size: 11px;
+          color: #64748b;
+        }
+        .mgmt-alert-notice {
+          background: #fffbeb;
+          border: 1px solid #fef3c7;
+          border-left: 4px solid #f59e0b;
+          padding: 8px 12px;
+          border-radius: 7px;
+          font-size: 11px;
+          color: #92400e;
+          line-height: 1.45;
+          margin-bottom: 12px;
+        }
+        .mgmt-team-grid {
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          gap: 9px;
+        }
+        @media (max-width: 640px) {
+          .mgmt-team-grid {
+            grid-template-columns: 1fr;
+          }
+        }
+        .mgmt-member-card {
+          padding: 10px 12px;
+          border-radius: 8px;
+          background: #f8fafc;
+          border: 1px solid #e2e8f0;
+          display: flex;
+          flex-direction: column;
+          gap: 5px;
+        }
+        .mgmt-member-top {
+          display: flex;
+          align-items: flex-start;
+          justify-content: space-between;
+          gap: 8px;
+        }
+        .mgmt-member-role {
           font-size: 11.5px;
+          font-weight: 700;
+          color: #0f172a;
+          line-height: 1.3;
+        }
+        .mgmt-member-kpi {
+          padding: 2px 7px;
+          border-radius: 10px;
+          font-size: 10.5px;
+          font-weight: 800;
+          white-space: nowrap;
+          flex: none;
+        }
+        .mgmt-member-kpi.passed {
+          background: #ecfdf5;
+          color: #047857;
+          border: 1px solid #a7f3d0;
+        }
+        .mgmt-member-kpi.improve {
+          background: #fff7ed;
+          color: #c2410c;
+          border: 1px solid #fed7aa;
+        }
+        .mgmt-member-scope {
+          font-size: 10px;
+          color: #64748b;
+        }
+
+        /* Card 5: Overdue Critical Tasks */
+        .overdue-card {
+          background: #ffffff;
+          border: 1px solid #fee2e2;
+          border-left: 5px solid #dc2626;
+          border-radius: 14px;
+          padding: 22px 24px;
+          box-shadow: 0 4px 16px rgba(220, 38, 38, 0.05);
+        }
+        .overdue-items-grid {
+          display: grid;
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+          gap: 14px;
+        }
+        @media (max-width: 1024px) {
+          .overdue-items-grid {
+            grid-template-columns: 1fr;
+          }
+        }
+        .overdue-item-box {
+          background: #fff5f5;
+          border: 1px solid #fed7d7;
+          border-radius: 10px;
+          padding: 14px 16px;
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+          gap: 10px;
+          transition: all 0.15s ease;
+        }
+        .overdue-item-box:hover {
+          border-color: #f87171;
+          box-shadow: 0 4px 12px rgba(220, 38, 38, 0.1);
+        }
+        .overdue-tag-row {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 8px;
+        }
+        .overdue-pill-danger {
+          background: #fee2e2;
+          color: #991b1b;
+          padding: 2px 7px;
+          border-radius: 5px;
+          font-size: 10px;
+          font-weight: 800;
+          display: inline-flex;
+          align-items: center;
+          gap: 4px;
+        }
+        .overdue-days-pill {
+          background: #dc2626;
+          color: #ffffff;
+          padding: 2px 8px;
+          border-radius: 10px;
+          font-size: 10.5px;
+          font-weight: 800;
+        }
+        .overdue-task-name {
+          font-size: 12.5px;
+          font-weight: 700;
+          color: #7f1d1d;
+          margin: 0;
+          line-height: 1.4;
+        }
+        .overdue-meta-row {
+          font-size: 10.5px;
+          color: #78350f;
+          display: flex;
+          flex-direction: column;
+          gap: 2px;
+        }
+        .overdue-actions {
+          display: flex;
+          gap: 8px;
+          margin-top: 4px;
+        }
+        .btn-overdue-urge {
+          flex: 1;
+          height: 30px;
+          background: #dc2626;
+          color: #ffffff;
+          border: none;
+          border-radius: 6px;
+          font-size: 11px;
           font-weight: 700;
           cursor: pointer;
           transition: background 0.15s;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 4px;
         }
-        .btn-link-action:hover {
-          background: #bfdbfe;
+        .btn-overdue-urge:hover {
+          background: #b91c1c;
+        }
+        .btn-overdue-view {
+          flex: 1;
+          height: 30px;
+          background: #ffffff;
+          color: #dc2626;
+          border: 1.5px solid #dc2626;
+          border-radius: 6px;
+          font-size: 11px;
+          font-weight: 700;
+          cursor: pointer;
+          transition: all 0.15s;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 4px;
+        }
+        .btn-overdue-view:hover {
+          background: #fee2e2;
         }
 
         /* ================= WBS CATALOG ================= */
@@ -4354,38 +4960,19 @@ export default function Home() {
             )}
           </button>
         </div>
-        {/* Module 0: TRANG CHỦ — ở vị trí đầu tiên */}
-        {(() => {
-          const isSectionOpen = homeOpen;
-          return <>
-            <button
-              type="button"
-              className={`sidebar-section-toggle ${isSectionOpen ? "open" : ""}`}
-              onClick={() => {
-                if (sidebarCollapsed) {
-                  setView("home");
-                } else {
-                  setHomeOpen((current) => !current);
-                  setView("home");
-                }
-              }}
-              aria-expanded={isSectionOpen}
-              title="Trang Chủ"
-            >
-              <div className="section-toggle-left">
-                <IconHome />
-                <span>Trang Chủ</span>
-              </div>
-              <IconChevronDown />
-            </button>
-            <nav className={`sidebar-nav sidebar-collapsible ${isSectionOpen ? "" : "collapsed"}`} aria-label="Điều hướng Trang chủ" aria-hidden={!isSectionOpen}>
-              <button className={view === "home" ? "active" : ""} onClick={() => setView("home")} tabIndex={isSectionOpen ? 0 : -1}>
-                <IconTableGrid />
-                <span>Tổng quan hệ thống</span>
-              </button>
-            </nav>
-          </>;
-        })()}
+        {/* Module 0: TRANG CHỦ — ở vị trí đầu tiên, trực tiếp không xổ dropdown */}
+        <button
+          type="button"
+          className={`sidebar-section-toggle ${view === "home" ? "active" : ""}`}
+          onClick={() => setView("home")}
+          title="Trang Chủ"
+          style={view === "home" ? { background: "linear-gradient(90deg, #1e40af 0%, #047857 100%)", boxShadow: "0 4px 14px rgba(30, 64, 175, 0.4)" } : undefined}
+        >
+          <div className="section-toggle-left">
+            <IconHome />
+            <span>Trang Chủ</span>
+          </div>
+        </button>
 
         {/* Module 1: LẬP MASTER TIMELINE — sổ ra/thu gọn được */}
         {(() => {
@@ -4574,12 +5161,14 @@ export default function Home() {
                   <IconMenu />
                 </button>
                 <IconHome />
-                <span style={{ fontSize: "16px", fontWeight: 700, color: "#0f172a" }}>TRANG CHỦ HỆ THỐNG PMD</span>
+                <span style={{ fontSize: "15px", fontWeight: 800, color: "#0f2942", letterSpacing: "0.2px" }}>
+                  BẢNG ĐIỀU HÀNH & THEO DÕI HIỆU SUẤT BĐHDA
+                </span>
               </div>
               <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                <div className="overview-date-badge">
+                <div className="home-today-badge" style={{ color: "#334155", background: "#f8fafc", borderColor: "#e2e8f0" }}>
                   <IconCalendar />
-                  <span>{formatDate(overviewToday)}</span>
+                  <span>Hôm nay: {formatDate(overviewToday)}</span>
                 </div>
                 <div style={{ fontSize: "12.5px", color: "#475569" }}>
                   Tài khoản: <strong style={{ color: "#0f52ba" }}>{currentAccount.name}</strong>
@@ -4587,108 +5176,540 @@ export default function Home() {
               </div>
             </header>
 
-            <div className="home-content-wrap">
-              <div className="home-hero-card">
-                <div className="home-hero-text">
-                  <h2>HỆ THỐNG QUẢN LÝ TIẾN ĐỘ & DỰ ÁN NOVAGROUP</h2>
-                  <p>Cổng quản trị tích hợp thông tin lập kế hoạch, kiểm soát tiến độ Master Timeline, Nhiệm vụ Thiết kế, Mô hình FS Thực thi và Giám sát điều hành dự án.</p>
-                </div>
-                <div className="home-hero-meta">
-                  <div className="hero-stat-pill">
-                    <span className="pill-num">{projects.length}</span>
-                    <span className="pill-lbl">Tổng dự án</span>
-                  </div>
-                  <div className="hero-stat-pill">
-                    <span className="pill-num">{officialApprovedProjects.length}</span>
-                    <span className="pill-lbl">MTL đã duyệt</span>
-                  </div>
-                  <div className="hero-stat-pill">
-                    <span className="pill-num">9</span>
-                    <span className="pill-lbl">Khối / Ban</span>
-                  </div>
-                </div>
-              </div>
+            {(() => {
+              const currentHour = new Date().getHours();
+              const greetingTime = currentHour < 12 ? "Chào buổi sáng" : currentHour < 18 ? "Chào buổi chiều" : "Chào buổi tối";
+              const roleDisplayName = currentAccount.name || "Cán bộ Ban Điều Hành Dự Án";
+              const todayDoneCount = todayTasksList.filter((t) => t.done).length;
+              const todayTotalCount = todayTasksList.length;
+              const todayPercent = Math.round((todayDoneCount / todayTotalCount) * 100);
 
-              <div className="home-modules-grid">
-                <div className="home-module-card" onClick={() => { setLapMtlOpen(true); setView("projects"); }}>
-                  <div className="home-module-icon mtl"><IconBuilding /></div>
-                  <div className="home-module-body">
-                    <h3>1. Lập Master Timeline</h3>
-                    <p>Quản trị cấu trúc WBS 5 cấp, mốc tiến độ chuẩn, Gantt chart và quy trình phê duyệt E-Approval.</p>
-                    <span className="home-module-link">Truy cập phân hệ →</span>
-                  </div>
-                </div>
-                <div className="home-module-card" onClick={() => { setDesignTaskOpen(true); setView("design_task"); }}>
-                  <div className="home-module-icon design"><IconDesignTask /></div>
-                  <div className="home-module-body">
-                    <h3>2. Lập Nhiệm Vụ Thiết Kế</h3>
-                    <p>Chuẩn hóa hồ sơ nhiệm vụ thiết kế (NVTK), quy trình PBCM góp ý và thẩm duyệt phương án thiết kế.</p>
-                    <span className="home-module-link">Truy cập phân hệ →</span>
-                  </div>
-                </div>
-                <div className="home-module-card" onClick={() => { setFsVer2Open(true); setView("fs_ver2"); }}>
-                  <div className="home-module-icon fs"><IconFS /></div>
-                  <div className="home-module-body">
-                    <h3>3. Lập FS Thực Thi (FS-Ver2)</h3>
-                    <p>Mô hình tính khả thi thực thi dự án, cập nhật chỉ tiêu tài chính, chi phí và đối chiếu số liệu liên Ban.</p>
-                    <span className="home-module-link">Truy cập phân hệ →</span>
-                  </div>
-                </div>
-                <div className="home-module-card" onClick={() => { setTrackingOpen(true); setView("overview"); }}>
-                  <div className="home-module-icon tracking"><IconGauge /></div>
-                  <div className="home-module-body">
-                    <h3>4. Theo Dõi Dự Án</h3>
-                    <p>Bảng điều khiển KPI, giám sát mốc tiến độ realtime, cảnh báo trễ hạn và báo cáo tổng hợp các phòng ban.</p>
-                    <span className="home-module-link">Truy cập phân hệ →</span>
-                  </div>
-                </div>
-              </div>
+              const bdhdaOperationsList = [
+                {
+                  code: "NV-01",
+                  name: "Lập & Kiểm soát Master Timeline (WBS Cấp 1-5)",
+                  dept: "Phòng Quản lý Dự án & MTL",
+                  progress: 92,
+                  target: 90,
+                  status: "passed",
+                  statusText: "Đạt chuẩn",
+                  actionView: "projects" as const,
+                  actionLabel: "Xem Lập MTL",
+                },
+                {
+                  code: "NV-02",
+                  name: "Phê duyệt Nhiệm vụ Thiết kế (NVTK) & Phương án KT",
+                  dept: "Phòng Quản lý Thiết kế",
+                  progress: 86,
+                  target: 80,
+                  status: "passed",
+                  statusText: "Đạt chuẩn",
+                  actionView: "design_task" as const,
+                  actionLabel: "Xem NVTK",
+                },
+                {
+                  code: "NV-03",
+                  name: "Thẩm định Mô hình Khả thi FS Thực thi (FS-Ver2)",
+                  dept: "Phòng Thẩm định Đầu tư & FS",
+                  progress: 82,
+                  target: 80,
+                  status: "passed",
+                  statusText: "Đạt chuẩn",
+                  actionView: "fs_ver2" as const,
+                  actionLabel: "Xem FS-Ver2",
+                },
+                {
+                  code: "NV-04",
+                  name: "Quản lý Hồ sơ Pháp lý & Mốc Giấy phép XD (GPXD)",
+                  dept: "Ban Pháp lý Dự án",
+                  progress: 90,
+                  target: 85,
+                  status: "passed",
+                  statusText: "Đạt chuẩn",
+                  actionView: "overview" as const,
+                  actionLabel: "Xem Tiến độ",
+                },
+                {
+                  code: "NV-05",
+                  name: "Giám sát Tiến độ Hiện trường & Nghiệm thu MEP",
+                  dept: "Ban QLDA Xây dựng Hiện trường",
+                  progress: 85,
+                  target: 80,
+                  status: "passed",
+                  statusText: "Đạt chuẩn",
+                  actionView: "overview" as const,
+                  actionLabel: "Xem Tiến độ",
+                },
+                {
+                  code: "NV-06",
+                  name: "Hoàn công, Thẩm duyệt PCCC & Bàn giao Dự án",
+                  dept: "Ban Quản lý Bàn giao & CSKH",
+                  progress: 76,
+                  target: 80,
+                  status: "improve",
+                  statusText: "Cần đẩy nhanh",
+                  actionView: "overview" as const,
+                  actionLabel: "Xem Mốc bàn giao",
+                },
+              ];
 
-              <div className="home-projects-card">
-                <div className="home-card-header">
-                  <h3>Dự án trọng điểm đang triển khai</h3>
-                  <button type="button" className="btn-table-action" onClick={() => { setLapMtlOpen(true); setView("projects"); }}>
-                    Xem tất cả dự án ({projects.length})
-                  </button>
-                </div>
-                <div className="home-projects-table-wrap">
-                  <table className="home-projects-table">
-                    <thead>
-                      <tr>
-                        <th>Mã dự án</th>
-                        <th>Tên dự án</th>
-                        <th>Vùng</th>
-                        <th>Loại hình</th>
-                        <th>Ngày bắt đầu MTL</th>
-                        <th>Trạng thái E-Approval</th>
-                        <th>Thao tác</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {projects.slice(0, 6).map((proj) => (
-                        <tr key={proj.id}>
-                          <td style={{ fontWeight: 600 }}>{proj.code}</td>
-                          <td style={{ fontWeight: 600, color: "#0f52ba" }}>{proj.name}</td>
-                          <td>{proj.region || "Miền Nam"}</td>
-                          <td>{proj.type || "Khu đô thị"}</td>
-                          <td>{proj.baselineDate || "15/01/2026"}</td>
-                          <td>
-                            <span className={`status-pill ${proj.approvalStatus === "approved" ? "approved" : proj.approvalStatus === "reviewing" ? "reviewing" : "pending"}`}>
-                              {proj.approvalStatus === "approved" ? "Đã duyệt" : proj.approvalStatus === "reviewing" ? "Đang thẩm định" : "Khởi tạo"}
+              const filteredOps = bdhdaOperationsList.filter((op) => {
+                if (homeOpFilter === "passed") return op.status === "passed";
+                if (homeOpFilter === "improve") return op.status === "improve";
+                return true;
+              });
+
+              const teamMembersList = [
+                {
+                  role: "Phó giám đốc Phòng điều hành dự án",
+                  email: "gmd.pgd@novaland.com.vn",
+                  kpiScore: 92.0,
+                  status: "passed",
+                  statusText: "Đạt chuẩn",
+                  scope: "Phụ trách Vùng Hồ Chí Minh & Khối Cao tầng",
+                  projects: 4,
+                },
+                {
+                  role: "Trưởng phòng cao cấp Quản lý dự án",
+                  email: "gmd.tpcc@novaland.com.vn",
+                  kpiScore: 88.5,
+                  status: "passed",
+                  statusText: "Đạt chuẩn",
+                  scope: "Phụ trách Vùng Phan Thiết 1 & Khu nghỉ dưỡng",
+                  projects: 3,
+                },
+                {
+                  role: "Trưởng phòng Quản lý dự án",
+                  email: "gmd.tp@novaland.com.vn",
+                  kpiScore: 78.0,
+                  status: "improve",
+                  statusText: "Cần đôn đốc",
+                  scope: "Kiểm soát MTL & Thẩm định mốc tiến độ",
+                  projects: 5,
+                },
+                {
+                  role: "Admin hệ thống (PMD / ITD)",
+                  email: "itd.admin@novagroup.vn",
+                  kpiScore: 96.0,
+                  status: "passed",
+                  statusText: "Xuất sắc",
+                  scope: "Quản trị dữ liệu WBS & Phân quyền hệ thống",
+                  projects: 14,
+                },
+              ];
+
+              const overdueList = [
+                {
+                  id: "od-1",
+                  title: "Nộp hồ sơ thẩm duyệt nghiệm thu PCCC Tháp B & C",
+                  project: "NovaWorld Phan Thiet (PGA Golf & Resort)",
+                  projectCode: "NVL-NVW-2026",
+                  projectId: "proj-novaworld-phanthiet",
+                  dept: "Ban Quản lý Dự án & Pháp lý",
+                  dueDate: "10/08/2026",
+                  daysLate: 40,
+                  severity: "critical",
+                  severityText: "Nghiêm trọng (G0)",
+                  targetModule: "workspace" as const,
+                },
+                {
+                  id: "od-2",
+                  title: "Nghiệm thu hoàn thành cọc khoan nhồi & đài móng Phân khu 2",
+                  project: "Aqua City - Đô thị Sinh Thái Thông Minh",
+                  projectCode: "NVL-AQC-2026",
+                  projectId: "proj-aqua-city",
+                  dept: "Ban QLDA Xây dựng Hiện trường",
+                  dueDate: "12/08/2026",
+                  daysLate: 38,
+                  severity: "warning",
+                  severityText: "Cảnh báo trễ",
+                  targetModule: "workspace" as const,
+                },
+                {
+                  id: "od-3",
+                  title: "Đối chiếu số liệu chi phí tư vấn và ký nháy hồ sơ NVTK",
+                  project: "Sunrise Riverside",
+                  projectCode: "NVL-SRR-2026",
+                  projectId: "proj-sunrise-riverside",
+                  dept: "Phòng Quản lý Thiết kế BĐHDA",
+                  dueDate: "20/08/2026",
+                  daysLate: 30,
+                  severity: "alert",
+                  severityText: "Chờ ký duyệt",
+                  targetModule: "design_task" as const,
+                },
+              ];
+
+              return (
+                <div className="home-content-wrap">
+                  {/* Top Executive Header Strip */}
+                  <div className="home-exec-header">
+                    <div className="home-exec-greeting">
+                      <h2>
+                        {greetingTime}, <span style={{ color: "#34d399" }}>{roleDisplayName}</span>! Chúc một ngày làm việc hiệu quả.
+                      </h2>
+                      <p>
+                        Tổng quan hiệu suất điều hành dự án và phân bổ công việc trọng tâm trong Kỳ đánh giá 6 tháng đầu năm 2026 · Ban Điều Hành Dự Án NovaGroup
+                      </p>
+                    </div>
+                    <div className="home-exec-controls">
+                      <div className="period-chips-group">
+                        <button
+                          type="button"
+                          className={`period-chip-btn ${homePeriod === "6m" ? "active" : ""}`}
+                          onClick={() => setHomePeriod("6m")}
+                        >
+                          Kỳ 6 Tháng đầu 2026
+                        </button>
+                        <button
+                          type="button"
+                          className={`period-chip-btn ${homePeriod === "q3" ? "active" : ""}`}
+                          onClick={() => setHomePeriod("q3")}
+                        >
+                          Quý 3/2026
+                        </button>
+                        <button
+                          type="button"
+                          className={`period-chip-btn ${homePeriod === "year" ? "active" : ""}`}
+                          onClick={() => setHomePeriod("year")}
+                        >
+                          Cả năm 2026
+                        </button>
+                      </div>
+                      <div className="home-today-badge">
+                        <IconCalendar />
+                        <span>Kỳ hiện tại</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Top Row: 2 Cards (Khối 1: Tổng KPI hoàn thành & Khối 2: Tiến độ theo nghiệp vụ) */}
+                  <div className="home-dashboard-grid">
+                    {/* Card 1: Tổng KPI Hoàn Thành */}
+                    <div className="exec-card">
+                      <div className="exec-card-head">
+                        <div className="exec-card-title">
+                          <div className="exec-icon-box kpi">
+                            <IconAward />
+                          </div>
+                          <span>Tổng KPI Hoàn Thành</span>
+                        </div>
+                        <span className="exec-badge-pill">
+                          {homePeriod === "6m" ? "Kỳ 6 Tháng" : homePeriod === "q3" ? "Quý 3" : "Năm 2026"}
+                        </span>
+                      </div>
+
+                      <ExecutiveArcGauge
+                        score={homePeriod === "6m" ? 88.0 : homePeriod === "q3" ? 85.5 : 89.2}
+                        max={100}
+                        label="ĐẠT CHUẨN (≥85%)"
+                      />
+
+                      <div style={{ textAlign: "center", marginBottom: "14px" }}>
+                        <div style={{ fontSize: "14px", fontWeight: 800, color: "#0f172a" }}>
+                          KPI cá nhân: <span style={{ color: "#059669" }}>{homePeriod === "6m" ? "88.0" : homePeriod === "q3" ? "85.5" : "89.2"} điểm</span>
+                        </div>
+                        <div style={{ fontSize: "11px", color: "#64748b", marginTop: "3px" }}>
+                          Công việc định kỳ tối đa 100 điểm; công việc giao thêm đã duyệt được cộng thưởng
+                        </div>
+                        <div style={{ display: "inline-block", marginTop: "6px", padding: "3px 10px", borderRadius: "12px", background: "#fffbeb", border: "1px solid #fef3c7", color: "#b45309", fontSize: "11px", fontWeight: 700 }}>
+                          Trách nhiệm quản lý: 3/4 nhân sự đạt KPI
+                        </div>
+                      </div>
+
+                      <div className="kpi-metrics-row">
+                        <div className="kpi-sub-tile">
+                          <span>Công việc định kỳ</span>
+                          <b>92.5 đ</b>
+                          <small>Tối đa 100đ</small>
+                        </div>
+                        <div className="kpi-sub-tile">
+                          <span>Điểm thưởng thêm</span>
+                          <b style={{ color: "#059669" }}>+3.5 đ</b>
+                          <small>Vượt tiến độ MTL</small>
+                        </div>
+                        <div className="kpi-sub-tile">
+                          <span>Trách nhiệm BĐH</span>
+                          <b>75.0%</b>
+                          <small>3/4 nhân sự đạt</small>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Card 2: Tiến Độ Theo Toàn Bộ Nghiệp Vụ */}
+                    <div className="exec-card">
+                      <div className="exec-card-head">
+                        <div className="exec-card-title">
+                          <div className="exec-icon-box ops">
+                            <IconBriefcase />
+                          </div>
+                          <span>Tiến Độ Theo Toàn Bộ Nghiệp Vụ</span>
+                        </div>
+                        <button
+                          type="button"
+                          className="exec-link-action"
+                          onClick={() => setView("overview")}
+                          title="Xem chi tiết toàn bộ nghiệp vụ trên Theo dõi dự án"
+                        >
+                          <span>Xem tất cả nghiệp vụ</span>
+                          <IconTrendingUp />
+                        </button>
+                      </div>
+
+                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "10px", flexWrap: "wrap", gap: "8px" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: "12px", fontSize: "11px", fontWeight: 600 }}>
+                          <span style={{ display: "flex", alignItems: "center", gap: "5px", color: "#047857" }}>
+                            <span style={{ width: "8px", height: "8px", borderRadius: "2px", background: "#10b981", display: "inline-block" }} />
+                            Đạt chuẩn (≥80%)
+                          </span>
+                          <span style={{ display: "flex", alignItems: "center", gap: "5px", color: "#b45309" }}>
+                            <span style={{ width: "8px", height: "8px", borderRadius: "2px", background: "#f59e0b", display: "inline-block" }} />
+                            Cần cải thiện (&lt;80%)
+                          </span>
+                        </div>
+                        <div className="op-filter-row" style={{ margin: 0 }}>
+                          <button
+                            type="button"
+                            className={`op-filter-btn ${homeOpFilter === "all" ? "active" : ""}`}
+                            onClick={() => setHomeOpFilter("all")}
+                          >
+                            Tất cả ({bdhdaOperationsList.length})
+                          </button>
+                          <button
+                            type="button"
+                            className={`op-filter-btn ${homeOpFilter === "passed" ? "active" : ""}`}
+                            onClick={() => setHomeOpFilter("passed")}
+                          >
+                            Đạt chuẩn (5)
+                          </button>
+                          <button
+                            type="button"
+                            className={`op-filter-btn ${homeOpFilter === "improve" ? "active" : ""}`}
+                            onClick={() => setHomeOpFilter("improve")}
+                          >
+                            Cần cải thiện (1)
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className="op-list">
+                        {filteredOps.map((op) => (
+                          <div className="op-item" key={op.code}>
+                            <div className="op-item-top">
+                              <span className="op-code">{op.code}</span>
+                              <span className="op-name" title={op.name}>
+                                {op.name}
+                              </span>
+                              <span className={`op-pct ${op.status === "improve" ? "improve" : ""}`}>
+                                {op.progress}%
+                              </span>
+                              <button
+                                type="button"
+                                className="op-btn-action"
+                                onClick={() => setView(op.actionView)}
+                                title={`Mở phân hệ ${op.actionLabel}`}
+                              >
+                                {op.actionLabel} →
+                              </button>
+                            </div>
+                            <div className="op-track-wrap">
+                              <div className="op-track">
+                                <div
+                                  className={`op-fill ${op.status}`}
+                                  style={{ width: `${op.progress}%` }}
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Middle Row: 2 Cards (Khối 3: Công việc hôm nay & Khối 4: KPI trách nhiệm quản lý) */}
+                  <div className="home-dashboard-grid">
+                    {/* Card 3: Công Việc Hôm Nay */}
+                    <div className="exec-card">
+                      <div className="exec-card-head">
+                        <div className="exec-card-title">
+                          <div className="exec-icon-box tasks">
+                            <IconClock />
+                          </div>
+                          <span>Công Việc Hôm Nay</span>
+                        </div>
+                        <span className="exec-badge-pill" style={{ background: todayDoneCount === todayTotalCount ? "#ecfdf5" : "#eff6ff", color: todayDoneCount === todayTotalCount ? "#047857" : "#1d4ed8" }}>
+                          {todayDoneCount}/{todayTotalCount}
+                        </span>
+                      </div>
+
+                      <div className="today-summary-strip">
+                        <ExecutiveDonut percent={todayPercent} size={64} stroke={7} color={todayPercent >= 50 ? "#059669" : "#2563eb"} />
+                        <div className="today-summary-text">
+                          <b>{todayDoneCount} / {todayTotalCount} Công việc</b>
+                          <span>Đã hoàn tất trong ngày</span>
+                        </div>
+                        <div className="today-stats-group">
+                          <span className="today-tag-chip routine">● Định kỳ: 4</span>
+                          <span className="today-tag-chip extra">● Giao thêm: 2</span>
+                          <span className="today-tag-chip approval">● Chờ duyệt: 1</span>
+                        </div>
+                      </div>
+
+                      <div className="today-list">
+                        {todayTasksList.map((t) => (
+                          <div
+                            key={t.id}
+                            className={`today-task-item ${t.done ? "is-done" : ""}`}
+                            onClick={() => {
+                              setTodayTasksList((prev) =>
+                                prev.map((item) => (item.id === t.id ? { ...item, done: !item.done } : item))
+                              );
+                            }}
+                          >
+                            <div className={`today-checkbox ${t.done ? "checked" : ""}`}>
+                              {t.done && (
+                                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                                  <polyline points="20 6 9 17 4 12" />
+                                </svg>
+                              )}
+                            </div>
+                            <div className="today-task-info">
+                              <div className="today-task-title">{t.title}</div>
+                              <div className="today-task-meta">
+                                <span>⏰ {t.time}</span>
+                                {t.project && <span>• 🏢 {t.project}</span>}
+                                <span style={{ marginLeft: "auto", fontWeight: 700, color: t.category === "routine" ? "#1d4ed8" : t.category === "approval" ? "#7c3aed" : "#c2410c" }}>
+                                  {t.category === "routine" ? "Định kỳ" : t.category === "approval" ? "Chờ duyệt" : "Giao thêm"}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Card 4: KPI Trách Nhiệm Quản Lý */}
+                    <div className="exec-card">
+                      <div className="exec-card-head">
+                        <div className="exec-card-title">
+                          <div className="exec-icon-box mgmt">
+                            <IconUsers />
+                          </div>
+                          <span>KPI Trách Nhiệm Quản Lý</span>
+                        </div>
+                        <span className="exec-badge-pill">Kỳ hiện tại</span>
+                      </div>
+
+                      <div className="mgmt-gauge-row">
+                        <ExecutiveDonut percent={75} size={64} stroke={7} color="#059669" />
+                        <div className="mgmt-gauge-text">
+                          <b>3 / 4 Nhân sự cấp dưới</b>
+                          <span>Đã đạt ngưỡng KPI 100% (≥85 điểm chuẩn)</span>
+                        </div>
+                      </div>
+
+                      <div className="mgmt-alert-notice">
+                        ⚠️ KPI trách nhiệm quản lý chưa hoàn thành vì còn nhân sự cấp dưới chưa đạt KPI.
+                      </div>
+
+                      <div className="mgmt-team-grid">
+                        {teamMembersList.map((m) => (
+                          <div className="mgmt-member-card" key={m.email}>
+                            <div className="mgmt-member-top">
+                              <div className="mgmt-member-role">{m.role}</div>
+                              <span className={`mgmt-member-kpi ${m.status}`}>
+                                {m.kpiScore.toFixed(1)} đ
+                              </span>
+                            </div>
+                            <div className="mgmt-member-scope">{m.scope}</div>
+                            <div style={{ fontSize: "9.5px", color: "#64748b", display: "flex", justifyContent: "space-between" }}>
+                              <span>Phụ trách: {m.projects} dự án</span>
+                              <span style={{ color: m.status === "passed" ? "#059669" : "#d97706", fontWeight: 700 }}>{m.statusText}</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Bottom Row: Full Width Card 5 (Các công việc đang trễ hạn) */}
+                  <div className="overdue-card">
+                    <div className="exec-card-head" style={{ borderBottomColor: "#fee2e2" }}>
+                      <div className="exec-card-title" style={{ color: "#991b1b" }}>
+                        <div className="exec-icon-box overdue">
+                          <IconAlertTriangle />
+                        </div>
+                        <span>Các Công Việc Đang Trễ Hạn</span>
+                        <span style={{ background: "#dc2626", color: "#ffffff", padding: "2px 8px", borderRadius: "10px", fontSize: "11px", fontWeight: 800 }}>
+                          {overdueList.length}
+                        </span>
+                      </div>
+                      <button
+                        type="button"
+                        className="exec-link-action"
+                        style={{ color: "#dc2626" }}
+                        onClick={() => {
+                          setTrackingOpen(true);
+                          setView("overview");
+                        }}
+                      >
+                        <span>Xem tất cả công việc trễ hạn ({overdueList.length})</span>
+                        <IconTrendingUp />
+                      </button>
+                    </div>
+
+                    <div className="overdue-items-grid">
+                      {overdueList.map((item) => (
+                        <div className="overdue-item-box" key={item.id}>
+                          <div className="overdue-tag-row">
+                            <span className="overdue-pill-danger">
+                              ⚠️ {item.severityText}
                             </span>
-                          </td>
-                          <td>
-                            <button type="button" className="btn-link-action" onClick={() => openWorkspace(proj.id)}>
-                              Xem MTL
+                            <span className="overdue-days-pill">
+                              Trễ {item.daysLate} ngày
+                            </span>
+                          </div>
+
+                          <h4 className="overdue-task-name">{item.title}</h4>
+
+                          <div className="overdue-meta-row">
+                            <div>🏢 <strong>Dự án:</strong> {item.project}</div>
+                            <div>👥 <strong>Bộ phận:</strong> {item.dept}</div>
+                            <div>📅 <strong>Hạn hoàn thành:</strong> <span style={{ color: "#dc2626", fontWeight: 700 }}>{item.dueDate}</span></div>
+                          </div>
+
+                          <div className="overdue-actions">
+                            <button
+                              type="button"
+                              className="btn-overdue-urge"
+                              onClick={() => setToast(`Đã gửi thông báo đôn đốc khẩn cấp cho: ${item.dept}`)}
+                              title="Gửi thông báo đôn đốc trực tiếp"
+                            >
+                              ⚡ Đôn đốc ngay
                             </button>
-                          </td>
-                        </tr>
+                            <button
+                              type="button"
+                              className="btn-overdue-view"
+                              onClick={() => {
+                                if (item.targetModule === "workspace") {
+                                  setActiveId(item.projectId);
+                                  setView("workspace");
+                                } else {
+                                  setView(item.targetModule);
+                                }
+                              }}
+                              title="Mở phân hệ chi tiết để xử lý"
+                            >
+                              ↗ Xem tiến độ MTL
+                            </button>
+                          </div>
+                        </div>
                       ))}
-                    </tbody>
-                  </table>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </div>
+              );
+            })()}
           </section>
         ) : view === "overview" ? (
           <>
