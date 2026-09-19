@@ -2454,7 +2454,7 @@ export default function Home() {
           font-size: 12.5px;
           font-weight: 600;
           color: #16a34a;
-          margin-bottom: 3px;
+          margin-bottom: 0;
         }
         .demo-user-desc {
           font-size: 11.5px;
@@ -2619,17 +2619,6 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Tabs */}
-            <div className="demo-tabs">
-              <button
-                type="button"
-                className="demo-tab-btn active"
-              >
-                <IconTableGrid />
-                <span>Hệ thống GMD</span>
-              </button>
-            </div>
-
             {/* Account List */}
             <div className="demo-account-list">
               {DEMO_ACCOUNTS.filter((acc) => acc.system === "gmd").map((acc) => (
@@ -2650,7 +2639,6 @@ export default function Home() {
                         </span>
                       </div>
                       <div className="demo-user-email">{acc.email || acc.username}</div>
-                      <div className="demo-user-desc">{acc.desc}</div>
                     </div>
                   </div>
                   <button
@@ -2666,7 +2654,7 @@ export default function Home() {
 
             {/* Admin divider */}
             <div className="demo-admin-divider">
-              Quản trị Hệ thống NovaGroup
+              Quản trị hệ thống
             </div>
 
             {/* Admin account card */}
@@ -2682,7 +2670,6 @@ export default function Home() {
                       <span className="demo-badge purple">{acc.badge || "NovaGroup Admin"}</span>
                     </div>
                     <div className="demo-user-email">{acc.email}</div>
-                    <div className="demo-user-desc">{acc.desc}</div>
                   </div>
                 </div>
                 <button
