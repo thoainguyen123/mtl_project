@@ -3263,106 +3263,96 @@ export default function Home() {
           box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
         }
         .home-content-wrap {
-          padding: 24px 28px 48px;
-          max-width: 1440px;
+          padding: 14px 20px 24px;
+          max-width: 1720px;
           width: 100%;
           margin: 0 auto;
           box-sizing: border-box;
         }
-        /* Top Executive Header Card */
-        .home-exec-header {
-          background: linear-gradient(135deg, #0b1f33 0%, #112d4a 60%, #1e3a5f 100%);
-          border-radius: 14px;
-          padding: 24px 28px;
-          color: #ffffff;
-          margin-bottom: 22px;
-          box-shadow: 0 8px 24px rgba(11, 31, 51, 0.22);
-          border-top: 3px solid #10b981;
+        .home-topbar {
+          background: #ffffff;
+          border-bottom: 1px solid #e2e8f0;
+          padding: 10px 24px;
           display: flex;
+          align-items: center;
           justify-content: space-between;
-          align-items: center;
-          gap: 20px;
-          flex-wrap: wrap;
+          flex: none;
+          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+          gap: 16px;
         }
-        .home-exec-greeting h2 {
-          font-size: 21px;
-          font-weight: 800;
-          margin: 0 0 6px;
-          letter-spacing: -0.2px;
-          color: #ffffff;
+        .period-chips-group-min {
+          display: inline-flex;
+          background: #f1f5f9;
+          padding: 2px;
+          border-radius: 8px;
+          border: 1px solid #e2e8f0;
         }
-        .home-exec-greeting p {
-          font-size: 13px;
-          color: #94a3b8;
-          margin: 0;
-          line-height: 1.45;
-          max-width: 760px;
-        }
-        .home-exec-controls {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          flex-wrap: wrap;
-        }
-        .period-chips-group {
-          display: flex;
-          background: rgba(255, 255, 255, 0.08);
-          padding: 3px;
-          border-radius: 20px;
-          border: 1px solid rgba(255, 255, 255, 0.15);
-        }
-        .period-chip-btn {
+        .period-chip-btn-min {
           border: none;
           background: transparent;
-          color: #cbd5e1;
-          font-size: 11.5px;
+          color: #64748b;
+          font-size: 11px;
           font-weight: 700;
-          padding: 5px 13px;
-          border-radius: 16px;
+          padding: 4px 10px;
+          border-radius: 6px;
           cursor: pointer;
           transition: all 0.15s ease;
         }
-        .period-chip-btn:hover {
-          color: #ffffff;
+        .period-chip-btn-min:hover {
+          color: #0f172a;
         }
-        .period-chip-btn.active {
-          background: linear-gradient(90deg, #10b981, #059669);
+        .period-chip-btn-min.active {
+          background: #0f2942;
           color: #ffffff;
-          box-shadow: 0 2px 8px rgba(16, 185, 129, 0.4);
+          box-shadow: 0 1px 3px rgba(15, 41, 66, 0.2);
         }
         .home-today-badge {
-          display: flex;
+          display: inline-flex;
           align-items: center;
           gap: 6px;
-          background: rgba(255, 255, 255, 0.1);
-          border: 1px solid rgba(255, 255, 255, 0.18);
-          border-radius: 8px;
-          padding: 6px 12px;
-          font-size: 11.5px;
+          border-radius: 6px;
+          padding: 4px 10px;
+          font-size: 11px;
           font-weight: 600;
-          color: #e2e8f0;
         }
 
-        /* 2-Column Grid Layout */
-        .home-dashboard-grid {
+        /* 3-Column Landscape Grid (Trang ngang) */
+        .home-landscape-grid {
           display: grid;
-          grid-template-columns: repeat(2, minmax(0, 1fr));
-          gap: 20px;
-          margin-bottom: 22px;
+          grid-template-columns: 310px minmax(0, 1.45fr) minmax(0, 1.25fr);
+          gap: 14px;
+          align-items: stretch;
         }
-        @media (max-width: 1024px) {
-          .home-dashboard-grid {
+        @media (max-width: 1300px) {
+          .home-landscape-grid {
+            grid-template-columns: 290px minmax(0, 1.3fr) minmax(0, 1.15fr);
+            gap: 12px;
+          }
+        }
+        @media (max-width: 1080px) {
+          .home-landscape-grid {
+            grid-template-columns: 1fr 1fr;
+          }
+        }
+        @media (max-width: 768px) {
+          .home-landscape-grid {
             grid-template-columns: 1fr;
           }
         }
 
-        /* Executive Base Card */
+        .home-col {
+          display: flex;
+          flex-direction: column;
+          gap: 12px;
+        }
+
+        /* Executive Base Card - Minimalist */
         .exec-card {
           background: #ffffff;
           border: 1px solid #e2e8f0;
-          border-radius: 14px;
-          padding: 22px 24px;
-          box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04);
+          border-radius: 10px;
+          padding: 13px 15px;
+          box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03);
           display: flex;
           flex-direction: column;
         }
@@ -3370,24 +3360,24 @@ export default function Home() {
           display: flex;
           align-items: center;
           justify-content: space-between;
-          margin-bottom: 16px;
-          padding-bottom: 14px;
+          margin-bottom: 10px;
+          padding-bottom: 8px;
           border-bottom: 1px solid #f1f5f9;
         }
         .exec-card-title {
           display: flex;
           align-items: center;
-          gap: 10px;
-          font-size: 13.5px;
+          gap: 7px;
+          font-size: 12px;
           font-weight: 800;
           color: #0f2942;
           text-transform: uppercase;
           letter-spacing: 0.3px;
         }
         .exec-icon-box {
-          width: 32px;
-          height: 32px;
-          border-radius: 8px;
+          width: 26px;
+          height: 26px;
+          border-radius: 6px;
           display: grid;
           place-items: center;
           color: #ffffff;
@@ -3400,11 +3390,11 @@ export default function Home() {
         .exec-icon-box.overdue { background: linear-gradient(135deg, #ef4444, #dc2626); }
 
         .exec-badge-pill {
-          font-size: 11px;
+          font-size: 10.5px;
           font-weight: 700;
-          padding: 3px 9px;
-          border-radius: 12px;
-          border: 1px solid #cbd5e1;
+          padding: 2px 7px;
+          border-radius: 10px;
+          border: 1px solid #e2e8f0;
           background: #f8fafc;
           color: #475569;
         }
@@ -3412,7 +3402,7 @@ export default function Home() {
           display: flex;
           align-items: center;
           gap: 4px;
-          font-size: 12px;
+          font-size: 11px;
           font-weight: 700;
           color: #059669;
           cursor: pointer;
@@ -3422,89 +3412,146 @@ export default function Home() {
         }
         .exec-link-action:hover {
           color: #047857;
-          transform: translateX(2px);
+          transform: translateX(1px);
         }
 
-        /* Card 1: Arc Gauge & Sub-Stats */
+        /* Card 1A: Arc Gauge & Sub-Stats */
         .exec-arc-container {
           display: flex;
           flex-direction: column;
           align-items: center;
           justify-content: center;
           position: relative;
-          margin: 4px 0 16px;
+          margin: 2px 0 8px;
         }
         .exec-arc-svg {
-          width: 210px;
-          height: 115px;
+          width: 175px;
+          height: 96px;
           overflow: visible;
         }
         .exec-arc-content {
           position: absolute;
-          bottom: 4px;
+          bottom: 2px;
           text-align: center;
         }
         .exec-arc-score {
-          font-size: 26px;
+          font-size: 22px;
           font-weight: 900;
           color: #0f172a;
           line-height: 1;
         }
         .exec-arc-label {
           display: inline-block;
-          margin-top: 4px;
-          padding: 2px 8px;
-          border-radius: 10px;
+          margin-top: 3px;
+          padding: 1px 6px;
+          border-radius: 8px;
           background: #ecfdf5;
           color: #047857;
-          font-size: 10px;
+          font-size: 9.5px;
           font-weight: 800;
         }
-        .kpi-metrics-row {
+        .kpi-metrics-row.compact {
           display: grid;
           grid-template-columns: repeat(3, 1fr);
-          gap: 10px;
-          margin-top: auto;
-          padding-top: 14px;
+          gap: 6px;
+          margin-top: 6px;
+          padding-top: 8px;
           border-top: 1px solid #f1f5f9;
         }
         .kpi-sub-tile {
           background: #f8fafc;
           border: 1px solid #e2e8f0;
-          border-radius: 8px;
-          padding: 10px 8px;
+          border-radius: 6px;
+          padding: 6px 4px;
           text-align: center;
         }
         .kpi-sub-tile span {
           display: block;
-          font-size: 10.5px;
+          font-size: 10px;
           color: #64748b;
-          margin-bottom: 4px;
+          margin-bottom: 2px;
           font-weight: 600;
         }
         .kpi-sub-tile b {
-          font-size: 13.5px;
+          font-size: 12px;
           color: #0f172a;
           font-weight: 800;
         }
-        .kpi-sub-tile small {
+
+        /* Card 1B: Subordinates Management */
+        .mgmt-team-list-compact {
+          display: flex;
+          flex-direction: column;
+          gap: 6px;
+        }
+        .mgmt-row-compact {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 8px;
+          padding: 6px 9px;
+          border-radius: 6px;
+          background: #f8fafc;
+          border: 1px solid #f1f5f9;
+          transition: all 0.15s ease;
+        }
+        .mgmt-row-compact:hover {
+          background: #f1f5f9;
+          border-color: #cbd5e1;
+        }
+        .mgmt-row-info {
+          min-width: 0;
+          flex: 1;
+        }
+        .mgmt-row-role {
+          display: block;
+          font-size: 11px;
+          font-weight: 700;
+          color: #1e293b;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+        .mgmt-row-scope {
           display: block;
           font-size: 9.5px;
-          color: #059669;
-          font-weight: 700;
-          margin-top: 2px;
+          color: #64748b;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+        .mgmt-row-kpi-wrap {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          flex: none;
+        }
+        .mgmt-kpi-pill {
+          font-size: 10.5px;
+          font-weight: 800;
+          padding: 2px 6px;
+          border-radius: 5px;
+        }
+        .mgmt-kpi-pill.passed {
+          background: #ecfdf5;
+          color: #047857;
+          border: 1px solid #a7f3d0;
+        }
+        .mgmt-kpi-pill.improve {
+          background: #fff7ed;
+          color: #c2410c;
+          border: 1px solid #fed7aa;
         }
 
-        /* Card 2: Operations Matrix */
-        .op-filter-row {
+        /* Card 2: Operations Matrix - Compact */
+        .op-filter-group-compact {
           display: flex;
-          gap: 6px;
-          margin-bottom: 12px;
+          gap: 4px;
         }
-        .op-filter-btn {
-          padding: 4px 10px;
-          border-radius: 6px;
-          font-size: 11px;
+        .op-filter-btn-min {
+          padding: 3px 8px;
+          border-radius: 5px;
+          font-size: 10.5px;
           font-weight: 700;
           border: 1px solid #cbd5e1;
           background: #f8fafc;
@@ -3512,39 +3559,45 @@ export default function Home() {
           cursor: pointer;
           transition: all 0.15s ease;
         }
-        .op-filter-btn.active {
+        .op-filter-btn-min.active {
           background: #0f2942;
           color: #ffffff;
           border-color: #0f2942;
         }
-        .op-list {
+        .op-legend-compact {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          font-size: 10.5px;
+          font-weight: 600;
+          margin-bottom: 6px;
+        }
+        .op-list-compact {
           display: flex;
           flex-direction: column;
-          gap: 9px;
-          overflow-y: auto;
-          max-height: 290px;
-          padding-right: 2px;
+          gap: 7px;
         }
-        .op-item {
-          padding: 10px 12px;
-          border-radius: 8px;
+        .op-item-compact {
+          padding: 8px 10px;
+          border-radius: 6px;
           background: #f8fafc;
           border: 1px solid #e2e8f0;
           transition: all 0.15s;
         }
-        .op-item:hover {
+        .op-item-compact:hover {
           border-color: #94a3b8;
-          background: #f1f5f9;
+          background: #ffffff;
+          box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
         }
-        .op-item-top {
+        .op-row-top {
           display: flex;
           align-items: center;
           justify-content: space-between;
-          margin-bottom: 4px;
-          gap: 10px;
+          gap: 8px;
+          margin-bottom: 5px;
         }
-        .op-code {
-          padding: 2px 6px;
+        .op-code-pill {
+          padding: 2px 5px;
           border-radius: 4px;
           background: #0f2942;
           color: #ffffff;
@@ -3552,141 +3605,101 @@ export default function Home() {
           font-weight: 800;
           flex: none;
         }
-        .op-name {
-          font-size: 12px;
+        .op-name-text {
+          font-size: 11.5px;
           font-weight: 700;
           color: #1e293b;
           white-space: nowrap;
           overflow: hidden;
           text-overflow: ellipsis;
-          flex: 1;
         }
-        .op-pct {
-          font-size: 12.5px;
+        .op-score-text {
+          font-size: 12px;
           font-weight: 800;
           color: #059669;
           flex: none;
         }
-        .op-pct.improve {
+        .op-score-text.improve {
           color: #d97706;
         }
-        .op-track-wrap {
-          display: flex;
-          align-items: center;
-          gap: 10px;
-          margin-top: 4px;
-        }
-        .op-track {
-          flex: 1;
-          height: 7px;
-          border-radius: 4px;
-          background: #e2e8f0;
-          position: relative;
-          overflow: hidden;
-        }
-        .op-fill {
-          height: 100%;
-          border-radius: 4px;
-          transition: width 0.4s ease;
-        }
-        .op-fill.passed {
-          background: linear-gradient(90deg, #10b981, #059669);
-        }
-        .op-fill.improve {
-          background: linear-gradient(90deg, #f59e0b, #d97706);
-        }
-        .op-btn-action {
-          padding: 2px 7px;
+        .op-quick-btn {
+          padding: 2px 6px;
           border-radius: 4px;
           border: 1px solid #cbd5e1;
           background: #ffffff;
           color: #2563eb;
-          font-size: 10.5px;
+          font-size: 10px;
           font-weight: 700;
           cursor: pointer;
           flex: none;
           transition: all 0.15s;
         }
-        .op-btn-action:hover {
+        .op-quick-btn:hover {
           background: #eff6ff;
           border-color: #93c5fd;
         }
+        .op-progress-track {
+          width: 100%;
+          height: 6px;
+          border-radius: 3px;
+          background: #e2e8f0;
+          position: relative;
+          overflow: hidden;
+        }
+        .op-progress-bar {
+          height: 100%;
+          border-radius: 3px;
+          transition: width 0.3s ease;
+        }
+        .op-progress-bar.passed {
+          background: linear-gradient(90deg, #10b981, #059669);
+        }
+        .op-progress-bar.improve {
+          background: linear-gradient(90deg, #f59e0b, #d97706);
+        }
+        .op-target-marker {
+          position: absolute;
+          top: 0;
+          bottom: 0;
+          width: 2px;
+          background: #0f172a;
+          opacity: 0.6;
+        }
 
-        /* Card 3: Today's Tasks */
-        .today-summary-strip {
-          display: flex;
-          align-items: center;
-          gap: 16px;
-          padding: 12px 14px;
-          background: #f8fafc;
-          border: 1px solid #e2e8f0;
-          border-radius: 10px;
-          margin-bottom: 12px;
-        }
-        .today-summary-text b {
-          font-size: 14px;
-          color: #0f172a;
-          display: block;
-        }
-        .today-summary-text span {
-          font-size: 11px;
-          color: #64748b;
-        }
-        .today-stats-group {
-          display: flex;
-          gap: 8px;
-          flex-wrap: wrap;
-          margin-left: auto;
-        }
-        .today-tag-chip {
-          padding: 4px 8px;
-          border-radius: 6px;
-          font-size: 11px;
-          font-weight: 700;
-          background: #ffffff;
-          border: 1px solid #e2e8f0;
-          color: #475569;
-        }
-        .today-tag-chip.routine { border-color: #93c5fd; color: #1d4ed8; background: #eff6ff; }
-        .today-tag-chip.extra { border-color: #fed7aa; color: #c2410c; background: #fff7ed; }
-        .today-tag-chip.approval { border-color: #ddd6fe; color: #6d28d9; background: #f5f3ff; }
-
-        .today-list {
+        /* Card 3A: Today's Tasks - Compact */
+        .today-tasks-compact-list {
           display: flex;
           flex-direction: column;
-          gap: 8px;
-          max-height: 250px;
-          overflow-y: auto;
-          padding-right: 2px;
+          gap: 6px;
         }
-        .today-task-item {
+        .today-row-compact {
           display: flex;
           align-items: center;
-          gap: 12px;
-          padding: 9px 12px;
-          border-radius: 8px;
+          gap: 8px;
+          padding: 7px 9px;
+          border-radius: 6px;
           border: 1px solid #f1f5f9;
-          background: #ffffff;
-          transition: all 0.15s;
+          background: #f8fafc;
           cursor: pointer;
+          transition: all 0.15s;
         }
-        .today-task-item:hover {
+        .today-row-compact:hover {
+          background: #f1f5f9;
           border-color: #cbd5e1;
+        }
+        .today-row-compact.is-done {
+          opacity: 0.6;
           background: #f8fafc;
         }
-        .today-task-item.is-done {
-          opacity: 0.65;
-          background: #f8fafc;
-        }
-        .today-task-item.is-done .today-task-title {
+        .today-row-compact.is-done .today-row-title {
           text-decoration: line-through;
           color: #94a3b8;
         }
         .today-checkbox {
-          width: 19px;
-          height: 19px;
-          border-radius: 5px;
-          border: 2px solid #cbd5e1;
+          width: 17px;
+          height: 17px;
+          border-radius: 4px;
+          border: 1.5px solid #cbd5e1;
           display: grid;
           place-items: center;
           cursor: pointer;
@@ -3699,224 +3712,124 @@ export default function Home() {
           border-color: #059669;
           color: #ffffff;
         }
-        .today-task-info {
+        .today-row-info {
           min-width: 0;
           flex: 1;
         }
-        .today-task-title {
-          font-size: 12px;
+        .today-row-title {
+          font-size: 11px;
           font-weight: 600;
           color: #1e293b;
-          margin: 0 0 2px;
-          line-height: 1.35;
-        }
-        .today-task-meta {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          font-size: 10px;
-          color: #64748b;
-        }
-
-        /* Card 4: Management & Subordinate KPI */
-        .mgmt-gauge-row {
-          display: flex;
-          align-items: center;
-          gap: 16px;
-          margin-bottom: 12px;
-          padding: 10px 14px;
-          background: #f8fafc;
-          border: 1px solid #e2e8f0;
-          border-radius: 10px;
-        }
-        .mgmt-gauge-text b {
-          font-size: 15px;
-          color: #0f172a;
-          display: block;
-        }
-        .mgmt-gauge-text span {
-          font-size: 11px;
-          color: #64748b;
-        }
-        .mgmt-alert-notice {
-          background: #fffbeb;
-          border: 1px solid #fef3c7;
-          border-left: 4px solid #f59e0b;
-          padding: 8px 12px;
-          border-radius: 7px;
-          font-size: 11px;
-          color: #92400e;
-          line-height: 1.45;
-          margin-bottom: 12px;
-        }
-        .mgmt-team-grid {
-          display: grid;
-          grid-template-columns: repeat(2, 1fr);
-          gap: 9px;
-        }
-        @media (max-width: 640px) {
-          .mgmt-team-grid {
-            grid-template-columns: 1fr;
-          }
-        }
-        .mgmt-member-card {
-          padding: 10px 12px;
-          border-radius: 8px;
-          background: #f8fafc;
-          border: 1px solid #e2e8f0;
-          display: flex;
-          flex-direction: column;
-          gap: 5px;
-        }
-        .mgmt-member-top {
-          display: flex;
-          align-items: flex-start;
-          justify-content: space-between;
-          gap: 8px;
-        }
-        .mgmt-member-role {
-          font-size: 11.5px;
-          font-weight: 700;
-          color: #0f172a;
-          line-height: 1.3;
-        }
-        .mgmt-member-kpi {
-          padding: 2px 7px;
-          border-radius: 10px;
-          font-size: 10.5px;
-          font-weight: 800;
           white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          margin-bottom: 2px;
+        }
+        .today-row-meta {
+          font-size: 9.5px;
+          color: #64748b;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+        .today-cat-tag {
+          font-size: 9px;
+          font-weight: 700;
+          padding: 2px 6px;
+          border-radius: 4px;
           flex: none;
         }
-        .mgmt-member-kpi.passed {
-          background: #ecfdf5;
-          color: #047857;
-          border: 1px solid #a7f3d0;
-        }
-        .mgmt-member-kpi.improve {
-          background: #fff7ed;
-          color: #c2410c;
-          border: 1px solid #fed7aa;
-        }
-        .mgmt-member-scope {
-          font-size: 10px;
-          color: #64748b;
-        }
+        .today-cat-tag.routine { background: #eff6ff; color: #1d4ed8; }
+        .today-cat-tag.extra { background: #fff7ed; color: #c2410c; }
+        .today-cat-tag.approval { background: #f5f3ff; color: #7c3aed; }
 
-        /* Card 5: Overdue Critical Tasks */
-        .overdue-card {
-          background: #ffffff;
-          border: 1px solid #fee2e2;
-          border-left: 5px solid #dc2626;
-          border-radius: 14px;
-          padding: 22px 24px;
-          box-shadow: 0 4px 16px rgba(220, 38, 38, 0.05);
+        /* Card 3B: Overdue Tasks - Compact */
+        .exec-card.overdue-style {
+          border-color: #fee2e2;
+          border-left: 4px solid #dc2626;
         }
-        .overdue-items-grid {
-          display: grid;
-          grid-template-columns: repeat(3, minmax(0, 1fr));
-          gap: 14px;
+        .overdue-list-compact {
+          display: flex;
+          flex-direction: column;
+          gap: 6px;
         }
-        @media (max-width: 1024px) {
-          .overdue-items-grid {
-            grid-template-columns: 1fr;
-          }
-        }
-        .overdue-item-box {
+        .overdue-row-compact {
+          padding: 7px 9px;
+          border-radius: 6px;
           background: #fff5f5;
           border: 1px solid #fed7d7;
-          border-radius: 10px;
-          padding: 14px 16px;
           display: flex;
-          flex-direction: column;
+          align-items: center;
           justify-content: space-between;
-          gap: 10px;
-          transition: all 0.15s ease;
+          gap: 8px;
+          transition: all 0.15s;
         }
-        .overdue-item-box:hover {
+        .overdue-row-compact:hover {
           border-color: #f87171;
-          box-shadow: 0 4px 12px rgba(220, 38, 38, 0.1);
+          background: #fef2f2;
         }
-        .overdue-tag-row {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          gap: 8px;
-        }
-        .overdue-pill-danger {
-          background: #fee2e2;
-          color: #991b1b;
-          padding: 2px 7px;
-          border-radius: 5px;
-          font-size: 10px;
-          font-weight: 800;
-          display: inline-flex;
-          align-items: center;
-          gap: 4px;
-        }
-        .overdue-days-pill {
-          background: #dc2626;
-          color: #ffffff;
-          padding: 2px 8px;
-          border-radius: 10px;
-          font-size: 10.5px;
-          font-weight: 800;
-        }
-        .overdue-task-name {
-          font-size: 12.5px;
-          font-weight: 700;
-          color: #7f1d1d;
-          margin: 0;
-          line-height: 1.4;
-        }
-        .overdue-meta-row {
-          font-size: 10.5px;
-          color: #78350f;
-          display: flex;
-          flex-direction: column;
-          gap: 2px;
-        }
-        .overdue-actions {
-          display: flex;
-          gap: 8px;
-          margin-top: 4px;
-        }
-        .btn-overdue-urge {
+        .overdue-row-main {
+          min-width: 0;
           flex: 1;
-          height: 30px;
-          background: #dc2626;
-          color: #ffffff;
-          border: none;
-          border-radius: 6px;
+        }
+        .overdue-row-title-row {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          margin-bottom: 2px;
+        }
+        .overdue-row-title {
           font-size: 11px;
           font-weight: 700;
-          cursor: pointer;
-          transition: background 0.15s;
+          color: #991b1b;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+        .overdue-pill-days {
+          background: #dc2626;
+          color: #ffffff;
+          font-size: 9px;
+          font-weight: 800;
+          padding: 1px 5px;
+          border-radius: 4px;
+          flex: none;
+        }
+        .overdue-row-sub {
+          font-size: 9.5px;
+          color: #7f1d1d;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+        .overdue-row-btns {
           display: flex;
           align-items: center;
-          justify-content: center;
           gap: 4px;
+          flex: none;
         }
-        .btn-overdue-urge:hover {
+        .btn-overdue-mini {
+          padding: 3px 6px;
+          border-radius: 4px;
+          font-size: 10px;
+          font-weight: 700;
+          cursor: pointer;
+          border: 1px solid transparent;
+          transition: all 0.15s;
+        }
+        .btn-overdue-mini.urge {
+          background: #dc2626;
+          color: #ffffff;
+        }
+        .btn-overdue-mini.urge:hover {
           background: #b91c1c;
         }
-        .btn-overdue-view {
-          flex: 1;
-          height: 30px;
+        .btn-overdue-mini.view {
           background: #ffffff;
-          color: #dc2626;
-          border: 1.5px solid #dc2626;
-          border-radius: 6px;
-          font-size: 11px;
-          font-weight: 700;
-          cursor: pointer;
-          transition: all 0.15s;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 4px;
+          border-color: #fca5a5;
+          color: #991b1b;
         }
-        .btn-overdue-view:hover {
+        .btn-overdue-mini.view:hover {
           background: #fee2e2;
         }
 
@@ -5161,28 +5074,56 @@ export default function Home() {
                   <IconMenu />
                 </button>
                 <IconHome />
-                <span style={{ fontSize: "15px", fontWeight: 800, color: "#0f2942", letterSpacing: "0.2px" }}>
+                <span style={{ fontSize: "14px", fontWeight: 800, color: "#0f2942", letterSpacing: "0.2px" }}>
                   BẢNG ĐIỀU HÀNH & THEO DÕI HIỆU SUẤT BĐHDA
                 </span>
               </div>
-              <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                <div className="home-today-badge" style={{ color: "#334155", background: "#f8fafc", borderColor: "#e2e8f0" }}>
-                  <IconCalendar />
-                  <span>Hôm nay: {formatDate(overviewToday)}</span>
+
+              {/* Minimalist Period Switcher directly in topbar */}
+              <div className="period-chips-group-min">
+                <button
+                  type="button"
+                  className={`period-chip-btn-min ${homePeriod === "6m" ? "active" : ""}`}
+                  onClick={() => setHomePeriod("6m")}
+                >
+                  Kỳ 6 Tháng đầu 2026
+                </button>
+                <button
+                  type="button"
+                  className={`period-chip-btn-min ${homePeriod === "q3" ? "active" : ""}`}
+                  onClick={() => setHomePeriod("q3")}
+                >
+                  Quý 3/2026
+                </button>
+                <button
+                  type="button"
+                  className={`period-chip-btn-min ${homePeriod === "year" ? "active" : ""}`}
+                  onClick={() => setHomePeriod("year")}
+                >
+                  Cả năm 2026
+                </button>
+              </div>
+
+              <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                <div className="home-today-badge" style={{ color: "#047857", background: "#ecfdf5", border: "1px solid #a7f3d0" }}>
+                  <span>KPI: {homePeriod === "6m" ? "88.0%" : homePeriod === "q3" ? "85.5%" : "89.2%"}</span>
                 </div>
-                <div style={{ fontSize: "12.5px", color: "#475569" }}>
-                  Tài khoản: <strong style={{ color: "#0f52ba" }}>{currentAccount.name}</strong>
+                <div className="home-today-badge" style={{ color: "#b91c1c", background: "#fef2f2", border: "1px solid #fecaca" }}>
+                  <span>Trễ: 3 việc</span>
+                </div>
+                <div className="home-today-badge" style={{ color: "#334155", background: "#f8fafc", border: "1px solid #e2e8f0" }}>
+                  <IconCalendar />
+                  <span>{formatDate(overviewToday)}</span>
+                </div>
+                <div style={{ fontSize: "12px", color: "#475569" }}>
+                  <strong style={{ color: "#0f52ba" }}>{currentAccount.name}</strong>
                 </div>
               </div>
             </header>
 
             {(() => {
-              const currentHour = new Date().getHours();
-              const greetingTime = currentHour < 12 ? "Chào buổi sáng" : currentHour < 18 ? "Chào buổi chiều" : "Chào buổi tối";
-              const roleDisplayName = currentAccount.name || "Cán bộ Ban Điều Hành Dự Án";
               const todayDoneCount = todayTasksList.filter((t) => t.done).length;
               const todayTotalCount = todayTasksList.length;
-              const todayPercent = Math.round((todayDoneCount / todayTotalCount) * 100);
 
               const bdhdaOperationsList = [
                 {
@@ -5249,7 +5190,7 @@ export default function Home() {
                   status: "improve",
                   statusText: "Cần đẩy nhanh",
                   actionView: "overview" as const,
-                  actionLabel: "Xem Mốc bàn giao",
+                  actionLabel: "Mốc bàn giao",
                 },
               ];
 
@@ -5302,23 +5243,23 @@ export default function Home() {
                 {
                   id: "od-1",
                   title: "Nộp hồ sơ thẩm duyệt nghiệm thu PCCC Tháp B & C",
-                  project: "NovaWorld Phan Thiet (PGA Golf & Resort)",
+                  project: "NovaWorld Phan Thiet",
                   projectCode: "NVL-NVW-2026",
                   projectId: "proj-novaworld-phanthiet",
-                  dept: "Ban Quản lý Dự án & Pháp lý",
+                  dept: "Ban QLDA & Pháp lý",
                   dueDate: "10/08/2026",
                   daysLate: 40,
                   severity: "critical",
-                  severityText: "Nghiêm trọng (G0)",
+                  severityText: "Nghiêm trọng",
                   targetModule: "workspace" as const,
                 },
                 {
                   id: "od-2",
-                  title: "Nghiệm thu hoàn thành cọc khoan nhồi & đài móng Phân khu 2",
-                  project: "Aqua City - Đô thị Sinh Thái Thông Minh",
+                  title: "Nghiệm thu hoàn thành cọc khoan nhồi Phân khu 2",
+                  project: "Aqua City",
                   projectCode: "NVL-AQC-2026",
                   projectId: "proj-aqua-city",
-                  dept: "Ban QLDA Xây dựng Hiện trường",
+                  dept: "Ban QLDA Hiện trường",
                   dueDate: "12/08/2026",
                   daysLate: 38,
                   severity: "warning",
@@ -5327,11 +5268,11 @@ export default function Home() {
                 },
                 {
                   id: "od-3",
-                  title: "Đối chiếu số liệu chi phí tư vấn và ký nháy hồ sơ NVTK",
+                  title: "Đối chiếu chi phí tư vấn và ký nháy hồ sơ NVTK",
                   project: "Sunrise Riverside",
                   projectCode: "NVL-SRR-2026",
                   projectId: "proj-sunrise-riverside",
-                  dept: "Phòng Quản lý Thiết kế BĐHDA",
+                  dept: "Phòng Quản lý Thiết kế",
                   dueDate: "20/08/2026",
                   daysLate: 30,
                   severity: "alert",
@@ -5342,369 +5283,288 @@ export default function Home() {
 
               return (
                 <div className="home-content-wrap">
-                  {/* Top Executive Header Strip */}
-                  <div className="home-exec-header">
-                    <div className="home-exec-greeting">
-                      <h2>
-                        {greetingTime}, <span style={{ color: "#34d399" }}>{roleDisplayName}</span>! Chúc một ngày làm việc hiệu quả.
-                      </h2>
-                      <p>
-                        Tổng quan hiệu suất điều hành dự án và phân bổ công việc trọng tâm trong Kỳ đánh giá 6 tháng đầu năm 2026 · Ban Điều Hành Dự Án NovaGroup
-                      </p>
-                    </div>
-                    <div className="home-exec-controls">
-                      <div className="period-chips-group">
-                        <button
-                          type="button"
-                          className={`period-chip-btn ${homePeriod === "6m" ? "active" : ""}`}
-                          onClick={() => setHomePeriod("6m")}
-                        >
-                          Kỳ 6 Tháng đầu 2026
-                        </button>
-                        <button
-                          type="button"
-                          className={`period-chip-btn ${homePeriod === "q3" ? "active" : ""}`}
-                          onClick={() => setHomePeriod("q3")}
-                        >
-                          Quý 3/2026
-                        </button>
-                        <button
-                          type="button"
-                          className={`period-chip-btn ${homePeriod === "year" ? "active" : ""}`}
-                          onClick={() => setHomePeriod("year")}
-                        >
-                          Cả năm 2026
-                        </button>
-                      </div>
-                      <div className="home-today-badge">
-                        <IconCalendar />
-                        <span>Kỳ hiện tại</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Top Row: 2 Cards (Khối 1: Tổng KPI hoàn thành & Khối 2: Tiến độ theo nghiệp vụ) */}
-                  <div className="home-dashboard-grid">
-                    {/* Card 1: Tổng KPI Hoàn Thành */}
-                    <div className="exec-card">
-                      <div className="exec-card-head">
-                        <div className="exec-card-title">
-                          <div className="exec-icon-box kpi">
-                            <IconAward />
-                          </div>
-                          <span>Tổng KPI Hoàn Thành</span>
-                        </div>
-                        <span className="exec-badge-pill">
-                          {homePeriod === "6m" ? "Kỳ 6 Tháng" : homePeriod === "q3" ? "Quý 3" : "Năm 2026"}
-                        </span>
-                      </div>
-
-                      <ExecutiveArcGauge
-                        score={homePeriod === "6m" ? 88.0 : homePeriod === "q3" ? 85.5 : 89.2}
-                        max={100}
-                        label="ĐẠT CHUẨN (≥85%)"
-                      />
-
-                      <div style={{ textAlign: "center", marginBottom: "14px" }}>
-                        <div style={{ fontSize: "14px", fontWeight: 800, color: "#0f172a" }}>
-                          KPI cá nhân: <span style={{ color: "#059669" }}>{homePeriod === "6m" ? "88.0" : homePeriod === "q3" ? "85.5" : "89.2"} điểm</span>
-                        </div>
-                        <div style={{ fontSize: "11px", color: "#64748b", marginTop: "3px" }}>
-                          Công việc định kỳ tối đa 100 điểm; công việc giao thêm đã duyệt được cộng thưởng
-                        </div>
-                        <div style={{ display: "inline-block", marginTop: "6px", padding: "3px 10px", borderRadius: "12px", background: "#fffbeb", border: "1px solid #fef3c7", color: "#b45309", fontSize: "11px", fontWeight: 700 }}>
-                          Trách nhiệm quản lý: 3/4 nhân sự đạt KPI
-                        </div>
-                      </div>
-
-                      <div className="kpi-metrics-row">
-                        <div className="kpi-sub-tile">
-                          <span>Công việc định kỳ</span>
-                          <b>92.5 đ</b>
-                          <small>Tối đa 100đ</small>
-                        </div>
-                        <div className="kpi-sub-tile">
-                          <span>Điểm thưởng thêm</span>
-                          <b style={{ color: "#059669" }}>+3.5 đ</b>
-                          <small>Vượt tiến độ MTL</small>
-                        </div>
-                        <div className="kpi-sub-tile">
-                          <span>Trách nhiệm BĐH</span>
-                          <b>75.0%</b>
-                          <small>3/4 nhân sự đạt</small>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Card 2: Tiến Độ Theo Toàn Bộ Nghiệp Vụ */}
-                    <div className="exec-card">
-                      <div className="exec-card-head">
-                        <div className="exec-card-title">
-                          <div className="exec-icon-box ops">
-                            <IconBriefcase />
-                          </div>
-                          <span>Tiến Độ Theo Toàn Bộ Nghiệp Vụ</span>
-                        </div>
-                        <button
-                          type="button"
-                          className="exec-link-action"
-                          onClick={() => setView("overview")}
-                          title="Xem chi tiết toàn bộ nghiệp vụ trên Theo dõi dự án"
-                        >
-                          <span>Xem tất cả nghiệp vụ</span>
-                          <IconTrendingUp />
-                        </button>
-                      </div>
-
-                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "10px", flexWrap: "wrap", gap: "8px" }}>
-                        <div style={{ display: "flex", alignItems: "center", gap: "12px", fontSize: "11px", fontWeight: 600 }}>
-                          <span style={{ display: "flex", alignItems: "center", gap: "5px", color: "#047857" }}>
-                            <span style={{ width: "8px", height: "8px", borderRadius: "2px", background: "#10b981", display: "inline-block" }} />
-                            Đạt chuẩn (≥80%)
-                          </span>
-                          <span style={{ display: "flex", alignItems: "center", gap: "5px", color: "#b45309" }}>
-                            <span style={{ width: "8px", height: "8px", borderRadius: "2px", background: "#f59e0b", display: "inline-block" }} />
-                            Cần cải thiện (&lt;80%)
-                          </span>
-                        </div>
-                        <div className="op-filter-row" style={{ margin: 0 }}>
-                          <button
-                            type="button"
-                            className={`op-filter-btn ${homeOpFilter === "all" ? "active" : ""}`}
-                            onClick={() => setHomeOpFilter("all")}
-                          >
-                            Tất cả ({bdhdaOperationsList.length})
-                          </button>
-                          <button
-                            type="button"
-                            className={`op-filter-btn ${homeOpFilter === "passed" ? "active" : ""}`}
-                            onClick={() => setHomeOpFilter("passed")}
-                          >
-                            Đạt chuẩn (5)
-                          </button>
-                          <button
-                            type="button"
-                            className={`op-filter-btn ${homeOpFilter === "improve" ? "active" : ""}`}
-                            onClick={() => setHomeOpFilter("improve")}
-                          >
-                            Cần cải thiện (1)
-                          </button>
-                        </div>
-                      </div>
-
-                      <div className="op-list">
-                        {filteredOps.map((op) => (
-                          <div className="op-item" key={op.code}>
-                            <div className="op-item-top">
-                              <span className="op-code">{op.code}</span>
-                              <span className="op-name" title={op.name}>
-                                {op.name}
-                              </span>
-                              <span className={`op-pct ${op.status === "improve" ? "improve" : ""}`}>
-                                {op.progress}%
-                              </span>
-                              <button
-                                type="button"
-                                className="op-btn-action"
-                                onClick={() => setView(op.actionView)}
-                                title={`Mở phân hệ ${op.actionLabel}`}
-                              >
-                                {op.actionLabel} →
-                              </button>
+                  {/* Minimalist Horizontal 3-Column Landscape Grid */}
+                  <div className="home-landscape-grid">
+                    {/* CỘT 1: TỔNG KPI & TRÁCH NHIỆM QUẢN LÝ */}
+                    <div className="home-col">
+                      {/* Card 1A: Tổng KPI Hoàn Thành */}
+                      <div className="exec-card">
+                        <div className="exec-card-head">
+                          <div className="exec-card-title">
+                            <div className="exec-icon-box kpi">
+                              <IconAward />
                             </div>
-                            <div className="op-track-wrap">
-                              <div className="op-track">
-                                <div
-                                  className={`op-fill ${op.status}`}
-                                  style={{ width: `${op.progress}%` }}
-                                />
+                            <span>Tổng KPI Hoàn Thành</span>
+                          </div>
+                          <span className="exec-badge-pill">
+                            {homePeriod === "6m" ? "Kỳ 6 Tháng" : homePeriod === "q3" ? "Quý 3" : "Năm 2026"}
+                          </span>
+                        </div>
+
+                        <ExecutiveArcGauge
+                          score={homePeriod === "6m" ? 88.0 : homePeriod === "q3" ? 85.5 : 89.2}
+                          max={100}
+                          label="ĐẠT CHUẨN (≥85%)"
+                        />
+
+                        <div className="kpi-metrics-row compact">
+                          <div className="kpi-sub-tile">
+                            <span>Định kỳ</span>
+                            <b>92.5 đ</b>
+                          </div>
+                          <div className="kpi-sub-tile">
+                            <span>Thưởng</span>
+                            <b style={{ color: "#059669" }}>+3.5 đ</b>
+                          </div>
+                          <div className="kpi-sub-tile">
+                            <span>Quản trị</span>
+                            <b>75.0%</b>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Card 1B: KPI Trách Nhiệm Quản Lý */}
+                      <div className="exec-card">
+                        <div className="exec-card-head">
+                          <div className="exec-card-title">
+                            <div className="exec-icon-box mgmt">
+                              <IconUsers />
+                            </div>
+                            <span>Trách Nhiệm Quản Lý</span>
+                          </div>
+                          <span className="exec-badge-pill" style={{ background: "#ecfdf5", color: "#047857", borderColor: "#a7f3d0" }}>
+                            3/4 Đạt (75%)
+                          </span>
+                        </div>
+
+                        <div className="mgmt-team-list-compact">
+                          {teamMembersList.map((m) => (
+                            <div className="mgmt-row-compact" key={m.email}>
+                              <div className="mgmt-row-info">
+                                <span className="mgmt-row-role">{m.role}</span>
+                                <span className="mgmt-row-scope">{m.scope}</span>
                               </div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Middle Row: 2 Cards (Khối 3: Công việc hôm nay & Khối 4: KPI trách nhiệm quản lý) */}
-                  <div className="home-dashboard-grid">
-                    {/* Card 3: Công Việc Hôm Nay */}
-                    <div className="exec-card">
-                      <div className="exec-card-head">
-                        <div className="exec-card-title">
-                          <div className="exec-icon-box tasks">
-                            <IconClock />
-                          </div>
-                          <span>Công Việc Hôm Nay</span>
-                        </div>
-                        <span className="exec-badge-pill" style={{ background: todayDoneCount === todayTotalCount ? "#ecfdf5" : "#eff6ff", color: todayDoneCount === todayTotalCount ? "#047857" : "#1d4ed8" }}>
-                          {todayDoneCount}/{todayTotalCount}
-                        </span>
-                      </div>
-
-                      <div className="today-summary-strip">
-                        <ExecutiveDonut percent={todayPercent} size={64} stroke={7} color={todayPercent >= 50 ? "#059669" : "#2563eb"} />
-                        <div className="today-summary-text">
-                          <b>{todayDoneCount} / {todayTotalCount} Công việc</b>
-                          <span>Đã hoàn tất trong ngày</span>
-                        </div>
-                        <div className="today-stats-group">
-                          <span className="today-tag-chip routine">● Định kỳ: 4</span>
-                          <span className="today-tag-chip extra">● Giao thêm: 2</span>
-                          <span className="today-tag-chip approval">● Chờ duyệt: 1</span>
-                        </div>
-                      </div>
-
-                      <div className="today-list">
-                        {todayTasksList.map((t) => (
-                          <div
-                            key={t.id}
-                            className={`today-task-item ${t.done ? "is-done" : ""}`}
-                            onClick={() => {
-                              setTodayTasksList((prev) =>
-                                prev.map((item) => (item.id === t.id ? { ...item, done: !item.done } : item))
-                              );
-                            }}
-                          >
-                            <div className={`today-checkbox ${t.done ? "checked" : ""}`}>
-                              {t.done && (
-                                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                                  <polyline points="20 6 9 17 4 12" />
-                                </svg>
-                              )}
-                            </div>
-                            <div className="today-task-info">
-                              <div className="today-task-title">{t.title}</div>
-                              <div className="today-task-meta">
-                                <span>⏰ {t.time}</span>
-                                {t.project && <span>• 🏢 {t.project}</span>}
-                                <span style={{ marginLeft: "auto", fontWeight: 700, color: t.category === "routine" ? "#1d4ed8" : t.category === "approval" ? "#7c3aed" : "#c2410c" }}>
-                                  {t.category === "routine" ? "Định kỳ" : t.category === "approval" ? "Chờ duyệt" : "Giao thêm"}
+                              <div className="mgmt-row-kpi-wrap">
+                                <span className={`mgmt-kpi-pill ${m.status}`}>
+                                  {m.kpiScore.toFixed(1)} đ
                                 </span>
                               </div>
                             </div>
-                          </div>
-                        ))}
+                          ))}
+                        </div>
                       </div>
                     </div>
 
-                    {/* Card 4: KPI Trách Nhiệm Quản Lý */}
-                    <div className="exec-card">
-                      <div className="exec-card-head">
-                        <div className="exec-card-title">
-                          <div className="exec-icon-box mgmt">
-                            <IconUsers />
+                    {/* CỘT 2: TIẾN ĐỘ THEO TOÀN BỘ NGHIỆP VỤ */}
+                    <div className="home-col">
+                      <div className="exec-card" style={{ height: "100%" }}>
+                        <div className="exec-card-head">
+                          <div className="exec-card-title">
+                            <div className="exec-icon-box ops">
+                              <IconBriefcase />
+                            </div>
+                            <span>Tiến Độ Nghiệp Vụ BĐHDA</span>
                           </div>
-                          <span>KPI Trách Nhiệm Quản Lý</span>
+                          <div className="op-filter-group-compact">
+                            <button
+                              type="button"
+                              className={`op-filter-btn-min ${homeOpFilter === "all" ? "active" : ""}`}
+                              onClick={() => setHomeOpFilter("all")}
+                            >
+                              Tất cả ({bdhdaOperationsList.length})
+                            </button>
+                            <button
+                              type="button"
+                              className={`op-filter-btn-min ${homeOpFilter === "passed" ? "active" : ""}`}
+                              onClick={() => setHomeOpFilter("passed")}
+                            >
+                              Đạt ({bdhdaOperationsList.filter((o) => o.status === "passed").length})
+                            </button>
+                            <button
+                              type="button"
+                              className={`op-filter-btn-min ${homeOpFilter === "improve" ? "active" : ""}`}
+                              onClick={() => setHomeOpFilter("improve")}
+                            >
+                              Cần đẩy nhanh ({bdhdaOperationsList.filter((o) => o.status === "improve").length})
+                            </button>
+                          </div>
                         </div>
-                        <span className="exec-badge-pill">Kỳ hiện tại</span>
-                      </div>
 
-                      <div className="mgmt-gauge-row">
-                        <ExecutiveDonut percent={75} size={64} stroke={7} color="#059669" />
-                        <div className="mgmt-gauge-text">
-                          <b>3 / 4 Nhân sự cấp dưới</b>
-                          <span>Đã đạt ngưỡng KPI 100% (≥85 điểm chuẩn)</span>
+                        <div className="op-legend-compact">
+                          <span style={{ color: "#047857" }}>● Đạt chuẩn (≥80%)</span>
+                          <span style={{ color: "#b45309" }}>● Cần cải thiện (&lt;80%)</span>
+                          <button
+                            type="button"
+                            className="exec-link-action"
+                            style={{ marginLeft: "auto" }}
+                            onClick={() => {
+                              setTrackingOpen(true);
+                              setView("overview");
+                            }}
+                          >
+                            <span>Xem tất cả tiến độ</span>
+                            <IconTrendingUp />
+                          </button>
+                        </div>
+
+                        <div className="op-list-compact">
+                          {filteredOps.map((op) => (
+                            <div className="op-item-compact" key={op.code}>
+                              <div className="op-row-top">
+                                <div style={{ display: "flex", alignItems: "center", gap: "8px", minWidth: 0, flex: 1 }}>
+                                  <span className="op-code-pill">{op.code}</span>
+                                  <span className="op-name-text" title={op.name}>
+                                    {op.name}
+                                  </span>
+                                </div>
+                                <span className={`op-score-text ${op.status === "improve" ? "improve" : ""}`}>
+                                  {op.progress}%
+                                </span>
+                                <button
+                                  type="button"
+                                  className="op-quick-btn"
+                                  onClick={() => setView(op.actionView)}
+                                  title={`Mở phân hệ ${op.actionLabel}`}
+                                >
+                                  {op.actionLabel} →
+                                </button>
+                              </div>
+                              <div className="op-progress-track">
+                                <div
+                                  className={`op-progress-bar ${op.status}`}
+                                  style={{ width: `${op.progress}%` }}
+                                />
+                                <div
+                                  className="op-target-marker"
+                                  style={{ left: `${op.target}%` }}
+                                  title={`Mốc chuẩn: ${op.target}%`}
+                                />
+                              </div>
+                            </div>
+                          ))}
                         </div>
                       </div>
+                    </div>
 
-                      <div className="mgmt-alert-notice">
-                        ⚠️ KPI trách nhiệm quản lý chưa hoàn thành vì còn nhân sự cấp dưới chưa đạt KPI.
-                      </div>
+                    {/* CỘT 3: CÔNG VIỆC HÔM NAY & CÁC CÔNG VIỆC ĐANG TRỄ HẠN */}
+                    <div className="home-col">
+                      {/* Card 3A: Công Việc Hôm Nay */}
+                      <div className="exec-card">
+                        <div className="exec-card-head">
+                          <div className="exec-card-title">
+                            <div className="exec-icon-box tasks">
+                              <IconClock />
+                            </div>
+                            <span>Công Việc Hôm Nay</span>
+                          </div>
+                          <span
+                            className="exec-badge-pill"
+                            style={{
+                              background: todayDoneCount === todayTotalCount ? "#ecfdf5" : "#eff6ff",
+                              color: todayDoneCount === todayTotalCount ? "#047857" : "#1d4ed8",
+                              borderColor: todayDoneCount === todayTotalCount ? "#a7f3d0" : "#bfdbfe",
+                            }}
+                          >
+                            {todayDoneCount}/{todayTotalCount} Hoàn thành
+                          </span>
+                        </div>
 
-                      <div className="mgmt-team-grid">
-                        {teamMembersList.map((m) => (
-                          <div className="mgmt-member-card" key={m.email}>
-                            <div className="mgmt-member-top">
-                              <div className="mgmt-member-role">{m.role}</div>
-                              <span className={`mgmt-member-kpi ${m.status}`}>
-                                {m.kpiScore.toFixed(1)} đ
+                        <div className="today-tasks-compact-list">
+                          {todayTasksList.map((t) => (
+                            <div
+                              key={t.id}
+                              className={`today-row-compact ${t.done ? "is-done" : ""}`}
+                              onClick={() => {
+                                setTodayTasksList((prev) =>
+                                  prev.map((item) => (item.id === t.id ? { ...item, done: !item.done } : item))
+                                );
+                              }}
+                            >
+                              <div className={`today-checkbox ${t.done ? "checked" : ""}`}>
+                                {t.done && (
+                                  <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                                    <polyline points="20 6 9 17 4 12" />
+                                  </svg>
+                                )}
+                              </div>
+                              <div className="today-row-info">
+                                <div className="today-row-title">{t.title}</div>
+                                <div className="today-row-meta">
+                                  <span>⏰ {t.time}</span>
+                                  {t.project && <span>• 🏢 {t.project}</span>}
+                                </div>
+                              </div>
+                              <span className={`today-cat-tag ${t.category}`}>
+                                {t.category === "routine" ? "Định kỳ" : t.category === "approval" ? "Ký duyệt" : "Giao thêm"}
                               </span>
                             </div>
-                            <div className="mgmt-member-scope">{m.scope}</div>
-                            <div style={{ fontSize: "9.5px", color: "#64748b", display: "flex", justifyContent: "space-between" }}>
-                              <span>Phụ trách: {m.projects} dự án</span>
-                              <span style={{ color: m.status === "passed" ? "#059669" : "#d97706", fontWeight: 700 }}>{m.statusText}</span>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Card 3B: Công Việc Đang Trễ Hạn */}
+                      <div className="exec-card overdue-style">
+                        <div className="exec-card-head" style={{ borderBottomColor: "#fee2e2" }}>
+                          <div className="exec-card-title" style={{ color: "#991b1b" }}>
+                            <div className="exec-icon-box overdue">
+                              <IconAlertTriangle />
                             </div>
+                            <span>Công Việc Đang Trễ Hạn</span>
                           </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Bottom Row: Full Width Card 5 (Các công việc đang trễ hạn) */}
-                  <div className="overdue-card">
-                    <div className="exec-card-head" style={{ borderBottomColor: "#fee2e2" }}>
-                      <div className="exec-card-title" style={{ color: "#991b1b" }}>
-                        <div className="exec-icon-box overdue">
-                          <IconAlertTriangle />
+                          <span
+                            className="exec-badge-pill"
+                            style={{ background: "#fef2f2", color: "#dc2626", borderColor: "#fecaca" }}
+                          >
+                            {overdueList.length} việc
+                          </span>
                         </div>
-                        <span>Các Công Việc Đang Trễ Hạn</span>
-                        <span style={{ background: "#dc2626", color: "#ffffff", padding: "2px 8px", borderRadius: "10px", fontSize: "11px", fontWeight: 800 }}>
-                          {overdueList.length}
-                        </span>
-                      </div>
-                      <button
-                        type="button"
-                        className="exec-link-action"
-                        style={{ color: "#dc2626" }}
-                        onClick={() => {
-                          setTrackingOpen(true);
-                          setView("overview");
-                        }}
-                      >
-                        <span>Xem tất cả công việc trễ hạn ({overdueList.length})</span>
-                        <IconTrendingUp />
-                      </button>
-                    </div>
 
-                    <div className="overdue-items-grid">
-                      {overdueList.map((item) => (
-                        <div className="overdue-item-box" key={item.id}>
-                          <div className="overdue-tag-row">
-                            <span className="overdue-pill-danger">
-                              ⚠️ {item.severityText}
-                            </span>
-                            <span className="overdue-days-pill">
-                              Trễ {item.daysLate} ngày
-                            </span>
-                          </div>
-
-                          <h4 className="overdue-task-name">{item.title}</h4>
-
-                          <div className="overdue-meta-row">
-                            <div>🏢 <strong>Dự án:</strong> {item.project}</div>
-                            <div>👥 <strong>Bộ phận:</strong> {item.dept}</div>
-                            <div>📅 <strong>Hạn hoàn thành:</strong> <span style={{ color: "#dc2626", fontWeight: 700 }}>{item.dueDate}</span></div>
-                          </div>
-
-                          <div className="overdue-actions">
-                            <button
-                              type="button"
-                              className="btn-overdue-urge"
-                              onClick={() => setToast(`Đã gửi thông báo đôn đốc khẩn cấp cho: ${item.dept}`)}
-                              title="Gửi thông báo đôn đốc trực tiếp"
-                            >
-                              ⚡ Đôn đốc ngay
-                            </button>
-                            <button
-                              type="button"
-                              className="btn-overdue-view"
-                              onClick={() => {
-                                if (item.targetModule === "workspace") {
-                                  setActiveId(item.projectId);
-                                  setView("workspace");
-                                } else {
-                                  setView(item.targetModule);
-                                }
-                              }}
-                              title="Mở phân hệ chi tiết để xử lý"
-                            >
-                              ↗ Xem tiến độ MTL
-                            </button>
-                          </div>
+                        <div className="overdue-list-compact">
+                          {overdueList.map((item) => (
+                            <div className="overdue-row-compact" key={item.id}>
+                              <div className="overdue-row-main">
+                                <div className="overdue-row-title-row">
+                                  <span className="overdue-row-title" title={item.title}>
+                                    {item.title}
+                                  </span>
+                                  <span className="overdue-pill-days">
+                                    Trễ {item.daysLate} ngày
+                                  </span>
+                                </div>
+                                <div className="overdue-row-sub">
+                                  <span>🏢 {item.project}</span>
+                                  <span>• 📅 Hạn: {item.dueDate}</span>
+                                </div>
+                              </div>
+                              <div className="overdue-row-btns">
+                                <button
+                                  type="button"
+                                  className="btn-overdue-mini urge"
+                                  onClick={() => setToast(`Đã gửi thông báo đôn đốc khẩn cấp cho: ${item.dept}`)}
+                                  title="Gửi thông báo đôn đốc trực tiếp"
+                                >
+                                  ⚡ Đôn đốc
+                                </button>
+                                <button
+                                  type="button"
+                                  className="btn-overdue-mini view"
+                                  onClick={() => {
+                                    if (item.targetModule === "workspace") {
+                                      setActiveId(item.projectId);
+                                      setView("workspace");
+                                    } else {
+                                      setView(item.targetModule);
+                                    }
+                                  }}
+                                  title="Mở phân hệ chi tiết để xử lý"
+                                >
+                                  ↗ MTL
+                                </button>
+                              </div>
+                            </div>
+                          ))}
                         </div>
-                      ))}
+                      </div>
                     </div>
                   </div>
                 </div>
