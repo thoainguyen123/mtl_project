@@ -788,9 +788,6 @@ function IconLock() {
 function IconEyeOff() {
   return <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" /><line x1="1" y1="1" x2="23" y2="23" /></svg>;
 }
-function IconFingerprint() {
-  return <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 10a2 2 0 0 0-2 2c0 1.02-.1 2.51-.26 4" /><path d="M14 13.12c0 2.38 0 6.38-1 8.88" /><path d="M2 16h.01" /><path d="M21.8 16c.2-2 .131-5.354 0-6" /><path d="M9 6.8a6 6 0 0 1 9 5.2c0 .47 0 1.17-.02 2" /><path d="M5.5 13a10.5 10.5 0 0 1-.5-2 7 7 0 0 1 13.2-3.1" /><path d="M2 12c0-3.3 2.5-6 6.5-6" /><path d="M16 22a9 9 0 0 0 6-9" /></svg>;
-}
 function IconNovaEmblem({ size = 18 }: { size?: number }) {
   return <svg viewBox="0 0 24 24" width={size} height={size} fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 2 8.5 2 15.5 12 22 22 15.5 22 8.5 12 2" /><polyline points="2 8.5 12 15 22 8.5" /><line x1="12" y1="22" x2="12" y2="15" /></svg>;
 }
@@ -1579,15 +1576,6 @@ export default function Home() {
     setLoginPassword("");
     setLoginError("");
     setShowDemoModal(false);
-  };
-
-  const loginWithBiometrics = () => {
-    const defaultAcc = DEMO_ACCOUNTS[0];
-    if (rememberMe) {
-      localStorage.setItem(SESSION_KEY, defaultAcc.username);
-    }
-    setCurrentAccount(defaultAcc);
-    notify(`Xác thực vân tay thành công. Chào mừng ${defaultAcc.name}!`);
   };
 
   const logout = () => {
@@ -2608,19 +2596,6 @@ export default function Home() {
             Đăng nhập
           </button>
         </form>
-
-        <button
-          type="button"
-          className="btn-fingerprint-login"
-          onClick={loginWithBiometrics}
-        >
-          <IconFingerprint />
-          <span>Đăng nhập bằng vân tay</span>
-        </button>
-
-        <p className="login-biometric-hint">
-          Sử dụng sinh trắc học đã đăng ký trên thiết bị này
-        </p>
       </div>
 
       {/* Demo Account Modal matching Image 2 */}
