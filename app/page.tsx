@@ -1989,10 +1989,6 @@ export default function Home() {
     });
   };
 
-  const toggleAllCatalogTasks = () => {
-    setEnabledCatalogCodes(enabledCatalogCount === fullCatalog.length ? new Set() : new Set(fullCatalog.map((task) => task.code)));
-  };
-
   const updateTask = (code: string, edit: TaskEdit) => {
     if (!activeProject || !isPlanEditable(activeProject)) return;
     const groupCode = allProjectTasks(activeProject).find((task) => task.code === code)?.groupCode;
@@ -6134,42 +6130,12 @@ export default function Home() {
                 display: "flex",
                 alignItems: "center",
                 flexWrap: "wrap",
-                gap: "10px",
+                gap: "12px",
                 padding: "10px 20px"
               }}
             >
-              <label className="table-filters-select">
-                <span>Loại công việc</span>
-                <select
-                  value={catalogWorkGroupFilter}
-                  onChange={(event) => {
-                    setCatalogWorkGroupFilter(event.target.value as "all" | Exclude<WorkType, "">);
-                    setCatalogCollapsed(new Set());
-                    setCatalogLevel("all");
-                  }}
-                  style={{ maxWidth: "175px" }}
-                >
-                  <option value="all">Tất cả loại công việc</option>
-                  <option value="Báo cáo định kỳ">Báo cáo định kỳ (gồm công việc cha)</option>
-                  <option value="Tracking công việc">Tracking công việc (gồm công việc cha)</option>
-                </select>
-              </label>
-              <label className="table-filters-select">
-                <span>Nguồn</span>
-                <select
-                  value={catalogSourceFilter}
-                  onChange={(event) => {
-                    setCatalogSourceFilter(event.target.value as "all" | "custom" | "standard");
-                  }}
-                  style={{ maxWidth: "125px" }}
-                >
-                  <option value="all">Tất cả nguồn</option>
-                  <option value="standard">Mẫu chuẩn</option>
-                  <option value="custom">Tùy chỉnh</option>
-                </select>
-              </label>
-
-              <label className="search-field" style={{ margin: 0, minWidth: "160px", maxWidth: "210px", height: "34px" }}>
+              {/* 1. Tìm */}
+              <label className="search-field" style={{ margin: 0, minWidth: "180px", maxWidth: "240px", height: "34px" }}>
                 <span>Tìm</span>
                 <input
                   value={catalogSearch}
@@ -6179,53 +6145,65 @@ export default function Home() {
                   placeholder="Tìm theo mã WBS hoặc tên..."
                 />
               </label>
-              <button
-                type="button"
-                className="secondary-button"
-                style={{ height: "34px", minHeight: "34px", padding: "0 11px", fontSize: "11.5px", whiteSpace: "nowrap" }}
-                onClick={() => applyCatalogLevel("all")}
-                title="Mở rộng tất cả các cấp công việc"
-              >
-                Mở tất cả
-              </button>
-              <button
-                type="button"
-                className="secondary-button"
-                style={{ height: "34px", minHeight: "34px", padding: "0 11px", fontSize: "11.5px", whiteSpace: "nowrap" }}
-                onClick={() => applyCatalogLevel(1)}
-                title="Thu gọn về cấp 1 (Chỉ hiện nhóm WBS)"
-              >
-                Thu gọn
-              </button>
+
+              {/* 2. Cấp công việc */}
               <label className="table-filters-select" style={{ gap: "6px" }}>
-                <span>Level</span>
+                <span>Cấp công việc</span>
                 <select
                   value={catalogLevel}
                   onChange={(event) => applyCatalogLevel(event.target.value === "all" ? "all" : Number(event.target.value))}
-                  style={{ height: "34px", minWidth: "110px", fontSize: "11.5px" }}
-                  title="Hiển thị theo level công việc"
+                  style={{ height: "34px", minWidth: "115px", fontSize: "12px" }}
+                  title="Hiển thị theo cấp công việc"
                 >
-                  <option value="all">Tất cả level</option>
-                  <option value="1">Level 1 (Cấp 1)</option>
-                  <option value="2">Level 2 (Cấp 2)</option>
-                  <option value="3">Level 3 (Cấp 3)</option>
-                  <option value="4">Level 4 (Cấp 4)</option>
-                  <option value="5">Level 5 (Cấp 5)</option>
+                  <option value="all">Tất cả cấp</option>
+                  <option value="1">Cấp 1</option>
+                  <option value="2">Cấp 2</option>
+                  <option value="3">Cấp 3</option>
+                  <option value="4">Cấp 4</option>
+                  <option value="5">Cấp 5</option>
                   {catalogLevel === "custom" && <option value="custom">Tùy biến</option>}
                 </select>
               </label>
-              <button
-                type="button"
-                className="secondary-button"
-                style={{ height: "34px", minHeight: "34px", padding: "0 11px", fontSize: "11.5px", whiteSpace: "nowrap" }}
-                onClick={toggleAllCatalogTasks}
-              >
-                {enabledCatalogCount === fullCatalog.length ? "Bỏ tích tất cả" : "Tích tất cả"}
-              </button>
+
+              {/* 3. Loại công việc */}
+              <label className="table-filters-select">
+                <span>Loại công việc</span>
+                <select
+                  value={catalogWorkGroupFilter}
+                  onChange={(event) => {
+                    setCatalogWorkGroupFilter(event.target.value as "all" | Exclude<WorkType, "">);
+                    setCatalogCollapsed(new Set());
+                    setCatalogLevel("all");
+                  }}
+                  style={{ maxWidth: "185px" }}
+                >
+                  <option value="all">Tất cả loại công việc</option>
+                  <option value="Báo cáo định kỳ">Báo cáo định kỳ (gồm công việc cha)</option>
+                  <option value="Tracking công việc">Tracking công việc (gồm công việc cha)</option>
+                </select>
+              </label>
+
+              {/* 4. Nguồn */}
+              <label className="table-filters-select">
+                <span>Nguồn</span>
+                <select
+                  value={catalogSourceFilter}
+                  onChange={(event) => {
+                    setCatalogSourceFilter(event.target.value as "all" | "custom" | "standard");
+                  }}
+                  style={{ maxWidth: "135px" }}
+                >
+                  <option value="all">Tất cả nguồn</option>
+                  <option value="standard">Mẫu chuẩn</option>
+                  <option value="custom">Tùy chỉnh</option>
+                </select>
+              </label>
+
+              {/* 5. Thêm công việc */}
               <button
                 type="button"
                 className="primary-button"
-                style={{ height: "34px", minHeight: "34px", padding: "0 13px", fontSize: "11.5px", whiteSpace: "nowrap" }}
+                style={{ height: "34px", minHeight: "34px", padding: "0 14px", fontSize: "11.5px", whiteSpace: "nowrap" }}
                 onClick={() => openTaskCreator(false)}
               >
                 + Thêm công việc
