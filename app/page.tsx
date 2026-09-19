@@ -6080,30 +6080,6 @@ export default function Home() {
               <div className="page-top-title-group">
                 <h1>Cấu trúc Master Timeline</h1>
               </div>
-              <div className="page-top-actions">
-                <label className="search-field" style={{ margin: 0, minWidth: "220px", maxWidth: "280px" }}>
-                  <span>Tìm</span>
-                  <input
-                    value={catalogSearch}
-                    onChange={(event) => {
-                      setCatalogSearch(event.target.value);
-                    }}
-                    placeholder="Tìm theo mã WBS hoặc tên..."
-                  />
-                </label>
-                <button type="button" className="secondary-button" onClick={() => setCatalogCollapsed(new Set())}>
-                  Mở tất cả
-                </button>
-                <button type="button" className="secondary-button" onClick={() => setCatalogCollapsed(new Set(catalogParentCodes))}>
-                  Thu gọn
-                </button>
-                <button type="button" className="secondary-button" onClick={toggleAllCatalogTasks}>
-                  {enabledCatalogCount === fullCatalog.length ? "Bỏ tích tất cả" : "Tích tất cả"}
-                </button>
-                <button type="button" className="primary-button" onClick={() => openTaskCreator(false)}>
-                  + Thêm công việc
-                </button>
-              </div>
             </header>
 
             <section className="catalog-groups">
@@ -6129,7 +6105,21 @@ export default function Home() {
               })}
             </section>
 
-            <div className="table-filters" style={{ margin: "14px 24px 0", borderRadius: "10px 10px 0 0", border: "1px solid #e2e8f0", borderBottom: 0, background: "#fff" }}>
+            <div
+              className="table-filters"
+              style={{
+                margin: "14px 24px 0",
+                borderRadius: "10px 10px 0 0",
+                border: "1px solid #e2e8f0",
+                borderBottom: 0,
+                background: "#fff",
+                display: "flex",
+                alignItems: "center",
+                flexWrap: "wrap",
+                gap: "10px",
+                padding: "10px 20px"
+              }}
+            >
               <label className="table-filters-select">
                 <span>Nhóm WBS</span>
                 <select
@@ -6173,7 +6163,51 @@ export default function Home() {
                   <option value="custom">Tùy chỉnh</option>
                 </select>
               </label>
-              <span className="table-filters-count" style={{ marginLeft: "auto" }}>
+
+              <label className="search-field" style={{ margin: 0, minWidth: "180px", maxWidth: "240px", height: "34px" }}>
+                <span>Tìm</span>
+                <input
+                  value={catalogSearch}
+                  onChange={(event) => {
+                    setCatalogSearch(event.target.value);
+                  }}
+                  placeholder="Tìm theo mã WBS hoặc tên..."
+                />
+              </label>
+              <button
+                type="button"
+                className="secondary-button"
+                style={{ height: "34px", minHeight: "34px", padding: "0 12px", fontSize: "11.5px", whiteSpace: "nowrap" }}
+                onClick={() => setCatalogCollapsed(new Set())}
+              >
+                Mở tất cả
+              </button>
+              <button
+                type="button"
+                className="secondary-button"
+                style={{ height: "34px", minHeight: "34px", padding: "0 12px", fontSize: "11.5px", whiteSpace: "nowrap" }}
+                onClick={() => setCatalogCollapsed(new Set(catalogParentCodes))}
+              >
+                Thu gọn
+              </button>
+              <button
+                type="button"
+                className="secondary-button"
+                style={{ height: "34px", minHeight: "34px", padding: "0 12px", fontSize: "11.5px", whiteSpace: "nowrap" }}
+                onClick={toggleAllCatalogTasks}
+              >
+                {enabledCatalogCount === fullCatalog.length ? "Bỏ tích tất cả" : "Tích tất cả"}
+              </button>
+              <button
+                type="button"
+                className="primary-button"
+                style={{ height: "34px", minHeight: "34px", padding: "0 14px", fontSize: "11.5px", whiteSpace: "nowrap" }}
+                onClick={() => openTaskCreator(false)}
+              >
+                + Thêm công việc
+              </button>
+
+              <span className="table-filters-count" style={{ marginLeft: "auto", whiteSpace: "nowrap" }}>
                 Hiển thị <strong>{visibleCatalogRows.length}</strong> / {fullCatalog.length} công việc
               </span>
             </div>
