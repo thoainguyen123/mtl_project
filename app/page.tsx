@@ -722,6 +722,30 @@ function IconCheck() {
 function IconChevronDown() {
   return <svg className="section-chevron" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9" /></svg>;
 }
+function IconChevronLeft() {
+  return <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6" /></svg>;
+}
+function IconChevronRight() {
+  return <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6" /></svg>;
+}
+function IconMenu() {
+  return (
+    <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <line x1="3" y1="12" x2="21" y2="12" />
+      <line x1="3" y1="6" x2="21" y2="6" />
+      <line x1="3" y1="18" x2="21" y2="18" />
+    </svg>
+  );
+}
+function IconLogOut() {
+  return (
+    <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+      <polyline points="16 17 21 12 16 7" />
+      <line x1="21" y1="12" x2="9" y2="12" />
+    </svg>
+  );
+}
 function IconShield() {
   return <svg className="nav-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3l7 3v5.5c0 4.2-2.9 7.7-7 9-4.1-1.3-7-4.8-7-9V6z" /><path d="M9 12.2l2.2 2.2 4-4.4" /></svg>;
 }
@@ -1059,6 +1083,7 @@ export default function Home() {
   const [showDemoModal, setShowDemoModal] = useState(false);
   const [hydrated, setHydrated] = useState(false);
   const [view, setView] = useState<"home" | "overview" | "projects" | "workspace" | "departments" | "gmd" | "gms" | "confirm_approval" | "approved_projects" | "catalog" | "design_task" | "fs_ver2">("home");
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [homeOpen, setHomeOpen] = useState(true);
   const [lapMtlOpen, setLapMtlOpen] = useState(false);
   const [designTaskOpen, setDesignTaskOpen] = useState(false);
@@ -1187,6 +1212,8 @@ export default function Home() {
         const catalogCodes = new Set([...TEMPLATE, ...savedCustomCatalog].map((task) => task.code));
         setEnabledCatalogCodes(new Set(savedEnabledCodes ? (JSON.parse(savedEnabledCodes) as string[]).filter((code) => catalogCodes.has(code)) : [...catalogCodes]));
         setActiveId(localStorage.getItem(ACTIVE_KEY) ?? normalized[0]?.id ?? "");
+        const savedCollapsed = localStorage.getItem("mtl-sidebar-collapsed") === "true";
+        if (savedCollapsed) setSidebarCollapsed(true);
       } catch {
         const normalized = DEFAULT_INITIAL_PROJECTS.map(normalizeProject);
         setProjects(normalized);
@@ -1207,7 +1234,19 @@ export default function Home() {
     localStorage.setItem(CATALOG_ENABLED_KEY, JSON.stringify([...enabledCatalogCodes]));
     localStorage.setItem(CATALOG_WORK_TYPE_KEY, JSON.stringify(catalogWorkTypeEdits));
     if (activeId) localStorage.setItem(ACTIVE_KEY, activeId);
-  }, [projects, activeId, customCatalog, enabledCatalogCodes, catalogWorkTypeEdits, hydrated]);
+    localStorage.setItem("mtl-sidebar-collapsed", String(sidebarCollapsed));
+  }, [projects, activeId, customCatalog, enabledCatalogCodes, catalogWorkTypeEdits, hydrated, sidebarCollapsed]);
+
+  useEffect(() => {
+    const handleToggleShortcut = (event: KeyboardEvent) => {
+      if ((event.ctrlKey || event.metaKey) && (event.key === "b" || event.key === "B")) {
+        event.preventDefault();
+        setSidebarCollapsed((current) => !current);
+      }
+    };
+    window.addEventListener("keydown", handleToggleShortcut);
+    return () => window.removeEventListener("keydown", handleToggleShortcut);
+  }, []);
 
   useEffect(() => {
     const closeMenu = () => setContextMenu(null);
@@ -2836,6 +2875,134 @@ export default function Home() {
         }
         .sidebar {
           width: 275px !important;
+          transition: width 0.22s cubic-bezier(0.4, 0, 0.2, 1), padding 0.22s ease !important;
+          position: relative !important;
+        }
+        .sidebar.collapsed {
+          width: 72px !important;
+          padding: 0 8px 16px !important;
+        }
+        .sidebar.collapsed .brand {
+          min-height: 72px !important;
+          padding: 12px 4px 10px !important;
+          margin: 0 -8px !important;
+        }
+        .sidebar.collapsed .brand-logo {
+          width: 38px !important;
+          height: auto !important;
+        }
+        .sidebar.collapsed .brand-app {
+          display: none !important;
+        }
+        .sidebar.collapsed .sidebar-section-toggle {
+          width: 48px !important;
+          height: 44px !important;
+          padding: 0 !important;
+          margin: 8px auto !important;
+          justify-content: center !important;
+        }
+        .sidebar.collapsed .section-toggle-left {
+          justify-content: center !important;
+          flex: none !important;
+          width: 100% !important;
+          gap: 0 !important;
+        }
+        .sidebar.collapsed .section-toggle-left span,
+        .sidebar.collapsed .section-chevron,
+        .sidebar.collapsed .sidebar-collapsible,
+        .sidebar.collapsed .sidebar-footer-info {
+          display: none !important;
+        }
+        .sidebar.collapsed .sidebar-footer {
+          padding: 12px 2px !important;
+        }
+        .sidebar.collapsed .sidebar-logout-btn {
+          width: 42px !important;
+          height: 34px !important;
+          padding: 0 !important;
+          margin: 0 auto !important;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+        }
+        .sidebar.collapsed .sidebar-logout-btn span {
+          display: none !important;
+        }
+        .sidebar-collapse-row {
+          display: flex;
+          justify-content: flex-end;
+          padding: 8px 2px;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+          margin-bottom: 6px;
+        }
+        .sidebar.collapsed .sidebar-collapse-row {
+          justify-content: center;
+          padding: 6px 0;
+        }
+        .sidebar-collapse-btn {
+          background: rgba(255, 255, 255, 0.08);
+          border: 1px solid rgba(255, 255, 255, 0.16);
+          color: #dbe4ef;
+          border-radius: 6px;
+          height: 28px;
+          padding: 0 10px;
+          font-size: 11px;
+          font-weight: 700;
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          cursor: pointer;
+          transition: all 0.16s ease;
+        }
+        .sidebar-collapse-btn:hover {
+          background: rgba(255, 255, 255, 0.18);
+          color: #ffffff;
+          border-color: rgba(255, 255, 255, 0.35);
+        }
+        .sidebar.collapsed .sidebar-collapse-btn {
+          width: 40px;
+          height: 30px;
+          padding: 0;
+          justify-content: center;
+        }
+        .sidebar-logout-btn {
+          margin-top: 10px;
+          width: 100%;
+          height: 32px;
+          border: 1px solid rgba(255, 255, 255, 0.16);
+          border-radius: 6px;
+          background: rgba(255, 255, 255, 0.06);
+          color: #dbe7ec;
+          font-size: 11px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 6px;
+          cursor: pointer;
+          transition: all 0.15s ease;
+        }
+        .sidebar-logout-btn:hover {
+          background: rgba(239, 68, 68, 0.2);
+          border-color: rgba(239, 68, 68, 0.4);
+          color: #fecaca;
+        }
+        .topbar-toggle-sidebar-btn {
+          width: 32px;
+          height: 32px;
+          display: grid;
+          place-items: center;
+          border: 1px solid #cbd5e1;
+          background: #f8fafc;
+          border-radius: 6px;
+          color: #475569;
+          cursor: pointer;
+          transition: all 0.15s ease;
+          flex: none;
+        }
+        .topbar-toggle-sidebar-btn:hover {
+          background: #e2e8f0;
+          color: #0f172a;
+          border-color: #94a3b8;
         }
         .sidebar-section-toggle {
           width: 100% !important;
@@ -4156,7 +4323,7 @@ export default function Home() {
           gap: 6px !important;
         }
       `}</style>
-      <aside className="sidebar">
+      <aside className={`sidebar ${sidebarCollapsed ? "collapsed" : ""}`}>
         <div className="brand">
           <div className="brand-logo-wrap">
             <img className="brand-logo" src="/nova-group-logo-light.png" alt="Nova Group" />
@@ -4169,6 +4336,24 @@ export default function Home() {
             </div>
           </div>
         </div>
+        <div className="sidebar-collapse-row">
+          <button
+            type="button"
+            className="sidebar-collapse-btn"
+            onClick={() => setSidebarCollapsed((prev) => !prev)}
+            title={sidebarCollapsed ? "Mở rộng thanh điều hướng (Ctrl+B)" : "Thu nhỏ thanh điều hướng (Ctrl+B)"}
+            aria-label={sidebarCollapsed ? "Mở rộng thanh điều hướng" : "Thu nhỏ thanh điều hướng"}
+          >
+            {sidebarCollapsed ? (
+              <IconChevronRight />
+            ) : (
+              <>
+                <IconChevronLeft />
+                <span>Thu nhỏ</span>
+              </>
+            )}
+          </button>
+        </div>
         {/* Module 0: TRANG CHỦ — ở vị trí đầu tiên */}
         {(() => {
           const isSectionOpen = homeOpen;
@@ -4176,9 +4361,16 @@ export default function Home() {
             <button
               type="button"
               className={`sidebar-section-toggle ${isSectionOpen ? "open" : ""}`}
-              onClick={() => { setHomeOpen((current) => !current); setView("home"); }}
+              onClick={() => {
+                if (sidebarCollapsed) {
+                  setView("home");
+                } else {
+                  setHomeOpen((current) => !current);
+                  setView("home");
+                }
+              }}
               aria-expanded={isSectionOpen}
-              title={isSectionOpen ? "Thu gọn menu Trang chủ" : "Mở rộng menu Trang chủ"}
+              title="Trang Chủ"
             >
               <div className="section-toggle-left">
                 <IconHome />
@@ -4199,7 +4391,20 @@ export default function Home() {
         {(() => {
           const lapMtlSectionOpen = lapMtlOpen;
           return <>
-            <button type="button" className={`sidebar-section-toggle ${lapMtlSectionOpen ? "open" : ""}`} onClick={() => { setLapMtlOpen((current) => !current); setView("projects"); }} aria-expanded={lapMtlSectionOpen} title={lapMtlSectionOpen ? "Thu gọn menu Lập MTL" : "Mở rộng menu Lập MTL"}>
+            <button
+              type="button"
+              className={`sidebar-section-toggle ${lapMtlSectionOpen ? "open" : ""}`}
+              onClick={() => {
+                if (sidebarCollapsed) {
+                  setView("projects");
+                } else {
+                  setLapMtlOpen((current) => !current);
+                  setView("projects");
+                }
+              }}
+              aria-expanded={lapMtlSectionOpen}
+              title="Lập Master Timeline"
+            >
               <div className="section-toggle-left">
                 <IconBuilding />
                 <span>Lập Master Timeline</span>
@@ -4227,7 +4432,20 @@ export default function Home() {
         {(() => {
           const isSectionOpen = designTaskOpen;
           return <>
-            <button type="button" className={`sidebar-section-toggle ${isSectionOpen ? "open" : ""}`} onClick={() => { setDesignTaskOpen((current) => !current); setView("design_task"); }} aria-expanded={isSectionOpen} title={isSectionOpen ? "Thu gọn menu Lập NVTK" : "Mở rộng menu Lập NVTK"}>
+            <button
+              type="button"
+              className={`sidebar-section-toggle ${isSectionOpen ? "open" : ""}`}
+              onClick={() => {
+                if (sidebarCollapsed) {
+                  setView("design_task");
+                } else {
+                  setDesignTaskOpen((current) => !current);
+                  setView("design_task");
+                }
+              }}
+              aria-expanded={isSectionOpen}
+              title="Lập Nhiệm Vụ Thiết Kế"
+            >
               <div className="section-toggle-left">
                 <IconDesignTask />
                 <span>Lập Nhiệm Vụ Thiết Kế</span>
@@ -4255,7 +4473,20 @@ export default function Home() {
         {(() => {
           const isSectionOpen = fsVer2Open;
           return <>
-            <button type="button" className={`sidebar-section-toggle ${isSectionOpen ? "open" : ""}`} onClick={() => { setFsVer2Open((current) => !current); setView("fs_ver2"); }} aria-expanded={isSectionOpen} title={isSectionOpen ? "Thu gọn menu Lập FS-Ver2" : "Mở rộng menu Lập FS-Ver2"}>
+            <button
+              type="button"
+              className={`sidebar-section-toggle ${isSectionOpen ? "open" : ""}`}
+              onClick={() => {
+                if (sidebarCollapsed) {
+                  setView("fs_ver2");
+                } else {
+                  setFsVer2Open((current) => !current);
+                  setView("fs_ver2");
+                }
+              }}
+              aria-expanded={isSectionOpen}
+              title="Lập FS Thực Thi (FS-Ver2)"
+            >
               <div className="section-toggle-left">
                 <IconFS />
                 <span>Lập FS Thực Thi (FS-Ver2)</span>
@@ -4286,9 +4517,16 @@ export default function Home() {
             <button
               type="button"
               className={`sidebar-section-toggle ${isSectionOpen ? "open" : ""}`}
-              onClick={() => { setTrackingOpen((current) => !current); setView("overview"); }}
+              onClick={() => {
+                if (sidebarCollapsed) {
+                  setView("overview");
+                } else {
+                  setTrackingOpen((current) => !current);
+                  setView("overview");
+                }
+              }}
               aria-expanded={isSectionOpen}
-              title={isSectionOpen ? "Thu gọn menu Theo dõi dự án" : "Mở rộng menu Theo dõi dự án"}
+              title="Theo Dõi Dự Án"
             >
               <div className="section-toggle-left">
                 <IconGauge />
@@ -4310,9 +4548,14 @@ export default function Home() {
         })()}
 
         <div className="sidebar-footer" style={{ marginTop: "auto", padding: "16px 18px", borderTop: "1px solid rgba(255, 255, 255, 0.08)", color: "#94a3b8", fontSize: "11px", lineHeight: "1.6" }}>
-          <div style={{ color: "#dbe7ec", fontWeight: 700 }}>{currentAccount.name}</div>
-          <div>{currentAccount.username}</div>
-          <button type="button" onClick={logout} style={{ marginTop: "10px", width: "100%", height: "32px", border: "1px solid #ffffff24", borderRadius: "6px", background: "#ffffff0c", color: "#dbe7ec", fontSize: "11px" }}>Đăng xuất</button>
+          <div className="sidebar-footer-info">
+            <div style={{ color: "#dbe7ec", fontWeight: 700 }}>{currentAccount.name}</div>
+            <div>{currentAccount.username}</div>
+          </div>
+          <button type="button" onClick={logout} className="sidebar-logout-btn" title="Đăng xuất">
+            <IconLogOut />
+            <span>Đăng xuất</span>
+          </button>
         </div>
       </aside>
 
@@ -4321,6 +4564,15 @@ export default function Home() {
           <section className="home-dashboard-view">
             <header className="topbar home-topbar">
               <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                <button
+                  type="button"
+                  className="topbar-toggle-sidebar-btn"
+                  onClick={() => setSidebarCollapsed((prev) => !prev)}
+                  title={sidebarCollapsed ? "Mở rộng thanh điều hướng (Ctrl+B)" : "Thu nhỏ thanh điều hướng (Ctrl+B)"}
+                  aria-label="Chuyển đổi thanh điều hướng"
+                >
+                  <IconMenu />
+                </button>
                 <IconHome />
                 <span style={{ fontSize: "16px", fontWeight: 700, color: "#0f172a" }}>TRANG CHỦ HỆ THỐNG PMD</span>
               </div>
@@ -4441,7 +4693,17 @@ export default function Home() {
         ) : view === "overview" ? (
           <>
             <header className="topbar overview-topbar">
-              <div style={{ width: "120px" }} />
+              <div style={{ width: "120px", display: "flex", alignItems: "center" }}>
+                <button
+                  type="button"
+                  className="topbar-toggle-sidebar-btn"
+                  onClick={() => setSidebarCollapsed((prev) => !prev)}
+                  title={sidebarCollapsed ? "Mở rộng thanh điều hướng (Ctrl+B)" : "Thu nhỏ thanh điều hướng (Ctrl+B)"}
+                  aria-label="Chuyển đổi thanh điều hướng"
+                >
+                  <IconMenu />
+                </button>
+              </div>
               <div className="overview-title-center">
                 <h1>THEO DÕI THỰC HIỆN CÔNG VIỆC</h1>
                 <div style={{ display: "flex", alignItems: "center", gap: "10px", justifyContent: "center", marginTop: "4px" }}>
@@ -4765,6 +5027,15 @@ export default function Home() {
           <>
             <header className="page-top-header">
               <div className="page-top-title-group">
+                <button
+                  type="button"
+                  className="topbar-toggle-sidebar-btn"
+                  onClick={() => setSidebarCollapsed((prev) => !prev)}
+                  title={sidebarCollapsed ? "Mở rộng thanh điều hướng (Ctrl+B)" : "Thu nhỏ thanh điều hướng (Ctrl+B)"}
+                  aria-label="Chuyển đổi thanh điều hướng"
+                >
+                  <IconMenu />
+                </button>
                 <h1>Dự án</h1>
                 <div className="top-stat-cards">
                   <div className="top-stat-card">
