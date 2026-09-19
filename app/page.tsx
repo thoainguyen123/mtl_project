@@ -1058,9 +1058,9 @@ export default function Home() {
   const [rememberMe, setRememberMe] = useState(true);
   const [showDemoModal, setShowDemoModal] = useState(false);
   const [hydrated, setHydrated] = useState(false);
-  const [view, setView] = useState<"home" | "overview" | "projects" | "workspace" | "departments" | "gmd" | "gms" | "confirm_approval" | "approved_projects" | "catalog" | "design_task" | "fs_ver2">("projects");
-  const [homeOpen, setHomeOpen] = useState(false);
-  const [lapMtlOpen, setLapMtlOpen] = useState(true);
+  const [view, setView] = useState<"home" | "overview" | "projects" | "workspace" | "departments" | "gmd" | "gms" | "confirm_approval" | "approved_projects" | "catalog" | "design_task" | "fs_ver2">("home");
+  const [homeOpen, setHomeOpen] = useState(true);
+  const [lapMtlOpen, setLapMtlOpen] = useState(false);
   const [designTaskOpen, setDesignTaskOpen] = useState(false);
   const [fsVer2Open, setFsVer2Open] = useState(false);
   const [trackingOpen, setTrackingOpen] = useState(false);
@@ -1578,6 +1578,8 @@ export default function Home() {
     setCurrentAccount(account);
     setLoginPassword("");
     setLoginError("");
+    setView("home");
+    setHomeOpen(true);
   };
 
   const loginAsAccount = (account: DemoAccount) => {
@@ -1588,6 +1590,8 @@ export default function Home() {
     setLoginPassword("");
     setLoginError("");
     setShowDemoModal(false);
+    setView("home");
+    setHomeOpen(true);
   };
 
   const logout = () => {
@@ -1595,6 +1599,8 @@ export default function Home() {
     setCurrentAccount(null);
     setLoginPassword("");
     setLoginError("");
+    setView("home");
+    setHomeOpen(true);
   };
 
   const openCreate = () => {
