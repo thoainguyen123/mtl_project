@@ -163,52 +163,64 @@ const SESSION_KEY = "mtl-workspace-session-v1";
 
 const DEMO_ACCOUNTS: DemoAccount[] = [
   {
-    username: "gmd.tp@novagroup.vn",
+    username: "gmd.gdb@novaland.com.vn",
     password: "MTL@2026",
-    name: "Trần Văn H",
-    role: "Trưởng phòng",
-    initials: "TH",
-    email: "gmd.tp@novagroup.vn",
-    badge: "Trưởng phòng",
+    name: "Giám đốc Ban điều hành dự án",
+    role: "Giám đốc Ban điều hành dự án",
+    initials: "GD",
+    email: "gmd.gdb@novaland.com.vn",
+    badge: "",
     badgeType: "blue",
     system: "gmd",
-    desc: "Phòng QLXD, An toàn & Môi trường · quản trị & duyệt quy trình GMD",
+    desc: "",
   },
   {
-    username: "gmd.tbp@novagroup.vn",
+    username: "gmd.pgd@novaland.com.vn",
     password: "MTL@2026",
-    name: "Nguyễn Văn T",
-    role: "Trưởng bộ phận",
-    initials: "NT",
-    email: "gmd.tbp@novagroup.vn",
-    badge: "Trưởng bộ phận",
+    name: "Phó giám đốc Phòng điều hành dự án",
+    role: "Phó giám đốc Phòng điều hành dự án",
+    initials: "PG",
+    email: "gmd.pgd@novaland.com.vn",
+    badge: "",
     badgeType: "blue",
     system: "gmd",
-    desc: "Bộ phận Quản lý Xây dựng · điều phối dự án & giao nhiệm vụ giám sát",
+    desc: "",
   },
   {
-    username: "gmd.ks.1@novagroup.vn",
+    username: "gmd.tpcc@novaland.com.vn",
     password: "MTL@2026",
-    name: "Lê Hoàng K",
-    role: "Kỹ sư cao cấp",
-    initials: "LK",
-    email: "gmd.ks.1@novagroup.vn",
-    badge: "Kỹ sư cao cấp",
+    name: "Trưởng phòng cao cấp Quản lý dự án",
+    role: "Trưởng phòng cao cấp Quản lý dự án",
+    initials: "TP",
+    email: "gmd.tpcc@novaland.com.vn",
+    badge: "",
     badgeType: "green",
     system: "gmd",
-    desc: "Bộ phận Quản lý Xây dựng · thực thi giám sát công trình & nộp báo cáo",
+    desc: "",
   },
   {
-    username: "itc.gd@novagroup.vn",
+    username: "gmd.tp@novaland.com.vn",
     password: "MTL@2026",
-    name: "Vũ Thị H",
-    role: "NovaGroup Admin",
-    initials: "VH",
-    email: "itc.gd@novagroup.vn",
-    badge: "NovaGroup Admin",
+    name: "Trưởng phòng Quản lý dự án",
+    role: "Trưởng phòng Quản lý dự án",
+    initials: "TP",
+    email: "gmd.tp@novaland.com.vn",
+    badge: "",
+    badgeType: "blue",
+    system: "gmd",
+    desc: "",
+  },
+  {
+    username: "itd.admin@novagroup.vn",
+    password: "MTL@2026",
+    name: "Admin hệ thống",
+    role: "Admin hệ thống",
+    initials: "AD",
+    email: "itd.admin@novagroup.vn",
+    badge: "",
     badgeType: "purple",
     system: "admin",
-    desc: "Ban CNTT & Chuyển đổi số · phân quyền, danh mục chuẩn & cấu hình hệ thống",
+    desc: "",
   },
   {
     username: "hrc.tp@novagroup.vn",
@@ -235,7 +247,6 @@ const DEMO_ACCOUNTS: DemoAccount[] = [
     desc: "Ban Nhân sự · theo dõi chính sách & nhân sự hiện trường dự án",
   },
   { username: "pmd.01", password: "MTL@2026", name: "PMD Administrator", role: "Chủ trì lập MTL", initials: "PM", email: "pmd.admin@novagroup.vn", badge: "Chủ trì MTL", badgeType: "blue", system: "admin", desc: "Phòng Điều hành Dự án · lập, kiểm soát và điều phối tiến độ tổng thể" },
-  { username: "gmd.01", password: "MTL@2026", name: "GMD Reviewer", role: "Kiểm soát MTL", initials: "GM", email: "gmd.reviewer@novagroup.vn", badge: "Kiểm soát MTL", badgeType: "blue", system: "gmd", desc: "Phòng QLXD, An toàn & Môi trường · kiểm soát MTL" },
   { username: "gms.01", password: "MTL@2026", name: "GMS.P Appraiser", role: "Thẩm định MTL", initials: "GS", email: "gms.appraiser@novagroup.vn", badge: "Thẩm định MTL", badgeType: "blue", system: "admin", desc: "Ban Thẩm định MTL" },
 ];
 
@@ -2625,7 +2636,7 @@ export default function Home() {
                 <div key={acc.username} className="demo-account-card">
                   <div className="demo-account-left">
                     <div className={`demo-avatar ${acc.badgeType || "blue"}`}>
-                      {acc.role.includes("Trưởng phòng") ? (
+                      {acc.email === "gmd.gdb@novaland.com.vn" ? (
                         <IconTableGrid />
                       ) : (
                         <IconUsers />
@@ -2634,9 +2645,11 @@ export default function Home() {
                     <div className="demo-user-details">
                       <div className="demo-user-name-row">
                         <span className="demo-user-name">{acc.name}</span>
-                        <span className={`demo-badge ${acc.badgeType || "blue"}`}>
-                          {acc.badge || acc.role}
-                        </span>
+                        {acc.badge ? (
+                          <span className={`demo-badge ${acc.badgeType || "blue"}`}>
+                            {acc.badge}
+                          </span>
+                        ) : null}
                       </div>
                       <div className="demo-user-email">{acc.email || acc.username}</div>
                     </div>
@@ -2658,7 +2671,7 @@ export default function Home() {
             </div>
 
             {/* Admin account card */}
-            {DEMO_ACCOUNTS.filter((acc) => acc.system === "admin" && acc.email === "itc.gd@novagroup.vn").map((acc) => (
+            {DEMO_ACCOUNTS.filter((acc) => acc.system === "admin" && acc.email === "itd.admin@novagroup.vn").map((acc) => (
               <div key={acc.username} className="demo-account-card">
                 <div className="demo-account-left">
                   <div className="demo-avatar purple">
@@ -2667,7 +2680,7 @@ export default function Home() {
                   <div className="demo-user-details">
                     <div className="demo-user-name-row">
                       <span className="demo-user-name">{acc.name}</span>
-                      <span className="demo-badge purple">{acc.badge || "NovaGroup Admin"}</span>
+                      {acc.badge ? <span className="demo-badge purple">{acc.badge}</span> : null}
                     </div>
                     <div className="demo-user-email">{acc.email}</div>
                   </div>
