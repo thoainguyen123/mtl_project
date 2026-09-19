@@ -736,11 +736,21 @@ function IconList() {
   return <svg className="nav-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3.5" width="18" height="17" rx="3" /><line x1="8.5" y1="8.5" x2="16" y2="8.5" /><line x1="8.5" y1="12" x2="16" y2="12" /><line x1="8.5" y1="15.5" x2="13" y2="15.5" /><circle cx="5.5" cy="8.5" r="0.75" fill="currentColor" stroke="none" /><circle cx="5.5" cy="12" r="0.75" fill="currentColor" stroke="none" /><circle cx="5.5" cy="15.5" r="0.75" fill="currentColor" stroke="none" /></svg>;
 }
 function IconGauge() {
-  return <svg className="nav-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3.5" width="7.5" height="7.5" rx="1.5" /><rect x="13.5" y="3.5" width="7.5" height="7.5" rx="1.5" /><rect x="3" y="13" width="7.5" height="7.5" rx="1.5" /><rect x="13.5" y="13" width="7.5" height="7.5" rx="1.5" /></svg>;
+  return (
+    <svg className="section-header-icon" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
+      <circle cx="12" cy="12" r="4" />
+    </svg>
+  );
 }
 
 function IconHome() {
-  return <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>;
+  return (
+    <svg className="section-header-icon" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+      <polyline points="9 22 9 12 15 12 15 22" />
+    </svg>
+  );
 }
 function IconCalendar() {
   return <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>;
@@ -1048,10 +1058,12 @@ export default function Home() {
   const [rememberMe, setRememberMe] = useState(true);
   const [showDemoModal, setShowDemoModal] = useState(false);
   const [hydrated, setHydrated] = useState(false);
-  const [view, setView] = useState<"overview" | "projects" | "workspace" | "departments" | "gmd" | "gms" | "confirm_approval" | "approved_projects" | "catalog" | "design_task" | "fs_ver2">("projects");
+  const [view, setView] = useState<"home" | "overview" | "projects" | "workspace" | "departments" | "gmd" | "gms" | "confirm_approval" | "approved_projects" | "catalog" | "design_task" | "fs_ver2">("projects");
+  const [homeOpen, setHomeOpen] = useState(false);
   const [lapMtlOpen, setLapMtlOpen] = useState(true);
   const [designTaskOpen, setDesignTaskOpen] = useState(false);
   const [fsVer2Open, setFsVer2Open] = useState(false);
+  const [trackingOpen, setTrackingOpen] = useState(false);
   const [overviewSource, setOverviewSource] = useState<"approved" | "all">("approved");
   const [overviewRegion, setOverviewRegion] = useState("all");
   const [overviewProject, setOverviewProject] = useState("all");
@@ -2938,6 +2950,197 @@ export default function Home() {
           align-items: center !important;
           justify-content: center !important;
         }
+        /* ================= HOME DASHBOARD ================= */
+        .home-dashboard-view {
+          display: flex;
+          flex-direction: column;
+          height: 100vh;
+          overflow-y: auto;
+          background: #f8fafc;
+        }
+        .home-topbar {
+          background: #ffffff;
+          border-bottom: 1px solid #e2e8f0;
+          padding: 14px 28px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          flex: none;
+        }
+        .home-content-wrap {
+          padding: 24px 28px 40px;
+          max-width: 1400px;
+          width: 100%;
+          margin: 0 auto;
+          box-sizing: border-box;
+        }
+        .home-hero-card {
+          background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #047857 100%);
+          color: #ffffff;
+          padding: 28px 32px;
+          border-radius: 14px;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          gap: 24px;
+          box-shadow: 0 8px 24px rgba(30, 58, 138, 0.18);
+          margin-bottom: 24px;
+        }
+        .home-hero-text h2 {
+          font-size: 20px;
+          font-weight: 800;
+          letter-spacing: 0.5px;
+          margin: 0 0 8px;
+        }
+        .home-hero-text p {
+          font-size: 13.5px;
+          opacity: 0.9;
+          margin: 0;
+          max-width: 680px;
+          line-height: 1.5;
+        }
+        .home-hero-meta {
+          display: flex;
+          gap: 14px;
+          flex: none;
+        }
+        .hero-stat-pill {
+          background: rgba(255, 255, 255, 0.15);
+          backdrop-filter: blur(6px);
+          border: 1px solid rgba(255, 255, 255, 0.25);
+          padding: 12px 18px;
+          border-radius: 10px;
+          text-align: center;
+          min-width: 85px;
+        }
+        .hero-stat-pill .pill-num {
+          display: block;
+          font-size: 22px;
+          font-weight: 800;
+          color: #ffffff;
+        }
+        .hero-stat-pill .pill-lbl {
+          font-size: 11px;
+          opacity: 0.85;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+        }
+        .home-modules-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+          gap: 18px;
+          margin-bottom: 28px;
+        }
+        .home-module-card {
+          background: #ffffff;
+          border: 1px solid #e2e8f0;
+          border-radius: 12px;
+          padding: 20px;
+          display: flex;
+          gap: 16px;
+          cursor: pointer;
+          transition: all 0.2s ease;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+        }
+        .home-module-card:hover {
+          transform: translateY(-3px);
+          box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
+          border-color: #7cb342;
+        }
+        .home-module-icon {
+          width: 44px;
+          height: 44px;
+          border-radius: 10px;
+          display: grid;
+          place-items: center;
+          flex: none;
+          color: #ffffff;
+        }
+        .home-module-icon.mtl { background: #1d4ed8; }
+        .home-module-icon.design { background: #ea580c; }
+        .home-module-icon.fs { background: #16a34a; }
+        .home-module-icon.tracking { background: #0891b2; }
+        .home-module-body {
+          min-width: 0;
+          flex: 1;
+        }
+        .home-module-body h3 {
+          font-size: 14.5px;
+          font-weight: 700;
+          color: #0f172a;
+          margin: 0 0 6px;
+        }
+        .home-module-body p {
+          font-size: 12px;
+          color: #64748b;
+          line-height: 1.45;
+          margin: 0 0 10px;
+        }
+        .home-module-link {
+          font-size: 12px;
+          font-weight: 700;
+          color: #558b2f;
+        }
+        .home-projects-card {
+          background: #ffffff;
+          border: 1px solid #e2e8f0;
+          border-radius: 12px;
+          padding: 22px;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+        }
+        .home-card-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 16px;
+        }
+        .home-card-header h3 {
+          font-size: 15px;
+          font-weight: 700;
+          color: #0f172a;
+          margin: 0;
+        }
+        .home-projects-table-wrap {
+          overflow-x: auto;
+        }
+        .home-projects-table {
+          width: 100%;
+          border-collapse: collapse;
+          font-size: 12.5px;
+        }
+        .home-projects-table th {
+          background: #f8fafc;
+          padding: 10px 14px;
+          text-align: left;
+          font-weight: 700;
+          color: #475569;
+          border-bottom: 1.5px solid #e2e8f0;
+          white-space: nowrap;
+        }
+        .home-projects-table td {
+          padding: 12px 14px;
+          border-bottom: 1px solid #f1f5f9;
+          color: #1e293b;
+          vertical-align: middle;
+        }
+        .home-projects-table tr:hover td {
+          background: #f8fafc;
+        }
+        .btn-link-action {
+          background: #e0ecfb;
+          color: #1d4ed8;
+          border: none;
+          padding: 4px 10px;
+          border-radius: 5px;
+          font-size: 11.5px;
+          font-weight: 700;
+          cursor: pointer;
+          transition: background 0.15s;
+        }
+        .btn-link-action:hover {
+          background: #bfdbfe;
+        }
+
         /* ================= WBS CATALOG ================= */
         .catalog-header {
           display: flex !important;
@@ -3960,6 +4163,32 @@ export default function Home() {
             </div>
           </div>
         </div>
+        {/* Module 0: TRANG CHỦ — ở vị trí đầu tiên */}
+        {(() => {
+          const isSectionOpen = homeOpen;
+          return <>
+            <button
+              type="button"
+              className={`sidebar-section-toggle ${isSectionOpen ? "open" : ""}`}
+              onClick={() => { setHomeOpen((current) => !current); setView("home"); }}
+              aria-expanded={isSectionOpen}
+              title={isSectionOpen ? "Thu gọn menu Trang chủ" : "Mở rộng menu Trang chủ"}
+            >
+              <div className="section-toggle-left">
+                <IconHome />
+                <span>Trang Chủ</span>
+              </div>
+              <IconChevronDown />
+            </button>
+            <nav className={`sidebar-nav sidebar-collapsible ${isSectionOpen ? "" : "collapsed"}`} aria-label="Điều hướng Trang chủ" aria-hidden={!isSectionOpen}>
+              <button className={view === "home" ? "active" : ""} onClick={() => setView("home")} tabIndex={isSectionOpen ? 0 : -1}>
+                <IconTableGrid />
+                <span>Tổng quan hệ thống</span>
+              </button>
+            </nav>
+          </>;
+        })()}
+
         {/* Module 1: LẬP MASTER TIMELINE — sổ ra/thu gọn được */}
         {(() => {
           const lapMtlSectionOpen = lapMtlOpen;
@@ -4044,6 +4273,36 @@ export default function Home() {
           </>;
         })()}
 
+        {/* Module 4: THEO DÕI DỰ ÁN — ở vị trí cuối cùng */}
+        {(() => {
+          const isSectionOpen = trackingOpen;
+          return <>
+            <button
+              type="button"
+              className={`sidebar-section-toggle ${isSectionOpen ? "open" : ""}`}
+              onClick={() => { setTrackingOpen((current) => !current); setView("overview"); }}
+              aria-expanded={isSectionOpen}
+              title={isSectionOpen ? "Thu gọn menu Theo dõi dự án" : "Mở rộng menu Theo dõi dự án"}
+            >
+              <div className="section-toggle-left">
+                <IconGauge />
+                <span>Theo Dõi Dự Án</span>
+              </div>
+              <IconChevronDown />
+            </button>
+            <nav className={`sidebar-nav sidebar-collapsible ${isSectionOpen ? "" : "collapsed"}`} aria-label="Điều hướng Theo dõi dự án" aria-hidden={!isSectionOpen}>
+              <button className={view === "overview" && overviewSource === "approved" ? "active" : ""} onClick={() => { setView("overview"); setOverviewSource("approved"); }} tabIndex={isSectionOpen ? 0 : -1}>
+                <IconTimeline />
+                <span>Tiến độ tổng thể MTL</span>
+              </button>
+              <button className={view === "overview" && overviewSource === "all" ? "active" : ""} onClick={() => { setView("overview"); setOverviewSource("all"); }} tabIndex={isSectionOpen ? 0 : -1}>
+                <IconList />
+                <span>Theo dõi công việc & KPI</span>
+              </button>
+            </nav>
+          </>;
+        })()}
+
         <div className="sidebar-footer" style={{ marginTop: "auto", padding: "16px 18px", borderTop: "1px solid rgba(255, 255, 255, 0.08)", color: "#94a3b8", fontSize: "11px", lineHeight: "1.6" }}>
           <div style={{ color: "#dbe7ec", fontWeight: 700 }}>{currentAccount.name}</div>
           <div>{currentAccount.username}</div>
@@ -4052,7 +4311,128 @@ export default function Home() {
       </aside>
 
       <section className="workspace">
-        {view === "overview" ? (
+        {view === "home" ? (
+          <section className="home-dashboard-view">
+            <header className="topbar home-topbar">
+              <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                <IconHome />
+                <span style={{ fontSize: "16px", fontWeight: 700, color: "#0f172a" }}>TRANG CHỦ HỆ THỐNG PMD</span>
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                <div className="overview-date-badge">
+                  <IconCalendar />
+                  <span>{formatDate(overviewToday)}</span>
+                </div>
+                <div style={{ fontSize: "12.5px", color: "#475569" }}>
+                  Tài khoản: <strong style={{ color: "#0f52ba" }}>{currentAccount.name}</strong>
+                </div>
+              </div>
+            </header>
+
+            <div className="home-content-wrap">
+              <div className="home-hero-card">
+                <div className="home-hero-text">
+                  <h2>HỆ THỐNG QUẢN LÝ TIẾN ĐỘ & DỰ ÁN NOVAGROUP</h2>
+                  <p>Cổng quản trị tích hợp thông tin lập kế hoạch, kiểm soát tiến độ Master Timeline, Nhiệm vụ Thiết kế, Mô hình FS Thực thi và Giám sát điều hành dự án.</p>
+                </div>
+                <div className="home-hero-meta">
+                  <div className="hero-stat-pill">
+                    <span className="pill-num">{projects.length}</span>
+                    <span className="pill-lbl">Tổng dự án</span>
+                  </div>
+                  <div className="hero-stat-pill">
+                    <span className="pill-num">{officialApprovedProjects.length}</span>
+                    <span className="pill-lbl">MTL đã duyệt</span>
+                  </div>
+                  <div className="hero-stat-pill">
+                    <span className="pill-num">9</span>
+                    <span className="pill-lbl">Khối / Ban</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="home-modules-grid">
+                <div className="home-module-card" onClick={() => { setLapMtlOpen(true); setView("projects"); }}>
+                  <div className="home-module-icon mtl"><IconBuilding /></div>
+                  <div className="home-module-body">
+                    <h3>1. Lập Master Timeline</h3>
+                    <p>Quản trị cấu trúc WBS 5 cấp, mốc tiến độ chuẩn, Gantt chart và quy trình phê duyệt E-Approval.</p>
+                    <span className="home-module-link">Truy cập phân hệ →</span>
+                  </div>
+                </div>
+                <div className="home-module-card" onClick={() => { setDesignTaskOpen(true); setView("design_task"); }}>
+                  <div className="home-module-icon design"><IconDesignTask /></div>
+                  <div className="home-module-body">
+                    <h3>2. Lập Nhiệm Vụ Thiết Kế</h3>
+                    <p>Chuẩn hóa hồ sơ nhiệm vụ thiết kế (NVTK), quy trình PBCM góp ý và thẩm duyệt phương án thiết kế.</p>
+                    <span className="home-module-link">Truy cập phân hệ →</span>
+                  </div>
+                </div>
+                <div className="home-module-card" onClick={() => { setFsVer2Open(true); setView("fs_ver2"); }}>
+                  <div className="home-module-icon fs"><IconFS /></div>
+                  <div className="home-module-body">
+                    <h3>3. Lập FS Thực Thi (FS-Ver2)</h3>
+                    <p>Mô hình tính khả thi thực thi dự án, cập nhật chỉ tiêu tài chính, chi phí và đối chiếu số liệu liên Ban.</p>
+                    <span className="home-module-link">Truy cập phân hệ →</span>
+                  </div>
+                </div>
+                <div className="home-module-card" onClick={() => { setTrackingOpen(true); setView("overview"); }}>
+                  <div className="home-module-icon tracking"><IconGauge /></div>
+                  <div className="home-module-body">
+                    <h3>4. Theo Dõi Dự Án</h3>
+                    <p>Bảng điều khiển KPI, giám sát mốc tiến độ realtime, cảnh báo trễ hạn và báo cáo tổng hợp các phòng ban.</p>
+                    <span className="home-module-link">Truy cập phân hệ →</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="home-projects-card">
+                <div className="home-card-header">
+                  <h3>Dự án trọng điểm đang triển khai</h3>
+                  <button type="button" className="btn-table-action" onClick={() => { setLapMtlOpen(true); setView("projects"); }}>
+                    Xem tất cả dự án ({projects.length})
+                  </button>
+                </div>
+                <div className="home-projects-table-wrap">
+                  <table className="home-projects-table">
+                    <thead>
+                      <tr>
+                        <th>Mã dự án</th>
+                        <th>Tên dự án</th>
+                        <th>Vùng</th>
+                        <th>Loại hình</th>
+                        <th>Ngày bắt đầu MTL</th>
+                        <th>Trạng thái E-Approval</th>
+                        <th>Thao tác</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {projects.slice(0, 6).map((proj) => (
+                        <tr key={proj.id}>
+                          <td style={{ fontWeight: 600 }}>{proj.code}</td>
+                          <td style={{ fontWeight: 600, color: "#0f52ba" }}>{proj.name}</td>
+                          <td>{proj.region || "Miền Nam"}</td>
+                          <td>{proj.type || "Khu đô thị"}</td>
+                          <td>{proj.baselineDate || "15/01/2026"}</td>
+                          <td>
+                            <span className={`status-pill ${proj.approvalStatus === "approved" ? "approved" : proj.approvalStatus === "reviewing" ? "reviewing" : "pending"}`}>
+                              {proj.approvalStatus === "approved" ? "Đã duyệt" : proj.approvalStatus === "reviewing" ? "Đang thẩm định" : "Khởi tạo"}
+                            </span>
+                          </td>
+                          <td>
+                            <button type="button" className="btn-link-action" onClick={() => openWorkspace(proj.id)}>
+                              Xem MTL
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </section>
+        ) : view === "overview" ? (
           <>
             <header className="topbar overview-topbar">
               <div style={{ width: "120px" }} />
