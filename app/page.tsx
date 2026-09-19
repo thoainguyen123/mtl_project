@@ -1949,12 +1949,6 @@ export default function Home() {
     notify(taskForm.addToCurrent && activeProject ? "Đã thêm task vào danh mục và dự án hiện tại" : "Đã thêm task vào Cấu trúc Master Timeline");
   };
 
-  const removeCatalogTask = (code: string) => {
-    setCustomCatalog((current) => current.filter((task) => task.code !== code));
-    setEnabledCatalogCodes((current) => { const next = new Set(current); next.delete(code); return next; });
-    notify("Đã xóa task tùy chỉnh khỏi danh mục dùng cho dự án mới");
-  };
-
   const removeTaskFromProject = (task: ScheduledTask) => {
     if (!activeProject || !isPlanEditable(activeProject)) return;
     const affectedCodes = allProjectTasks(activeProject).filter((item) => item.code === task.code || item.code.startsWith(`${task.code}.`)).map((item) => item.code);
@@ -3987,7 +3981,7 @@ export default function Home() {
         }
         .catalog-table-head {
           display: grid !important;
-          grid-template-columns: 130px minmax(300px, 1.8fr) minmax(320px, 2fr) 200px 110px 65px !important;
+          grid-template-columns: 130px minmax(300px, 1.8fr) minmax(320px, 2fr) 200px 110px !important;
           align-items: center !important;
           gap: 12px !important;
           padding: 12px 16px !important;
@@ -4004,7 +3998,7 @@ export default function Home() {
         }
         .catalog-row {
           display: grid !important;
-          grid-template-columns: 130px minmax(300px, 1.8fr) minmax(320px, 2fr) 200px 110px 65px !important;
+          grid-template-columns: 130px minmax(300px, 1.8fr) minmax(320px, 2fr) 200px 110px !important;
           align-items: center !important;
           gap: 12px !important;
           padding: 10px 16px !important;
@@ -6221,7 +6215,6 @@ export default function Home() {
                 <span>BÁO CÁO GMD</span>
                 <span>LOẠI CÔNG VIỆC</span>
                 <span>TRẠNG THÁI</span>
-                <span>HÀNH ĐỘNG</span>
               </div>
               {visibleCatalogRows.map((task) => {
                 const hasChildren = catalogParentCodes.has(task.code);
@@ -6283,21 +6276,6 @@ export default function Home() {
                         <i />
                         <b>{enabledCatalogCodes.has(task.code) ? "Có" : "Không"}</b>
                       </label>
-                    </span>
-                    <span>
-                      {task.custom ? (
-                        <button
-                          type="button"
-                          className="danger-button"
-                          style={{ height: "26px", fontSize: "10.5px", padding: "0 8px" }}
-                          onClick={() => removeCatalogTask(task.code)}
-                          aria-label={`Xóa ${task.code}`}
-                        >
-                          Xóa
-                        </button>
-                      ) : (
-                        <span style={{ color: "#94a3b8", fontSize: "11px" }}>—</span>
-                      )}
                     </span>
                   </div>
                 );
