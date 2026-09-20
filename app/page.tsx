@@ -9812,20 +9812,11 @@ export default function Home() {
                   title="Lọc theo ban/phòng phụ trách"
                 >
                   <option value="all">-- Lọc theo Ban/Phòng (9-4) --</option>
-                  <optgroup label="Khối 9 (Ban/Phòng Gián tiếp)">
-                    {GROUPS.filter((g) => g.code.startsWith("9.")).map((g) => (
-                      <option key={g.code} value={g.code}>
-                        {g.code} {g.short} – {g.name}
-                      </option>
-                    ))}
-                  </optgroup>
-                  <optgroup label="Khối 4 (Trực tiếp & Chủ trì)">
-                    {GROUPS.filter((g) => g.code.startsWith("4.")).map((g) => (
-                      <option key={g.code} value={g.code}>
-                        {g.code} {g.short} – {g.name}
-                      </option>
-                    ))}
-                  </optgroup>
+                  {GROUPS.map((g) => (
+                    <option key={g.code} value={g.code}>
+                      {g.code} {g.short} – {g.name}
+                    </option>
+                  ))}
                 </select>
 
                 <label
