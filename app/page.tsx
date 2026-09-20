@@ -6117,7 +6117,7 @@ export default function Home() {
         /* ================= PROJECTS OVERVIEW TABLE ================= */
         .projects-overview-table {
           width: 100% !important;
-          max-width: 960px !important;
+          max-width: 100% !important;
           margin: 0 !important;
           overflow-x: hidden !important;
           box-sizing: border-box !important;
@@ -6127,9 +6127,9 @@ export default function Home() {
           min-width: 0 !important;
           width: 100% !important;
           box-sizing: border-box !important;
-          grid-template-columns: 140px minmax(200px, 1fr) 120px 140px 110px !important;
-          padding: 10px 16px !important;
-          gap: 12px !important;
+          grid-template-columns: minmax(150px, 1.3fr) minmax(240px, 2.2fr) minmax(130px, 1fr) minmax(150px, 1.2fr) minmax(130px, 1fr) !important;
+          padding: 12px 20px !important;
+          gap: 16px !important;
         }
         .projects-overview-table .project-table-head span:nth-child(4),
         .projects-overview-table .project-table-head span:last-child {
