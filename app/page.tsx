@@ -563,6 +563,129 @@ function formatDateTime(date?: string) {
   return new Intl.DateTimeFormat("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" }).format(new Date(date));
 }
 
+function interpolateDate(start: string, end: string, fraction: number): string {
+  if (!start || !end) return start || end || "";
+  const startMs = Date.parse(`${start.slice(0, 10)}T00:00:00Z`);
+  const endMs = Date.parse(`${end.slice(0, 10)}T00:00:00Z`);
+  if (isNaN(startMs) || isNaN(endMs)) return start;
+  const targetMs = startMs + (endMs - startMs) * Math.max(0, Math.min(1, fraction));
+  return new Date(targetMs).toISOString().slice(0, 10);
+}
+
+function getProjectLifecycleWindows(startDate: string, targetDate: string, milestoneDates?: MilestoneDates) {
+  const pStart = startDate || today;
+  const pEnd = targetDate && targetDate > pStart ? targetDate : dateAtOffset(pStart, 365);
+
+  const mGroundbreaking = (milestoneDates?.["MILE_PCD_01"] && milestoneDates["MILE_PCD_01"] > pStart && milestoneDates["MILE_PCD_01"] < pEnd)
+    ? milestoneDates["MILE_PCD_01"]
+    : interpolateDate(pStart, pEnd, 0.28);
+
+  const mSales = (milestoneDates?.["MILE_COM_02"] && milestoneDates["MILE_COM_02"] > pStart && milestoneDates["MILE_COM_02"] < pEnd)
+    ? milestoneDates["MILE_COM_02"]
+    : interpolateDate(pStart, pEnd, 0.42);
+
+  const mFinish = interpolateDate(mGroundbreaking, pEnd, 0.82);
+
+  const mHandover = (milestoneDates?.["MILE_OM_02"] && milestoneDates["MILE_OM_02"] > mFinish && milestoneDates["MILE_OM_02"] < pEnd)
+    ? milestoneDates["MILE_OM_02"]
+    : interpolateDate(mFinish, pEnd, 0.65);
+
+  const windows: Record<string, [string, string]> = {
+    "4.0": [pStart, pEnd],
+    "4.1": [pStart, mHandover],
+    "4.2": [pStart, mGroundbreaking],
+    "4.3": [mGroundbreaking, mFinish],
+    "4.4": [mFinish, pEnd],
+    "9.1": [pStart, mGroundbreaking],
+    "9.2": [pStart, pEnd],
+    "9.3": [mSales, pEnd],
+    "9.4": [interpolateDate(pStart, mSales, 0.5), mFinish],
+    "9.5": [interpolateDate(pStart, mGroundbreaking, 0.4), mFinish],
+    "9.6": [interpolateDate(pStart, mGroundbreaking, 0.3), mFinish],
+    "9.7": [pStart, pEnd],
+    "9.8": [pStart, mGroundbreaking],
+    "9.9": [pStart, mGroundbreaking],
+  };
+
+  return { pStart, pEnd, mGroundbreaking, mSales, mFinish, mHandover, windows };
+}
+
+function generateCalibratedTaskEdits(project: Project): Record<string, TaskEdit> {
+  const { pStart, pEnd, windows } = getProjectLifecycleWindows(project.startDate, project.targetDate, project.milestoneDates);
+  const totalProjectWorkingDays = Math.max(10, workingDaysBetween(pStart, pEnd));
+  const timeScale = Math.min(1.2, Math.max(0.15, totalProjectWorkingDays / 600));
+
+  const allTasks = allProjectTasks(project);
+  const edits: Record<string, TaskEdit> = { ...(project.taskEdits || {}) };
+
+  const leafTasks = allTasks.filter((task) => {
+    const isParent = task.summary || allTasks.some((other) => other.code !== task.code && other.code.startsWith(`${task.code}.`));
+    return !isParent;
+  });
+
+  const byGroup = new Map<string, typeof leafTasks>();
+  leafTasks.forEach((task) => {
+    byGroup.set(task.groupCode, [...(byGroup.get(task.groupCode) ?? []), task]);
+  });
+
+  byGroup.forEach((groupTasks, groupCode) => {
+    const [wStart, wEnd] = windows[groupCode] ?? [pStart, pEnd];
+    const wWorkingDays = Math.max(5, workingDaysBetween(wStart, wEnd));
+    const gCount = Math.max(1, groupTasks.length);
+
+    groupTasks.forEach((task, index) => {
+      if (task.workGroup === "Báo cáo định kỳ") return;
+
+      const existing = edits[task.code];
+      const isKeyMilestone = /\.MILE_(?:PLP|PCD|COM|OM)_\d+$/.test(task.code);
+
+      if (existing?.startDate && existing?.endDate) {
+        let clampedStart = existing.startDate < pStart ? pStart : existing.startDate;
+        let clampedEnd = existing.endDate > pEnd ? pEnd : existing.endDate;
+        if (clampedEnd < clampedStart) clampedEnd = clampedStart;
+        edits[task.code] = {
+          ...existing,
+          startDate: clampedStart,
+          endDate: clampedEnd,
+          duration: isKeyMilestone ? 0 : Math.max(1, workingDaysBetween(clampedStart, clampedEnd)),
+        };
+        return;
+      }
+
+      const offsetFraction = index / gCount;
+      const offsetWorkingDays = Math.floor(offsetFraction * Math.max(0, wWorkingDays - 4) * 0.85);
+      let taskStart = dateAtWorkingOffset(wStart, offsetWorkingDays);
+      if (taskStart < pStart) taskStart = pStart;
+      if (taskStart >= pEnd) taskStart = dateAtOffset(pEnd, -3);
+
+      let taskEnd = taskStart;
+      let duration = 0;
+
+      if (isKeyMilestone) {
+        duration = 0;
+        taskEnd = taskStart;
+      } else {
+        const rawDur = task.defaultDuration > 0 ? task.defaultDuration : 10;
+        const scaledDur = Math.max(1, Math.round(rawDur * timeScale));
+        const tentativeEnd = dateAtWorkingOffset(taskStart, scaledDur - 1);
+        taskEnd = tentativeEnd <= wEnd ? tentativeEnd : wEnd;
+        if (taskEnd > pEnd) taskEnd = pEnd;
+        if (taskEnd < taskStart) taskEnd = taskStart;
+        duration = Math.max(1, workingDaysBetween(taskStart, taskEnd));
+      }
+
+      edits[task.code] = {
+        ...(existing || {}),
+        startDate: taskStart,
+        endDate: taskEnd,
+        duration,
+      };
+    });
+  });
+
+  return edits;
+}
+
 function taskStatusClass(status: NonNullable<TaskEdit["status"]>) {
   if (status === "Hoàn thành") return "confirmed";
   if (status === "Đang thực hiện") return "working";
@@ -579,6 +702,9 @@ function scheduleTasks(project: Project): ScheduledTask[] {
   const source = allProjectTasks(project);
   const totalDays = daysBetween(project.startDate, project.targetDate);
   const today = new Date().toISOString().slice(0, 10);
+  const { pStart, pEnd, windows } = getProjectLifecycleWindows(project.startDate, project.targetDate, project.milestoneDates);
+  const totalProjectWorkingDays = Math.max(10, workingDaysBetween(pStart, pEnd));
+  const timeScale = Math.min(1.2, Math.max(0.15, totalProjectWorkingDays / 600));
 
   const includedCodes = new Set(project.includedTaskCodes);
   const tasks = source.filter((task) => includedCodes.has(task.code)).map((task) => {
@@ -609,19 +735,44 @@ function scheduleTasks(project: Project): ScheduledTask[] {
       }
     } else {
       // Chỉ những công việc mà Loại công việc là "Tracking công việc" (hoặc công việc lá thực hiện) thì mới có thông tin
-      const groupIndex = selected.findIndex((group) => group.code === task.groupCode);
-      const groupTasks = source.filter((item) => item.groupCode === task.groupCode);
-      const indexInGroup = groupTasks.findIndex((item) => item.code === task.code);
-      const groupSpan = Math.max(7, Math.floor(totalDays / Math.max(selected.length, 1)));
-      const groupStart = Math.floor(groupIndex * (totalDays / Math.max(selected.length, 1)));
-      const suggestedOffset = task.level === 1 ? groupStart : groupStart + Math.floor((indexInGroup / Math.max(groupTasks.length, 1)) * groupSpan * 0.76);
-      const suggestedDuration = task.level === 1 ? Math.max(2, groupSpan - 2) : task.defaultDuration;
+      if (edit.startDate && edit.endDate) {
+        startDate = edit.startDate;
+        endDate = edit.endDate;
+        duration = isKeyMilestone ? 0 : (edit.duration ?? Math.max(1, workingDaysBetween(startDate, endDate)));
+      } else {
+        const [wStart, wEnd] = windows[task.groupCode] ?? [pStart, pEnd];
+        const groupTasks = source.filter((item) => item.groupCode === task.groupCode && !item.summary);
+        const indexInGroup = Math.max(0, groupTasks.findIndex((item) => item.code === task.code));
+        const wWorkingDays = Math.max(5, workingDaysBetween(wStart, wEnd));
+        const offsetWorkingDays = Math.floor((indexInGroup / Math.max(1, groupTasks.length)) * Math.max(0, wWorkingDays - 4) * 0.85);
 
-      startDate = edit.startDate ?? dateAtOffset(project.startDate, suggestedOffset);
-      duration = isKeyMilestone ? 0 : edit.endDate
-        ? Math.max(1, workingDaysBetween(startDate, edit.endDate))
-        : Math.max(1, Number(edit.duration ?? suggestedDuration));
-      endDate = isKeyMilestone ? startDate : edit.endDate && edit.endDate >= startDate ? edit.endDate : dateAtWorkingOffset(startDate, duration - 1);
+        startDate = edit.startDate ?? dateAtWorkingOffset(wStart, offsetWorkingDays);
+        if (startDate < pStart) startDate = pStart;
+        if (startDate >= pEnd) startDate = dateAtOffset(pEnd, -3);
+
+        if (isKeyMilestone) {
+          duration = 0;
+          endDate = startDate;
+        } else {
+          const rawDur = task.defaultDuration > 0 ? task.defaultDuration : 10;
+          const scaledDur = Math.max(1, Math.round(rawDur * timeScale));
+          const tentativeEnd = dateAtWorkingOffset(startDate, scaledDur - 1);
+          endDate = tentativeEnd <= wEnd ? tentativeEnd : wEnd;
+          if (endDate > pEnd) endDate = pEnd;
+          if (endDate < startDate) endDate = startDate;
+          duration = Math.max(1, workingDaysBetween(startDate, endDate));
+        }
+      }
+
+      // STRICT CLAMPING: Gói gọn tuyệt đối trong [project.startDate, project.targetDate]
+      if (startDate < project.startDate) startDate = project.startDate;
+      if (endDate > project.targetDate) {
+        endDate = project.targetDate;
+        if (!isKeyMilestone) {
+          duration = Math.max(1, workingDaysBetween(startDate, endDate));
+        }
+      }
+      if (endDate < startDate) endDate = startDate;
     }
 
     const hasDates = Boolean(startDate && endDate && (duration > 0 || isKeyMilestone));
@@ -640,13 +791,18 @@ function scheduleTasks(project: Project): ScheduledTask[] {
       actualStatus = "Đang thực hiện";
     }
 
+    const leftPercent = hasDates ? Math.min(98, (startOffset / totalDays) * 100) : 0;
+    const maxAllowedWidth = Math.max(0, 100 - leftPercent);
+    const rawWidth = hasDates ? (duration / totalDays) * 100 : 0;
+    const widthPercent = hasDates ? Math.max(0.7, Math.min(maxAllowedWidth, rawWidth)) : 0;
+
     return {
       ...task,
       startDate,
       endDate,
       duration,
-      left: hasDates ? Math.min(98, (startOffset / totalDays) * 100) : 0,
-      width: hasDates ? Math.max(0.7, Math.min(100, (duration / totalDays) * 100)) : 0,
+      left: leftPercent,
+      width: widthPercent,
       pic: edit.pic ?? "",
       status: actualStatus === "Hoàn thành" ? "Hoàn thành" : (actualStatus === "Trễ hạn" ? "Trễ hạn" : (edit.status ?? "Đang thực hiện")),
       actualProgress,
@@ -8823,7 +8979,7 @@ export default function Home() {
                   <div className="init-bottom-bar">
                     <div className="init-info-pill">
                       <span style={{ fontSize: "14px", fontWeight: 700, color: "#16a34a" }}>ℹ</span>
-                      <span>Hệ thống sẽ tạo bộ tiến độ gốc hoàn toàn mới cho dự án dựa trên Cấu trúc Master Timeline mẫu đã phê duyệt.</span>
+                      <span>Hệ thống tự động cân chỉnh thời lượng (duration) của toàn bộ công việc để gói gọn tổng thể trong 2 mốc Ngày bắt đầu và Ngày kết thúc.</span>
                     </div>
 
                     <div className="init-actions-right">
@@ -8842,6 +8998,10 @@ export default function Home() {
                             alert("Vui lòng nhập Ngày bắt đầu dự án và Ngày kết thúc hoàn toàn dự án.");
                             return;
                           }
+                          if (initEndDate <= initStartDate) {
+                            alert("Ngày kết thúc hoàn toàn dự án phải sau Ngày bắt đầu dự án.");
+                            return;
+                          }
                           const newId = `project-${Date.now()}`;
                           const allGroupCodes = GROUPS.map((g) => g.code);
                           const allTaskCodes = fullCatalog.map((t) => t.code);
@@ -8850,7 +9010,7 @@ export default function Home() {
                           if (initSalesStartDate) milestoneDates["MILE_COM_02"] = initSalesStartDate;
                           if (initHandoverDate) milestoneDates["MILE_OM_02"] = initHandoverDate;
 
-                          const newProj: Project = {
+                          const newProjDraft: Project = {
                             id: newId,
                             name: initProjectName.trim() || "Dự án mới",
                             code: initProjectCode.trim() || `PRJ-${Date.now().toString().slice(-4)}`,
@@ -8859,8 +9019,8 @@ export default function Home() {
                             location: initRegion || "Đồng Nai 1",
                             area: initRegion || "Đồng Nai 1",
                             region: initRegion || "Đồng Nai 1",
-                            startDate: initStartDate || today,
-                            targetDate: initEndDate || dateAtWorkingOffset(initStartDate || today, 365),
+                            startDate: initStartDate,
+                            targetDate: initEndDate,
                             parameters: {
                               ...DEFAULT_PROJECT_PARAMETERS,
                               loaiHinhDuAn: (["Nhà ở thấp tầng", "Chung cư cao tầng", "Khách sạn", "Biệt thự nghỉ dưỡng", "Công viên nước"].includes(initProjectType)
@@ -8879,13 +9039,20 @@ export default function Home() {
                             approvalStatus: "draft",
                             officialVersion: "v1.0",
                           };
+
+                          const calibratedEdits = generateCalibratedTaskEdits(newProjDraft);
+                          const newProj: Project = {
+                            ...newProjDraft,
+                            taskEdits: calibratedEdits,
+                          };
+
                           setProjects((prev) => [newProj, ...prev]);
                           setActiveId(newId);
                           setSelectedCode("");
                           setWorkspaceDeptFilter("all");
                           setWorkspaceLevelFilter("all");
                           setView("workspace");
-                          notify(`Đã khởi tạo thành công tiến độ cho "${newProj.name}"! Chuyển tiếp sang Hoàn thiện tiến độ.`);
+                          notify(`Đã khởi tạo thành công tiến độ cho "${newProj.name}"! Toàn bộ công việc đã được cân chỉnh thời lượng gói gọn từ ${formatDate(initStartDate)} đến ${formatDate(initEndDate)}.`);
                         }}
                       >
                         <IconSparkles />

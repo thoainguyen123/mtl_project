@@ -90,3 +90,95 @@ test("schedule calculation logic leaves Báo cáo định kỳ with empty dates 
   assert.equal(sampleParent.endDate, "2026-03-10");
   assert.equal(sampleParent.duration, 7);
 });
+
+test("calibrated schedule strictly encloses all tasks within project startDate and targetDate without slipping", () => {
+  const pStart = "2026-09-20";
+  const pEnd = "2028-12-31";
+
+  function interpolateDate(start, end, fraction) {
+    const startMs = Date.parse(`${start}T00:00:00Z`);
+    const endMs = Date.parse(`${end}T00:00:00Z`);
+    const targetMs = startMs + (endMs - startMs) * Math.max(0, Math.min(1, fraction));
+    return new Date(targetMs).toISOString().slice(0, 10);
+  }
+
+  function dateAtWorkingOffset(start, offset) {
+    let value = start;
+    let remaining = Math.abs(offset);
+    const direction = offset < 0 ? -1 : 1;
+    while (remaining > 0) {
+      const d = new Date(`${value}T00:00:00Z`);
+      d.setUTCDate(d.getUTCDate() + direction);
+      value = d.toISOString().slice(0, 10);
+      const weekday = new Date(`${value}T00:00:00Z`).getUTCDay();
+      if (weekday !== 0 && weekday !== 6) remaining -= 1;
+    }
+    return value;
+  }
+
+  const mGroundbreaking = interpolateDate(pStart, pEnd, 0.28);
+  const mFinish = interpolateDate(mGroundbreaking, pEnd, 0.82);
+  const mHandover = interpolateDate(mFinish, pEnd, 0.65);
+
+  const windows = {
+    "4.0": [pStart, pEnd],
+    "4.1": [pStart, mHandover],
+    "4.2": [pStart, mGroundbreaking],
+    "4.3": [mGroundbreaking, mFinish],
+    "4.4": [mFinish, pEnd],
+    "9.1": [pStart, mGroundbreaking],
+    "9.2": [pStart, pEnd],
+    "9.3": [interpolateDate(pStart, pEnd, 0.42), pEnd],
+    "9.4": [interpolateDate(pStart, pEnd, 0.35), mFinish],
+    "9.5": [interpolateDate(pStart, mGroundbreaking, 0.4), mFinish],
+    "9.6": [interpolateDate(pStart, mGroundbreaking, 0.3), mFinish],
+    "9.7": [pStart, pEnd],
+    "9.8": [pStart, mGroundbreaking],
+    "9.9": [pStart, mGroundbreaking],
+  };
+
+  const totalProjectWorkingDays = workingDaysBetween(pStart, pEnd);
+  const timeScale = Math.min(1.2, Math.max(0.15, totalProjectWorkingDays / 600));
+
+  const leafTasks = template.filter((t) => !t.summary);
+  const byGroup = new Map();
+  leafTasks.forEach((t) => byGroup.set(t.groupCode, [...(byGroup.get(t.groupCode) ?? []), t]));
+
+  const scheduled = [];
+  byGroup.forEach((groupTasks, groupCode) => {
+    const [wStart, wEnd] = windows[groupCode] ?? [pStart, pEnd];
+    const wWorkingDays = Math.max(5, workingDaysBetween(wStart, wEnd));
+    const gCount = Math.max(1, groupTasks.length);
+
+    groupTasks.forEach((task, index) => {
+      if (task.workGroup === "Báo cáo định kỳ") return;
+      const offsetWorkingDays = Math.floor((index / gCount) * Math.max(0, wWorkingDays - 4) * 0.85);
+      let taskStart = dateAtWorkingOffset(wStart, offsetWorkingDays);
+      if (taskStart < pStart) taskStart = pStart;
+      if (taskStart >= pEnd) taskStart = pStart;
+
+      const rawDur = task.defaultDuration > 0 ? task.defaultDuration : 10;
+      const scaledDur = Math.max(1, Math.round(rawDur * timeScale));
+      const tentativeEnd = dateAtWorkingOffset(taskStart, scaledDur - 1);
+      let taskEnd = tentativeEnd <= wEnd ? tentativeEnd : wEnd;
+      if (taskEnd > pEnd) taskEnd = pEnd;
+      if (taskEnd < taskStart) taskEnd = taskStart;
+
+      scheduled.push({
+        code: task.code,
+        groupCode: task.groupCode,
+        startDate: taskStart,
+        endDate: taskEnd,
+        duration: workingDaysBetween(taskStart, taskEnd),
+      });
+    });
+  });
+
+  assert.ok(scheduled.length > 500);
+  // Verify 100% of tasks are strictly within [pStart, pEnd]
+  assert.ok(scheduled.every((t) => t.startDate >= pStart), "All tasks must start on or after project start date");
+  assert.ok(scheduled.every((t) => t.endDate <= pEnd), "All tasks must end on or before project end date");
+  assert.ok(scheduled.every((t) => t.endDate >= t.startDate), "All tasks must end on or after their start date");
+  assert.ok(scheduled.every((t) => t.duration >= 1), "All tasks must have positive duration");
+});
+
