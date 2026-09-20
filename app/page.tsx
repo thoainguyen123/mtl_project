@@ -1243,6 +1243,7 @@ export default function Home() {
   const [initRegion, setInitRegion] = useState("Miền Nam");
   const [initProjectType, setInitProjectType] = useState("Khu đô thị sinh thái thông minh");
   const [initStartDate, setInitStartDate] = useState(today);
+  const [initEndDate, setInitEndDate] = useState("2028-12-31");
   const [initTemplateSearch, setInitTemplateSearch] = useState("");
   const [initSelectedApprovedProjectId, setInitSelectedApprovedProjectId] = useState<string>("proj-aqua-city-phoenix");
   const [initSelectedVersion, setInitSelectedVersion] = useState<string>("v1.0");
@@ -7762,26 +7763,22 @@ export default function Home() {
                         </div>
 
                         <div className="init-field">
-                          <label className="init-field-label">Vùng</label>
-                          <select
-                            className="init-field-select"
-                            value={initRegion}
-                            onChange={(e) => setInitRegion(e.target.value)}
-                          >
-                            <option value="Miền Nam">Miền Nam</option>
-                            <option value="Miền Trung">Miền Trung</option>
-                            <option value="Miền Bắc">Miền Bắc</option>
-                            <option value="Tây Nguyên">Tây Nguyên</option>
-                          </select>
-                        </div>
-
-                        <div className="init-field">
                           <label className="init-field-label">Ngày bắt đầu dự kiến</label>
                           <input
                             type="date"
                             className="init-field-input"
                             value={initStartDate}
                             onChange={(e) => setInitStartDate(e.target.value)}
+                          />
+                        </div>
+
+                        <div className="init-field">
+                          <label className="init-field-label">Ngày hoàn thành dự án</label>
+                          <input
+                            type="date"
+                            className="init-field-input"
+                            value={initEndDate}
+                            onChange={(e) => setInitEndDate(e.target.value)}
                           />
                         </div>
                       </div>
@@ -7795,33 +7792,7 @@ export default function Home() {
                       </div>
 
                       <div style={{ display: "flex", flexDirection: "column", gap: 10, flex: 1, overflowY: "auto", paddingRight: 2 }}>
-                        <div className="approved-cert-card">
-                          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                            <span className="approved-version-pill">
-                              <IconCheck /> ĐÃ PHÊ DUYỆT CHUẨN
-                            </span>
-                            <span style={{ fontSize: "11px", color: "#166534", fontWeight: 700 }}>
-                              QĐ 128/QĐ-HĐQT-NVL
-                            </span>
-                          </div>
-                          <div style={{ fontSize: "13.5px", fontWeight: 800, color: "#0f172a" }}>
-                            Cấu trúc Master Timeline Novaland – Mô hình 9-4
-                          </div>
-                          <div style={{ fontSize: "11px", color: "#475569", lineHeight: "1.45" }}>
-                            Bộ khung tiến độ chuẩn hóa tích hợp Khối Trực tiếp & Chủ trì (Khối 4: 5 nhóm · 317 task) và Khối Ban/Phòng Gián tiếp (Khối 9: 9 ban/phòng · 783 task).
-                          </div>
-                          <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginTop: 4 }}>
-                            <span style={{ background: "#ffffff", border: "1px solid #bbf7d0", padding: "2px 7px", borderRadius: 4, fontSize: "10.5px", fontWeight: 700, color: "#15803d" }}>
-                              Khối 4: 5 nhóm (317 task)
-                            </span>
-                            <span style={{ background: "#ffffff", border: "1px solid #bfdbfe", padding: "2px 7px", borderRadius: 4, fontSize: "10.5px", fontWeight: 700, color: "#1d4ed8" }}>
-                              Khối 9: 9 nhóm (783 task)
-                            </span>
-                            <span style={{ background: "#ffffff", border: "1px solid #e2e8f0", padding: "2px 7px", borderRadius: 4, fontSize: "10.5px", fontWeight: 700, color: "#0f172a" }}>
-                              Tổng {fullCatalog.length} công việc
-                            </span>
-                          </div>
-                        </div>
+
 
                         {/* Block 9 */}
                         <div>
@@ -8334,7 +8305,7 @@ export default function Home() {
                             area: initArea || "Đồng Nai",
                             region: initRegion || "Miền Nam",
                             startDate: initStartDate || today,
-                            targetDate: dateAtWorkingOffset(initStartDate || today, 365),
+                            targetDate: initEndDate || dateAtWorkingOffset(initStartDate || today, 365),
                             parameters: DEFAULT_PROJECT_PARAMETERS,
                             parameterImpacts: [],
                             milestoneDates: {},
