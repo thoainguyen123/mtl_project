@@ -879,6 +879,52 @@ function IconTrendingUp() {
   );
 }
 
+function IconSparkles() {
+  return (
+    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z" />
+    </svg>
+  );
+}
+
+function IconSearch({ size = 15 }: { size?: number }) {
+  return (
+    <svg viewBox="0 0 24 24" width={size} height={size} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="11" cy="11" r="8" />
+      <line x1="21" y1="21" x2="16.65" y2="16.65" />
+    </svg>
+  );
+}
+
+function IconBell() {
+  return (
+    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+      <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+    </svg>
+  );
+}
+
+function IconFolderFlat() {
+  return (
+    <svg viewBox="0 0 24 24" width="14" height="14" fill="#22c55e" stroke="none">
+      <path d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z" />
+    </svg>
+  );
+}
+
+function IconDocFlat() {
+  return (
+    <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="#64748b" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+      <polyline points="14 2 14 8 20 8" />
+      <line x1="16" y1="13" x2="8" y2="13" />
+      <line x1="16" y1="17" x2="8" y2="17" />
+    </svg>
+  );
+}
+
+
 function ExecutiveArcGauge({ score = 88.0, max = 100, label = "ĐẠT CHUẨN" }: { score?: number; max?: number; label?: string }) {
   const percent = Math.min(100, Math.max(0, (score / max) * 100));
   const arcLength = 295;
@@ -1188,7 +1234,24 @@ export default function Home() {
   const [rememberMe, setRememberMe] = useState(true);
   const [showDemoModal, setShowDemoModal] = useState(false);
   const [hydrated, setHydrated] = useState(false);
-  const [view, setView] = useState<"home" | "overview" | "projects" | "workspace" | "departments" | "gmd" | "gms" | "confirm_approval" | "approved_projects" | "catalog" | "design_task" | "fs_ver2">("home");
+  const [view, setView] = useState<"home" | "overview" | "projects" | "workspace" | "departments" | "gmd" | "gms" | "confirm_approval" | "approved_projects" | "catalog" | "design_task" | "fs_ver2" | "init_template">("home");
+  const [initProjectName, setInitProjectName] = useState("Aqua City - Đảo Phượng Hoàng");
+  const [initProjectCode, setInitProjectCode] = useState("AQC-001");
+  const [initInvestor, setInitInvestor] = useState("Tập đoàn Novaland");
+  const [initArea, setInitArea] = useState("Đồng Nai");
+  const [initRegion, setInitRegion] = useState("Miền Nam");
+  const [initStatus, setInitStatus] = useState("Đang triển khai");
+  const [initTemplateChoice, setInitTemplateChoice] = useState<"aqua" | "urban" | "fasttrack">("aqua");
+  const [initTemplateSearch, setInitTemplateSearch] = useState("");
+  const [initTemplateTypeFilter, setInitTemplateTypeFilter] = useState("all");
+  const [initTreeExpanded, setInitTreeExpanded] = useState<Record<string, boolean>>({
+    root: true,
+    phase1: true,
+    phase2: true,
+    phase3: true,
+    phase4: true,
+    phase5: true,
+  });
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [homePeriod, setHomePeriod] = useState<"6m" | "q3" | "year">("6m");
   const [homeOpFilter, setHomeOpFilter] = useState<"all" | "passed" | "improve">("all");
@@ -3970,6 +4033,369 @@ export default function Home() {
           text-overflow: ellipsis;
         }
 
+        /* ================= KHỞI TẠO TIẾN ĐỘ TỪ TEMPLATE (FLAT UI) ================= */
+        .init-template-view {
+          display: flex;
+          flex-direction: column;
+          height: 100vh;
+          overflow-y: auto;
+          background: #f8fafc;
+          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+        .init-template-topbar {
+          background: #ffffff;
+          border-bottom: 1px solid #e2e8f0;
+          padding: 0 24px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          height: 52px;
+          flex: none;
+          gap: 16px;
+        }
+        .init-topbar-left {
+          display: flex;
+          align-items: center;
+          gap: 14px;
+          flex: 1;
+          max-width: 600px;
+        }
+        .init-search-box {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          background: #f1f5f9;
+          border: 1px solid #e2e8f0;
+          border-radius: 6px;
+          padding: 6px 12px;
+          width: 100%;
+          color: #64748b;
+          font-size: 12.5px;
+        }
+        .init-search-box input {
+          border: none;
+          background: transparent;
+          outline: none;
+          width: 100%;
+          font-size: 12.5px;
+          color: #0f172a;
+        }
+        .init-topbar-right {
+          display: flex;
+          align-items: center;
+          gap: 14px;
+          flex: none;
+        }
+        .init-btn-home {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          background: #22c55e;
+          color: #ffffff;
+          border: none;
+          border-radius: 6px;
+          padding: 6px 14px;
+          font-size: 12.5px;
+          font-weight: 700;
+          cursor: pointer;
+          transition: background 0.15s ease;
+          box-shadow: none !important;
+        }
+        .init-btn-home:hover {
+          background: #16a34a;
+        }
+        .init-template-body {
+          flex: 1;
+          padding: 16px 24px 20px;
+          display: flex;
+          flex-direction: column;
+          gap: 14px;
+          box-sizing: border-box;
+        }
+        .init-breadcrumb {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          font-size: 12px;
+          color: #64748b;
+        }
+        .init-breadcrumb-sep {
+          color: #94a3b8;
+        }
+        .init-page-title {
+          font-size: 20px;
+          font-weight: 800;
+          color: #0f172a;
+          margin: 2px 0 6px;
+        }
+        .init-template-grid {
+          display: grid;
+          grid-template-columns: 1.05fr 1.15fr 1.35fr;
+          gap: 14px;
+          align-items: stretch;
+          flex: 1;
+          min-height: 0;
+        }
+        @media (max-width: 1200px) {
+          .init-template-grid {
+            grid-template-columns: 1fr;
+          }
+        }
+        .init-col-card {
+          background: #ffffff;
+          border: 1px solid #e2e8f0;
+          border-radius: 10px;
+          padding: 16px 18px;
+          display: flex;
+          flex-direction: column;
+          box-shadow: none !important;
+          min-height: 0;
+        }
+        .init-col-head {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          margin-bottom: 14px;
+          padding-bottom: 10px;
+          border-bottom: 1px solid #f1f5f9;
+        }
+        .init-num-badge {
+          width: 22px;
+          height: 22px;
+          border-radius: 50%;
+          background: #22c55e;
+          color: #ffffff;
+          display: grid;
+          place-items: center;
+          font-size: 12px;
+          font-weight: 800;
+          flex: none;
+        }
+        .init-col-title {
+          font-size: 13.5px;
+          font-weight: 800;
+          color: #0f172a;
+        }
+        .init-field-group {
+          display: flex;
+          flex-direction: column;
+          gap: 11px;
+        }
+        .init-field {
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+        }
+        .init-field-label {
+          font-size: 11.5px;
+          font-weight: 700;
+          color: #334155;
+        }
+        .init-field-input, .init-field-select {
+          width: 100%;
+          padding: 8px 10px;
+          border: 1px solid #e2e8f0;
+          border-radius: 6px;
+          font-size: 12.5px;
+          color: #0f172a;
+          background: #ffffff;
+          box-sizing: border-box;
+          outline: none;
+          transition: border-color 0.15s;
+          box-shadow: none !important;
+        }
+        .init-field-input:focus, .init-field-select:focus {
+          border-color: #22c55e;
+        }
+        .init-field-input.readonly {
+          background: #f1f5f9;
+          color: #475569;
+          cursor: default;
+        }
+        .template-item-card {
+          border: 1px solid #e2e8f0;
+          border-radius: 8px;
+          padding: 11px 13px;
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          background: #ffffff;
+          cursor: pointer;
+          transition: all 0.15s ease;
+          box-shadow: none !important;
+        }
+        .template-item-card:hover {
+          border-color: #cbd5e1;
+          background: #f8fafc;
+        }
+        .template-item-card.active {
+          border: 1.5px solid #22c55e;
+          background: #f6fef9;
+        }
+        .template-radio-dot {
+          width: 16px;
+          height: 16px;
+          border-radius: 50%;
+          border: 2px solid #cbd5e1;
+          display: grid;
+          place-items: center;
+          flex: none;
+        }
+        .template-radio-dot.checked {
+          border-color: #22c55e;
+          background: #22c55e;
+        }
+        .template-radio-inner {
+          width: 6px;
+          height: 6px;
+          border-radius: 50%;
+          background: #ffffff;
+        }
+        .template-icon-square {
+          width: 32px;
+          height: 32px;
+          border-radius: 6px;
+          display: grid;
+          place-items: center;
+          color: #ffffff;
+          flex: none;
+        }
+        .template-icon-square.green { background: #22c55e; }
+        .template-icon-square.blue { background: #2563eb; }
+        .template-icon-square.purple { background: #8b5cf6; }
+
+        .template-info-main {
+          flex: 1;
+          min-width: 0;
+        }
+        .template-name {
+          font-size: 12.5px;
+          font-weight: 700;
+          color: #0f172a;
+          margin-bottom: 3px;
+        }
+        .template-meta-row {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          font-size: 10.5px;
+          color: #64748b;
+        }
+        .template-meta-item {
+          display: flex;
+          align-items: center;
+          gap: 4px;
+        }
+
+        /* WBS Tree View */
+        .wbs-tree-flat {
+          display: flex;
+          flex-direction: column;
+          gap: 2px;
+          font-size: 12px;
+          color: #1e293b;
+          overflow-y: auto;
+          flex: 1;
+          padding-right: 4px;
+        }
+        .wbs-tree-node {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          padding: 4px 6px;
+          border-radius: 4px;
+          cursor: pointer;
+          user-select: none;
+        }
+        .wbs-tree-node:hover {
+          background: #f1f5f9;
+        }
+        .wbs-tree-node.root {
+          font-weight: 700;
+          color: #0f172a;
+        }
+        .wbs-tree-node.phase {
+          font-weight: 600;
+          color: #1e293b;
+        }
+        .wbs-tree-node.task {
+          font-size: 11.5px;
+          color: #475569;
+          padding-left: 20px;
+        }
+        .wbs-tree-chevron {
+          width: 14px;
+          display: inline-block;
+          font-size: 10px;
+          color: #94a3b8;
+          text-align: center;
+        }
+
+        /* Bottom Action Bar */
+        .init-bottom-bar {
+          background: #ffffff;
+          border: 1px solid #e2e8f0;
+          border-radius: 8px;
+          padding: 10px 16px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 16px;
+          flex: none;
+          box-shadow: none !important;
+        }
+        .init-info-pill {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          background: #f0fdf4;
+          border: 1px solid #bbf7d0;
+          border-radius: 6px;
+          padding: 6px 12px;
+          font-size: 11.5px;
+          color: #166534;
+          flex: 1;
+        }
+        .init-actions-right {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          flex: none;
+        }
+        .init-btn-cancel {
+          background: #ffffff;
+          border: 1px solid #e2e8f0;
+          color: #475569;
+          border-radius: 6px;
+          padding: 7px 18px;
+          font-size: 12.5px;
+          font-weight: 700;
+          cursor: pointer;
+          box-shadow: none !important;
+          transition: background 0.15s;
+        }
+        .init-btn-cancel:hover {
+          background: #f8fafc;
+        }
+        .init-btn-submit {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          background: #22c55e;
+          border: none;
+          color: #ffffff;
+          border-radius: 6px;
+          padding: 7px 18px;
+          font-size: 12.5px;
+          font-weight: 700;
+          cursor: pointer;
+          box-shadow: none !important;
+          transition: background 0.15s;
+        }
+        .init-btn-submit:hover {
+          background: #16a34a;
+        }
+
         /* ================= WBS CATALOG ================= */
         .catalog-header {
           display: flex !important;
@@ -5053,6 +5479,10 @@ export default function Home() {
                 <IconList />
                 <span>Cấu trúc Master Timeline</span>
               </button>
+              <button className={view === "init_template" ? "active" : ""} onClick={() => setView("init_template")} tabIndex={lapMtlSectionOpen ? 0 : -1}>
+                <IconSparkles />
+                <span>Khởi tạo tiến độ</span>
+              </button>
               <button className={view === "projects" || view === "workspace" ? "active" : ""} onClick={() => setView("projects")} tabIndex={lapMtlSectionOpen ? 0 : -1}>
                 <IconTimeline />
                 <span>Lập / Cập nhật</span>
@@ -6073,6 +6503,13 @@ export default function Home() {
                   <span>Tìm dự án</span>
                   <input value={projectSearch} onChange={(event) => { setProjectSearch(event.target.value); setProjectPage(1); }} placeholder="Nhập tên, mã dự án, chủ đầu tư..." />
                 </label>
+                <button
+                  className="secondary-button"
+                  style={{ borderColor: "#22c55e", color: "#16a34a", fontWeight: 700, display: "inline-flex", alignItems: "center", gap: 6, background: "#f0fdf4" }}
+                  onClick={() => setView("init_template")}
+                >
+                  <IconSparkles /> Khởi tạo từ Template
+                </button>
                 <button className="primary-button" onClick={openCreate}>+ Tạo Master Timeline</button>
               </div>
             </header>
@@ -7003,6 +7440,536 @@ export default function Home() {
               <Pagination total={visibleFsProjects.length} pageSize={fsPageSize} page={fsPage} onPageChange={setFsPage} onPageSizeChange={(size) => { setFsPageSize(size); setFsPage(1); }} />
             </section>
           </>
+        ) : view === "init_template" ? (
+          <div className="init-template-view">
+            {/* Topbar */}
+            <header className="init-template-topbar">
+              <div className="init-topbar-left">
+                <button
+                  type="button"
+                  style={{ background: "none", border: "none", cursor: "pointer", color: "#64748b", display: "grid", placeItems: "center" }}
+                  onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+                  title="Thu gọn / Mở rộng menu"
+                >
+                  <IconMenu />
+                </button>
+                <div className="init-search-box">
+                  <IconSearch />
+                  <input
+                    type="text"
+                    placeholder="Tìm kiếm dự án, công việc, tài liệu..."
+                    value={initTemplateSearch}
+                    onChange={(e) => setInitTemplateSearch(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              <div className="init-topbar-right">
+                <button
+                  type="button"
+                  style={{ background: "none", border: "none", cursor: "pointer", color: "#64748b", display: "grid", placeItems: "center" }}
+                  title="Thông báo"
+                >
+                  <IconBell />
+                </button>
+                <div style={{ width: 1, height: 18, background: "#e2e8f0" }} />
+                <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: "12.5px", fontWeight: 600, color: "#1e293b", cursor: "pointer" }}>
+                  <span style={{ width: 22, height: 22, borderRadius: "50%", background: "#f1f5f9", display: "grid", placeItems: "center", color: "#64748b", fontSize: "11px", fontWeight: 700 }}>
+                    NV
+                  </span>
+                  <span>Nguyễn Văn A</span>
+                  <IconChevronDown />
+                </div>
+                <button className="init-btn-home" onClick={() => setView("home")}>
+                  <IconHome />
+                  <span>Về trang chủ</span>
+                </button>
+              </div>
+            </header>
+
+            {/* Main Body */}
+            <div className="init-template-body">
+              {/* Breadcrumbs */}
+              <nav className="init-breadcrumb" aria-label="Breadcrumb">
+                <button
+                  onClick={() => setView("home")}
+                  style={{ background: "none", border: "none", padding: 0, cursor: "pointer", color: "#64748b", display: "inline-flex", alignItems: "center" }}
+                  title="Trang chủ"
+                >
+                  <IconHome />
+                </button>
+                <span className="init-breadcrumb-sep">/</span>
+                <button
+                  onClick={() => setView("projects")}
+                  style={{ background: "none", border: "none", padding: 0, cursor: "pointer", color: "#64748b" }}
+                >
+                  Dự án
+                </button>
+                <span className="init-breadcrumb-sep">/</span>
+                <span style={{ color: "#0f172a", fontWeight: 600 }}>Khởi tạo tiến độ</span>
+              </nav>
+
+              <h1 className="init-page-title">Khởi tạo tiến độ từ Template</h1>
+
+              {/* 3-Column Grid */}
+              <div className="init-template-grid">
+                {/* Column 1: Thông tin dự án */}
+                <div className="init-col-card">
+                  <div className="init-col-head">
+                    <span className="init-num-badge">1</span>
+                    <span className="init-col-title">Thông tin dự án</span>
+                  </div>
+
+                  <div className="init-field-group">
+                    <div className="init-field">
+                      <label className="init-field-label">
+                        Dự án <span style={{ color: "#ef4444" }}>*</span>
+                      </label>
+                      <select
+                        className="init-field-select"
+                        value={initProjectName}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          setInitProjectName(val);
+                          const matched = projects.find((p) => p.name === val);
+                          if (matched) {
+                            setInitProjectCode(matched.code || "AQC-001");
+                            setInitInvestor(matched.investor || "Tập đoàn Novaland");
+                            setInitArea(matched.location || matched.area || "Đồng Nai");
+                            setInitRegion(matched.region || "Miền Nam");
+                          } else if (val.includes("Aqua City")) {
+                            setInitProjectCode("AQC-001");
+                            setInitInvestor("Tập đoàn Novaland");
+                            setInitArea("Đồng Nai");
+                            setInitRegion("Miền Nam");
+                          } else if (val.includes("NovaWorld Phan Thiết")) {
+                            setInitProjectCode("NVW-PT-01");
+                            setInitInvestor("Tập đoàn Novaland");
+                            setInitArea("Bình Thuận");
+                            setInitRegion("Miền Nam");
+                          } else if (val.includes("Sunrise Riverside")) {
+                            setInitProjectCode("SRR-01");
+                            setInitInvestor("Tập đoàn Novaland");
+                            setInitArea("TP. Hồ Chí Minh");
+                            setInitRegion("Miền Nam");
+                          } else if (val.includes("The Grand Manhattan")) {
+                            setInitProjectCode("TGM-01");
+                            setInitInvestor("Tập đoàn Novaland");
+                            setInitArea("TP. Hồ Chí Minh");
+                            setInitRegion("Miền Nam");
+                          }
+                        }}
+                      >
+                        {projects.map((p) => (
+                          <option key={p.id} value={p.name}>
+                            {p.name}
+                          </option>
+                        ))}
+                        {!projects.some((p) => p.name.includes("Aqua City")) && (
+                          <option value="Aqua City - Đảo Phượng Hoàng">Aqua City - Đảo Phượng Hoàng</option>
+                        )}
+                        {!projects.some((p) => p.name.includes("NovaWorld Phan Thiết")) && (
+                          <option value="NovaWorld Phan Thiết">NovaWorld Phan Thiết</option>
+                        )}
+                        {!projects.some((p) => p.name.includes("Sunrise Riverside")) && (
+                          <option value="Sunrise Riverside">Sunrise Riverside</option>
+                        )}
+                        {!projects.some((p) => p.name.includes("The Grand Manhattan")) && (
+                          <option value="The Grand Manhattan">The Grand Manhattan</option>
+                        )}
+                      </select>
+                    </div>
+
+                    <div className="init-field">
+                      <label className="init-field-label">Mã dự án</label>
+                      <input
+                        type="text"
+                        className="init-field-input readonly"
+                        readOnly
+                        value={initProjectCode}
+                        placeholder="Mã dự án..."
+                      />
+                    </div>
+
+                    <div className="init-field">
+                      <label className="init-field-label">Chủ đầu tư</label>
+                      <input
+                        type="text"
+                        className="init-field-input readonly"
+                        readOnly
+                        value={initInvestor}
+                        placeholder="Chủ đầu tư..."
+                      />
+                    </div>
+
+                    <div className="init-field">
+                      <label className="init-field-label">Khu vực</label>
+                      <select
+                        className="init-field-select"
+                        value={initArea}
+                        onChange={(e) => setInitArea(e.target.value)}
+                      >
+                        <option value="Đồng Nai">Đồng Nai</option>
+                        <option value="TP. Hồ Chí Minh">TP. Hồ Chí Minh</option>
+                        <option value="Bình Thuận">Bình Thuận</option>
+                        <option value="Bà Rịa - Vũng Tàu">Bà Rịa - Vũng Tàu</option>
+                        <option value="Khánh Hòa">Khánh Hòa</option>
+                        <option value="Lâm Đồng">Lâm Đồng</option>
+                      </select>
+                    </div>
+
+                    <div className="init-field">
+                      <label className="init-field-label">Vùng</label>
+                      <select
+                        className="init-field-select"
+                        value={initRegion}
+                        onChange={(e) => setInitRegion(e.target.value)}
+                      >
+                        <option value="Miền Nam">Miền Nam</option>
+                        <option value="Miền Trung">Miền Trung</option>
+                        <option value="Miền Bắc">Miền Bắc</option>
+                        <option value="Tây Nguyên">Tây Nguyên</option>
+                      </select>
+                    </div>
+
+                    <div className="init-field">
+                      <label className="init-field-label">Trạng thái</label>
+                      <select
+                        className="init-field-select"
+                        value={initStatus}
+                        onChange={(e) => setInitStatus(e.target.value)}
+                      >
+                        <option value="Đang triển khai">● Đang triển khai</option>
+                        <option value="Chuẩn bị đầu tư">● Chuẩn bị đầu tư</option>
+                        <option value="Tạm hoãn">● Tạm hoãn</option>
+                        <option value="Hoàn thành">● Hoàn thành</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Column 2: Chọn Template tiến độ */}
+                <div className="init-col-card">
+                  <div className="init-col-head">
+                    <span className="init-num-badge">2</span>
+                    <span className="init-col-title">Chọn Template tiến độ</span>
+                  </div>
+
+                  <div className="init-field-group" style={{ marginBottom: 12 }}>
+                    <div className="init-search-box" style={{ background: "#ffffff" }}>
+                      <IconSearch />
+                      <input
+                        type="text"
+                        placeholder="Tìm kiếm template..."
+                        value={initTemplateSearch}
+                        onChange={(e) => setInitTemplateSearch(e.target.value)}
+                      />
+                    </div>
+
+                    <div className="init-field">
+                      <label className="init-field-label">Loại template</label>
+                      <select
+                        className="init-field-select"
+                        value={initTemplateTypeFilter}
+                        onChange={(e) => setInitTemplateTypeFilter(e.target.value)}
+                      >
+                        <option value="all">Tất cả</option>
+                        <option value="Khu đô thị">Khu đô thị</option>
+                        <option value="Bất động sản dân dụng">Bất động sản dân dụng</option>
+                        <option value="Fast Track">Fast Track</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  {/* Template Cards List */}
+                  <div style={{ display: "flex", flexDirection: "column", gap: 10, flex: 1, overflowY: "auto" }}>
+                    {[
+                      {
+                        id: "aqua" as const,
+                        name: "Template Aqua City – Standard",
+                        colorClass: "green",
+                        tasks: 120,
+                        wbs: 12,
+                        duration: "12 tháng",
+                        type: "Khu đô thị",
+                      },
+                      {
+                        id: "urban" as const,
+                        name: "Template Khu đô thị – 2026",
+                        colorClass: "blue",
+                        tasks: 85,
+                        wbs: 9,
+                        duration: "9 tháng",
+                        type: "Khu đô thị",
+                      },
+                      {
+                        id: "fasttrack" as const,
+                        name: "Template Dự án BĐS – Fast Track",
+                        colorClass: "purple",
+                        tasks: 65,
+                        wbs: 7,
+                        duration: "6 tháng",
+                        type: "Fast Track",
+                      },
+                    ]
+                      .filter((tmpl) => {
+                        const matchesSearch = tmpl.name.toLowerCase().includes(initTemplateSearch.toLowerCase());
+                        const matchesType = initTemplateTypeFilter === "all" || tmpl.type === initTemplateTypeFilter;
+                        return matchesSearch && matchesType;
+                      })
+                      .map((tmpl) => {
+                        const isSelected = initTemplateChoice === tmpl.id;
+                        return (
+                          <div
+                            key={tmpl.id}
+                            className={`template-item-card ${isSelected ? "active" : ""}`}
+                            onClick={() => setInitTemplateChoice(tmpl.id)}
+                          >
+                            <div className={`template-radio-dot ${isSelected ? "checked" : ""}`}>
+                              {isSelected && <div className="template-radio-inner" />}
+                            </div>
+                            <div className={`template-icon-square ${tmpl.colorClass}`}>
+                              <IconList />
+                            </div>
+                            <div className="template-info-main">
+                              <div className="template-name">{tmpl.name}</div>
+                              <div className="template-meta-row">
+                                <span className="template-meta-item">
+                                  <IconList /> {tmpl.tasks} công việc
+                                </span>
+                                <span className="template-meta-item">
+                                  <IconBuilding /> {tmpl.wbs} WBS
+                                </span>
+                                <span className="template-meta-item">
+                                  <IconClock /> {tmpl.duration}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                  </div>
+                </div>
+
+                {/* Column 3: Xem trước cấu trúc */}
+                <div className="init-col-card">
+                  <div className="init-col-head">
+                    <span className="init-num-badge" style={{ display: "grid", placeItems: "center" }}>
+                      <IconEye />
+                    </span>
+                    <span className="init-col-title">Xem trước cấu trúc</span>
+                  </div>
+
+                  <div className="wbs-tree-flat">
+                    {/* Root node: Tổng thể tiến độ */}
+                    <div>
+                      <div
+                        className="wbs-tree-node root"
+                        onClick={() =>
+                          setInitTreeExpanded((prev) => ({
+                            ...prev,
+                            root: !prev.root,
+                          }))
+                        }
+                      >
+                        <span className="wbs-tree-chevron">{initTreeExpanded.root ? "▼" : "▶"}</span>
+                        <IconFolderFlat />
+                        <span>Tổng thể tiến độ</span>
+                      </div>
+
+                      {initTreeExpanded.root && (
+                        <div style={{ paddingLeft: 18, display: "flex", flexDirection: "column", gap: 2 }}>
+                          {/* Phase 1: Chuẩn bị đầu tư */}
+                          <div>
+                            <div
+                              className="wbs-tree-node phase"
+                              onClick={() =>
+                                setInitTreeExpanded((prev) => ({
+                                  ...prev,
+                                  phase1: !prev.phase1,
+                                }))
+                              }
+                            >
+                              <span className="wbs-tree-chevron">{initTreeExpanded.phase1 ? "▼" : "▶"}</span>
+                              <IconFolderFlat />
+                              <span>1. Chuẩn bị đầu tư</span>
+                            </div>
+                            {initTreeExpanded.phase1 && (
+                              <div>
+                                <div className="wbs-tree-node task"><IconDocFlat /><span>1.1. Nghiên cứu thị trường</span></div>
+                                <div className="wbs-tree-node task"><IconDocFlat /><span>1.2. Lập đề xuất dự án</span></div>
+                                <div className="wbs-tree-node task"><IconDocFlat /><span>1.3. Phê duyệt chủ trương</span></div>
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Phase 2: Pháp lý */}
+                          <div>
+                            <div
+                              className="wbs-tree-node phase"
+                              onClick={() =>
+                                setInitTreeExpanded((prev) => ({
+                                  ...prev,
+                                  phase2: !prev.phase2,
+                                }))
+                              }
+                            >
+                              <span className="wbs-tree-chevron">{initTreeExpanded.phase2 ? "▼" : "▶"}</span>
+                              <IconFolderFlat />
+                              <span>2. Pháp lý</span>
+                            </div>
+                            {initTreeExpanded.phase2 && (
+                              <div>
+                                <div className="wbs-tree-node task"><IconDocFlat /><span>2.1. Quy hoạch</span></div>
+                                <div className="wbs-tree-node task"><IconDocFlat /><span>2.2. Giấy phép đầu tư</span></div>
+                                <div className="wbs-tree-node task"><IconDocFlat /><span>2.3. Giấy phép xây dựng</span></div>
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Phase 3: Thiết kế */}
+                          <div>
+                            <div
+                              className="wbs-tree-node phase"
+                              onClick={() =>
+                                setInitTreeExpanded((prev) => ({
+                                  ...prev,
+                                  phase3: !prev.phase3,
+                                }))
+                              }
+                            >
+                              <span className="wbs-tree-chevron">{initTreeExpanded.phase3 ? "▼" : "▶"}</span>
+                              <IconFolderFlat />
+                              <span>3. Thiết kế</span>
+                            </div>
+                            {initTreeExpanded.phase3 && (
+                              <div>
+                                <div className="wbs-tree-node task"><IconDocFlat /><span>3.1. Thiết kế cơ sở</span></div>
+                                <div className="wbs-tree-node task"><IconDocFlat /><span>3.2. Thiết kế kỹ thuật</span></div>
+                                <div className="wbs-tree-node task"><IconDocFlat /><span>3.3. Thiết kế bản vẽ thi công</span></div>
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Phase 4: Thi công */}
+                          <div>
+                            <div
+                              className="wbs-tree-node phase"
+                              onClick={() =>
+                                setInitTreeExpanded((prev) => ({
+                                  ...prev,
+                                  phase4: !prev.phase4,
+                                }))
+                              }
+                            >
+                              <span className="wbs-tree-chevron">{initTreeExpanded.phase4 ? "▼" : "▶"}</span>
+                              <IconFolderFlat />
+                              <span>4. Thi công</span>
+                            </div>
+                            {initTreeExpanded.phase4 && (
+                              <div>
+                                <div className="wbs-tree-node task"><IconDocFlat /><span>4.1. Chuẩn bị mặt bằng</span></div>
+                                <div className="wbs-tree-node task"><IconDocFlat /><span>4.2. Thi công hạ tầng</span></div>
+                                <div className="wbs-tree-node task"><IconDocFlat /><span>4.3. Thi công công trình</span></div>
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Phase 5: Nghiệm thu & bàn giao */}
+                          <div>
+                            <div
+                              className="wbs-tree-node phase"
+                              onClick={() =>
+                                setInitTreeExpanded((prev) => ({
+                                  ...prev,
+                                  phase5: !prev.phase5,
+                                }))
+                              }
+                            >
+                              <span className="wbs-tree-chevron">{initTreeExpanded.phase5 ? "▼" : "▶"}</span>
+                              <IconFolderFlat />
+                              <span>5. Nghiệm thu & bàn giao</span>
+                            </div>
+                            {initTreeExpanded.phase5 && (
+                              <div>
+                                <div className="wbs-tree-node task"><IconDocFlat /><span>5.1. Nghiệm thu công trình</span></div>
+                                <div className="wbs-tree-node task"><IconDocFlat /><span>5.2. Hoàn công</span></div>
+                                <div className="wbs-tree-node task"><IconDocFlat /><span>5.3. Bàn giao đưa vào sử dụng</span></div>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Bottom Notification & Action Bar */}
+              <div className="init-bottom-bar">
+                <div className="init-info-pill">
+                  <span style={{ fontSize: "14px", fontWeight: 700, color: "#16a34a" }}>ℹ</span>
+                  <span>Sau khi khởi tạo, hệ thống sẽ tạo bản tiến độ mới từ template; bạn có thể chỉnh sửa trước khi trình duyệt.</span>
+                </div>
+
+                <div className="init-actions-right">
+                  <button
+                    type="button"
+                    className="init-btn-cancel"
+                    onClick={() => setView("projects")}
+                  >
+                    Hủy
+                  </button>
+                  <button
+                    type="button"
+                    className="init-btn-submit"
+                    onClick={() => {
+                      const existing = projects.find(
+                        (p) => p.code === initProjectCode || p.name.toLowerCase() === initProjectName.toLowerCase()
+                      );
+                      if (existing) {
+                        setActiveId(existing.id);
+                        setView("workspace");
+                        notify(`Đã khởi tạo tiến độ từ template cho dự án ${existing.name}!`);
+                      } else {
+                        const newId = `project-${Date.now()}`;
+                        const newProj: Project = {
+                          id: newId,
+                          name: initProjectName,
+                          code: initProjectCode,
+                          type: "Khu đô thị",
+                          investor: initInvestor,
+                          location: initArea,
+                          area: initArea,
+                          region: initRegion,
+                          startDate: today,
+                          targetDate: dateAtWorkingOffset(today, 365),
+                          parameters: DEFAULT_PROJECT_PARAMETERS,
+                          parameterImpacts: [],
+                          milestoneDates: {},
+                          selectedGroups: ["G1", "G2", "G3", "G4", "G5"],
+                          createdAt: new Date().toISOString(),
+                          taskEdits: {},
+                          taskDependencies: {},
+                          customTasks: [],
+                          includedTaskCodes: fullCatalog.map((t) => t.code),
+                          departmentApprovals: normalizeDepartmentApprovals(["G1", "G2", "G3", "G4", "G5"]),
+                          approvalStatus: "draft",
+                        };
+                        setProjects((prev) => [newProj, ...prev]);
+                        setActiveId(newId);
+                        setView("workspace");
+                        notify(`Đã khởi tạo thành công tiến độ dự án ${initProjectName} từ template!`);
+                      }
+                    }}
+                  >
+                    <span>▶</span>
+                    <span>Khởi tạo tiến độ</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
         ) : !activeProject ? (
           <div className="empty-state">
             <span className="empty-kicker">MTL WORKSPACE</span><h1>Tạo Master Timeline trong vài phút</h1><p>Nhập thông tin dự án, chọn phạm vi áp dụng và hệ thống sẽ sinh đúng cây công việc từ mẫu Microsoft Project.</p>
