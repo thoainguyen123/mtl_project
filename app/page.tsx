@@ -1253,6 +1253,10 @@ export default function Home() {
   const [initWbsCollapsed, setInitWbsCollapsed] = useState<Set<string>>(new Set());
   const [initWbsSearch, setInitWbsSearch] = useState<string>("");
   const [initWbsLevel, setInitWbsLevel] = useState<string>("all");
+  const [initUpdateSelectedDeptCode, setInitUpdateSelectedDeptCode] = useState<string>("9.1");
+  const [initUpdateWbsCollapsed, setInitUpdateWbsCollapsed] = useState<Set<string>>(new Set());
+  const [initUpdateWbsSearch, setInitUpdateWbsSearch] = useState<string>("");
+  const [initUpdateWbsLevel, setInitUpdateWbsLevel] = useState<string>("all");
   const [workspaceDeptFilter, setWorkspaceDeptFilter] = useState<string>("all");
   const [workspaceLevelFilter, setWorkspaceLevelFilter] = useState<string>("all");
   const [showCompleteModal, setShowCompleteModal] = useState(false);
@@ -1832,6 +1836,58 @@ export default function Home() {
       return ![...initWbsCollapsed].some((code) => task.code.startsWith(`${code}.`));
     });
   }, [initWbsTasks, initWbsSearch, initWbsCollapsed]);
+
+  const applyInitUpdateWbsLevel = (lvl: string | number) => {
+    if (lvl === "all") {
+      setInitUpdateWbsCollapsed(new Set());
+      setInitUpdateWbsLevel("all");
+    } else {
+      const num = typeof lvl === "string" ? Number(lvl) : lvl;
+      if (Number.isFinite(num) && num >= 1) {
+        const toCollapse = new Set(
+          fullCatalog
+            .filter((task) => catalogParentCodes.has(task.code) && task.level >= num)
+            .map((task) => task.code)
+        );
+        setInitUpdateWbsCollapsed(toCollapse);
+        setInitUpdateWbsLevel(String(num));
+      }
+    }
+  };
+
+  const targetProjectForUpdate = useMemo(() => {
+    return (
+      projects.find((p) => p.id === initSelectedApprovedProjectId) ||
+      projects.find((p) => p.isOfficialApproved) ||
+      projects[0]
+    );
+  }, [projects, initSelectedApprovedProjectId]);
+
+  const targetProjectTasks = useMemo(() => {
+    if (!targetProjectForUpdate) return fullCatalog;
+    const s = scheduleTasks(targetProjectForUpdate);
+    return s.length > 0 ? s : fullCatalog;
+  }, [targetProjectForUpdate, fullCatalog]);
+
+  const initUpdateWbsTasks = useMemo(() => {
+    if (initUpdateSelectedDeptCode === "all") return targetProjectTasks;
+    return targetProjectTasks.filter((task) => task.groupCode === initUpdateSelectedDeptCode);
+  }, [targetProjectTasks, initUpdateSelectedDeptCode]);
+
+  const visibleInitUpdateWbsTasks = useMemo(() => {
+    const q = initUpdateWbsSearch.trim().toLocaleLowerCase("vi");
+    return initUpdateWbsTasks.filter((task) => {
+      if (q) {
+        return (
+          task.code.toLowerCase().includes(q) ||
+          task.name.toLocaleLowerCase("vi").includes(q) ||
+          (task.workGroup ?? "").toLocaleLowerCase("vi").includes(q)
+        );
+      }
+      return ![...initUpdateWbsCollapsed].some((code) => task.code.startsWith(`${code}.`));
+    });
+  }, [initUpdateWbsTasks, initUpdateWbsSearch, initUpdateWbsCollapsed]);
+
   const applyWorkspaceLevel = (lvl: number | "all") => {
     setWorkspaceLevelFilter(String(lvl));
     if (lvl === "all") {
@@ -8614,7 +8670,7 @@ export default function Home() {
                       <>
                         <div className="init-template-grid">
                           {/* Column 1: Chọn Dự án & Version đã duyệt nguồn */}
-                          <div className="init-col-card">
+                          <div className="init-col-card" style={{ height: "calc(100vh - 230px)", minHeight: "560px", display: "flex", flexDirection: "column", overflowY: "auto" }}>
                             <div className="init-col-head">
                               <span className="init-num-badge" style={{ background: "#2563eb" }}>1</span>
                               <span className="init-col-title">Dự án & Version đã duyệt nguồn</span>
@@ -8668,7 +8724,7 @@ export default function Home() {
                                     fontWeight: 700,
                                   }}
                                 >
-                                  <span className="approved-version-pill">
+                                  <span className="approved-version-pill" style={{ background: "#2563eb" }}>
                                     <IconCheck /> {sourceVersion}
                                   </span>
                                   <span>{approvalCode}</span>
@@ -8718,472 +8774,360 @@ export default function Home() {
                                   value={today}
                                 />
                               </div>
-                            </div>
-                          </div>
 
-                          {/* Column 2: Chi tiết hồ sơ phê duyệt trước đó */}
-                          <div className="init-col-card">
-                            <div className="init-col-head">
-                              <span className="init-num-badge" style={{ background: "#2563eb" }}>2</span>
-                              <span className="init-col-title">Hồ sơ Version đã duyệt trước đó</span>
-                            </div>
-
-                            <div style={{ display: "flex", flexDirection: "column", gap: 12, flex: 1 }}>
-                              <div className="version-meta-box">
-                                <div className="version-meta-row">
-                                  <span className="version-meta-label">Dự án gốc:</span>
-                                  <span className="version-meta-val">{targetProject?.name}</span>
+                              {/* Hồ sơ phê duyệt trước đó tóm tắt */}
+                              <div className="version-meta-box" style={{ marginTop: 4 }}>
+                                <div style={{ fontSize: "11.5px", fontWeight: 700, color: "#1e3a8a", marginBottom: 4, display: "flex", alignItems: "center", gap: 5 }}>
+                                  <span>📋</span> Hồ sơ Version đã duyệt trước đó:
                                 </div>
                                 <div className="version-meta-row">
                                   <span className="version-meta-label">Mã dự án:</span>
                                   <span className="version-meta-val" style={{ color: "#2563eb" }}>{targetProject?.code}</span>
                                 </div>
                                 <div className="version-meta-row">
-                                  <span className="version-meta-label">Số quyết định phê duyệt:</span>
+                                  <span className="version-meta-label">Số quyết định:</span>
                                   <span className="version-meta-val">{approvalCode}</span>
                                 </div>
                                 <div className="version-meta-row">
-                                  <span className="version-meta-label">Ngày ký duyệt chính thức:</span>
+                                  <span className="version-meta-label">Ngày ký duyệt:</span>
                                   <span className="version-meta-val">{formatDate(approvalDate)}</span>
                                 </div>
                                 <div className="version-meta-row">
-                                  <span className="version-meta-label">Cấp phê duyệt:</span>
-                                  <span className="version-meta-val">HĐQT / Ban Tổng Giám đốc</span>
+                                  <span className="version-meta-label">Quy mô WBS kế thừa:</span>
+                                  <span className="version-meta-val" style={{ color: "#16a34a" }}>14 Ban/Phòng · {targetScheduledTasks.length} task</span>
                                 </div>
-                                <div className="version-meta-row">
-                                  <span className="version-meta-label">Phiên bản nguồn:</span>
-                                  <span className="version-meta-val" style={{ color: "#166534" }}>{sourceVersion} (Chính thức)</span>
-                                </div>
-                              </div>
-
-                              <div style={{ fontSize: "11.5px", fontWeight: 700, color: "#334155", margin: "2px 0 0" }}>
-                                Dữ liệu WBS kế thừa vào bản mới (Mô hình 9-4):
-                              </div>
-
-                              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
-                                <div style={{ background: "#eff6ff", border: "1px solid #bfdbfe", borderRadius: 6, padding: "8px 10px" }}>
-                                  <div style={{ fontSize: "10px", color: "#1d4ed8", fontWeight: 700, textTransform: "uppercase" }}>Khối 9 · Ban / Phòng Gián tiếp</div>
-                                  <div style={{ fontSize: "13.5px", fontWeight: 800, color: "#1e3a8a" }}>
-                                    9 nhóm · 783 task
-                                  </div>
-                                </div>
-                                <div style={{ background: "#f0fdf4", border: "1px solid #bbf7d0", borderRadius: 6, padding: "8px 10px" }}>
-                                  <div style={{ fontSize: "10px", color: "#166534", fontWeight: 700, textTransform: "uppercase" }}>Khối 4 · Trực tiếp & Chủ trì</div>
-                                  <div style={{ fontSize: "13.5px", fontWeight: 800, color: "#14532d" }}>
-                                    5 nhóm · 317 task
-                                  </div>
-                                </div>
-                              </div>
-
-                              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
-                                <div style={{ background: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: 6, padding: "8px 10px" }}>
-                                  <div style={{ fontSize: "10.5px", color: "#64748b" }}>Tổng số công việc WBS</div>
-                                  <div style={{ fontSize: "13.5px", fontWeight: 800, color: "#0f172a" }}>
-                                    {fullCatalog.length} task
-                                  </div>
-                                </div>
-                                <div style={{ background: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: 6, padding: "8px 10px" }}>
-                                  <div style={{ fontSize: "10.5px", color: "#64748b" }}>Liên kết logic WBS</div>
-                                  <div style={{ fontSize: "13.5px", fontWeight: 800, color: "#0f172a" }}>
-                                    100% liên kết 14 đơn vị
-                                  </div>
-                                </div>
-                              </div>
-
-                              <div style={{ background: "#eff6ff", border: "1px solid #bfdbfe", borderRadius: 6, padding: "9px 12px", fontSize: "11.5px", color: "#1e40af", lineHeight: "1.5" }}>
-                                <b>Quy chế cập nhật theo mô hình 9-4:</b> Phiên bản mới sẽ kế thừa toàn bộ cấu trúc 14 đơn vị chuyên môn (Khối 4 trực tiếp & Khối 9 gián tiếp), ngày bắt đầu/kết thúc cơ sở và liên kết logic của version {sourceVersion}. Sau khi khởi tạo, PMD và các phòng ban có thể cập nhật thực tế mốc tiến độ theo thẩm quyền.
                               </div>
                             </div>
                           </div>
 
-                          {/* Column 3: Xem trước cấu trúc & tiến độ kế thừa */}
-                          <div className="init-col-card">
+                          {/* Column 2: Cấu trúc Master Timeline (9-4) */}
+                          <div className="init-col-card" style={{ height: "calc(100vh - 230px)", minHeight: "560px", display: "flex", flexDirection: "column" }}>
                             <div className="init-col-head">
-                              <span className="init-num-badge" style={{ background: "#2563eb", display: "grid", placeItems: "center" }}>
-                                <IconEye />
-                              </span>
-                              <span className="init-col-title">Xem trước cấu trúc kế thừa (9-4)</span>
-                              <div style={{ marginLeft: "auto", display: "flex", gap: 4 }}>
-                                <button
-                                  type="button"
-                                  onClick={() =>
-                                    setInitTreeExpanded({
-                                      root: true,
-                                      block4: true,
-                                      block9: true,
-                                      g4_0: true,
-                                      g4_1: true,
-                                      g4_2: true,
-                                      g4_3: true,
-                                      g4_4: true,
-                                      g9_1: true,
-                                      g9_2: true,
-                                      g9_3: true,
-                                      g9_4: true,
-                                      g9_5: true,
-                                      g9_6: true,
-                                      g9_7: true,
-                                      g9_8: true,
-                                      g9_9: true,
-                                    })
-                                  }
-                                  style={{ background: "#f1f5f9", border: "1px solid #cbd5e1", borderRadius: 3, padding: "2px 6px", fontSize: "10.5px", fontWeight: 600, color: "#334155", cursor: "pointer" }}
-                                >
-                                  Mở tất cả
-                                </button>
-                                <button
-                                  type="button"
-                                  onClick={() =>
-                                    setInitTreeExpanded({
-                                      root: true,
-                                      block4: false,
-                                      block9: false,
-                                      g4_0: false,
-                                      g4_1: false,
-                                      g4_2: false,
-                                      g4_3: false,
-                                      g4_4: false,
-                                      g9_1: false,
-                                      g9_2: false,
-                                      g9_3: false,
-                                      g9_4: false,
-                                      g9_5: false,
-                                      g9_6: false,
-                                      g9_7: false,
-                                      g9_8: false,
-                                      g9_9: false,
-                                    })
-                                  }
-                                  style={{ background: "#f1f5f9", border: "1px solid #cbd5e1", borderRadius: 3, padding: "2px 6px", fontSize: "10.5px", fontWeight: 600, color: "#334155", cursor: "pointer" }}
-                                >
-                                  Thu gọn
-                                </button>
-                              </div>
+                              <span className="init-num-badge" style={{ background: "#2563eb" }}>2</span>
+                              <span className="init-col-title">Cấu trúc Master Timeline (9-4)</span>
                             </div>
 
-                            <div className="wbs-tree-flat">
-                              <div>
-                                <div
-                                  className="wbs-tree-node root"
-                                  onClick={() =>
-                                    setInitTreeExpanded((prev) => ({
-                                      ...prev,
-                                      root: !prev.root,
-                                    }))
-                                  }
-                                >
-                                  <span className="wbs-tree-chevron">{initTreeExpanded.root ? "▼" : "▶"}</span>
-                                  <IconFolderFlat />
-                                  <span>{targetProject?.name} ({sourceVersion} · Mô hình 9-4)</span>
-                                </div>
+                            <div style={{ fontSize: "11px", color: "#64748b", marginBottom: 8, lineHeight: "1.4" }}>
+                              Nhấn vào từng ban/phòng bên dưới để xem phân rã WBS kế thừa ở bảng bên phải:
+                            </div>
 
-                                {initTreeExpanded.root && (
-                                  <div style={{ paddingLeft: 14, display: "flex", flexDirection: "column", gap: 3, marginTop: 4 }}>
-                                    {/* KHỐI 9 */}
-                                    <div>
-                                      <div
-                                        className="wbs-tree-node block block-9"
-                                        onClick={() => setInitTreeExpanded((prev) => ({ ...prev, block9: !prev.block9 }))}
-                                      >
-                                        <span className="wbs-tree-chevron">{initTreeExpanded.block9 ? "▼" : "▶"}</span>
-                                        <IconFolderFlat />
-                                        <span>KHỐI 9: BAN / PHÒNG BAN GIÁN TIẾP (783 task)</span>
+                            <div className="init-wbs-scroll-container" style={{ display: "flex", flexDirection: "column", gap: 5, flex: 1, minHeight: 0, overflowY: "auto", paddingRight: 4 }}>
+                              {[
+                                { code: "9.1", short: "HRC", name: "Ban Nhân sự", desc: "Quản lý nguồn nhân lực, tuyển dụng, đào tạo & HRBP", type: "khoi9" },
+                                { code: "9.2", short: "FAC", name: "Ban Tài chính Kế toán", desc: "FS, CF, P/L, quản trị vốn, dòng tiền Capex/Opex", type: "khoi9" },
+                                { code: "9.3", short: "SAC", name: "Ban Kinh doanh", desc: "Kế hoạch sản phẩm, bán hàng B2C, khai thác thương mại", type: "khoi9" },
+                                { code: "9.4", short: "MAC", name: "Ban Marketing", desc: "Chiến lược MKT, sự kiện mở bán, nội dung & digital", type: "khoi9" },
+                                { code: "9.5", short: "PTC", name: "Ban Cung ứng Đấu thầu", desc: "Cung ứng VLXD/MEP, tổ chức đấu thầu & thanh quyết toán", type: "khoi9" },
+                                { code: "9.6", short: "QSB", name: "Phòng Khối lượng và Ngân sách", desc: "Suất đầu tư, ngân sách xây dựng, kiểm soát khối lượng BoQ", type: "khoi9" },
+                                { code: "9.7", short: "SED", name: "Phòng An ninh", desc: "Phương án an ninh nội bộ, bảo vệ dự án, giám sát an toàn", type: "khoi9" },
+                                { code: "9.8", short: "IDD", name: "Phòng Thiết kế Nội bộ", desc: "Thiết kế quy hoạch, ý tưởng kiến trúc, nội thất & cảnh quan", type: "khoi9" },
+                                { code: "9.9", short: "CSC", name: "Trung tâm Bồi thường GPMB", desc: "Kế hoạch đền bù, thỏa thuận bồi thường & giải phóng MB", type: "khoi9" },
+                                { code: "4.0", short: "PMD", name: "Phòng Điều hành Dự án", desc: "Chủ trì lập, tích hợp & điều phối tổng tiến độ MTL", type: "khoi4" },
+                                { code: "4.1", short: "PLP", name: "Phòng Thủ tục Pháp lý Dự án", desc: "Chủ trương ĐT, quy hoạch 1/500, đất đai, GPXD, nghiệm thu", type: "khoi4" },
+                                { code: "4.2", short: "DMD", name: "Phòng Quản lý Thiết kế", desc: "Nhiệm vụ thiết kế, TKCS, TKBVTC, thẩm duyệt PCCC", type: "khoi4" },
+                                { code: "4.3", short: "PCD", name: "Phòng Quản lý Xây dựng, An toàn & MT", desc: "Mặt bằng, cọc móng, kết cấu ngầm/thân, MEP, hạ tầng", type: "khoi4" },
+                                { code: "4.4", short: "OM", name: "Phòng Quản lý Vận hành Dự án", desc: "Phí QLVH, pre-opening vận hành, nghiệm thu bàn giao", type: "khoi4" },
+                              ].map((g) => {
+                                const isSelected = initUpdateSelectedDeptCode === g.code;
+                                const isKhoi9 = g.type === "khoi9";
+                                const deptTaskCount = targetScheduledTasks.filter((t) => t.groupCode === g.code).length;
+                                return (
+                                  <div
+                                    key={g.code}
+                                    onClick={() => setInitUpdateSelectedDeptCode(g.code)}
+                                    style={{
+                                      background: isSelected
+                                        ? (isKhoi9 ? "#eff6ff" : "#f0fdf4")
+                                        : (isKhoi9 ? "#f8fafc" : "#f0fdf4"),
+                                      border: isSelected
+                                        ? (isKhoi9 ? "2px solid #2563eb" : "2px solid #16a34a")
+                                        : (isKhoi9 ? "1px solid #e2e8f0" : "1px solid #bbf7d0"),
+                                      borderRadius: 6,
+                                      padding: "6px 8px",
+                                      display: "flex",
+                                      alignItems: "center",
+                                      justifyContent: "space-between",
+                                      gap: 8,
+                                      cursor: "pointer",
+                                      transition: "all 0.12s ease",
+                                    }}
+                                    title={`Bấm để xem công việc kế thừa của ${g.short} – ${g.name}`}
+                                  >
+                                    <div style={{ display: "flex", flexDirection: "column", gap: 1, minWidth: 0 }}>
+                                      <div style={{
+                                        fontSize: "12px",
+                                        fontWeight: 700,
+                                        color: isSelected
+                                          ? (isKhoi9 ? "#1d4ed8" : "#166534")
+                                          : "#1e293b",
+                                        display: "flex",
+                                        alignItems: "center",
+                                        gap: 5,
+                                      }}>
+                                        <b style={{ color: isKhoi9 ? "#2563eb" : "#16a34a" }}>{g.code}</b>
+                                        <span>{g.short}</span>
+                                        <span style={{ fontWeight: 500, color: "#64748b" }}>– {g.name}</span>
                                       </div>
-
-                                      {initTreeExpanded.block9 && (
-                                        <div style={{ paddingLeft: 14, display: "flex", flexDirection: "column", gap: 2 }}>
-                                          {/* 9.1 HRC */}
-                                          <div>
-                                            <div
-                                              className="wbs-tree-node group"
-                                              onClick={() => setInitTreeExpanded((prev) => ({ ...prev, g9_1: !prev.g9_1 }))}
-                                            >
-                                              <span className="wbs-tree-chevron">{initTreeExpanded.g9_1 ? "▼" : "▶"}</span>
-                                              <IconFolderFlat />
-                                              <span>9.1 HRC – Ban Nhân sự</span>
-                                              <span className="wbs-tree-tag" style={{ background: "#f1f5f9", color: "#475569" }}>Kế thừa định biên</span>
-                                            </div>
-                                            {initTreeExpanded.g9_1 && (
-                                              <div>
-                                                <div className="wbs-tree-node task"><IconDocFlat /><span>9.1.1 Kế hoạch nhân sự & Tuyển dụng dự án [Kế thừa]</span></div>
-                                                <div className="wbs-tree-node task"><IconDocFlat /><span>9.1.2 Đào tạo tiền khai trương & Nhân sự ban QLDA</span></div>
-                                              </div>
-                                            )}
-                                          </div>
-
-                                          {/* 9.2 FAC */}
-                                          <div>
-                                            <div
-                                              className="wbs-tree-node group"
-                                              onClick={() => setInitTreeExpanded((prev) => ({ ...prev, g9_2: !prev.g9_2 }))}
-                                            >
-                                              <span className="wbs-tree-chevron">{initTreeExpanded.g9_2 ? "▼" : "▶"}</span>
-                                              <IconFolderFlat />
-                                              <span>9.2 FAC – Ban Tài chính Kế toán</span>
-                                              <span className="wbs-tree-tag" style={{ background: "#f1f5f9", color: "#475569" }}>Kế thừa dòng tiền</span>
-                                            </div>
-                                            {initTreeExpanded.g9_2 && (
-                                              <div>
-                                                <div className="wbs-tree-node task"><IconDocFlat /><span>9.2.1 Kế hoạch giải ngân & Dòng tiền dự án CF [Kế thừa]</span></div>
-                                                <div className="wbs-tree-node task"><IconDocFlat /><span>9.2.2 Kiểm soát hạn mức vốn vay & Capex/Opex</span></div>
-                                              </div>
-                                            )}
-                                          </div>
-
-                                          {/* 9.3 SAC */}
-                                          <div>
-                                            <div
-                                              className="wbs-tree-node group"
-                                              onClick={() => setInitTreeExpanded((prev) => ({ ...prev, g9_3: !prev.g9_3 }))}
-                                            >
-                                              <span className="wbs-tree-chevron">{initTreeExpanded.g9_3 ? "▼" : "▶"}</span>
-                                              <IconFolderFlat />
-                                              <span>9.3 SAC – Ban Kinh doanh</span>
-                                              <span className="wbs-tree-tag" style={{ background: "#f1f5f9", color: "#475569" }}>Kế thừa bán hàng</span>
-                                            </div>
-                                            {initTreeExpanded.g9_3 && (
-                                              <div>
-                                                <div className="wbs-tree-node task"><IconDocFlat /><span>9.3.1 Kế hoạch mở bán đợt tiếp theo & Giỏ hàng</span></div>
-                                                <div className="wbs-tree-node task"><IconDocFlat /><span>9.3.2 Tiến độ ký kết HĐMB & Khai thác thương mại</span></div>
-                                              </div>
-                                            )}
-                                          </div>
-
-                                          {/* 9.4 MAC */}
-                                          <div>
-                                            <div
-                                              className="wbs-tree-node group"
-                                              onClick={() => setInitTreeExpanded((prev) => ({ ...prev, g9_4: !prev.g9_4 }))}
-                                            >
-                                              <span className="wbs-tree-chevron">{initTreeExpanded.g9_4 ? "▼" : "▶"}</span>
-                                              <IconFolderFlat />
-                                              <span>9.4 MAC – Ban Marketing</span>
-                                              <span className="wbs-tree-tag" style={{ background: "#f1f5f9", color: "#475569" }}>Kế thừa chiến dịch</span>
-                                            </div>
-                                            {initTreeExpanded.g9_4 && (
-                                              <div>
-                                                <div className="wbs-tree-node task"><IconDocFlat /><span>9.4.1 Chiến dịch truyền thông tổng thể & Ngân sách MKT</span></div>
-                                                <div className="wbs-tree-node task"><IconDocFlat /><span>9.4.2 Sự kiện bán hàng & Triển lãm sa bàn thực tế</span></div>
-                                              </div>
-                                            )}
-                                          </div>
-
-                                          {/* 9.5 PTC */}
-                                          <div>
-                                            <div
-                                              className="wbs-tree-node group"
-                                              onClick={() => setInitTreeExpanded((prev) => ({ ...prev, g9_5: !prev.g9_5 }))}
-                                            >
-                                              <span className="wbs-tree-chevron">{initTreeExpanded.g9_5 ? "▼" : "▶"}</span>
-                                              <IconFolderFlat />
-                                              <span>9.5 PTC – Ban Cung ứng Đấu thầu</span>
-                                              <span className="wbs-tree-tag" style={{ background: "#f1f5f9", color: "#475569" }}>Kế thừa gói thầu</span>
-                                            </div>
-                                            {initTreeExpanded.g9_5 && (
-                                              <div>
-                                                <div className="wbs-tree-node task"><IconDocFlat /><span>9.5.1 Kế hoạch thầu cơ điện MEP, Thang máy, Hoàn thiện</span></div>
-                                                <div className="wbs-tree-node task"><IconDocFlat /><span>9.5.2 Cung ứng vật tư thiết bị & Hợp đồng thi công</span></div>
-                                              </div>
-                                            )}
-                                          </div>
-
-                                          {/* 9.6 QSB */}
-                                          <div>
-                                            <div
-                                              className="wbs-tree-node group"
-                                              onClick={() => setInitTreeExpanded((prev) => ({ ...prev, g9_6: !prev.g9_6 }))}
-                                            >
-                                              <span className="wbs-tree-chevron">{initTreeExpanded.g9_6 ? "▼" : "▶"}</span>
-                                              <IconFolderFlat />
-                                              <span>9.6 QSB – Phòng Khối lượng và Ngân sách</span>
-                                              <span className="wbs-tree-tag" style={{ background: "#f1f5f9", color: "#475569" }}>Kế thừa BoQ</span>
-                                            </div>
-                                            {initTreeExpanded.g9_6 && (
-                                              <div>
-                                                <div className="wbs-tree-node task"><IconDocFlat /><span>9.6.1 Rà soát dự toán chi phí xây dựng & Khối lượng</span></div>
-                                                <div className="wbs-tree-node task"><IconDocFlat /><span>9.6.2 Kiểm soát biến động giá & Phát sinh công trường</span></div>
-                                              </div>
-                                            )}
-                                          </div>
-
-                                          {/* 9.7 SED */}
-                                          <div>
-                                            <div
-                                              className="wbs-tree-node group"
-                                              onClick={() => setInitTreeExpanded((prev) => ({ ...prev, g9_7: !prev.g9_7 }))}
-                                            >
-                                              <span className="wbs-tree-chevron">{initTreeExpanded.g9_7 ? "▼" : "▶"}</span>
-                                              <IconFolderFlat />
-                                              <span>9.7 SED – Phòng An ninh</span>
-                                              <span className="wbs-tree-tag" style={{ background: "#f1f5f9", color: "#475569" }}>Kế thừa an ninh</span>
-                                            </div>
-                                            {initTreeExpanded.g9_7 && (
-                                              <div>
-                                                <div className="wbs-tree-node task"><IconDocFlat /><span>9.7.1 Phương án an ninh ranh đất & Giám sát 24/7</span></div>
-                                                <div className="wbs-tree-node task"><IconDocFlat /><span>9.7.2 Phối hợp chính quyền địa phương & PCCC cơ sở</span></div>
-                                              </div>
-                                            )}
-                                          </div>
-
-                                          {/* 9.8 IDD */}
-                                          <div>
-                                            <div
-                                              className="wbs-tree-node group"
-                                              onClick={() => setInitTreeExpanded((prev) => ({ ...prev, g9_8: !prev.g9_8 }))}
-                                            >
-                                              <span className="wbs-tree-chevron">{initTreeExpanded.g9_8 ? "▼" : "▶"}</span>
-                                              <IconFolderFlat />
-                                              <span>9.8 IDD – Phòng Thiết kế Nội bộ</span>
-                                              <span className="wbs-tree-tag" style={{ background: "#f1f5f9", color: "#475569" }}>Kế thừa hồ sơ</span>
-                                            </div>
-                                            {initTreeExpanded.g9_8 && (
-                                              <div>
-                                                <div className="wbs-tree-node task"><IconDocFlat /><span>9.8.1 Chuẩn hóa concept & Thiết kế nhà mẫu thực tế</span></div>
-                                                <div className="wbs-tree-node task"><IconDocFlat /><span>9.8.2 Thiết kế chi tiết cảnh quan & Chiếu sáng đô thị</span></div>
-                                              </div>
-                                            )}
-                                          </div>
-
-                                          {/* 9.9 CSC */}
-                                          <div>
-                                            <div
-                                              className="wbs-tree-node group"
-                                              onClick={() => setInitTreeExpanded((prev) => ({ ...prev, g9_9: !prev.g9_9 }))}
-                                            >
-                                              <span className="wbs-tree-chevron">{initTreeExpanded.g9_9 ? "▼" : "▶"}</span>
-                                              <IconFolderFlat />
-                                              <span>9.9 CSC – Trung tâm Bồi thường GPMB</span>
-                                              <span className="wbs-tree-tag" style={{ background: "#f1f5f9", color: "#475569" }}>Kế thừa tiến độ MB</span>
-                                            </div>
-                                            {initTreeExpanded.g9_9 && (
-                                              <div>
-                                                <div className="wbs-tree-node task"><IconDocFlat /><span>9.9.1 Tiến độ chi trả bồi thường & Nhận bàn giao đất</span></div>
-                                                <div className="wbs-tree-node task"><IconDocFlat /><span>9.9.2 Bàn giao mốc giới thi công đợt bổ sung</span></div>
-                                              </div>
-                                            )}
-                                          </div>
-                                        </div>
-                                      )}
-                                    </div>
-
-                                    {/* KHỐI 4 */}
-                                    <div>
-                                      <div
-                                        className="wbs-tree-node block block-4"
-                                        onClick={() => setInitTreeExpanded((prev) => ({ ...prev, block4: !prev.block4 }))}
-                                      >
-                                        <span className="wbs-tree-chevron">{initTreeExpanded.block4 ? "▼" : "▶"}</span>
-                                        <IconFolderFlat />
-                                        <span>KHỐI 4: PHÒNG BAN TRỰC TIẾP & CHỦ TRÌ (317 task)</span>
+                                      <div style={{ fontSize: "10.5px", color: "#64748b", textOverflow: "ellipsis", overflow: "hidden", whiteSpace: "nowrap" }}>
+                                        {g.desc}
                                       </div>
-
-                                      {initTreeExpanded.block4 && (
-                                        <div style={{ paddingLeft: 14, display: "flex", flexDirection: "column", gap: 2 }}>
-                                          {/* 4.0 PMD */}
-                                          <div>
-                                            <div
-                                              className="wbs-tree-node group"
-                                              onClick={() => setInitTreeExpanded((prev) => ({ ...prev, g4_0: !prev.g4_0 }))}
-                                            >
-                                              <span className="wbs-tree-chevron">{initTreeExpanded.g4_0 ? "▼" : "▶"}</span>
-                                              <IconFolderFlat />
-                                              <span>4.0 PMD – Phòng Điều hành Dự án</span>
-                                              <span className="wbs-tree-tag" style={{ background: "#dcfce7", color: "#166534" }}>Chủ trì điều phối</span>
-                                            </div>
-                                            {initTreeExpanded.g4_0 && (
-                                              <div>
-                                                <div className="wbs-tree-node task"><IconDocFlat /><span>4.0.1 Lập & cập nhật tổng tiến độ MTL [Kế thừa mốc]</span></div>
-                                                <div className="wbs-tree-node task"><IconDocFlat /><span>4.0.2 Lập & cập nhật FS thực thi [Đã phê duyệt]</span></div>
-                                                <div className="wbs-tree-node task"><IconDocFlat /><span>4.0.3 Lập nhiệm vụ thiết kế [Đã duyệt]</span></div>
-                                              </div>
-                                            )}
-                                          </div>
-
-                                          {/* 4.1 PLP */}
-                                          <div>
-                                            <div
-                                              className="wbs-tree-node group"
-                                              onClick={() => setInitTreeExpanded((prev) => ({ ...prev, g4_1: !prev.g4_1 }))}
-                                            >
-                                              <span className="wbs-tree-chevron">{initTreeExpanded.g4_1 ? "▼" : "▶"}</span>
-                                              <IconFolderFlat />
-                                              <span>4.1 PLP – Phòng Thủ tục Pháp lý Dự án</span>
-                                              <span className="wbs-tree-tag" style={{ background: "#dbeafe", color: "#1e40af" }}>Kế thừa mốc</span>
-                                            </div>
-                                            {initTreeExpanded.g4_1 && (
-                                              <div>
-                                                <div className="wbs-tree-node task"><IconDocFlat /><span>4.1.1 Pháp lý đầu tư & Đất đai [Đã hoàn thành]</span></div>
-                                                <div className="wbs-tree-node task"><IconDocFlat /><span>4.1.2 Quy hoạch 1/500 & Giấy phép XD [Kế thừa mốc]</span></div>
-                                                <div className="wbs-tree-node task"><IconDocFlat /><span>4.1.3 Thẩm định pháp lý chuyên ngành [Đang cập nhật]</span></div>
-                                              </div>
-                                            )}
-                                          </div>
-
-                                          {/* 4.2 DMD */}
-                                          <div>
-                                            <div
-                                              className="wbs-tree-node group"
-                                              onClick={() => setInitTreeExpanded((prev) => ({ ...prev, g4_2: !prev.g4_2 }))}
-                                            >
-                                              <span className="wbs-tree-chevron">{initTreeExpanded.g4_2 ? "▼" : "▶"}</span>
-                                              <IconFolderFlat />
-                                              <span>4.2 DMD – Phòng Quản lý Thiết kế</span>
-                                              <span className="wbs-tree-tag" style={{ background: "#dbeafe", color: "#1e40af" }}>Kế thừa mốc</span>
-                                            </div>
-                                            {initTreeExpanded.g4_2 && (
-                                              <div>
-                                                <div className="wbs-tree-node task"><IconDocFlat /><span>4.2.1 Nhiệm vụ thiết kế & Thiết kế cơ sở [Đã duyệt]</span></div>
-                                                <div className="wbs-tree-node task"><IconDocFlat /><span>4.2.2 TKBVTC & Thẩm duyệt PCCC [Kế thừa mốc]</span></div>
-                                                <div className="wbs-tree-node task"><IconDocFlat /><span>4.2.3 Hồ sơ mời thầu thiết kế kỹ thuật [Đang cập nhật]</span></div>
-                                              </div>
-                                            )}
-                                          </div>
-
-                                          {/* 4.3 PCD */}
-                                          <div>
-                                            <div
-                                              className="wbs-tree-node group"
-                                              onClick={() => setInitTreeExpanded((prev) => ({ ...prev, g4_3: !prev.g4_3 }))}
-                                            >
-                                              <span className="wbs-tree-chevron">{initTreeExpanded.g4_3 ? "▼" : "▶"}</span>
-                                              <IconFolderFlat />
-                                              <span>4.3 PCD – Phòng Quản lý Xây dựng, AT & MT</span>
-                                              <span className="wbs-tree-tag" style={{ background: "#fef3c7", color: "#92400e" }}>Đang thi công</span>
-                                            </div>
-                                            {initTreeExpanded.g4_3 && (
-                                              <div>
-                                                <div className="wbs-tree-node task"><IconDocFlat /><span>4.3.1 Công tác chuẩn bị & Khởi công [Hoàn thành]</span></div>
-                                                <div className="wbs-tree-node task"><IconDocFlat /><span>4.3.2 Thi công cọc móng & San lấp [Đã hoàn thành]</span></div>
-                                                <div className="wbs-tree-node task"><IconDocFlat /><span>4.3.3 Thi công kết cấu hầm & thân [Đang thi công]</span></div>
-                                                <div className="wbs-tree-node task"><IconDocFlat /><span>4.3.4 Hoàn thiện, MEP & Cảnh quan [Kế thừa mốc]</span></div>
-                                              </div>
-                                            )}
-                                          </div>
-
-                                          {/* 4.4 OM */}
-                                          <div>
-                                            <div
-                                              className="wbs-tree-node group"
-                                              onClick={() => setInitTreeExpanded((prev) => ({ ...prev, g4_4: !prev.g4_4 }))}
-                                            >
-                                              <span className="wbs-tree-chevron">{initTreeExpanded.g4_4 ? "▼" : "▶"}</span>
-                                              <IconFolderFlat />
-                                              <span>4.4 OM – Phòng Quản lý Vận hành Dự án</span>
-                                              <span className="wbs-tree-tag" style={{ background: "#dbeafe", color: "#1e40af" }}>Kế thừa mốc</span>
-                                            </div>
-                                            {initTreeExpanded.g4_4 && (
-                                              <div>
-                                                <div className="wbs-tree-node task"><IconDocFlat /><span>4.4.1 Tiêu chuẩn QLVH & Tính giá dịch vụ [Kế thừa mốc]</span></div>
-                                                <div className="wbs-tree-node task"><IconDocFlat /><span>4.4.2 Pre-opening & Nghiệm thu bàn giao [Kế thừa mốc]</span></div>
-                                              </div>
-                                            )}
-                                          </div>
-                                        </div>
-                                      )}
                                     </div>
-
+                                    <span style={{
+                                      fontSize: "10.5px",
+                                      fontWeight: 700,
+                                      color: isSelected
+                                        ? "#ffffff"
+                                        : (isKhoi9 ? "#2563eb" : "#166534"),
+                                      background: isSelected
+                                        ? (isKhoi9 ? "#2563eb" : "#16a34a")
+                                        : (isKhoi9 ? "#eff6ff" : "#ffffff"),
+                                      border: `1px solid ${isKhoi9 ? "#bfdbfe" : "#86efac"}`,
+                                      padding: "2px 6px",
+                                      borderRadius: 4,
+                                      flex: "none",
+                                    }}>
+                                      {deptTaskCount} task
+                                    </span>
                                   </div>
-                                )}
+                                );
+                              })}
+                            </div>
+                          </div>
+
+                          {/* Column 3: Chi tiết công việc kế thừa */}
+                          <div className="init-col-card" style={{ minWidth: 0, height: "calc(100vh - 230px)", minHeight: "560px", display: "flex", flexDirection: "column" }}>
+                            <div className="init-col-head" style={{ flexWrap: "wrap", gap: 8, alignItems: "center" }}>
+                              <span className="init-num-badge" style={{ background: "#2563eb" }}>3</span>
+                              <span className="init-col-title">Chi tiết công việc</span>
+                              {(() => {
+                                const allDepts = [
+                                  { code: "9.1", short: "HRC", name: "Ban Nhân sự" },
+                                  { code: "9.2", short: "FAC", name: "Ban Tài chính Kế toán" },
+                                  { code: "9.3", short: "SAC", name: "Ban Kinh doanh" },
+                                  { code: "9.4", short: "MAC", name: "Ban Marketing" },
+                                  { code: "9.5", short: "PTC", name: "Ban Cung ứng Đấu thầu" },
+                                  { code: "9.6", short: "QSB", name: "Phòng Khối lượng và Ngân sách" },
+                                  { code: "9.7", short: "SED", name: "Phòng An ninh" },
+                                  { code: "9.8", short: "IDD", name: "Phòng Thiết kế Nội bộ" },
+                                  { code: "9.9", short: "CSC", name: "Trung tâm Bồi thường GPMB" },
+                                  { code: "4.0", short: "PMD", name: "Phòng Điều hành Dự án" },
+                                  { code: "4.1", short: "PLP", name: "Phòng Thủ tục Pháp lý Dự án" },
+                                  { code: "4.2", short: "DMD", name: "Phòng Quản lý Thiết kế" },
+                                  { code: "4.3", short: "PCD", name: "Phòng Quản lý Xây dựng, An toàn & MT" },
+                                  { code: "4.4", short: "OM", name: "Phòng Quản lý Vận hành Dự án" },
+                                ];
+                                const activeDept = allDepts.find((d) => d.code === initUpdateSelectedDeptCode);
+                                if (activeDept) {
+                                  const isKhoi9 = activeDept.code.startsWith("9.");
+                                  return (
+                                    <span style={{
+                                      fontSize: "11px",
+                                      fontWeight: 700,
+                                      color: isKhoi9 ? "#1d4ed8" : "#166534",
+                                      background: isKhoi9 ? "#dbeafe" : "#dcfce7",
+                                      border: `1px solid ${isKhoi9 ? "#bfdbfe" : "#bbf7d0"}`,
+                                      padding: "2px 8px",
+                                      borderRadius: 4,
+                                    }}>
+                                      {activeDept.code} · {activeDept.name} ({initUpdateWbsTasks.length} task)
+                                    </span>
+                                  );
+                                }
+                                return (
+                                  <span style={{ fontSize: "11px", fontWeight: 700, color: "#475569", background: "#f1f5f9", padding: "2px 8px", borderRadius: 4 }}>
+                                    Toàn bộ 14 ban/phòng ({targetScheduledTasks.length} task)
+                                  </span>
+                                );
+                              })()}
+
+                              <label
+                                style={{
+                                  display: "inline-flex",
+                                  alignItems: "center",
+                                  gap: "6px",
+                                  fontSize: "11px",
+                                  fontWeight: 700,
+                                  color: "#475569",
+                                  background: "#f8fafc",
+                                  border: "1px solid #cbd5e1",
+                                  borderRadius: "5px",
+                                  padding: "2px 6px 2px 8px",
+                                  cursor: "pointer",
+                                }}
+                              >
+                                <span style={{ whiteSpace: "nowrap" }}>Cấp công việc</span>
+                                <select
+                                  value={initUpdateWbsLevel}
+                                  onChange={(e) => applyInitUpdateWbsLevel(e.target.value === "all" ? "all" : Number(e.target.value))}
+                                  style={{
+                                    height: "24px",
+                                    padding: "0 6px",
+                                    fontSize: "11px",
+                                    fontWeight: 600,
+                                    color: "#0f172a",
+                                    background: "#ffffff",
+                                    border: "1px solid #cbd5e1",
+                                    borderRadius: "4px",
+                                    outline: "none",
+                                    cursor: "pointer",
+                                  }}
+                                  title="Hiển thị theo cấp công việc"
+                                >
+                                  <option value="all">Tất cả cấp</option>
+                                  <option value="1">Cấp 1</option>
+                                  <option value="2">Cấp 2</option>
+                                  <option value="3">Cấp 3</option>
+                                  <option value="4">Cấp 4</option>
+                                  <option value="5">Cấp 5</option>
+                                  {initUpdateWbsLevel === "custom" && <option value="custom">Tùy biến</option>}
+                                </select>
+                              </label>
+                              {initUpdateSelectedDeptCode !== "all" ? (
+                                <button
+                                  type="button"
+                                  className="init-tree-ctrl-btn"
+                                  onClick={() => setInitUpdateSelectedDeptCode("all")}
+                                  style={{ background: "#e0e7ff", color: "#3730a3", borderColor: "#c7d2fe" }}
+                                  title="Hiển thị toàn bộ công việc kế thừa của tất cả 14 ban/phòng"
+                                >
+                                  Tất cả
+                                </button>
+                              ) : (
+                                <button
+                                  type="button"
+                                  className="init-tree-ctrl-btn"
+                                  onClick={() => setInitUpdateSelectedDeptCode("9.1")}
+                                  style={{ background: "#dbeafe", color: "#1e40af", borderColor: "#bfdbfe" }}
+                                  title="Quay lại lọc theo ban/phòng"
+                                >
+                                  Theo ban/phòng
+                                </button>
+                              )}
+                            </div>
+
+                            {/* Search bar inside Column 3 */}
+                            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+                              <input
+                                type="text"
+                                className="init-field-input"
+                                style={{ height: "30px", fontSize: "11.5px", padding: "4px 10px" }}
+                                placeholder="Tìm kiếm công việc theo mã WBS hoặc tên..."
+                                value={initUpdateWbsSearch}
+                                onChange={(e) => setInitUpdateWbsSearch(e.target.value)}
+                              />
+                              <span style={{ fontSize: "11px", color: "#64748b", whiteSpace: "nowrap", flex: "none" }}>
+                                Hiển thị <strong>{visibleInitUpdateWbsTasks.length}</strong> công việc
+                              </span>
+                            </div>
+
+                            {/* The WBS Decomposed Table */}
+                            <div
+                              className="init-wbs-scroll-container"
+                              style={{
+                                flex: 1,
+                                minHeight: 0,
+                                overflowY: "auto",
+                                overflowX: "auto",
+                                border: "1px solid #e2e8f0",
+                                borderRadius: 8,
+                                background: "#ffffff",
+                              }}
+                            >
+                              <div className="init-wbs-table" style={{ minWidth: 580 }}>
+                                <div className="init-wbs-head">
+                                  <span>WBS</span>
+                                  <span>HẠNG MỤC CÔNG VIỆC</span>
+                                  <span>LOẠI CÔNG VIỆC</span>
+                                  <span>TRẠNG THÁI</span>
+                                </div>
+                                <div className="init-wbs-body">
+                                  {visibleInitUpdateWbsTasks.map((task) => {
+                                    const hasChildren = catalogParentCodes.has(task.code);
+                                    const isCollapsed = initUpdateWbsCollapsed.has(task.code);
+                                    return (
+                                      <div
+                                        key={task.code}
+                                        className="init-wbs-row auto-enabled"
+                                      >
+                                        {/* WBS Cell */}
+                                        <div
+                                          className="init-wbs-cell"
+                                          style={{
+                                            paddingLeft: `${Math.max(0, (task.level - 1) * 14)}px`,
+                                          }}
+                                        >
+                                          {hasChildren ? (
+                                            <button
+                                              type="button"
+                                              className="catalog-tree-toggle"
+                                              aria-expanded={!isCollapsed}
+                                              aria-label={isCollapsed ? `Mở rộng ${task.code}` : `Thu gọn ${task.code}`}
+                                              title={isCollapsed ? "Mở rộng" : "Thu gọn"}
+                                              onClick={() => {
+                                                setInitUpdateWbsLevel("custom");
+                                                setInitUpdateWbsCollapsed((current) => {
+                                                  const next = new Set(current);
+                                                  if (isCollapsed) next.delete(task.code);
+                                                  else next.add(task.code);
+                                                  return next;
+                                                });
+                                              }}
+                                            >
+                                              {isCollapsed ? "+" : "−"}
+                                            </button>
+                                          ) : (
+                                            <i className="catalog-tree-spacer" aria-hidden="true" />
+                                          )}
+                                          <b className="catalog-wbs-code" title={task.code}>
+                                            {task.code}
+                                          </b>
+                                        </div>
+
+                                        {/* Hạng mục công việc Cell */}
+                                        <div
+                                          className="init-name-cell"
+                                          style={{
+                                            fontWeight: task.level === 1 ? 800 : task.level === 2 ? 700 : task.level === 3 ? 700 : 500,
+                                            fontSize: task.level === 1 ? "13px" : task.level === 2 ? "12.5px" : "12px",
+                                            textTransform: task.level <= 2 ? "uppercase" : "none",
+                                            color: task.level === 1 ? "#0f172a" : task.level === 2 ? "#1e293b" : "#334155",
+                                          }}
+                                          title={task.name}
+                                        >
+                                          {task.name}
+                                        </div>
+
+                                        {/* Loại công việc Cell */}
+                                        <div>
+                                          <span style={{ fontSize: "11px", color: "#475569", fontWeight: 600 }}>
+                                            {task.workGroup || "Phối hợp"}
+                                          </span>
+                                        </div>
+
+                                        {/* Trạng thái Cell */}
+                                        <div>
+                                          <span
+                                            className="status-badge"
+                                            style={{
+                                              background: "#eff6ff",
+                                              color: "#1d4ed8",
+                                              border: "1px solid #bfdbfe",
+                                              fontSize: "10.5px",
+                                              padding: "2px 6px",
+                                            }}
+                                          >
+                                            Kế thừa
+                                          </span>
+                                        </div>
+                                      </div>
+                                    );
+                                  })}
+                                  {!visibleInitUpdateWbsTasks.length && (
+                                    <div style={{ padding: "30px", textAlign: "center", color: "#64748b", fontSize: "12px" }}>
+                                      Không tìm thấy công việc nào phù hợp với bộ lọc hoặc từ khóa tìm kiếm.
+                                    </div>
+                                  )}
+                                </div>
                               </div>
                             </div>
                           </div>
