@@ -987,6 +987,15 @@ function IconDocFlat() {
   );
 }
 
+function IconSettings() {
+  return (
+    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="3" />
+      <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
+    </svg>
+  );
+}
+
 
 function ExecutiveArcGauge({ score = 88.0, max = 100, label = "ĐẠT CHUẨN" }: { score?: number; max?: number; label?: string }) {
   const percent = Math.min(100, Math.max(0, (score / max) * 100));
@@ -1361,6 +1370,7 @@ export default function Home() {
   const [designTaskOpen, setDesignTaskOpen] = useState(false);
   const [fsVer2Open, setFsVer2Open] = useState(false);
   const [trackingOpen, setTrackingOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(true);
   const [overviewSource, setOverviewSource] = useState<"approved" | "all">("approved");
   const [overviewRegion, setOverviewRegion] = useState("all");
   const [overviewProject, setOverviewProject] = useState("all");
@@ -6175,10 +6185,6 @@ export default function Home() {
               <IconChevronDown />
             </button>
             <nav className={`sidebar-nav sidebar-collapsible ${lapMtlSectionOpen ? "" : "collapsed"}`} aria-label="Điều hướng Lập MTL" aria-hidden={!lapMtlSectionOpen}>
-              <button className={view === "catalog" ? "active" : ""} onClick={() => setView("catalog")} tabIndex={lapMtlSectionOpen ? 0 : -1}>
-                <IconList />
-                <span>Cấu trúc Master Timeline</span>
-              </button>
               <button className={view === "init_template" ? "active" : ""} onClick={() => setView("init_template")} tabIndex={lapMtlSectionOpen ? 0 : -1}>
                 <IconSparkles />
                 <span>Khởi tạo tiến độ</span>
@@ -6201,89 +6207,35 @@ export default function Home() {
           </>;
         })()}
 
-        {/* Module 2: LẬP NHIỆM VỤ THIẾT KẾ */}
-        {(() => {
-          const isSectionOpen = designTaskOpen;
-          return <>
-            <button
-              type="button"
-              className={`sidebar-section-toggle ${isSectionOpen ? "open" : ""}`}
-              onClick={() => {
-                if (sidebarCollapsed) {
-                  setView("design_task");
-                } else {
-                  setDesignTaskOpen((current) => !current);
-                  setView("design_task");
-                }
-              }}
-              aria-expanded={isSectionOpen}
-              title="Lập Nhiệm Vụ Thiết Kế"
-            >
-              <div className="section-toggle-left">
-                <IconDesignTask />
-                <span>Lập Nhiệm Vụ Thiết Kế</span>
-              </div>
-              <IconChevronDown />
-            </button>
-            <nav className={`sidebar-nav sidebar-collapsible ${isSectionOpen ? "" : "collapsed"}`} aria-label="Điều hướng Lập Nhiệm vụ thiết kế" aria-hidden={!isSectionOpen}>
-              <button className={view === "design_task" ? "active" : ""} onClick={() => setView("design_task")} tabIndex={isSectionOpen ? 0 : -1}>
-                <IconTimeline />
-                <span>Lập & Cập nhật NVTK</span>
-              </button>
-              <button className="" onClick={() => setView("design_task")} tabIndex={isSectionOpen ? 0 : -1}>
-                <IconCheck />
-                <span>PBCM góp ý NVTK</span>
-              </button>
-              <button className="" onClick={() => setView("design_task")} tabIndex={isSectionOpen ? 0 : -1}>
-                <IconFileCheck />
-                <span>Thẩm định & Phê duyệt</span>
-              </button>
-            </nav>
-          </>;
-        })()}
+        {/* Module 2: LẬP NHIỆM VỤ THIẾT KẾ — trực tiếp không xổ dropdown */}
+        <button
+          type="button"
+          className={`sidebar-section-toggle ${view === "design_task" ? "active" : ""}`}
+          onClick={() => setView("design_task")}
+          title="Lập Nhiệm Vụ Thiết Kế"
+          style={view === "design_task" ? { background: "#23b26d", color: "#ffffff", borderRadius: "8px", fontWeight: 700 } : undefined}
+        >
+          <div className="section-toggle-left">
+            <IconDesignTask />
+            <span>Lập Nhiệm Vụ Thiết Kế</span>
+          </div>
+        </button>
 
-        {/* Module 3: LẬP FS THỰC THI (FS-Ver2) */}
-        {(() => {
-          const isSectionOpen = fsVer2Open;
-          return <>
-            <button
-              type="button"
-              className={`sidebar-section-toggle ${isSectionOpen ? "open" : ""}`}
-              onClick={() => {
-                if (sidebarCollapsed) {
-                  setView("fs_ver2");
-                } else {
-                  setFsVer2Open((current) => !current);
-                  setView("fs_ver2");
-                }
-              }}
-              aria-expanded={isSectionOpen}
-              title="Lập FS Thực Thi (FS-Ver2)"
-            >
-              <div className="section-toggle-left">
-                <IconFS />
-                <span>Lập FS Thực Thi (FS-Ver2)</span>
-              </div>
-              <IconChevronDown />
-            </button>
-            <nav className={`sidebar-nav sidebar-collapsible ${isSectionOpen ? "" : "collapsed"}`} aria-label="Điều hướng Lập FS Thực thi" aria-hidden={!isSectionOpen}>
-              <button className={view === "fs_ver2" ? "active" : ""} onClick={() => setView("fs_ver2")} tabIndex={isSectionOpen ? 0 : -1}>
-                <IconTimeline />
-                <span>Lập & Phân tích FS</span>
-              </button>
-              <button className="" onClick={() => setView("fs_ver2")} tabIndex={isSectionOpen ? 0 : -1}>
-                <IconCheck />
-                <span>Đối chiếu số liệu các Ban</span>
-              </button>
-              <button className="" onClick={() => setView("fs_ver2")} tabIndex={isSectionOpen ? 0 : -1}>
-                <IconFileCheck />
-                <span>Phê duyệt FS-Ver2</span>
-              </button>
-            </nav>
-          </>;
-        })()}
+        {/* Module 3: LẬP FS THỰC THI (FS-Ver2) — trực tiếp không xổ dropdown */}
+        <button
+          type="button"
+          className={`sidebar-section-toggle ${view === "fs_ver2" ? "active" : ""}`}
+          onClick={() => setView("fs_ver2")}
+          title="Lập FS Thực Thi (FS-Ver2)"
+          style={view === "fs_ver2" ? { background: "#23b26d", color: "#ffffff", borderRadius: "8px", fontWeight: 700 } : undefined}
+        >
+          <div className="section-toggle-left">
+            <IconFS />
+            <span>Lập FS Thực Thi (FS-Ver2)</span>
+          </div>
+        </button>
 
-        {/* Module 4: THEO DÕI DỰ ÁN — ở vị trí cuối cùng */}
+        {/* Module 4: THEO DÕI DỰ ÁN */}
         {(() => {
           const isSectionOpen = trackingOpen;
           return <>
@@ -6315,6 +6267,39 @@ export default function Home() {
               <button className={view === "overview" && overviewSource === "all" ? "active" : ""} onClick={() => { setView("overview"); setOverviewSource("all"); }} tabIndex={isSectionOpen ? 0 : -1}>
                 <IconList />
                 <span>Theo dõi công việc & KPI</span>
+              </button>
+            </nav>
+          </>;
+        })()}
+
+        {/* Module 5: CÀI ĐẶT — ở dưới cùng */}
+        {(() => {
+          const isSectionOpen = settingsOpen;
+          return <>
+            <button
+              type="button"
+              className={`sidebar-section-toggle ${isSectionOpen ? "open" : ""}`}
+              onClick={() => {
+                if (sidebarCollapsed) {
+                  setView("catalog");
+                } else {
+                  setSettingsOpen((current) => !current);
+                  setView("catalog");
+                }
+              }}
+              aria-expanded={isSectionOpen}
+              title="Cài đặt"
+            >
+              <div className="section-toggle-left">
+                <IconSettings />
+                <span>Cài đặt</span>
+              </div>
+              <IconChevronDown />
+            </button>
+            <nav className={`sidebar-nav sidebar-collapsible ${isSectionOpen ? "" : "collapsed"}`} aria-label="Điều hướng Cài đặt" aria-hidden={!isSectionOpen}>
+              <button className={view === "catalog" ? "active" : ""} onClick={() => setView("catalog")} tabIndex={isSectionOpen ? 0 : -1}>
+                <IconList />
+                <span>Cấu trúc Master Timeline</span>
               </button>
             </nav>
           </>;
@@ -7273,7 +7258,21 @@ export default function Home() {
           <>
             <header className="page-top-header">
               <div className="page-top-title-group">
-                <h1>Cấu trúc Master Timeline</h1>
+                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                  <button
+                    type="button"
+                    className="topbar-toggle-sidebar-btn"
+                    onClick={() => setSidebarCollapsed((prev) => !prev)}
+                    title={sidebarCollapsed ? "Mở rộng thanh điều hướng (Ctrl+B)" : "Thu nhỏ thanh điều hướng (Ctrl+B)"}
+                    aria-label="Chuyển đổi thanh điều hướng"
+                  >
+                    <IconMenu />
+                  </button>
+                  <div>
+                    <div style={{ fontSize: "11px", fontWeight: 700, color: "#64748b", textTransform: "uppercase", letterSpacing: "0.5px" }}>Cài đặt</div>
+                    <h1 style={{ margin: 0 }}>Cấu trúc Master Timeline</h1>
+                  </div>
+                </div>
               </div>
             </header>
 
@@ -7879,243 +7878,179 @@ export default function Home() {
             </section>
           </>
         ) : view === "design_task" ? (
-          <>
+          <div style={{ display: "flex", flexDirection: "column", height: "100%", width: "100%", background: "#f8fafc" }}>
             <header className="page-top-header">
               <div className="page-top-title-group">
-                <h1>Nhiệm vụ thiết kế</h1>
-                <div className="top-stat-cards">
-                  <div className="top-stat-card">
-                    <span>TỔNG DỰ ÁN</span>
-                    <b>{projects.length}</b>
-                  </div>
-                  <div className="top-stat-card">
-                    <span>CHƯA LẬP</span>
-                    <b style={{ color: "#64748b" }}>{projects.filter((p) => p.designTaskStatus === "chua_lap").length}</b>
-                  </div>
-                  <div className="top-stat-card">
-                    <span>ĐANG LẬP</span>
-                    <b style={{ color: "#1a56a8" }}>{projects.filter((p) => p.designTaskStatus === "dang_lap").length}</b>
-                  </div>
-                  <div className="top-stat-card">
-                    <span>PBCM GÓP Ý</span>
-                    <b style={{ color: "#d97706" }}>{projects.filter((p) => p.designTaskStatus === "pbcm_gop_y").length}</b>
-                  </div>
-                  <div className="top-stat-card">
-                    <span>ĐÃ DUYỆT</span>
-                    <b style={{ color: "#167461" }}>{projects.filter((p) => p.designTaskStatus === "da_duyet").length}</b>
-                  </div>
+                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                  <button
+                    type="button"
+                    className="topbar-toggle-sidebar-btn"
+                    onClick={() => setSidebarCollapsed((prev) => !prev)}
+                    title={sidebarCollapsed ? "Mở rộng thanh điều hướng (Ctrl+B)" : "Thu nhỏ thanh điều hướng (Ctrl+B)"}
+                    aria-label="Chuyển đổi thanh điều hướng"
+                  >
+                    <IconMenu />
+                  </button>
+                  <h1 style={{ margin: 0 }}>Lập Nhiệm Vụ Thiết Kế</h1>
                 </div>
               </div>
               <div className="page-top-actions">
-                <label className="search-field" style={{ margin: 0, minWidth: "200px", maxWidth: "260px" }}>
-                  <span>Tìm dự án</span>
-                  <input value={designSearch} onChange={(event) => { setDesignSearch(event.target.value); setDesignPage(1); }} placeholder="Nhập tên, mã dự án..." />
-                </label>
                 <button type="button" className="secondary-button" onClick={() => setView("projects")}>← Quay lại MTL</button>
-                <button type="button" className="primary-button">+ Tạo NVTK</button>
               </div>
             </header>
-            <section className="project-index">
-
-              {/* Filters */}
-              <div className="table-filters" style={{ margin: "14px 24px 14px", border: "none" }}>
-                <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", alignItems: "center" }}>
-                  <label className="table-filters-select">
-                    <span>Vùng</span>
-                    <select value={designRegionFilter} onChange={(event) => { setDesignRegionFilter(event.target.value); setDesignPage(1); }}>
-                      <option value="all">Tất cả vùng</option>
-                      {[...new Set(projects.map((p) => p.region).filter(Boolean) as string[])].sort().map((r) => (
-                        <option key={r} value={r}>{r}</option>
-                      ))}
-                    </select>
-                  </label>
-                  <label className="table-filters-select">
-                    <span>Trạng thái NVTK</span>
-                    <select value={designStatusFilter} onChange={(event) => { setDesignStatusFilter(event.target.value); setDesignPage(1); }}>
-                      <option value="all">Tất cả trạng thái NVTK</option>
-                      <option value="chua_lap">Chưa lập NVTK</option>
-                      <option value="dang_lap">Đang lập NVTK</option>
-                      <option value="pbcm_gop_y">PBCM góp ý</option>
-                      <option value="da_duyet">Đã phê duyệt NVTK</option>
-                    </select>
-                  </label>
+            <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: "40px 20px" }}>
+              <div style={{
+                maxWidth: "480px",
+                width: "100%",
+                background: "#ffffff",
+                borderRadius: "16px",
+                border: "1px solid #e2e8f0",
+                boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01)",
+                padding: "48px 32px",
+                textAlign: "center",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center"
+              }}>
+                <div style={{
+                  width: "72px",
+                  height: "72px",
+                  borderRadius: "50%",
+                  background: "#eff6ff",
+                  border: "2px solid #bfdbfe",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: "32px",
+                  marginBottom: "20px"
+                }}>
+                  🚧
                 </div>
-                <span className="table-filters-count">{visibleDesignProjects.length} dự án</span>
+                <span style={{
+                  display: "inline-block",
+                  padding: "4px 12px",
+                  borderRadius: "20px",
+                  background: "#fef3c7",
+                  color: "#92400e",
+                  fontSize: "12px",
+                  fontWeight: 700,
+                  marginBottom: "12px",
+                  letterSpacing: "0.5px",
+                  textTransform: "uppercase"
+                }}>
+                  Tính năng đang phát triển
+                </span>
+                <h2 style={{ fontSize: "22px", fontWeight: 800, color: "#0f172a", margin: "0 0 10px" }}>
+                  Đang xây dựng
+                </h2>
+                <p style={{ fontSize: "14px", color: "#64748b", lineHeight: 1.6, margin: "0 0 28px", maxWidth: "380px" }}>
+                  Phân hệ quản lý hồ sơ và quy trình phê duyệt Nhiệm vụ thiết kế (NVTK) hiện đang được xây dựng và sẽ sớm ra mắt trong các phiên bản tiếp theo.
+                </p>
+                <button
+                  type="button"
+                  className="primary-button"
+                  onClick={() => setView("projects")}
+                  style={{
+                    padding: "10px 24px",
+                    fontSize: "13px",
+                    fontWeight: 700,
+                    borderRadius: "8px",
+                    background: "#2563eb",
+                    boxShadow: "0 4px 12px rgba(37, 99, 235, 0.2)"
+                  }}
+                >
+                  ← Về Hoàn thiện tiến độ
+                </button>
               </div>
-
-              {/* Exact 7-column Table (No Loại Dự Án) */}
-              {visibleDesignProjects.length > 0 ? (
-                <div className="project-table" aria-label="Danh sách dự án Lập Nhiệm Vụ Thiết Kế">
-                  <div className="project-table-head">
-                    <span>Mã dự án</span>
-                    <span>Tên dự án</span>
-                    <span>Chủ đầu tư</span>
-                    <span>Khu vực</span>
-                    <span>Vùng</span>
-                    <span>Trạng thái</span>
-                    <span>Hành động</span>
-                  </div>
-                  <div className="project-table-body">
-                    {pagedDesignProjects.map((project) => (
-                      <div key={project.id} className="project-table-row" onClick={() => { setActiveId(project.id); setView("workspace"); }}>
-                        <span className="project-code">{project.code}</span>
-                        <span className="project-name-cell">
-                          <b>{project.name}</b>
-                        </span>
-                        <span className="project-table-cell-ellipsis" title={project.investor || "Tập đoàn Novaland"}>{project.investor || "Tập đoàn Novaland"}</span>
-                        <span className="project-table-cell-ellipsis" title={project.location || project.area || "—"}>{project.location || project.area || "—"}</span>
-                        <span className="project-region-cell">{project.region || "Toàn quốc"}</span>
-                        <span>
-                          {project.designTaskStatus === "da_duyet" ? (
-                            <span className="status-badge" style={{ background: "#edf8f5", color: "#167461", border: "1px solid #a4dfd1" }}>✓ ĐÃ DUYỆT NVTK</span>
-                          ) : project.designTaskStatus === "pbcm_gop_y" ? (
-                            <span className="status-badge" style={{ background: "#fef3c7", color: "#92400e", border: "1px solid #fde68a" }}>PBCM GÓP Ý</span>
-                          ) : project.designTaskStatus === "dang_lap" ? (
-                            <span className="status-badge" style={{ background: "#eef4fb", color: "#1a56a8", border: "1px solid #bfdbfe" }}>ĐANG LẬP NVTK</span>
-                          ) : (
-                            <span className="status-badge" style={{ background: "#f1f5f9", color: "#64748b" }}>CHƯA LẬP NVTK</span>
-                          )}
-                        </span>
-                        <span className="project-action-cell" onClick={(event) => event.stopPropagation()}>
-                          <button type="button" className="action-btn view-btn" title="Xem chi tiết NVTK" aria-label="Chi tiết NVTK" onClick={() => { setActiveId(project.id); setView("workspace"); }}>
-                            <IconEye />
-                          </button>
-                          <button type="button" className="action-btn delete-btn" title="Xóa dự án" aria-label="Xóa dự án" onClick={() => setProjectToDelete(project)}>
-                            <IconTrash />
-                          </button>
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ) : (
-                <div className="project-index-empty">
-                  <b>Không tìm thấy hồ sơ NVTK phù hợp</b>
-                  <span>Thử tìm bằng từ khóa khác hoặc thiết lập lại bộ lọc.</span>
-                </div>
-              )}
-              <Pagination total={visibleDesignProjects.length} pageSize={designPageSize} page={designPage} onPageChange={setDesignPage} onPageSizeChange={(size) => { setDesignPageSize(size); setDesignPage(1); }} />
-            </section>
-          </>
+            </div>
+          </div>
         ) : view === "fs_ver2" ? (
-          <>
+          <div style={{ display: "flex", flexDirection: "column", height: "100%", width: "100%", background: "#f8fafc" }}>
             <header className="page-top-header">
               <div className="page-top-title-group">
-                <h1>FS thực thi</h1>
-                <div className="top-stat-cards">
-                  <div className="top-stat-card">
-                    <span>TỔNG DỰ ÁN</span>
-                    <b>{projects.length}</b>
-                  </div>
-                  <div className="top-stat-card">
-                    <span>CHƯA LẬP</span>
-                    <b style={{ color: "#64748b" }}>{projects.filter((p) => p.fsStatus === "chua_lap").length}</b>
-                  </div>
-                  <div className="top-stat-card">
-                    <span>ĐANG TÍNH TOÁN</span>
-                    <b style={{ color: "#1a56a8" }}>{projects.filter((p) => p.fsStatus === "dang_tinh_toan").length}</b>
-                  </div>
-                  <div className="top-stat-card">
-                    <span>ĐỐI CHIẾU</span>
-                    <b style={{ color: "#d97706" }}>{projects.filter((p) => p.fsStatus === "cho_doi_chieu").length}</b>
-                  </div>
-                  <div className="top-stat-card">
-                    <span>ĐÃ DUYỆT</span>
-                    <b style={{ color: "#167461" }}>{projects.filter((p) => p.fsStatus === "da_duyet").length}</b>
-                  </div>
+                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                  <button
+                    type="button"
+                    className="topbar-toggle-sidebar-btn"
+                    onClick={() => setSidebarCollapsed((prev) => !prev)}
+                    title={sidebarCollapsed ? "Mở rộng thanh điều hướng (Ctrl+B)" : "Thu nhỏ thanh điều hướng (Ctrl+B)"}
+                    aria-label="Chuyển đổi thanh điều hướng"
+                  >
+                    <IconMenu />
+                  </button>
+                  <h1 style={{ margin: 0 }}>Lập FS Thực Thi (FS-Ver2)</h1>
                 </div>
               </div>
               <div className="page-top-actions">
-                <label className="search-field" style={{ margin: 0, minWidth: "200px", maxWidth: "260px" }}>
-                  <span>Tìm dự án</span>
-                  <input value={fsSearch} onChange={(event) => { setFsSearch(event.target.value); setFsPage(1); }} placeholder="Nhập tên, mã dự án..." />
-                </label>
                 <button type="button" className="secondary-button" onClick={() => setView("projects")}>← Quay lại MTL</button>
-                <button type="button" className="primary-button">+ Lập Phương Án FS</button>
               </div>
             </header>
-            <section className="project-index">
-
-              {/* Filters */}
-              <div className="table-filters" style={{ margin: "14px 24px 14px", border: "none" }}>
-                <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", alignItems: "center" }}>
-                  <label className="table-filters-select">
-                    <span>Vùng</span>
-                    <select value={fsRegionFilter} onChange={(event) => { setFsRegionFilter(event.target.value); setFsPage(1); }}>
-                      <option value="all">Tất cả vùng</option>
-                      {[...new Set(projects.map((p) => p.region).filter(Boolean) as string[])].sort().map((r) => (
-                        <option key={r} value={r}>{r}</option>
-                      ))}
-                    </select>
-                  </label>
-                  <label className="table-filters-select">
-                    <span>Trạng thái FS</span>
-                    <select value={fsStatusFilter} onChange={(event) => { setFsStatusFilter(event.target.value); setFsPage(1); }}>
-                      <option value="all">Tất cả trạng thái FS</option>
-                      <option value="chua_lap">Chưa lập FS</option>
-                      <option value="dang_tinh_toan">Đang tính toán FS</option>
-                      <option value="cho_doi_chieu">Đối chiếu số liệu</option>
-                      <option value="da_duyet">Đã duyệt FS-Ver2</option>
-                    </select>
-                  </label>
+            <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: "40px 20px" }}>
+              <div style={{
+                maxWidth: "480px",
+                width: "100%",
+                background: "#ffffff",
+                borderRadius: "16px",
+                border: "1px solid #e2e8f0",
+                boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01)",
+                padding: "48px 32px",
+                textAlign: "center",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center"
+              }}>
+                <div style={{
+                  width: "72px",
+                  height: "72px",
+                  borderRadius: "50%",
+                  background: "#f0fdf4",
+                  border: "2px solid #bbf7d0",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: "32px",
+                  marginBottom: "20px"
+                }}>
+                  🚧
                 </div>
-                <span className="table-filters-count">{visibleFsProjects.length} dự án</span>
+                <span style={{
+                  display: "inline-block",
+                  padding: "4px 12px",
+                  borderRadius: "20px",
+                  background: "#fef3c7",
+                  color: "#92400e",
+                  fontSize: "12px",
+                  fontWeight: 700,
+                  marginBottom: "12px",
+                  letterSpacing: "0.5px",
+                  textTransform: "uppercase"
+                }}>
+                  Tính năng đang phát triển
+                </span>
+                <h2 style={{ fontSize: "22px", fontWeight: 800, color: "#0f172a", margin: "0 0 10px" }}>
+                  Đang xây dựng
+                </h2>
+                <p style={{ fontSize: "14px", color: "#64748b", lineHeight: 1.6, margin: "0 0 28px", maxWidth: "380px" }}>
+                  Phân hệ lập kế hoạch và phân tích tính khả thi dự án (FS-Ver2) hiện đang được xây dựng và sẽ sớm ra mắt trong các phiên bản tiếp theo.
+                </p>
+                <button
+                  type="button"
+                  className="primary-button"
+                  onClick={() => setView("projects")}
+                  style={{
+                    padding: "10px 24px",
+                    fontSize: "13px",
+                    fontWeight: 700,
+                    borderRadius: "8px",
+                    background: "#16a34a",
+                    boxShadow: "0 4px 12px rgba(22, 163, 74, 0.2)"
+                  }}
+                >
+                  ← Về Hoàn thiện tiến độ
+                </button>
               </div>
-
-              {/* Exact 7-column Table (No Loại Dự Án) */}
-              {visibleFsProjects.length > 0 ? (
-                <div className="project-table" aria-label="Danh sách dự án Lập FS Thực Thi">
-                  <div className="project-table-head">
-                    <span>Mã dự án</span>
-                    <span>Tên dự án</span>
-                    <span>Chủ đầu tư</span>
-                    <span>Khu vực</span>
-                    <span>Vùng</span>
-                    <span>Trạng thái</span>
-                    <span>Hành động</span>
-                  </div>
-                  <div className="project-table-body">
-                    {pagedFsProjects.map((project) => (
-                      <div key={project.id} className="project-table-row" onClick={() => { setActiveId(project.id); setView("workspace"); }}>
-                        <span className="project-code">{project.code}</span>
-                        <span className="project-name-cell">
-                          <b>{project.name}</b>
-                        </span>
-                        <span className="project-table-cell-ellipsis" title={project.investor || "Tập đoàn Novaland"}>{project.investor || "Tập đoàn Novaland"}</span>
-                        <span className="project-table-cell-ellipsis" title={project.location || project.area || "—"}>{project.location || project.area || "—"}</span>
-                        <span className="project-region-cell">{project.region || "Toàn quốc"}</span>
-                        <span>
-                          {project.fsStatus === "da_duyet" ? (
-                            <span className="status-badge" style={{ background: "#edf8f5", color: "#167461", border: "1px solid #a4dfd1" }}>✓ ĐÃ DUYỆT FS-VER2</span>
-                          ) : project.fsStatus === "cho_doi_chieu" ? (
-                            <span className="status-badge" style={{ background: "#fef3c7", color: "#92400e", border: "1px solid #fde68a" }}>ĐỐI CHIẾU SỐ LIỆU</span>
-                          ) : project.fsStatus === "dang_tinh_toan" ? (
-                            <span className="status-badge" style={{ background: "#eef4fb", color: "#1a56a8", border: "1px solid #bfdbfe" }}>ĐANG TÍNH TOÁN FS</span>
-                          ) : (
-                            <span className="status-badge" style={{ background: "#f1f5f9", color: "#64748b" }}>CHƯA LẬP FS</span>
-                          )}
-                        </span>
-                        <span className="project-action-cell" onClick={(event) => event.stopPropagation()}>
-                          <button type="button" className="action-btn view-btn" title="Xem phân tích FS" aria-label="Xem FS" onClick={() => { setActiveId(project.id); setView("workspace"); }}>
-                            <IconEye />
-                          </button>
-                          <button type="button" className="action-btn delete-btn" title="Xóa dự án" aria-label="Xóa dự án" onClick={() => setProjectToDelete(project)}>
-                            <IconTrash />
-                          </button>
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ) : (
-                <div className="project-index-empty">
-                  <b>Không tìm thấy hồ sơ FS phù hợp</b>
-                  <span>Thử tìm bằng từ khóa khác hoặc thiết lập lại bộ lọc.</span>
-                </div>
-              )}
-              <Pagination total={visibleFsProjects.length} pageSize={fsPageSize} page={fsPage} onPageChange={setFsPage} onPageSizeChange={(size) => { setFsPageSize(size); setFsPage(1); }} />
-            </section>
-          </>
+            </div>
+          </div>
         ) : view === "init_template" ? (
           <div className="init-template-view">
             {/* Main Body */}
