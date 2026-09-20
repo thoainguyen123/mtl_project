@@ -1253,6 +1253,8 @@ export default function Home() {
   const [initWbsCollapsed, setInitWbsCollapsed] = useState<Set<string>>(new Set());
   const [initWbsSearch, setInitWbsSearch] = useState<string>("");
   const [initWbsLevel, setInitWbsLevel] = useState<string>("all");
+  const [workspaceDeptFilter, setWorkspaceDeptFilter] = useState<string>("all");
+  const [workspaceLevelFilter, setWorkspaceLevelFilter] = useState<string>("all");
   const [initTreeExpanded, setInitTreeExpanded] = useState<Record<string, boolean>>({
     root: true,
     block4: true,
@@ -1828,13 +1830,30 @@ export default function Home() {
       return ![...initWbsCollapsed].some((code) => task.code.startsWith(`${code}.`));
     });
   }, [initWbsTasks, initWbsSearch, initWbsCollapsed]);
+  const applyWorkspaceLevel = (lvl: number | "all") => {
+    setWorkspaceLevelFilter(String(lvl));
+    if (lvl === "all") {
+      setCollapsed(new Set());
+    } else {
+      const toCollapse = new Set<string>();
+      scheduled.forEach((t) => {
+        if (t.summary && t.level >= lvl) {
+          toCollapse.add(t.code);
+        }
+      });
+      setCollapsed(toCollapse);
+    }
+  };
+
   const visibleTasks = useMemo(() => {
     const query = search.trim().toLocaleLowerCase("vi");
     return scheduled.filter((task) => {
+      if (workspaceDeptFilter !== "all" && task.groupCode !== workspaceDeptFilter) return false;
+      if (workspaceLevelFilter !== "all" && task.level > Number(workspaceLevelFilter)) return false;
       if (query) return `${task.code} ${task.name} ${GROUP_BY_CODE[task.groupCode]?.name ?? ""}`.toLocaleLowerCase("vi").includes(query);
       return ![...collapsed].some((code) => task.code.startsWith(`${code}.`));
     });
-  }, [scheduled, search, collapsed]);
+  }, [scheduled, search, collapsed, workspaceDeptFilter, workspaceLevelFilter]);
 
   const notify = (message: string) => {
     setToast(message);
@@ -5725,9 +5744,22 @@ export default function Home() {
                 <IconSparkles />
                 <span>Khởi tạo tiến độ</span>
               </button>
-              <button className={view === "projects" || view === "workspace" ? "active" : ""} onClick={() => setView("projects")} tabIndex={lapMtlSectionOpen ? 0 : -1}>
+              <button
+                className={view === "projects" || view === "workspace" ? "active" : ""}
+                onClick={() => {
+                  if (activeProject) {
+                    setView("workspace");
+                  } else if (projects.length > 0) {
+                    setActiveId(projects[0].id);
+                    setView("workspace");
+                  } else {
+                    setView("init_template");
+                  }
+                }}
+                tabIndex={lapMtlSectionOpen ? 0 : -1}
+              >
                 <IconTimeline />
-                <span>Lập / Cập nhật</span>
+                <span>Hoàn thiện tiến độ</span>
               </button>
               <button className={view === "confirm_approval" ? "active" : ""} onClick={() => setView("confirm_approval")} tabIndex={lapMtlSectionOpen ? 0 : -1}>
                 <IconFileCheck />
@@ -6731,7 +6763,7 @@ export default function Home() {
                     <b>{projects.length}</b>
                   </div>
                   <div className="top-stat-card">
-                    <span>ĐANG LẬP / CẬP NHẬT</span>
+                    <span>ĐANG HOÀN THIỆN TIẾN ĐỘ</span>
                     <b style={{ color: "#1a56a8" }}>{projects.filter((p) => p.approvalStatus !== "approved" && !p.isOfficialApproved).length}</b>
                   </div>
                   <div className="top-stat-card">
@@ -8260,6 +8292,8 @@ export default function Home() {
                         className="init-btn-submit"
                         onClick={() => {
                           const newId = `project-${Date.now()}`;
+                          const allGroupCodes = GROUPS.map((g) => g.code);
+                          const allTaskCodes = fullCatalog.map((t) => t.code);
                           const newProj: Project = {
                             id: newId,
                             name: initProjectName.trim() || "Dự án mới",
@@ -8274,20 +8308,23 @@ export default function Home() {
                             parameters: DEFAULT_PROJECT_PARAMETERS,
                             parameterImpacts: [],
                             milestoneDates: {},
-                            selectedGroups: ["G1", "G2", "G3", "G4", "G5"],
+                            selectedGroups: allGroupCodes,
                             createdAt: new Date().toISOString(),
                             taskEdits: {},
-                            taskDependencies: {},
+                            taskDependencies: defaultDependenciesForCodes(allTaskCodes),
                             customTasks: [],
-                            includedTaskCodes: fullCatalog.filter((t) => enabledCatalogCodes.has(t.code)).map((t) => t.code),
-                            departmentApprovals: normalizeDepartmentApprovals(["G1", "G2", "G3", "G4", "G5"]),
+                            includedTaskCodes: allTaskCodes,
+                            departmentApprovals: normalizeDepartmentApprovals(allGroupCodes),
                             approvalStatus: "draft",
                             officialVersion: "v1.0",
                           };
                           setProjects((prev) => [newProj, ...prev]);
                           setActiveId(newId);
+                          setSelectedCode("");
+                          setWorkspaceDeptFilter("all");
+                          setWorkspaceLevelFilter("all");
                           setView("workspace");
-                          notify(`Đã khởi tạo thành công tiến độ mới từ Cấu trúc Master Timeline mẫu cho ${newProj.name}!`);
+                          notify(`Đã khởi tạo thành công tiến độ cho "${newProj.name}"! Chuyển tiếp sang Hoàn thiện tiến độ.`);
                         }}
                       >
                         <IconSparkles />
@@ -8926,8 +8963,11 @@ export default function Home() {
                                   current.map((p) => (p.id === targetProject.id ? updatedProject : p))
                                 );
                                 setActiveId(targetProject.id);
+                                setSelectedCode("");
+                                setWorkspaceDeptFilter("all");
+                                setWorkspaceLevelFilter("all");
                                 setView("workspace");
-                                notify(`Đã khởi tạo thành công bản cập nhật ${newVer} từ phiên bản ${sourceVersion} cho dự án ${targetProject.name}!`);
+                                notify(`Đã khởi tạo thành công bản cập nhật ${newVer} cho dự án "${targetProject.name}"! Chuyển tiếp sang Hoàn thiện tiến độ.`);
                               }}
                             >
                               <IconRefresh />
@@ -8951,7 +8991,59 @@ export default function Home() {
         ) : (
           <>
             <header className="topbar workspace-topbar">
-              <button className="breadcrumb-back" onClick={() => setView("projects")}>← Danh sách dự án</button>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+                <button
+                  type="button"
+                  className="topbar-toggle-sidebar-btn"
+                  onClick={() => setSidebarCollapsed((prev) => !prev)}
+                  title={sidebarCollapsed ? "Mở rộng thanh điều hướng (Ctrl+B)" : "Thu nhỏ thanh điều hướng (Ctrl+B)"}
+                  aria-label="Chuyển đổi thanh điều hướng"
+                >
+                  <IconMenu />
+                </button>
+                <span style={{ fontSize: "13px", fontWeight: 800, color: "#1e3a8a", display: "inline-flex", alignItems: "center", gap: 5 }}>
+                  <IconTimeline /> Hoàn thiện tiến độ
+                </span>
+                <span style={{ color: "#cbd5e1" }}>|</span>
+                <button className="breadcrumb-back" onClick={() => setView("projects")}>← Danh sách dự án</button>
+                <button
+                  className="breadcrumb-back"
+                  onClick={() => setView("init_template")}
+                  style={{ color: "#16a34a", borderColor: "#bbf7d0", background: "#f0fdf4" }}
+                >
+                  + Khởi tạo tiến độ mới
+                </button>
+                {projects.length > 1 && (
+                  <label style={{ display: "inline-flex", alignItems: "center", gap: 5, fontSize: "11px", fontWeight: 600, color: "#64748b" }}>
+                    <span>Dự án:</span>
+                    <select
+                      value={activeProject.id}
+                      onChange={(e) => {
+                        setActiveId(e.target.value);
+                        setSelectedCode("");
+                      }}
+                      style={{
+                        height: "28px",
+                        padding: "0 6px",
+                        fontSize: "11.5px",
+                        fontWeight: 600,
+                        borderRadius: "5px",
+                        border: "1px solid #cbd5e1",
+                        background: "#ffffff",
+                        color: "#0f172a",
+                        cursor: "pointer",
+                        maxWidth: "200px",
+                      }}
+                    >
+                      {projects.map((p) => (
+                        <option key={p.id} value={p.id}>
+                          {p.name} ({p.code})
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                )}
+              </div>
               <div className="top-actions">
                 <span className="saved-state"><i />Đã lưu trên thiết bị</span>
                 <button className="secondary-button project-export" onClick={exportMicrosoftProject}>
@@ -9025,10 +9117,135 @@ export default function Home() {
               </div>
             </section>
 
-            <section className="toolbar" aria-label="Công cụ danh sách MTL">
-              <div className="scope-tabs"><span className="active">Tất cả công việc ({scheduled.length})</span></div>
-              <label className="search-field"><span>Tìm</span><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Mã WBS hoặc tên công việc" /></label>
-              <button className="text-button" onClick={() => setCollapsed(new Set())}>Mở tất cả</button><button className="text-button" onClick={() => setCollapsed(new Set(activeProject.selectedGroups))}>Thu gọn</button>
+            <section className="toolbar" aria-label="Công cụ danh sách MTL" style={{ flexWrap: "wrap", gap: 10, alignItems: "center" }}>
+              <div className="scope-tabs" style={{ display: "inline-flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+                <button
+                  type="button"
+                  className={workspaceDeptFilter === "all" ? "active" : ""}
+                  onClick={() => setWorkspaceDeptFilter("all")}
+                  style={{
+                    padding: "4px 10px",
+                    borderRadius: "6px",
+                    border: "1px solid",
+                    borderColor: workspaceDeptFilter === "all" ? "#2563eb" : "#cbd5e1",
+                    background: workspaceDeptFilter === "all" ? "#eff6ff" : "#ffffff",
+                    color: workspaceDeptFilter === "all" ? "#1d4ed8" : "#475569",
+                    fontSize: "11.5px",
+                    fontWeight: 700,
+                    cursor: "pointer",
+                  }}
+                >
+                  Tất cả công việc ({scheduled.length})
+                </button>
+                <select
+                  value={workspaceDeptFilter}
+                  onChange={(e) => setWorkspaceDeptFilter(e.target.value)}
+                  style={{
+                    height: "28px",
+                    padding: "0 8px",
+                    borderRadius: "6px",
+                    border: "1px solid #cbd5e1",
+                    background: "#f8fafc",
+                    fontSize: "11px",
+                    fontWeight: 600,
+                    color: "#0f172a",
+                    cursor: "pointer",
+                  }}
+                  title="Lọc theo ban/phòng phụ trách"
+                >
+                  <option value="all">-- Lọc theo Ban/Phòng (9-4) --</option>
+                  <optgroup label="Khối 9 (Ban/Phòng Gián tiếp)">
+                    {GROUPS.filter((g) => g.code.startsWith("9.")).map((g) => (
+                      <option key={g.code} value={g.code}>
+                        {g.code} {g.short} – {g.name}
+                      </option>
+                    ))}
+                  </optgroup>
+                  <optgroup label="Khối 4 (Trực tiếp & Chủ trì)">
+                    {GROUPS.filter((g) => g.code.startsWith("4.")).map((g) => (
+                      <option key={g.code} value={g.code}>
+                        {g.code} {g.short} – {g.name}
+                      </option>
+                    ))}
+                  </optgroup>
+                </select>
+
+                <label
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "6px",
+                    fontSize: "11px",
+                    fontWeight: 700,
+                    color: "#475569",
+                    background: "#f8fafc",
+                    border: "1px solid #cbd5e1",
+                    borderRadius: "6px",
+                    padding: "2px 6px 2px 8px",
+                    cursor: "pointer",
+                  }}
+                >
+                  <span>Cấp công việc:</span>
+                  <select
+                    value={workspaceLevelFilter}
+                    onChange={(e) => applyWorkspaceLevel(e.target.value === "all" ? "all" : Number(e.target.value))}
+                    style={{
+                      height: "24px",
+                      padding: "0 6px",
+                      fontSize: "11px",
+                      fontWeight: 600,
+                      color: "#0f172a",
+                      background: "#ffffff",
+                      border: "1px solid #cbd5e1",
+                      borderRadius: "4px",
+                      outline: "none",
+                      cursor: "pointer",
+                    }}
+                  >
+                    <option value="all">Tất cả cấp</option>
+                    <option value="1">Cấp 1</option>
+                    <option value="2">Cấp 2</option>
+                    <option value="3">Cấp 3</option>
+                    <option value="4">Cấp 4</option>
+                    <option value="5">Cấp 5</option>
+                  </select>
+                </label>
+              </div>
+
+              <div style={{ marginLeft: "auto", display: "inline-flex", alignItems: "center", gap: 8 }}>
+                <label className="search-field" style={{ margin: 0, minWidth: "200px" }}>
+                  <span>Tìm</span>
+                  <input
+                    value={search}
+                    onChange={(event) => setSearch(event.target.value)}
+                    placeholder="Mã WBS hoặc tên công việc"
+                  />
+                </label>
+                <button
+                  type="button"
+                  className="text-button"
+                  onClick={() => {
+                    setCollapsed(new Set());
+                    setWorkspaceLevelFilter("all");
+                  }}
+                >
+                  Mở tất cả
+                </button>
+                <button
+                  type="button"
+                  className="text-button"
+                  onClick={() => {
+                    const toCollapse = new Set<string>();
+                    scheduled.forEach((t) => {
+                      if (t.summary && t.level >= 2) toCollapse.add(t.code);
+                    });
+                    setCollapsed(toCollapse);
+                    setWorkspaceLevelFilter("1");
+                  }}
+                >
+                  Thu gọn
+                </button>
+              </div>
             </section>
 
             <div className={`planning-area ${selectedTask ? "with-detail" : ""}`}>
@@ -9115,8 +9332,19 @@ export default function Home() {
                         </span>
 
                         {/* 6. Ghi chú */}
-                        <span className="task-cell task-cell-note" title={taskNote || "Chưa có ghi chú"}>
-                          {taskNote ? <span>{taskNote}</span> : <span style={{ color: "#cbd5e1" }}>—</span>}
+                        <span
+                          className="task-cell task-cell-note"
+                          title={taskNote ? `${taskNote} (Bấm để chỉnh sửa)` : "Chưa có ghi chú (Bấm để thêm ghi chú)"}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedCode(task.code);
+                          }}
+                        >
+                          {taskNote ? (
+                            <span style={{ color: "#0f172a", fontWeight: 500 }}>{taskNote}</span>
+                          ) : (
+                            <span style={{ color: "#94a3b8", fontStyle: "italic", fontSize: "11px" }}>—</span>
+                          )}
                         </span>
 
                         {/* 7. Liên kết */}
@@ -9147,9 +9375,21 @@ export default function Home() {
 
               {selectedTask && (
                 <aside className="detail-panel">
-                  <header><span>CHI TIẾT CÔNG VIỆC</span><button aria-label="Đóng chi tiết" onClick={() => setSelectedCode("")}>Đóng</button></header>
-                  {activeProject.isOfficialApproved && <div className="locked-banner" style={{ background: "#102d4b", color: "#9fe3d5" }}>🛡️ Baseline đã khóa · Cập nhật tiến độ thực tế bên dưới</div>}
-                  <div className="detail-code">{selectedTask.code}</div><h2>{selectedTask.name}</h2><div className="detail-meta"><span>{GROUP_BY_CODE[selectedTask.groupCode]?.short}</span><b>{selectedTask.summary ? "Summary task" : "Task thực hiện"}</b></div>
+                  <header>
+                    <span>CHI TIẾT & CHỈNH SỬA TIẾN ĐỘ</span>
+                    <button aria-label="Đóng chi tiết" onClick={() => setSelectedCode("")}>Đóng</button>
+                  </header>
+                  {activeProject.isOfficialApproved && (
+                    <div className="locked-banner" style={{ background: "#102d4b", color: "#9fe3d5" }}>
+                      🛡️ Baseline đã khóa · Cập nhật tiến độ thực tế bên dưới
+                    </div>
+                  )}
+                  <div className="detail-code">{selectedTask.code}</div>
+                  <h2>{selectedTask.name}</h2>
+                  <div className="detail-meta">
+                    <span>{GROUP_BY_CODE[selectedTask.groupCode]?.short || selectedTask.groupCode} – {GROUP_BY_CODE[selectedTask.groupCode]?.name}</span>
+                    <b>{selectedTask.summary ? "Nhóm công việc (Summary)" : "Công việc thực hiện"}</b>
+                  </div>
                   
                   {!selectedTask.summary && (
                     <div style={{ margin: "14px 0", padding: "12px", background: "#f0f7f5", borderRadius: "8px", border: "1px solid #cce8e2" }}>
@@ -9163,14 +9403,128 @@ export default function Home() {
                     </div>
                   )}
 
-                  <label className="field"><span>PIC phụ trách</span><input disabled={activeProject.baselineLocked} value={selectedTask.pic} onChange={(event) => updateTask(selectedTask.code, { pic: event.target.value })} placeholder="Nhập tên người phụ trách" /></label>
-                  <label className="field"><span>Ngày bắt đầu (Kế hoạch)</span><input disabled={activeProject.baselineLocked || selectedTask.summary} type="date" value={selectedTask.startDate} max={selectedTask.endDate} onChange={(event) => updateTaskDates(selectedTask.code, event.target.value, selectedTask.endDate)} /></label>
-                  <label className="field"><span>Ngày kết thúc (Kế hoạch)</span><input disabled={activeProject.baselineLocked || selectedTask.summary} type="date" value={selectedTask.endDate} min={selectedTask.startDate} onChange={(event) => updateTaskDates(selectedTask.code, selectedTask.startDate, event.target.value)} /></label>
-                  <label className="field field-readonly"><span>Thời lượng kế hoạch</span><input readOnly value={`${selectedTask.duration} ngày làm việc`} /></label>
-                  <DependencyPicker tasks={scheduled} selectedDependencies={selectedTask.predecessors} successorCode={selectedTask.code} disabled={activeProject.baselineLocked || selectedTask.summary} onChange={(dependencies) => updateTaskDependencies(selectedTask.code, dependencies)} />
-                  {selectedTask.dependencyConflict && <div className="dependency-warning" role="alert"><b>Xung đột liên kết FS</b><span>{selectedTask.dependencyConflict}</span>{selectedTask.suggestedStartDate && <button type="button" onClick={() => updateTaskDates(selectedTask.code, selectedTask.suggestedStartDate!, dateAtWorkingOffset(selectedTask.suggestedStartDate!, selectedTask.duration - 1))}>Áp dụng ngày {formatDate(selectedTask.suggestedStartDate)}</button>}</div>}
-                  <div className="detail-summary"><div><span>Bắt đầu</span><b>{formatDate(selectedTask.startDate)}</b></div><div><span>Kết thúc</span><b>{formatDate(selectedTask.endDate)}</b></div></div>
-                  <p className="detail-note">{selectedTask.summary ? "Ngày của task tổng hợp được tự động lấy theo các công việc con." : activeProject.isOfficialApproved ? "Master Timeline chính thức đã khóa. Bấm 'Tạo bản điều chỉnh' nếu cần thay đổi kế hoạch cơ sở." : "Thay đổi được lưu tự động trên thiết bị cho dự án này."}</p>
+                  <label className="field">
+                    <span>PIC phụ trách</span>
+                    <input
+                      disabled={activeProject.baselineLocked}
+                      value={selectedTask.pic}
+                      onChange={(event) => updateTask(selectedTask.code, { pic: event.target.value })}
+                      placeholder="Nhập tên nhân sự/đơn vị phụ trách"
+                    />
+                  </label>
+
+                  <label className="field">
+                    <span>Thời gian thực hiện (ngày làm việc)</span>
+                    {selectedTask.summary ? (
+                      <input
+                        readOnly
+                        value={`${selectedTask.duration} ngày (tính tự động từ công việc con)`}
+                        style={{ background: "#f8fafc", color: "#64748b" }}
+                      />
+                    ) : (
+                      <input
+                        type="number"
+                        min={1}
+                        disabled={activeProject.baselineLocked}
+                        value={selectedTask.duration}
+                        onChange={(event) => {
+                          const days = Math.max(1, Number(event.target.value) || 1);
+                          const newEnd = dateAtWorkingOffset(selectedTask.startDate, days - 1);
+                          updateTask(selectedTask.code, { duration: days, endDate: newEnd });
+                        }}
+                      />
+                    )}
+                  </label>
+
+                  <label className="field">
+                    <span>Ngày bắt đầu (Kế hoạch)</span>
+                    <input
+                      disabled={activeProject.baselineLocked || selectedTask.summary}
+                      type="date"
+                      value={selectedTask.startDate}
+                      max={selectedTask.endDate}
+                      onChange={(event) => {
+                        const newStart = event.target.value;
+                        if (!newStart) return;
+                        const newEnd = dateAtWorkingOffset(newStart, selectedTask.duration - 1);
+                        updateTask(selectedTask.code, { startDate: newStart, endDate: newEnd });
+                      }}
+                    />
+                  </label>
+
+                  <label className="field">
+                    <span>Ngày kết thúc (Kế hoạch)</span>
+                    <input
+                      disabled={activeProject.baselineLocked || selectedTask.summary}
+                      type="date"
+                      value={selectedTask.endDate}
+                      min={selectedTask.startDate}
+                      onChange={(event) => updateTaskDates(selectedTask.code, selectedTask.startDate, event.target.value)}
+                    />
+                  </label>
+
+                  <label className="field">
+                    <span>Ghi chú công việc</span>
+                    <textarea
+                      rows={3}
+                      disabled={activeProject.baselineLocked}
+                      value={activeProject.taskEdits[selectedTask.code]?.note ?? selectedTask.actualNote ?? ""}
+                      onChange={(e) => updateTask(selectedTask.code, { note: e.target.value, actualNote: e.target.value })}
+                      placeholder="Nhập ghi chú hoặc yêu cầu chi tiết cho công việc này..."
+                      style={{
+                        width: "100%",
+                        padding: "8px 10px",
+                        borderRadius: "8px",
+                        border: "1px solid #c9d6db",
+                        fontSize: "12px",
+                        resize: "vertical",
+                        boxSizing: "border-box",
+                        fontFamily: "inherit",
+                      }}
+                    />
+                  </label>
+
+                  <DependencyPicker
+                    tasks={scheduled}
+                    selectedDependencies={selectedTask.predecessors}
+                    successorCode={selectedTask.code}
+                    disabled={activeProject.baselineLocked || selectedTask.summary}
+                    onChange={(dependencies) => updateTaskDependencies(selectedTask.code, dependencies)}
+                  />
+
+                  {selectedTask.dependencyConflict && (
+                    <div className="dependency-warning" role="alert">
+                      <b>Xung đột liên kết FS</b>
+                      <span>{selectedTask.dependencyConflict}</span>
+                      {selectedTask.suggestedStartDate && (
+                        <button
+                          type="button"
+                          onClick={() => updateTaskDates(selectedTask.code, selectedTask.suggestedStartDate!, dateAtWorkingOffset(selectedTask.suggestedStartDate!, selectedTask.duration - 1))}
+                        >
+                          Áp dụng ngày {formatDate(selectedTask.suggestedStartDate)}
+                        </button>
+                      )}
+                    </div>
+                  )}
+
+                  <div className="detail-summary">
+                    <div>
+                      <span>Bắt đầu</span>
+                      <b>{formatDate(selectedTask.startDate)}</b>
+                    </div>
+                    <div>
+                      <span>Kết thúc</span>
+                      <b>{formatDate(selectedTask.endDate)}</b>
+                    </div>
+                  </div>
+
+                  <p className="detail-note">
+                    {selectedTask.summary
+                      ? "Ngày của nhóm công việc được tự động tổng hợp từ các công việc con."
+                      : activeProject.isOfficialApproved
+                      ? "Master Timeline chính thức đã khóa. Bấm 'Tạo bản điều chỉnh' nếu cần thay đổi kế hoạch cơ sở."
+                      : "Mọi thay đổi thông tin và ngày tiến độ được tự động lưu trên thiết bị."}
+                  </p>
                 </aside>
               )}
             </div>
