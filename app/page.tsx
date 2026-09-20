@@ -1242,10 +1242,13 @@ export default function Home() {
   const [initProjectName, setInitProjectName] = useState("Aqua City - Phân khu Phoenix South");
   const [initProjectCode, setInitProjectCode] = useState("AQC-PS-2026");
   const [initInvestor, setInitInvestor] = useState("Tập đoàn Novaland");
-  const [initArea, setInitArea] = useState("Đồng Nai");
-  const [initRegion, setInitRegion] = useState("Miền Nam");
-  const [initProjectType, setInitProjectType] = useState("Khu đô thị sinh thái thông minh");
+  const [initArea, setInitArea] = useState("Đồng Nai 1");
+  const [initRegion, setInitRegion] = useState("Đồng Nai 1");
+  const [initProjectType, setInitProjectType] = useState("Nhà ở thấp tầng");
   const [initStartDate, setInitStartDate] = useState(today);
+  const [initGroundbreakingDate, setInitGroundbreakingDate] = useState("");
+  const [initSalesStartDate, setInitSalesStartDate] = useState("");
+  const [initHandoverDate, setInitHandoverDate] = useState("");
   const [initEndDate, setInitEndDate] = useState("2028-12-31");
   const [initTemplateSearch, setInitTemplateSearch] = useState("");
   const [initSelectedApprovedProjectId, setInitSelectedApprovedProjectId] = useState<string>("proj-aqua-city-phoenix");
@@ -8212,46 +8215,84 @@ export default function Home() {
                             value={initProjectType}
                             onChange={(e) => setInitProjectType(e.target.value)}
                           >
-                            <option value="Khu đô thị sinh thái thông minh">Khu đô thị sinh thái thông minh</option>
-                            <option value="Tổ hợp Du lịch Nghỉ dưỡng Giải trí">Tổ hợp Du lịch Nghỉ dưỡng Giải trí</option>
-                            <option value="Khu phức hợp Căn hộ Cao cấp & Thương mại">Khu phức hợp Căn hộ Cao cấp & Thương mại</option>
-                            <option value="Bất động sản công nghiệp & Dân dụng">Bất động sản công nghiệp & Dân dụng</option>
+                            <option value="Nhà ở thấp tầng">Nhà ở thấp tầng</option>
+                            <option value="Chung cư cao tầng">Chung cư cao tầng</option>
+                            <option value="Khách sạn">Khách sạn</option>
+                            <option value="Biệt thự nghỉ dưỡng">Biệt thự nghỉ dưỡng</option>
+                            <option value="Công viên nước">Công viên nước</option>
                           </select>
                         </div>
 
                         <div className="init-field">
-                          <label className="init-field-label">Khu vực</label>
+                          <label className="init-field-label">Vùng dự án</label>
                           <select
                             className="init-field-select"
-                            value={initArea}
-                            onChange={(e) => setInitArea(e.target.value)}
+                            value={initRegion}
+                            onChange={(e) => {
+                              setInitRegion(e.target.value);
+                              setInitArea(e.target.value);
+                            }}
                           >
-                            <option value="Đồng Nai">Đồng Nai</option>
-                            <option value="TP. Hồ Chí Minh">TP. Hồ Chí Minh</option>
-                            <option value="Bình Thuận">Bình Thuận</option>
-                            <option value="Bà Rịa - Vũng Tàu">Bà Rịa - Vũng Tàu</option>
-                            <option value="Khánh Hòa">Khánh Hòa</option>
-                            <option value="Lâm Đồng">Lâm Đồng</option>
+                            <option value="Đồng Nai 1">Đồng Nai 1</option>
+                            <option value="Tp HCM 1">Tp HCM 1</option>
+                            <option value="Hồ Tràm 1">Hồ Tràm 1</option>
+                            <option value="Phan Thiết 1">Phan Thiết 1</option>
                           </select>
                         </div>
 
                         <div className="init-field">
-                          <label className="init-field-label">Ngày bắt đầu dự kiến</label>
+                          <label className="init-field-label">
+                            Ngày bắt đầu dự án <span style={{ color: "#ef4444" }}>*</span>
+                          </label>
                           <input
                             type="date"
                             className="init-field-input"
                             value={initStartDate}
                             onChange={(e) => setInitStartDate(e.target.value)}
+                            required
                           />
                         </div>
 
                         <div className="init-field">
-                          <label className="init-field-label">Ngày hoàn thành dự án</label>
+                          <label className="init-field-label">Ngày mục tiêu khởi công</label>
+                          <input
+                            type="date"
+                            className="init-field-input"
+                            value={initGroundbreakingDate}
+                            onChange={(e) => setInitGroundbreakingDate(e.target.value)}
+                          />
+                        </div>
+
+                        <div className="init-field">
+                          <label className="init-field-label">Ngày mục tiêu mở bán</label>
+                          <input
+                            type="date"
+                            className="init-field-input"
+                            value={initSalesStartDate}
+                            onChange={(e) => setInitSalesStartDate(e.target.value)}
+                          />
+                        </div>
+
+                        <div className="init-field">
+                          <label className="init-field-label">Ngày mục tiêu bàn giao</label>
+                          <input
+                            type="date"
+                            className="init-field-input"
+                            value={initHandoverDate}
+                            onChange={(e) => setInitHandoverDate(e.target.value)}
+                          />
+                        </div>
+
+                        <div className="init-field">
+                          <label className="init-field-label">
+                            Ngày kết thúc hoàn toàn dự án <span style={{ color: "#ef4444" }}>*</span>
+                          </label>
                           <input
                             type="date"
                             className="init-field-input"
                             value={initEndDate}
                             onChange={(e) => setInitEndDate(e.target.value)}
+                            required
                           />
                         </div>
                       </div>
@@ -8634,23 +8675,37 @@ export default function Home() {
                         type="button"
                         className="init-btn-submit"
                         onClick={() => {
+                          if (!initStartDate || !initEndDate) {
+                            alert("Vui lòng nhập Ngày bắt đầu dự án và Ngày kết thúc hoàn toàn dự án.");
+                            return;
+                          }
                           const newId = `project-${Date.now()}`;
                           const allGroupCodes = GROUPS.map((g) => g.code);
                           const allTaskCodes = fullCatalog.map((t) => t.code);
+                          const milestoneDates: MilestoneDates = {};
+                          if (initGroundbreakingDate) milestoneDates["MILE_PCD_01"] = initGroundbreakingDate;
+                          if (initSalesStartDate) milestoneDates["MILE_COM_02"] = initSalesStartDate;
+                          if (initHandoverDate) milestoneDates["MILE_OM_02"] = initHandoverDate;
+
                           const newProj: Project = {
                             id: newId,
                             name: initProjectName.trim() || "Dự án mới",
                             code: initProjectCode.trim() || `PRJ-${Date.now().toString().slice(-4)}`,
-                            type: initProjectType || "Khu đô thị sinh thái thông minh",
+                            type: initProjectType || "Nhà ở thấp tầng",
                             investor: initInvestor || "Tập đoàn Novaland",
-                            location: initArea || "Đồng Nai",
-                            area: initArea || "Đồng Nai",
-                            region: initRegion || "Miền Nam",
+                            location: initRegion || "Đồng Nai 1",
+                            area: initRegion || "Đồng Nai 1",
+                            region: initRegion || "Đồng Nai 1",
                             startDate: initStartDate || today,
                             targetDate: initEndDate || dateAtWorkingOffset(initStartDate || today, 365),
-                            parameters: DEFAULT_PROJECT_PARAMETERS,
+                            parameters: {
+                              ...DEFAULT_PROJECT_PARAMETERS,
+                              loaiHinhDuAn: (["Nhà ở thấp tầng", "Chung cư cao tầng", "Khách sạn", "Biệt thự nghỉ dưỡng", "Công viên nước"].includes(initProjectType)
+                                ? initProjectType
+                                : "Nhà ở thấp tầng") as ProjectParameters["loaiHinhDuAn"],
+                            },
                             parameterImpacts: [],
-                            milestoneDates: {},
+                            milestoneDates,
                             selectedGroups: allGroupCodes,
                             createdAt: new Date().toISOString(),
                             taskEdits: {},
