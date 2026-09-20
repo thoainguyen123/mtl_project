@@ -7634,15 +7634,6 @@ export default function Home() {
                 </button>
                 <h1>Xác nhận phê duyệt</h1>
               </div>
-              <div className="page-top-actions">
-                <label className="search-field" style={{ margin: 0, minWidth: "220px", maxWidth: "300px" }}>
-                  <span>Tìm dự án</span>
-                  <input value={confirmSearch} onChange={(event) => { setConfirmSearch(event.target.value); setConfirmPage(1); }} placeholder="Tên, mã dự án hoặc mã E-Approval..." />
-                </label>
-                <button type="button" className="primary-button" onClick={() => openEApprovalModal()}>
-                  + Nhập phê duyệt E-Approval
-                </button>
-              </div>
             </header>
             <section className="project-index">
 
