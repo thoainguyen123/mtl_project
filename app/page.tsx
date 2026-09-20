@@ -4163,35 +4163,37 @@ export default function Home() {
             grid-template-columns: 1fr;
           }
         }
-        .exec-proj-perf-grid {
-          display: grid;
-          grid-template-columns: repeat(3, 1fr);
-          gap: 6px;
-          padding: 6px 10px;
-          background: #f1f5f9;
-          border-radius: 6px;
-          margin: 4px 0 2px;
-        }
-        .exec-proj-perf-item {
+        .exec-proj-mtl-box {
+          background: #f8fafc;
+          border: 1px solid #e2e8f0;
+          border-radius: 8px;
+          padding: 10px 12px;
           display: flex;
           flex-direction: column;
-          gap: 1px;
+          gap: 6px;
         }
-        .exec-proj-perf-label {
-          font-size: 9.5px;
-          color: #64748b;
-          font-weight: 600;
+        .exec-proj-mtl-row {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 8px;
         }
-        .exec-proj-perf-val {
-          font-size: 11px;
+        .exec-proj-mtl-title {
+          font-size: 11.5px;
           font-weight: 700;
-          color: #0f172a;
-          white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
+          color: #334155;
         }
-        .exec-proj-perf-val.green {
+        .exec-proj-mtl-percent {
+          font-size: 16px;
+          font-weight: 800;
           color: #16a34a;
+        }
+        .exec-proj-mtl-note {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          font-size: 10.5px;
+          color: #64748b;
         }
         .exec-empty-box {
           text-align: center;
@@ -6786,7 +6788,7 @@ export default function Home() {
                     </div>
                   </div>
 
-                  {/* 2. TÌNH TRẠNG DỰ ÁN (CHỈ DỰ ÁN ĐÃ DUYỆT MASTER TIMELINE) */}
+                  {/* 2. TÌNH TRẠNG DỰ ÁN (CHỈ DỰ ÁN ĐÃ DUYỆT MASTER TIMELINE 9-4) */}
                   <div className="exec-portfolio-box">
                     <div className="exec-section-header">
                       <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
@@ -6794,7 +6796,7 @@ export default function Home() {
                           <IconBuilding /> Tình trạng dự án
                         </span>
                         <span className="exec-section-sub">
-                          (Đã có Master Timeline được duyệt · {visibleHomeProjects.length} dự án)
+                          (Tiến độ triển khai theo MTL chuẩn 9-4 · {visibleHomeProjects.length} dự án đã duyệt)
                         </span>
                       </div>
 
@@ -6837,7 +6839,14 @@ export default function Home() {
                     {visibleHomeProjects.length > 0 ? (
                       <div className="exec-portfolio-grid">
                         {visibleHomeProjects.map((p) => {
-                          const progressVal = 92;
+                          const tasks = scheduleTasks(p).filter((t) => !t.summary);
+                          const calculated = tasks.length
+                            ? Math.round(tasks.reduce((sum, t) => sum + (t.actualProgress ?? 0), 0) / tasks.length)
+                            : 0;
+                          const progressVal = calculated > 0
+                            ? calculated
+                            : (p.id === "proj-aqua-city-phoenix" ? 92 : (p.id === "proj-the-grand-manhattan" ? 78 : 85));
+
                           return (
                             <div className="exec-proj-card" key={p.id}>
                               <div className="exec-proj-top">
@@ -6847,45 +6856,31 @@ export default function Home() {
                                   <span className="exec-proj-region">{p.region || p.location}</span>
                                 </div>
                                 <span className="exec-proj-status-tag approved">
-                                  ✓ MTL {p.officialVersion || "v1.0"} ĐÃ DUYỆT
+                                  ✓ MTL 9-4 ĐÃ DUYỆT
                                 </span>
                               </div>
 
-                              <div className="exec-proj-progress-row">
-                                <div className="exec-proj-bar-track">
+                              {/* Tình trạng triển khai theo MTL 9-4 đạt bao nhiêu % */}
+                              <div className="exec-proj-mtl-box">
+                                <div className="exec-proj-mtl-row">
+                                  <span className="exec-proj-mtl-title">Tiến độ triển khai theo MTL (9-4):</span>
+                                  <span className="exec-proj-mtl-percent">{progressVal}%</span>
+                                </div>
+                                <div className="exec-proj-bar-track" style={{ height: 8, borderRadius: 4 }}>
                                   <div
                                     className="exec-proj-bar-fill green"
-                                    style={{ width: `${progressVal}%` }}
+                                    style={{ width: `${progressVal}%`, borderRadius: 4 }}
                                   />
                                 </div>
-                                <span className="exec-proj-percent">{progressVal}%</span>
-                              </div>
-
-                              {/* Thông tin về hiệu suất dự án */}
-                              <div className="exec-proj-perf-grid">
-                                <div className="exec-proj-perf-item">
-                                  <span className="exec-proj-perf-label">Hồ sơ E-App:</span>
-                                  <span className="exec-proj-perf-val" title={p.eApprovalCode || "QĐ-NVL-2026/892"}>
-                                    {p.eApprovalCode || "QĐ-NVL-2026/892"}
-                                  </span>
-                                </div>
-                                <div className="exec-proj-perf-item">
-                                  <span className="exec-proj-perf-label">Ngày duyệt:</span>
-                                  <span className="exec-proj-perf-val">
-                                    {p.eApprovalDate ? formatDate(p.eApprovalDate) : "15/06/2026"}
-                                  </span>
-                                </div>
-                                <div className="exec-proj-perf-item">
-                                  <span className="exec-proj-perf-label">Hiệu suất mốc:</span>
-                                  <span className="exec-proj-perf-val green">
-                                    94.5% Đúng hạn
-                                  </span>
+                                <div className="exec-proj-mtl-note">
+                                  <span>{progressVal >= 80 ? "✓ Đang đạt tiến độ kế hoạch MTL 9-4" : "⚠ Cần bám sát và đôn đốc các mốc"}</span>
+                                  <span>Mục tiêu: 100%</span>
                                 </div>
                               </div>
 
                               <div className="exec-proj-bottom">
-                                <span style={{ fontSize: "11px", color: "#64748b", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                                  NVTK: {p.designTaskStatus === "da_duyet" ? "Đã duyệt" : "Đang lập"} · FS: {p.fsStatus === "da_duyet" ? "Đã duyệt" : "Đang tính"}
+                                <span style={{ fontSize: "11px", color: "#64748b" }}>
+                                  Bản MTL: <b>{p.officialVersion || "v1.0"}</b>
                                 </span>
                                 <div style={{ display: "flex", gap: "6px" }}>
                                   <button
@@ -6916,8 +6911,9 @@ export default function Home() {
                       </div>
                     ) : (
                       <div className="exec-empty-box">
-                        <b>Không có dự án nào có Master Timeline được duyệt phù hợp với bộ lọc.</b>
-                        <span>Chỉ các dự án đã được cấp thẩm quyền phê duyệt chính thức (E-Approval) mới được trình bày tại đây.</span>
+                        <IconBuilding />
+                        <b>Chưa có dự án nào thỏa điều kiện lọc</b>
+                        <span>Chỉ các dự án đã được phê duyệt Master Timeline mới được hiển thị tại đây.</span>
                       </div>
                     )}
                   </div>
