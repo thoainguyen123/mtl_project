@@ -1369,6 +1369,8 @@ export default function Home() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [homePeriod, setHomePeriod] = useState<"6m" | "q3" | "year">("6m");
   const [homeOpFilter, setHomeOpFilter] = useState<"all" | "passed" | "improve">("all");
+  const [homeRegionFilter, setHomeRegionFilter] = useState("all");
+  const [homeProjectFilter, setHomeProjectFilter] = useState("all");
   const [todayTasksList, setTodayTasksList] = useState<Array<{ id: string; title: string; category: "routine" | "extra" | "technical"; time: string; done: boolean; project?: string }>>([
     { id: "t1", title: "Duyệt kế hoạch triển khai thiết kế Dự án Aqua City - Phân khu Phoenix", category: "routine", time: "10:30", done: true, project: "Aqua City" },
     { id: "t2", title: "Rà soát mốc tiến độ hồ sơ PCCC Dự án NovaWorld Phan Thiết", category: "technical", time: "14:15", done: true, project: "NovaWorld Phan Thiết" },
@@ -4082,6 +4084,7 @@ export default function Home() {
         }
 
         /* SECTION: 3 KEY PROJECTS HEALTH */
+        /* SECTION: TÌNH TRẠNG DỰ ÁN (CHỈ DỰ ÁN ĐÃ DUYỆT MTL) */
         .exec-portfolio-box {
           background: #ffffff;
           border: 1px solid #e2e8f0;
@@ -4094,6 +4097,8 @@ export default function Home() {
           align-items: center;
           justify-content: space-between;
           margin-bottom: 12px;
+          gap: 12px;
+          flex-wrap: wrap;
         }
         .exec-section-title {
           font-size: 13px;
@@ -4109,16 +4114,106 @@ export default function Home() {
           font-size: 11.5px;
           color: #64748b;
           font-weight: 500;
+          margin-left: 4px;
+        }
+        .exec-filters-wrap {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          flex-wrap: wrap;
+        }
+        .exec-filter-group {
+          display: flex;
+          align-items: center;
+          gap: 5px;
+        }
+        .exec-filter-label {
+          font-size: 11px;
+          font-weight: 700;
+          color: #64748b;
+          text-transform: uppercase;
+        }
+        .exec-filter-select {
+          padding: 3px 8px;
+          border-radius: 6px;
+          border: 1px solid #cbd5e1;
+          background: #ffffff;
+          color: #0f172a;
+          font-size: 11.5px;
+          font-weight: 600;
+          cursor: pointer;
+          outline: none;
+          height: 28px;
+          transition: all 0.15s ease;
+        }
+        .exec-filter-select:hover {
+          border-color: #94a3b8;
+        }
+        .exec-filter-select:focus {
+          border-color: #16a34a;
+          box-shadow: 0 0 0 2px rgba(22, 163, 74, 0.15);
         }
         .exec-portfolio-grid {
           display: grid;
-          grid-template-columns: repeat(3, minmax(0, 1fr));
+          grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
           gap: 12px;
         }
         @media (max-width: 900px) {
           .exec-portfolio-grid {
             grid-template-columns: 1fr;
           }
+        }
+        .exec-proj-perf-grid {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 6px;
+          padding: 6px 10px;
+          background: #f1f5f9;
+          border-radius: 6px;
+          margin: 4px 0 2px;
+        }
+        .exec-proj-perf-item {
+          display: flex;
+          flex-direction: column;
+          gap: 1px;
+        }
+        .exec-proj-perf-label {
+          font-size: 9.5px;
+          color: #64748b;
+          font-weight: 600;
+        }
+        .exec-proj-perf-val {
+          font-size: 11px;
+          font-weight: 700;
+          color: #0f172a;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+        .exec-proj-perf-val.green {
+          color: #16a34a;
+        }
+        .exec-empty-box {
+          text-align: center;
+          padding: 24px 16px;
+          background: #f8fafc;
+          border: 1px dashed #cbd5e1;
+          border-radius: 8px;
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+          align-items: center;
+          justify-content: center;
+          width: 100%;
+          box-sizing: border-box;
+        }
+        .exec-empty-box b {
+          font-size: 12.5px;
+          color: #475569;
+        }
+        .exec-empty-box span {
+          font-size: 11px;
+          color: #94a3b8;
         }
         .exec-proj-card {
           background: #f8fafc;
@@ -6570,64 +6665,21 @@ export default function Home() {
                 },
               ];
 
-              const keyProjects = [
-                {
-                  project: pAqua,
-                  code: pAqua?.code || "NVL-AQC-2026",
-                  name: "Aqua City Phoenix South",
-                  region: "Vùng Đồng Nai 1",
-                  progress: 92,
-                  progressColor: "green",
-                  statusTag: "approved",
-                  statusLabel: "✓ MTL v1.0 ĐÃ DUYỆT",
-                  note: "Mốc GPXD & Hạ tầng đúng hạn",
-                  actionLabel: "Xem MTL ↗",
-                  isPrimary: false,
-                  onAction: () => {
-                    if (pAqua) {
-                      setActiveId(pAqua.id);
-                      setView("workspace");
-                    }
-                  },
-                },
-                {
-                  project: pNova,
-                  code: pNova?.code || "NVL-NVW-2026",
-                  name: "NovaWorld Phan Thiet",
-                  region: "Vùng Phan Thiết 1",
-                  progress: 85,
-                  progressColor: "blue",
-                  statusTag: "in-progress",
-                  statusLabel: "ĐANG THI CÔNG",
-                  note: "Cảnh báo PCCC Tháp B & C (-40d)",
-                  actionLabel: "Xem MTL ↗",
-                  isPrimary: false,
-                  onAction: () => {
-                    if (pNova) {
-                      setActiveId(pNova.id);
-                      setView("workspace");
-                    }
-                  },
-                },
-                {
-                  project: pTgm,
-                  code: pTgm?.code || "NVL-GMH-2026",
-                  name: "The Grand Manhattan",
-                  region: "Vùng TP.HCM 1",
-                  progress: 78,
-                  progressColor: "orange",
-                  statusTag: "pending-eapp",
-                  statusLabel: "CHỜ E-APPROVAL",
-                  note: "Đã hoàn thiện MTL v1.0 · Cần duyệt",
-                  actionLabel: "✓ Phê duyệt E-Approval",
-                  isPrimary: true,
-                  onAction: () => {
-                    if (pTgm) {
-                      openEApprovalModal(pTgm);
-                    }
-                  },
-                },
-              ];
+              const approvedMtlProjects = projects.filter(
+                (p) => Boolean(p.isOfficialApproved || (p.approvalStatus === "approved" && p.eApprovalCode))
+              );
+
+              const availableRegions = Array.from(new Set(approvedMtlProjects.map((p) => p.region).filter(Boolean))) as string[];
+
+              const availableProjectsForSelect = approvedMtlProjects.filter(
+                (p) => homeRegionFilter === "all" || p.region === homeRegionFilter
+              );
+
+              const visibleHomeProjects = approvedMtlProjects.filter((p) => {
+                const matchesRegion = homeRegionFilter === "all" || p.region === homeRegionFilter;
+                const matchesProject = homeProjectFilter === "all" || p.id === homeProjectFilter;
+                return matchesRegion && matchesProject;
+              });
 
               const overdueAlerts = [
                 {
@@ -6682,12 +6734,14 @@ export default function Home() {
 
                     <div className="exec-kpi-card blue">
                       <div className="exec-kpi-left">
-                        <span className="exec-kpi-label">Dự án Đang Quản lý</span>
+                        <span className="exec-kpi-label">Dự án Đã Duyệt MTL</span>
                         <div className="exec-kpi-num-row">
-                          <span className="exec-kpi-big-num">3 / 3</span>
+                          <span className="exec-kpi-big-num">{approvedMtlProjects.length} / {projects.length}</span>
                           <span className="exec-kpi-tag blue">Đúng hạn 92%</span>
                         </div>
-                        <span className="exec-kpi-sub">Aqua City · NVW Phan Thiết · TGM</span>
+                        <span className="exec-kpi-sub">
+                          {approvedMtlProjects.map((p) => p.code).join(" · ") || "Chưa có dự án duyệt"}
+                        </span>
                       </div>
                       <IconBuilding />
                     </div>
@@ -6732,54 +6786,140 @@ export default function Home() {
                     </div>
                   </div>
 
-                  {/* 2. Key Projects Portfolio Health */}
+                  {/* 2. TÌNH TRẠNG DỰ ÁN (CHỈ DỰ ÁN ĐÃ DUYỆT MASTER TIMELINE) */}
                   <div className="exec-portfolio-box">
                     <div className="exec-section-header">
-                      <span className="exec-section-title">
-                        <IconBuilding /> Sức khỏe Các Đại Dự Án Trọng Điểm
-                      </span>
-                      <span className="exec-section-sub">3 Dự án BĐHDA trực tiếp kiểm soát tiến độ</span>
-                    </div>
+                      <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+                        <span className="exec-section-title">
+                          <IconBuilding /> Tình trạng dự án
+                        </span>
+                        <span className="exec-section-sub">
+                          (Đã có Master Timeline được duyệt · {visibleHomeProjects.length} dự án)
+                        </span>
+                      </div>
 
-                    <div className="exec-portfolio-grid">
-                      {keyProjects.map((kp) => (
-                        <div className="exec-proj-card" key={kp.code}>
-                          <div className="exec-proj-top">
-                            <div>
-                              <span className="exec-proj-code">{kp.code}</span>
-                              <div className="exec-proj-name" title={kp.name}>{kp.name}</div>
-                              <span className="exec-proj-region">{kp.region}</span>
-                            </div>
-                            <span className={`exec-proj-status-tag ${kp.statusTag}`}>
-                              {kp.statusLabel}
-                            </span>
-                          </div>
-
-                          <div className="exec-proj-progress-row">
-                            <div className="exec-proj-bar-track">
-                              <div
-                                className={`exec-proj-bar-fill ${kp.progressColor}`}
-                                style={{ width: `${kp.progress}%` }}
-                              />
-                            </div>
-                            <span className="exec-proj-percent">{kp.progress}%</span>
-                          </div>
-
-                          <div className="exec-proj-bottom">
-                            <span style={{ fontSize: "11px", color: "#64748b", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                              {kp.note}
-                            </span>
-                            <button
-                              type="button"
-                              className={`exec-proj-btn ${kp.isPrimary ? "primary" : ""}`}
-                              onClick={kp.onAction}
-                            >
-                              {kp.actionLabel}
-                            </button>
-                          </div>
+                      {/* Bộ lọc Vùng / Dự án */}
+                      <div className="exec-filters-wrap">
+                        <div className="exec-filter-group">
+                          <span className="exec-filter-label">Vùng:</span>
+                          <select
+                            value={homeRegionFilter}
+                            onChange={(e) => {
+                              setHomeRegionFilter(e.target.value);
+                              setHomeProjectFilter("all");
+                            }}
+                            className="exec-filter-select"
+                            aria-label="Lọc theo Vùng"
+                          >
+                            <option value="all">Tất cả vùng ({availableRegions.length})</option>
+                            {availableRegions.map((region) => (
+                              <option key={region} value={region}>{region}</option>
+                            ))}
+                          </select>
                         </div>
-                      ))}
+                        <div className="exec-filter-group">
+                          <span className="exec-filter-label">Dự án:</span>
+                          <select
+                            value={homeProjectFilter}
+                            onChange={(e) => setHomeProjectFilter(e.target.value)}
+                            className="exec-filter-select"
+                            aria-label="Lọc theo Dự án"
+                          >
+                            <option value="all">Tất cả dự án ({availableProjectsForSelect.length})</option>
+                            {availableProjectsForSelect.map((p) => (
+                              <option key={p.id} value={p.id}>[{p.code}] {p.name}</option>
+                            ))}
+                          </select>
+                        </div>
+                      </div>
                     </div>
+
+                    {visibleHomeProjects.length > 0 ? (
+                      <div className="exec-portfolio-grid">
+                        {visibleHomeProjects.map((p) => {
+                          const progressVal = 92;
+                          return (
+                            <div className="exec-proj-card" key={p.id}>
+                              <div className="exec-proj-top">
+                                <div>
+                                  <span className="exec-proj-code">{p.code}</span>
+                                  <div className="exec-proj-name" title={p.name}>{p.name}</div>
+                                  <span className="exec-proj-region">{p.region || p.location}</span>
+                                </div>
+                                <span className="exec-proj-status-tag approved">
+                                  ✓ MTL {p.officialVersion || "v1.0"} ĐÃ DUYỆT
+                                </span>
+                              </div>
+
+                              <div className="exec-proj-progress-row">
+                                <div className="exec-proj-bar-track">
+                                  <div
+                                    className="exec-proj-bar-fill green"
+                                    style={{ width: `${progressVal}%` }}
+                                  />
+                                </div>
+                                <span className="exec-proj-percent">{progressVal}%</span>
+                              </div>
+
+                              {/* Thông tin về hiệu suất dự án */}
+                              <div className="exec-proj-perf-grid">
+                                <div className="exec-proj-perf-item">
+                                  <span className="exec-proj-perf-label">Hồ sơ E-App:</span>
+                                  <span className="exec-proj-perf-val" title={p.eApprovalCode || "QĐ-NVL-2026/892"}>
+                                    {p.eApprovalCode || "QĐ-NVL-2026/892"}
+                                  </span>
+                                </div>
+                                <div className="exec-proj-perf-item">
+                                  <span className="exec-proj-perf-label">Ngày duyệt:</span>
+                                  <span className="exec-proj-perf-val">
+                                    {p.eApprovalDate ? formatDate(p.eApprovalDate) : "15/06/2026"}
+                                  </span>
+                                </div>
+                                <div className="exec-proj-perf-item">
+                                  <span className="exec-proj-perf-label">Hiệu suất mốc:</span>
+                                  <span className="exec-proj-perf-val green">
+                                    94.5% Đúng hạn
+                                  </span>
+                                </div>
+                              </div>
+
+                              <div className="exec-proj-bottom">
+                                <span style={{ fontSize: "11px", color: "#64748b", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                                  NVTK: {p.designTaskStatus === "da_duyet" ? "Đã duyệt" : "Đang lập"} · FS: {p.fsStatus === "da_duyet" ? "Đã duyệt" : "Đang tính"}
+                                </span>
+                                <div style={{ display: "flex", gap: "6px" }}>
+                                  <button
+                                    type="button"
+                                    className="exec-proj-btn primary"
+                                    onClick={() => {
+                                      setActiveId(p.id);
+                                      setView("workspace");
+                                    }}
+                                  >
+                                    Xem chi tiết MTL ↗
+                                  </button>
+                                  <button
+                                    type="button"
+                                    className="exec-proj-btn"
+                                    onClick={() => {
+                                      setOverviewProject(p.id);
+                                      setView("overview");
+                                    }}
+                                  >
+                                    Tiến độ
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    ) : (
+                      <div className="exec-empty-box">
+                        <b>Không có dự án nào có Master Timeline được duyệt phù hợp với bộ lọc.</b>
+                        <span>Chỉ các dự án đã được cấp thẩm quyền phê duyệt chính thức (E-Approval) mới được trình bày tại đây.</span>
+                      </div>
+                    )}
                   </div>
 
                   {/* 3. Lower Grid: Operations Matrix & Action Hub */}
