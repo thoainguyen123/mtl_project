@@ -1863,16 +1863,18 @@ export default function Home() {
     );
   }, [projects, initSelectedApprovedProjectId]);
 
-  const targetProjectTasks = useMemo(() => {
+  const targetScheduledTasks = useMemo(() => {
     if (!targetProjectForUpdate) return fullCatalog;
     const s = scheduleTasks(targetProjectForUpdate);
     return s.length > 0 ? s : fullCatalog;
   }, [targetProjectForUpdate, fullCatalog]);
 
+  const targetProjectTasks = targetScheduledTasks;
+
   const initUpdateWbsTasks = useMemo(() => {
-    if (initUpdateSelectedDeptCode === "all") return targetProjectTasks;
-    return targetProjectTasks.filter((task) => task.groupCode === initUpdateSelectedDeptCode);
-  }, [targetProjectTasks, initUpdateSelectedDeptCode]);
+    if (initUpdateSelectedDeptCode === "all") return targetScheduledTasks;
+    return targetScheduledTasks.filter((task) => task.groupCode === initUpdateSelectedDeptCode);
+  }, [targetScheduledTasks, initUpdateSelectedDeptCode]);
 
   const visibleInitUpdateWbsTasks = useMemo(() => {
     const q = initUpdateWbsSearch.trim().toLocaleLowerCase("vi");
