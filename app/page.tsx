@@ -114,6 +114,7 @@ type Project = {
   eApprovalNote?: string;
   officialVersion?: string;
   baselineLocked?: boolean;
+  scheduleStatus?: "in_progress" | "completed";
 };
 
 type ProjectForm = Pick<Project, "name" | "code" | "type" | "investor" | "location" | "startDate" | "targetDate" | "area" | "region" | "group"> & {
@@ -340,6 +341,7 @@ const DEFAULT_INITIAL_PROJECTS: Partial<Project>[] = [
     area: "Đồng Nai",
     region: "Vùng Đồng Nai 1",
     group: "Nhóm 3 (Đang xây dựng)",
+    scheduleStatus: "completed",
     approvalStatus: "approved",
     isOfficialApproved: true,
     eApprovalCode: "QĐ-NVL-2026/892",
@@ -360,6 +362,7 @@ const DEFAULT_INITIAL_PROJECTS: Partial<Project>[] = [
     area: "Bình Thuận",
     region: "Vùng Phan Thiết 1",
     group: "Nhóm 3 (Đang xây dựng)",
+    scheduleStatus: "in_progress",
     approvalStatus: "draft",
     isOfficialApproved: false,
     officialVersion: "v1.0",
@@ -378,6 +381,7 @@ const DEFAULT_INITIAL_PROJECTS: Partial<Project>[] = [
     area: "TP.HCM",
     region: "Vùng Hồ Chí Minh 1",
     group: "Nhóm 3 (Đang xây dựng)",
+    scheduleStatus: "in_progress",
     approvalStatus: "draft",
     isOfficialApproved: false,
     officialVersion: "v1.0",
@@ -387,6 +391,13 @@ const DEFAULT_INITIAL_PROJECTS: Partial<Project>[] = [
     targetDate: "2027-12-31",
   }
 ];
+
+function isScheduleCompleted(project?: Partial<Project> | null): boolean {
+  if (!project) return false;
+  if (project.scheduleStatus === "completed") return true;
+  if (project.scheduleStatus === "in_progress") return false;
+  return Boolean(project.isOfficialApproved || project.approvalStatus === "approved");
+}
 
 function emptyTaskFormCreator(): TaskForm {
   return {
@@ -497,6 +508,7 @@ function normalizeProject(project: Partial<Project>): Project {
     eApprovalNote: project.eApprovalNote,
     officialVersion: project.officialVersion ?? (isOfficial ? "v1.0" : undefined),
     baselineLocked: Boolean(project.baselineLocked ?? isOfficial),
+    scheduleStatus: project.scheduleStatus ?? (isOfficial || project.approvalStatus === "approved" ? "completed" : "in_progress"),
   };
 }
 
@@ -1591,9 +1603,13 @@ export default function Home() {
     return projects.filter((p) => p.approvalStatus === "appraised" && !p.isOfficialApproved).length;
   }, [projects]);
 
+  const confirmEligibleProjects = useMemo(() => {
+    return projects.filter((project) => isScheduleCompleted(project));
+  }, [projects]);
+
   const visibleConfirmProjects = useMemo(() => {
     const query = confirmSearch.trim().toLocaleLowerCase("vi");
-    return projects.filter((project) => {
+    return confirmEligibleProjects.filter((project) => {
       const matchesQuery = !query || `${project.code} ${project.name} ${project.location} ${project.eApprovalCode ?? ""}`.toLocaleLowerCase("vi").includes(query);
       const matchesFilter = confirmFilter === "all"
         ? true
@@ -1602,7 +1618,7 @@ export default function Home() {
           : !!project.isOfficialApproved;
       return matchesQuery && matchesFilter;
     });
-  }, [projects, confirmSearch, confirmFilter]);
+  }, [confirmEligibleProjects, confirmSearch, confirmFilter]);
 
   const pagedConfirmProjects = useMemo(() => {
     const pageCount = Math.max(1, Math.ceil(visibleConfirmProjects.length / confirmPageSize));
@@ -7260,7 +7276,7 @@ export default function Home() {
                   </div>
                   <div className="project-table-body">
                     {projects.map((project) => {
-                      const isCompleted = project.approvalStatus === "approved" || Boolean(project.isOfficialApproved);
+                      const isCompleted = isScheduleCompleted(project);
                       return (
                         <div key={project.id} className="project-table-row" onClick={() => openProject(project)}>
                           <span className="project-region-cell">{project.region || project.location || project.area || "Đồng Nai 1"}</span>
@@ -7721,13 +7737,13 @@ export default function Home() {
               <div className="table-filters" style={{ margin: "14px 24px 14px", border: "none" }}>
                 <div className="gms-function-tabs" style={{ margin: 0 }}>
                   <button className={confirmFilter === "all" ? "active" : ""} onClick={() => { setConfirmFilter("all"); setConfirmPage(1); }}>
-                    Tất cả dự án <b>{projects.length}</b>
+                    Tất cả dự án <b>{confirmEligibleProjects.length}</b>
                   </button>
                   <button className={confirmFilter === "pending" ? "active" : ""} onClick={() => { setConfirmFilter("pending"); setConfirmPage(1); }}>
-                    Chưa xác nhận <b>{projects.filter((p) => !p.isOfficialApproved).length}</b>
+                    Chưa xác nhận <b>{confirmEligibleProjects.filter((p) => !p.isOfficialApproved).length}</b>
                   </button>
                   <button className={confirmFilter === "approved" ? "active" : ""} onClick={() => { setConfirmFilter("approved"); setConfirmPage(1); }}>
-                    Đã phê duyệt <b>{officialApprovedProjects.length}</b>
+                    Đã phê duyệt <b>{confirmEligibleProjects.filter((p) => p.isOfficialApproved).length}</b>
                   </button>
                 </div>
                 <span className="table-filters-count">{visibleConfirmProjects.length} dự án</span>
@@ -7810,9 +7826,8 @@ export default function Home() {
                 </div>
               ) : (
                 <div className="project-index-empty">
-                  <b>Không tìm thấy dự án phù hợp</b>
-                  <span>Thử tìm bằng tên/mã khác hoặc bấm nút bên dưới để nhập phê duyệt E-Approval.</span>
-                  <button className="primary-button" onClick={() => openEApprovalModal()}>+ Nhập phê duyệt E-Approval</button>
+                  <b>Chưa có dự án nào chuyển sang Xác nhận phê duyệt</b>
+                  <span>Chỉ các dự án đã có trạng thái "Đã hoàn thiện" tại mục Hoàn thiện tiến độ mới xuất hiện tại đây.</span>
                 </div>
               )}
               <Pagination total={visibleConfirmProjects.length} pageSize={confirmPageSize} page={confirmPage} onPageChange={setConfirmPage} onPageSizeChange={(size) => { setConfirmPageSize(size); setConfirmPage(1); }} />
@@ -9894,7 +9909,7 @@ export default function Home() {
               >
                 🖨️ Xuất file
               </button>
-              {!(activeProject.approvalStatus === "approved" || Boolean(activeProject.isOfficialApproved)) ? (
+              {!isScheduleCompleted(activeProject) ? (
                 <button
                   type="button"
                   className="primary-button"
@@ -9905,15 +9920,15 @@ export default function Home() {
                         p.id === activeProject.id
                           ? {
                               ...p,
+                              scheduleStatus: "completed",
                               approvalStatus: "approved",
-                              isOfficialApproved: true,
                               approvedAt: p.approvedAt || new Date().toISOString(),
                             }
                           : p
                       )
                     );
                     setShowCompleteModal(false);
-                    notify(`Đã xác nhận hoàn thiện tiến độ dự án "${activeProject.name}"!`);
+                    notify(`Đã xác nhận hoàn thiện tiến độ dự án "${activeProject.name}"! Dự án đã được chuyển sang mục Xác nhận phê duyệt.`);
                   }}
                 >
                   ✓ Xác nhận
@@ -9929,6 +9944,7 @@ export default function Home() {
                         p.id === activeProject.id
                           ? {
                               ...p,
+                              scheduleStatus: "in_progress",
                               approvalStatus: "draft",
                               isOfficialApproved: false,
                               approvedAt: undefined,
@@ -9964,7 +9980,7 @@ export default function Home() {
                 <span>Dự án cần phê duyệt *</span>
                 <select value={eApprovalForm.projectId} onChange={(e) => setEApprovalForm({ ...eApprovalForm, projectId: e.target.value })}>
                   <option value="">-- Chọn dự án --</option>
-                  {projects.map((p) => (
+                  {confirmEligibleProjects.map((p) => (
                     <option key={p.id} value={p.id}>
                       [{p.code}] {p.name} {p.isOfficialApproved ? "(Đã duyệt)" : ""}
                     </option>
