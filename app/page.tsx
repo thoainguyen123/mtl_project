@@ -261,7 +261,7 @@ const GROUPS = [
   { code: "9.5", short: "PTC", name: "Ban Cung ứng Đấu thầu", role: "indirect", scope: "9 phòng ban" },
   { code: "9.6", short: "QSB", name: "Phòng Khối lượng và Ngân sách", role: "indirect", scope: "9 phòng ban" },
   { code: "9.7", short: "SED", name: "Phòng An ninh", role: "indirect", scope: "9 phòng ban" },
-  { code: "9.8", short: "IDC", name: "Trung tâm Thiết kế Nội bộ", role: "indirect", scope: "9 phòng ban" },
+  { code: "9.8", short: "IDD", name: "Phòng Thiết kế Nội bộ", role: "indirect", scope: "9 phòng ban" },
   { code: "9.9", short: "CSC", name: "Trung tâm Bồi thường GPMB", role: "indirect", scope: "9 phòng ban" },
   { code: "4.0", short: "PMD", name: "Phòng Điều hành Dự án", role: "coordinator", scope: "Chủ trì lập MTL" },
   { code: "4.1", short: "PLP", name: "Phòng Thủ tục Pháp lý Dự án", role: "direct", scope: "4 phòng trực tiếp" },
@@ -7905,7 +7905,7 @@ export default function Home() {
                           { code: "9.5", short: "PTC", name: "Ban Cung ứng Đấu thầu", desc: "Cung ứng VLXD/MEP, tổ chức đấu thầu & thanh quyết toán", count: "128 task", type: "khoi9" },
                           { code: "9.6", short: "QSB", name: "Phòng Khối lượng và Ngân sách", desc: "Suất đầu tư, ngân sách xây dựng, kiểm soát khối lượng BoQ", count: "43 task", type: "khoi9" },
                           { code: "9.7", short: "SED", name: "Phòng An ninh", desc: "Phương án an ninh nội bộ, bảo vệ dự án, giám sát an toàn", count: "30 task", type: "khoi9" },
-                          { code: "9.8", short: "IDC", name: "Trung tâm Thiết kế Nội bộ", desc: "Thiết kế quy hoạch, ý tưởng kiến trúc, nội thất & cảnh quan", count: "169 task", type: "khoi9" },
+                          { code: "9.8", short: "IDD", name: "Phòng Thiết kế Nội bộ", desc: "Thiết kế quy hoạch, ý tưởng kiến trúc, nội thất & cảnh quan", count: "169 task", type: "khoi9" },
                           { code: "9.9", short: "CSC", name: "Trung tâm Bồi thường GPMB", desc: "Kế hoạch đền bù, thỏa thuận bồi thường & giải phóng MB", count: "7 task", type: "khoi9" },
                           { code: "4.0", short: "PMD", name: "Phòng Điều hành Dự án", desc: "Chủ trì lập, tích hợp & điều phối tổng tiến độ MTL", count: "7 task", type: "khoi4" },
                           { code: "4.1", short: "PLP", name: "Phòng Thủ tục Pháp lý Dự án", desc: "Chủ trương ĐT, quy hoạch 1/500, đất đai, GPXD, nghiệm thu", count: "99 task", type: "khoi4" },
@@ -8012,7 +8012,7 @@ export default function Home() {
                             { code: "9.5", short: "PTC", name: "Ban Cung ứng Đấu thầu" },
                             { code: "9.6", short: "QSB", name: "Phòng Khối lượng và Ngân sách" },
                             { code: "9.7", short: "SED", name: "Phòng An ninh" },
-                            { code: "9.8", short: "IDC", name: "Trung tâm Thiết kế Nội bộ" },
+                            { code: "9.8", short: "IDD", name: "Phòng Thiết kế Nội bộ" },
                             { code: "9.9", short: "CSC", name: "Trung tâm Bồi thường GPMB" },
                             { code: "4.0", short: "PMD", name: "Phòng Điều hành Dự án" },
                             { code: "4.1", short: "PLP", name: "Phòng Thủ tục Pháp lý Dự án" },
@@ -8723,7 +8723,7 @@ export default function Home() {
                                             )}
                                           </div>
 
-                                          {/* 9.8 IDC */}
+                                          {/* 9.8 IDD */}
                                           <div>
                                             <div
                                               className="wbs-tree-node group"
@@ -8731,7 +8731,7 @@ export default function Home() {
                                             >
                                               <span className="wbs-tree-chevron">{initTreeExpanded.g9_8 ? "▼" : "▶"}</span>
                                               <IconFolderFlat />
-                                              <span>9.8 IDC – Trung tâm Thiết kế Nội bộ</span>
+                                              <span>9.8 IDD – Phòng Thiết kế Nội bộ</span>
                                               <span className="wbs-tree-tag" style={{ background: "#f1f5f9", color: "#475569" }}>Kế thừa hồ sơ</span>
                                             </div>
                                             {initTreeExpanded.g9_8 && (
