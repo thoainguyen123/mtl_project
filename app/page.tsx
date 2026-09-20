@@ -314,8 +314,8 @@ const PROJECT_GROUPS = [
 ] as const;
 
 const emptyForm: ProjectForm = {
-  area: "Khu vực 1",
-  region: "Vùng Hồ Chí Minh 1",
+  area: "",
+  region: "Đồng Nai 1",
   name: "",
   code: "",
   version: "v1.0",
@@ -1745,7 +1745,7 @@ export default function Home() {
     DEFAULT_DEPENDENCIES,
     form.parameters,
   ), [fullCatalog, enabledCatalogCodes, form.parameters]);
-  const isLowRiseCreation = form.parameters.loaiHinhDuAn === "Thấp tầng/Biệt thự";
+  const isLowRiseCreation = ["Nhà ở thấp tầng", "Biệt thự nghỉ dưỡng", "Thấp tầng/Biệt thự"].includes(form.parameters.loaiHinhDuAn);
   const activeMilestoneDates = useMemo(() => isLowRiseCreation
     ? Object.fromEntries(Object.entries(form.milestoneDates).filter(([code]) => code !== "MILE_PCD_03" && code !== "MILE_PCD_04"))
     : form.milestoneDates, [isLowRiseCreation, form.milestoneDates]);
@@ -2014,7 +2014,10 @@ export default function Home() {
   const continueCreateProject = () => {
     setFormError("");
     if (!form.name.trim() || !form.code.trim()) return setFormError("Vui lòng nhập tên và mã dự án.");
-    if (!form.region?.trim()) return setFormError("Vui lòng khai báo vùng quản lý.");
+    if (!form.region?.trim()) return setFormError("Vui lòng chọn Vùng dự án.");
+    if (!form.startDate) return setFormError("Vui lòng nhập Ngày bắt đầu dự án.");
+    if (!form.targetDate) return setFormError("Vui lòng nhập Ngày kết thúc hoàn toàn dự án.");
+    if (form.targetDate <= form.startDate) return setFormError("Ngày kết thúc dự án phải sau Ngày bắt đầu dự án.");
     setCreateStep(2);
   };
 
@@ -9980,14 +9983,14 @@ export default function Home() {
 
             <div className="form-grid" key={createStep}>
               {createStep === 1 && <section className="create-slide field-wide" aria-label="Thông tin dự án">
-              <div className="create-section-title">1. Nhận diện Master Timeline</div>
+              <div className="create-section-title">1. Thông tin dự án mới</div>
               <label className="field field-wide">
-                <span>Tên dự án *</span>
+                <span>Tên dự án mới *</span>
                 <input
                   autoFocus
                   value={form.name}
                   onChange={(event) => setForm({ ...form, name: event.target.value })}
-                  placeholder="Ví dụ: Aqua City - Đảo Phượng Hoàng"
+                  placeholder="Ví dụ: Aqua City - Phân khu Phoenix South"
                 />
               </label>
 
@@ -9996,10 +9999,100 @@ export default function Home() {
                 <input
                   value={form.code}
                   onChange={(event) => setForm({ ...form, code: event.target.value })}
-                  placeholder="Ví dụ: NVL-AQH-2026"
+                  placeholder="Ví dụ: AQC-PS-2026"
                 />
               </label>
 
+              <label className="field">
+                <span>Chủ đầu tư</span>
+                <input
+                  value={form.investor || ""}
+                  onChange={(event) => setForm({ ...form, investor: event.target.value })}
+                  placeholder="Ví dụ: Tập đoàn Novaland"
+                />
+              </label>
+
+              <label className="field">
+                <span>Loại hình dự án</span>
+                <select
+                  value={form.parameters.loaiHinhDuAn}
+                  onChange={(event) => {
+                    const value = event.target.value as ProjectParameters["loaiHinhDuAn"];
+                    setForm((current) => ({ ...current, type: value, parameters: { ...current.parameters, loaiHinhDuAn: value } }));
+                  }}
+                >
+                  <option value="Nhà ở thấp tầng">Nhà ở thấp tầng</option>
+                  <option value="Chung cư cao tầng">Chung cư cao tầng</option>
+                  <option value="Khách sạn">Khách sạn</option>
+                  <option value="Biệt thự nghỉ dưỡng">Biệt thự nghỉ dưỡng</option>
+                  <option value="Công viên nước">Công viên nước</option>
+                </select>
+              </label>
+
+              <label className="field">
+                <span>Vùng dự án *</span>
+                <select
+                  value={form.region || "Đồng Nai 1"}
+                  onChange={(event) => setForm({ ...form, region: event.target.value })}
+                >
+                  <option value="Đồng Nai 1">Đồng Nai 1</option>
+                  <option value="Tp HCM 1">Tp HCM 1</option>
+                  <option value="Hồ Tràm 1">Hồ Tràm 1</option>
+                  <option value="Phan Thiết 1">Phan Thiết 1</option>
+                </select>
+              </label>
+
+              <div className="create-section-title" style={{ marginTop: 12 }}>2. Kế hoạch thời gian & Các mốc mục tiêu</div>
+              <label className="field">
+                <span>Ngày bắt đầu dự án *</span>
+                <input
+                  type="date"
+                  required
+                  value={form.startDate}
+                  max={form.targetDate}
+                  onChange={(event) => setForm((current) => ({ ...current, startDate: event.target.value }))}
+                />
+              </label>
+
+              <label className="field">
+                <span>Ngày mục tiêu khởi công</span>
+                <input
+                  type="date"
+                  value={form.milestoneDates["MILE_PCD_01"] ?? ""}
+                  onChange={(event) => setForm((current) => ({ ...current, milestoneDates: { ...current.milestoneDates, MILE_PCD_01: event.target.value } }))}
+                />
+              </label>
+
+              <label className="field">
+                <span>Ngày mục tiêu mở bán</span>
+                <input
+                  type="date"
+                  value={form.milestoneDates["MILE_COM_02"] ?? ""}
+                  onChange={(event) => setForm((current) => ({ ...current, milestoneDates: { ...current.milestoneDates, MILE_COM_02: event.target.value } }))}
+                />
+              </label>
+
+              <label className="field">
+                <span>Ngày mục tiêu bàn giao</span>
+                <input
+                  type="date"
+                  value={form.milestoneDates["MILE_OM_02"] ?? ""}
+                  onChange={(event) => setForm((current) => ({ ...current, milestoneDates: { ...current.milestoneDates, MILE_OM_02: event.target.value } }))}
+                />
+              </label>
+
+              <label className="field field-wide">
+                <span>Ngày kết thúc hoàn toàn dự án *</span>
+                <input
+                  type="date"
+                  required
+                  value={form.targetDate}
+                  min={form.startDate}
+                  onChange={(event) => setForm((current) => ({ ...current, targetDate: event.target.value }))}
+                />
+              </label>
+
+              <div className="create-section-title" style={{ marginTop: 12 }}>3. Phạm vi & Phân nhóm</div>
               <label className="field">
                 <span>Phiên bản Master Timeline</span>
                 <input
@@ -10007,20 +10100,6 @@ export default function Home() {
                   onChange={(event) => setForm({ ...form, version: event.target.value })}
                   placeholder="Ví dụ: v1.0"
                 />
-              </label>
-
-              <div className="create-section-title">2. Phân loại và phạm vi quản lý</div>
-              <label className="field">
-                <span>Vùng quản lý *</span>
-                <select
-                  value={form.region || "Vùng Hồ Chí Minh 1"}
-                  onChange={(event) => setForm({ ...form, region: event.target.value })}
-                >
-                  <option value="Vùng Đồng Nai 1">Vùng Đồng Nai 1</option>
-                  <option value="Vùng Phan Thiết 1">Vùng Phan Thiết 1</option>
-                  <option value="Vùng Hồ Chí Minh 1">Vùng Hồ Chí Minh 1</option>
-                  <option value="Vùng Hồ Tràm 1">Vùng Hồ Tràm 1</option>
-                </select>
               </label>
 
               <label className="field">
@@ -10038,22 +10117,8 @@ export default function Home() {
               </label>
 
               <label className="field">
-                <span>Khu vực / Phân khu</span>
-                <input value={form.area || ""} onChange={(event) => setForm({ ...form, area: event.target.value })} placeholder="Ví dụ: Phân khu Phoenix" />
-              </label>
-
-              <label className="field field-wide">
-                <span>Chủ đầu tư (Pháp nhân)</span>
-                <input
-                  value={form.investor || ""}
-                  onChange={(event) => setForm({ ...form, investor: event.target.value })}
-                  placeholder="Ví dụ: Tập đoàn Novaland / Công ty TNHH BĐS Đà Lạt Valley"
-                />
-              </label>
-
-              <label className="field field-wide">
-                <span>Địa điểm dự án</span>
-                <input value={form.location} onChange={(event) => setForm({ ...form, location: event.target.value })} placeholder="Ví dụ: Biên Hòa, Đồng Nai" />
+                <span>Phân khu / Địa điểm</span>
+                <input value={form.area || ""} onChange={(event) => setForm({ ...form, area: event.target.value })} placeholder="Ví dụ: Phân khu Phoenix South" />
               </label>
 
               </section>}
@@ -10066,7 +10131,11 @@ export default function Home() {
                     const value = event.target.value as ProjectParameters["loaiHinhDuAn"];
                     setForm((current) => ({ ...current, type: value, parameters: { ...current.parameters, loaiHinhDuAn: value } }));
                   }}>
-                    <option>Chung cư cao tầng</option><option>Thấp tầng/Biệt thự</option><option>Khu đô thị phức hợp</option><option>Khách sạn/Nghỉ dưỡng</option>
+                    <option value="Nhà ở thấp tầng">Nhà ở thấp tầng</option>
+                    <option value="Chung cư cao tầng">Chung cư cao tầng</option>
+                    <option value="Khách sạn">Khách sạn</option>
+                    <option value="Biệt thự nghỉ dưỡng">Biệt thự nghỉ dưỡng</option>
+                    <option value="Công viên nước">Công viên nước</option>
                   </select>
                 </label>
                 <div className="parameter-pair field-wide">

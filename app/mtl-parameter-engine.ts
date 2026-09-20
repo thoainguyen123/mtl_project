@@ -1,5 +1,5 @@
 export type ProjectParameters = {
-  loaiHinhDuAn: "Chung cư cao tầng" | "Thấp tầng/Biệt thự" | "Khu đô thị phức hợp" | "Khách sạn/Nghỉ dưỡng";
+  loaiHinhDuAn: "Nhà ở thấp tầng" | "Chung cư cao tầng" | "Khách sạn" | "Biệt thự nghỉ dưỡng" | "Công viên nước" | "Thấp tầng/Biệt thự" | "Khu đô thị phức hợp" | "Khách sạn/Nghỉ dưỡng";
   dienTichDat: number;
   donViDienTichDat: "m²" | "ha";
   gfa: number;
@@ -135,9 +135,9 @@ export function generateParameterizedMTL(
   };
 
   let removedByType = 0;
-  if (parameters.loaiHinhDuAn === "Chung cư cao tầng") removedByType = removeBranches(["4.3.7"]);
-  if (parameters.loaiHinhDuAn === "Thấp tầng/Biệt thự") removedByType = removeBranches(["4.3.8"]);
-  if (parameters.loaiHinhDuAn === "Khách sạn/Nghỉ dưỡng") removedByType = removeBranches(["4.3.7"]);
+  const isLowRise = ["Nhà ở thấp tầng", "Biệt thự nghỉ dưỡng", "Thấp tầng/Biệt thự"].includes(parameters.loaiHinhDuAn);
+  if (!isLowRise) removedByType = removeBranches(["4.3.7"]);
+  else removedByType = removeBranches(["4.3.8"]);
   impacts.push({ parameter: "PARAM_LOAI_HINH_DA", title: parameters.loaiHinhDuAn, detail: removedByType ? `Loại ${removedByType} task không phù hợp loại hình.` : "Giữ các nhánh cao tầng, thấp tầng và tiện ích phù hợp.", affectedTasks: removedByType });
 
   const phaseBranches = [
@@ -155,7 +155,7 @@ export function generateParameterizedMTL(
   }
   impacts.push({ parameter: "PARAM_SO_PHAN_KY", title: `${parameters.soPhanKy} phân kỳ`, detail: phaseClones ? `Sinh ${phaseClones} task mở bán, cấp phép và bàn giao theo đợt.` : "Sử dụng các nhánh đợt 1 trong thư viện.", affectedTasks: phaseClones });
 
-  if (parameters.loaiHinhDuAn !== "Thấp tầng/Biệt thự") {
+  if (!isLowRise) {
   const towerMappings: Map<string, string>[] = [];
   if (tasks.some((task) => task.code === "4.3.8.1")) {
     const towerRoot = tasks.find((task) => task.code === "4.3.8.1");
@@ -234,7 +234,7 @@ export function generateParameterizedMTL(
     }
   });
   impacts.push({ parameter: "PARAM_QUY_MO_GFA_DAT", title: `${parameters.dienTichDat} ${parameters.donViDienTichDat} · GFA ${parameters.gfa.toLocaleString("vi-VN")} m²`, detail: `Tính lại duration cho ${recalculatedTaskCount} task thiết kế, QSB và thi công.`, affectedTasks: recalculatedTaskCount });
-  if (parameters.loaiHinhDuAn === "Thấp tầng/Biệt thự") {
+  if (isLowRise) {
     impacts.push({ parameter: "PARAM_SO_CAN_THAP_TANG", title: `${parameters.soCanThapTang} căn thấp tầng`, detail: "Tính lại thời lượng kết cấu, hoàn thiện và nội thất theo số căn.", affectedTasks: tasks.filter((task) => task.code === "4.3.7.1.1" || task.code === "4.3.7.1.2").length });
   } else {
     impacts.push({ parameter: "PARAM_SO_TANG_NOI", title: `${parameters.soTangNoi} tầng`, detail: `Thời lượng kết cấu thân: ${parameters.soTangNoi} × 6 = ${parameters.soTangNoi * 6} ngày mỗi tháp.`, affectedTasks: tasks.filter((task) => /4\.3\.8\.1(?:_THAP_[A-Z])?\.2$/.test(task.code)).length });

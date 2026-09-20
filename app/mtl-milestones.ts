@@ -91,7 +91,7 @@ export function createInitialSampleSchedule(
   const warnings: string[] = [];
   const sources: MilestoneSources = {};
   const effective: MilestoneDates = {};
-  const lowRise = parameters.loaiHinhDuAn === "Thấp tầng/Biệt thự";
+  const lowRise = ["Nhà ở thấp tầng", "Biệt thự nghỉ dưỡng", "Thấp tầng/Biệt thự"].includes(parameters.loaiHinhDuAn);
   const milestones = KEY_MILESTONES.filter((milestone) => !lowRise || !["MILE_PCD_03", "MILE_PCD_04"].includes(milestone.code));
   milestones.forEach(({ code }) => {
     if (!enteredDates[code]) return;
