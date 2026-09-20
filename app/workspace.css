@@ -126,8 +126,9 @@
   min-width: 1300px;
 }
 .refined-ui .workspace .confirm-approval-table :is(.project-table-head,.project-table-row) {
-  grid-template-columns: 110px minmax(220px,2fr) 130px 150px 150px 110px 150px !important;
-  min-width: 1125px;
+  grid-template-columns: 110px minmax(200px, 1.8fr) 130px 140px minmax(200px, 1.4fr) 110px 190px !important;
+  min-width: 1080px;
+  gap: 14px !important;
 }
 .refined-ui .workspace :is(.project-table-head,.catalog-table-head,.task-grid .grid-header) {
   background: #f2f5f1 !important;

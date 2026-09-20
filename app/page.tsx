@@ -1611,11 +1611,12 @@ export default function Home() {
     const query = confirmSearch.trim().toLocaleLowerCase("vi");
     return confirmEligibleProjects.filter((project) => {
       const matchesQuery = !query || `${project.code} ${project.name} ${project.location} ${project.eApprovalCode ?? ""}`.toLocaleLowerCase("vi").includes(query);
+      const isApproved = Boolean(project.isOfficialApproved && (project.eApprovalUrl || project.eApprovalCode));
       const matchesFilter = confirmFilter === "all"
         ? true
         : confirmFilter === "pending"
-          ? !project.isOfficialApproved
-          : !!project.isOfficialApproved;
+          ? !isApproved
+          : isApproved;
       return matchesQuery && matchesFilter;
     });
   }, [confirmEligibleProjects, confirmSearch, confirmFilter]);
@@ -6119,13 +6120,35 @@ export default function Home() {
           border-color: #fca5a5 !important;
         }
         /* ================= CONFIRM APPROVAL TABLE ================= */
+        .confirm-approval-table {
+          width: 100% !important;
+          max-width: 100% !important;
+          margin: 0 !important;
+          overflow-x: auto !important;
+          box-sizing: border-box !important;
+        }
+        .refined-ui .workspace .confirm-approval-table :is(.project-table-head,.project-table-row),
         .confirm-approval-table .project-table-head,
         .confirm-approval-table .project-table-row {
-          grid-template-columns: 120px minmax(220px, 2fr) 150px 140px 160px 110px 150px !important;
+          min-width: 1080px !important;
+          width: 100% !important;
+          box-sizing: border-box !important;
+          grid-template-columns: 110px minmax(200px, 1.8fr) 130px 140px minmax(200px, 1.4fr) 110px 190px !important;
+          padding: 12px 18px !important;
+          gap: 14px !important;
+          align-items: center !important;
         }
         .confirm-approval-table .project-action-cell {
           justify-content: flex-start !important;
           gap: 6px !important;
+          display: flex !important;
+          align-items: center !important;
+        }
+        .confirm-approval-table .eapp-link-badge {
+          max-width: 100% !important;
+          overflow: hidden !important;
+          text-overflow: ellipsis !important;
+          white-space: nowrap !important;
         }
         /* ================= PROJECTS OVERVIEW TABLE ================= */
         .projects-overview-table {
@@ -7740,10 +7763,10 @@ export default function Home() {
                     Tất cả dự án <b>{confirmEligibleProjects.length}</b>
                   </button>
                   <button className={confirmFilter === "pending" ? "active" : ""} onClick={() => { setConfirmFilter("pending"); setConfirmPage(1); }}>
-                    Chưa xác nhận <b>{confirmEligibleProjects.filter((p) => !p.isOfficialApproved).length}</b>
+                    Chưa xác nhận <b>{confirmEligibleProjects.filter((p) => !(p.isOfficialApproved && (p.eApprovalUrl || p.eApprovalCode))).length}</b>
                   </button>
                   <button className={confirmFilter === "approved" ? "active" : ""} onClick={() => { setConfirmFilter("approved"); setConfirmPage(1); }}>
-                    Đã phê duyệt <b>{confirmEligibleProjects.filter((p) => p.isOfficialApproved).length}</b>
+                    Đã phê duyệt <b>{confirmEligibleProjects.filter((p) => Boolean(p.isOfficialApproved && (p.eApprovalUrl || p.eApprovalCode))).length}</b>
                   </button>
                 </div>
                 <span className="table-filters-count">{visibleConfirmProjects.length} dự án</span>
@@ -7761,7 +7784,9 @@ export default function Home() {
                     <span>Hành động</span>
                   </div>
                   <div className="project-table-body">
-                    {pagedConfirmProjects.map((project) => (
+                    {pagedConfirmProjects.map((project) => {
+                      const isApprovedWithEApp = Boolean(project.isOfficialApproved && (project.eApprovalUrl || project.eApprovalCode));
+                      return (
                       <div key={project.id} className="project-table-row">
                         <span className="project-code">{project.code}</span>
                         <span className="project-name-cell">
@@ -7769,7 +7794,7 @@ export default function Home() {
                         </span>
                         <span className="project-region-cell">{project.region || project.area || "—"}</span>
                         <span>
-                          {project.isOfficialApproved ? (
+                          {isApprovedWithEApp ? (
                             <span className="status-badge" style={{ background: "#edf8f5", color: "#167461", border: "1px solid #a4dfd1" }}>
                               ✓ ĐÃ DUYỆT {project.officialVersion || "v1.0"}
                             </span>
@@ -7791,24 +7816,24 @@ export default function Home() {
                         </span>
                         <span>{project.eApprovalDate ? formatDate(project.eApprovalDate) : <span style={{ color: "#94a3b8" }}>—</span>}</span>
                         <span className="project-action-cell" onClick={(event) => event.stopPropagation()}>
-                          {!project.isOfficialApproved ? (
+                          {!isApprovedWithEApp ? (
                             <button
                               type="button"
                               className="primary-button"
-                              style={{ height: "30px", fontSize: "11.5px", padding: "0 12px", background: "#73b52d", borderColor: "#64a024" }}
+                              style={{ height: "30px", fontSize: "11px", fontWeight: 700, padding: "0 10px", background: "#16a34a", borderColor: "#15803d", whiteSpace: "nowrap" }}
                               onClick={() => openEApprovalModal(project)}
                             >
-                              ✓ Xác nhận
+                              Xác nhận phê duyệt
                             </button>
                           ) : (
                             <button
                               type="button"
                               className="secondary-button"
-                              style={{ height: "30px", fontSize: "11.5px", padding: "0 10px" }}
-                              title="Sửa thông tin E-Approval"
+                              style={{ height: "30px", fontSize: "11px", fontWeight: 600, padding: "0 10px", whiteSpace: "nowrap" }}
+                              title="Chỉnh sửa thông tin E-Approval"
                               onClick={() => openEApprovalModal(project)}
                             >
-                              Sửa
+                              Xác nhận phê duyệt
                             </button>
                           )}
                           <button
@@ -7821,7 +7846,8 @@ export default function Home() {
                           </button>
                         </span>
                       </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </div>
               ) : (
