@@ -116,8 +116,8 @@
   overflow: auto !important;
 }
 .refined-ui .workspace :is(.project-table-head,.project-table-row) {
-  grid-template-columns: 105px minmax(200px, 2fr) minmax(140px, 1.3fr) minmax(130px, 1fr) 105px 155px 70px !important;
-  min-width: 1010px;
+  grid-template-columns: 140px minmax(220px, 2fr) 120px 160px 80px !important;
+  min-width: 720px;
   gap: 12px !important;
   padding: 14px 16px !important;
 }

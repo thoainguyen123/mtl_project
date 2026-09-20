@@ -1157,8 +1157,8 @@ function allDepartmentsApproved(project: Project) {
 }
 
 function projectApprovalLabel(project: Project) {
-  if (project.approvalStatus !== "draft") return APPROVAL_LABEL[project.approvalStatus];
-  return allDepartmentsApproved(project) ? "SẴN SÀNG GỬI GMS" : "CHỜ PHÒNG BAN XÁC NHẬN";
+  const isCompleted = project.approvalStatus === "approved" || Boolean(project.isOfficialApproved);
+  return isCompleted ? "ĐÃ HOÀN THIỆN" : "ĐANG HOÀN THIỆN";
 }
 
 function escapeXml(value: unknown) {
@@ -6127,14 +6127,7 @@ export default function Home() {
               <button
                 className={view === "projects" || view === "workspace" ? "active" : ""}
                 onClick={() => {
-                  if (activeProject) {
-                    setView("workspace");
-                  } else if (projects.length > 0) {
-                    setActiveId(projects[0].id);
-                    setView("workspace");
-                  } else {
-                    setView("init_template");
-                  }
+                  setView("projects");
                 }}
                 tabIndex={lapMtlSectionOpen ? 0 : -1}
               >
@@ -7136,115 +7129,85 @@ export default function Home() {
                 >
                   <IconMenu />
                 </button>
-                <h1>Dự án</h1>
-                <div className="top-stat-cards">
-                  <div className="top-stat-card">
-                    <span>TỔNG DỰ ÁN</span>
-                    <b>{projects.length}</b>
-                  </div>
-                  <div className="top-stat-card">
-                    <span>ĐANG HOÀN THIỆN TIẾN ĐỘ</span>
-                    <b style={{ color: "#1a56a8" }}>{projects.filter((p) => p.approvalStatus !== "approved" && !p.isOfficialApproved).length}</b>
-                  </div>
-                  <div className="top-stat-card">
-                    <span>ĐÃ DUYỆT</span>
-                    <b style={{ color: "#167461" }}>{projects.filter((p) => p.approvalStatus === "approved" || p.isOfficialApproved).length}</b>
-                  </div>
-                </div>
-              </div>
-              <div className="page-top-actions">
-                <label className="search-field" style={{ margin: 0, minWidth: "220px", maxWidth: "300px" }}>
-                  <span>Tìm dự án</span>
-                  <input value={projectSearch} onChange={(event) => { setProjectSearch(event.target.value); setProjectPage(1); }} placeholder="Nhập tên, mã dự án, chủ đầu tư..." />
-                </label>
-                <button
-                  className="secondary-button"
-                  style={{ borderColor: "#22c55e", color: "#16a34a", fontWeight: 700, display: "inline-flex", alignItems: "center", gap: 6, background: "#f0fdf4" }}
-                  onClick={() => setView("init_template")}
-                >
-                  <IconSparkles /> Khởi tạo từ Template
-                </button>
-                <button className="primary-button" onClick={openCreate}>+ Tạo Master Timeline</button>
+                <h1>Hoàn thiện tiến độ</h1>
               </div>
             </header>
-            <section className="project-index">
-
-              {/* Table Filters */}
-              {/* Table Filters */}
-              <div className="table-filters" style={{ margin: "14px 24px 14px", border: "none" }}>
-                <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", alignItems: "center" }}>
-                  <label className="table-filters-select">
-                    <span>Vùng</span>
-                    <select value={projectRegionFilter} onChange={(event) => { setProjectRegionFilter(event.target.value); setProjectPage(1); }}>
-                      <option value="all">Tất cả vùng</option>
-                      {[...new Set(projects.map((p) => p.region).filter(Boolean) as string[])].sort().map((r) => (
-                        <option key={r} value={r}>{r}</option>
-                      ))}
-                    </select>
-                  </label>
-                  <label className="table-filters-select">
-                    <span>Trạng thái MTL</span>
-                    <select value={projectStatusFilter} onChange={(event) => { setProjectStatusFilter(event.target.value as ApprovalStatus | "all"); setProjectPage(1); }}>
-                      <option value="all">Tất cả trạng thái</option>
-                      <option value="draft">{APPROVAL_LABEL.draft}</option>
-                      <option value="gmd_review">{APPROVAL_LABEL.gmd_review}</option>
-                      <option value="submitted">{APPROVAL_LABEL.submitted}</option>
-                      <option value="appraised">{APPROVAL_LABEL.appraised}</option>
-                      <option value="approved">{APPROVAL_LABEL.approved}</option>
-                      <option value="changes_requested">{APPROVAL_LABEL.changes_requested}</option>
-                    </select>
-                  </label>
-                </div>
-                <span className="table-filters-count">{visibleProjects.length} dự án</span>
-              </div>
-
-              {/* Exact 7-column Table (No Loại Dự Án) */}
-              {visibleProjects.length > 0 ? (
-                <div className="project-table" aria-label="Danh sách dự án Master Timeline">
+            <section className="project-index" style={{ padding: "20px 24px" }}>
+              {projects.length > 0 ? (
+                <div className="project-table" aria-label="Danh sách dự án Hoàn thiện tiến độ">
                   <div className="project-table-head">
-                    <span>Mã dự án</span>
+                    <span>Vùng dự án</span>
                     <span>Tên dự án</span>
-                    <span>Chủ đầu tư</span>
-                    <span>Khu vực</span>
-                    <span>Vùng</span>
+                    <span>Mã dự án</span>
                     <span>Trạng thái</span>
                     <span>Hành động</span>
                   </div>
                   <div className="project-table-body">
-                    {pagedProjects.map((project) => (
-                      <div key={project.id} className="project-table-row" onClick={() => openProject(project)}>
-                        <span className="project-code">{project.code}</span>
-                        <span className="project-name-cell">
-                          <b>{project.name}</b>
-                        </span>
-                        <span className="project-table-cell-ellipsis" title={project.investor || "Tập đoàn Novaland"}>{project.investor || "Tập đoàn Novaland"}</span>
-                        <span className="project-table-cell-ellipsis" title={project.location || project.area || "—"}>{project.location || project.area || "—"}</span>
-                        <span className="project-region-cell">{project.region || "Toàn quốc"}</span>
-                        <span>
-                          <span className={`status-badge approval-${project.approvalStatus}`}>
-                            {projectApprovalLabel(project)}{project.approvedVersion ? ` · ${project.approvedVersion}` : ""}
+                    {projects.map((project) => {
+                      const isCompleted = project.approvalStatus === "approved" || Boolean(project.isOfficialApproved);
+                      return (
+                        <div key={project.id} className="project-table-row" onClick={() => openProject(project)}>
+                          <span className="project-region-cell">{project.region || project.location || project.area || "Đồng Nai 1"}</span>
+                          <span className="project-name-cell">
+                            <b>{project.name}</b>
                           </span>
-                        </span>
-                        <span className="project-action-cell" onClick={(event) => event.stopPropagation()}>
-                          <button type="button" className="action-btn view-btn" title="Mở Master Timeline" aria-label="Mở dự án" onClick={() => openProject(project)}>
-                            <IconEye />
-                          </button>
-                          <button type="button" className="action-btn delete-btn" title="Xóa dự án" aria-label="Xóa dự án" onClick={() => setProjectToDelete(project)}>
-                            <IconTrash />
-                          </button>
-                        </span>
-                      </div>
-                    ))}
+                          <span className="project-code">{project.code}</span>
+                          <span onClick={(e) => e.stopPropagation()}>
+                            <select
+                              aria-label="Trạng thái hoàn thiện"
+                              className={`status-select ${isCompleted ? "status-completed" : "status-in-progress"}`}
+                              value={isCompleted ? "completed" : "in_progress"}
+                              onChange={(e) => {
+                                const isNowDone = e.target.value === "completed";
+                                setProjects((curr) =>
+                                  curr.map((p) =>
+                                    p.id === project.id
+                                      ? {
+                                          ...p,
+                                          approvalStatus: isNowDone ? "approved" : "draft",
+                                          isOfficialApproved: isNowDone,
+                                          approvedAt: isNowDone ? (p.approvedAt || new Date().toISOString()) : undefined,
+                                        }
+                                      : p
+                                  )
+                                );
+                              }}
+                              style={{
+                                cursor: "pointer",
+                                padding: "6px 10px",
+                                borderRadius: "6px",
+                                fontWeight: 700,
+                                fontSize: "11px",
+                                border: isCompleted ? "1px solid #86efac" : "1px solid #bae6fd",
+                                background: isCompleted ? "#dcfce7" : "#e0f2fe",
+                                color: isCompleted ? "#15803d" : "#0284c7",
+                                outline: "none",
+                              }}
+                            >
+                              <option value="in_progress">Đang hoàn thiện</option>
+                              <option value="completed">Đã hoàn thiện</option>
+                            </select>
+                          </span>
+                          <span className="project-action-cell" onClick={(event) => event.stopPropagation()}>
+                            <button type="button" className="action-btn view-btn" title="Hoàn thiện tiến độ" aria-label="Hoàn thiện tiến độ" onClick={() => openProject(project)}>
+                              <IconEye />
+                            </button>
+                            <button type="button" className="action-btn delete-btn" title="Xóa dự án" aria-label="Xóa dự án" onClick={() => setProjectToDelete(project)}>
+                              <IconTrash />
+                            </button>
+                          </span>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               ) : (
                 <div className="project-index-empty">
-                  <b>{projectSearch || projectStatusFilter !== "all" || projectRegionFilter !== "all" ? "Không tìm thấy dự án phù hợp" : "Chưa có dự án nào"}</b>
-                  <span>{projectSearch || projectStatusFilter !== "all" || projectRegionFilter !== "all" ? "Thử tìm bằng từ khóa khác hoặc thiết lập lại bộ lọc." : "Tạo dự án đầu tiên để hệ thống sinh Master Timeline từ Cấu trúc Master Timeline."}</span>
-                  {!projectSearch && projectStatusFilter === "all" && <button className="primary-button" onClick={openCreate}>Tạo Master timeline</button>}
+                  <b>Chưa có dự án nào</b>
+                  <span>Khởi tạo tiến độ dự án mới để bắt đầu hoàn thiện tiến độ.</span>
+                  <button className="primary-button" onClick={() => setView("init_template")}>Khởi tạo tiến độ</button>
                 </div>
               )}
-              <Pagination total={visibleProjects.length} pageSize={projectPageSize} page={projectPage} onPageChange={setProjectPage} onPageSizeChange={(size) => { setProjectPageSize(size); setProjectPage(1); }} />
             </section>
           </>
         ) : view === "catalog" ? (
