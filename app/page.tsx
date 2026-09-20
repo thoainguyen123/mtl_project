@@ -7885,159 +7885,116 @@ export default function Home() {
                       </div>
                     </div>
 
-                    {/* Column 2: Cấu trúc Mẫu Master Timeline chuẩn (Mô hình 9-4) */}
+                    {/* Column 2: Cấu trúc Master Timeline (9-4) */}
                     <div className="init-col-card">
                       <div className="init-col-head">
                         <span className="init-num-badge">2</span>
-                        <span className="init-col-title">Mẫu Cấu trúc Master Timeline chuẩn (9-4)</span>
+                        <span className="init-col-title">Cấu trúc Master Timeline (9-4)</span>
                       </div>
 
                       <div style={{ fontSize: "11px", color: "#64748b", marginBottom: 8, lineHeight: "1.4" }}>
                         Nhấn vào từng ban/phòng bên dưới để xem phân rã WBS ở bảng bên phải:
                       </div>
 
-                      <div style={{ display: "flex", flexDirection: "column", gap: 10, flex: 1, overflowY: "auto", paddingRight: 2 }}>
-                        {/* Block 9 */}
-                        <div>
-                          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 5 }}>
-                            <span style={{ fontSize: "11px", fontWeight: 800, color: "#1e40af", textTransform: "uppercase", letterSpacing: "0.3px" }}>
-                              Khối 9 · Ban / Phòng Gián tiếp (9 ban/phòng · 783 task)
-                            </span>
-                            <span style={{ fontSize: "10px", fontWeight: 700, color: "#1d4ed8", background: "#dbeafe", padding: "1px 5px", borderRadius: 3 }}>
-                              Indirect / Support
-                            </span>
-                          </div>
-                          <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
-                            {[
-                              { code: "9.1", short: "HRC", name: "Ban Nhân sự", desc: "Quản lý nguồn nhân lực, tuyển dụng, đào tạo & HRBP", count: "57 task" },
-                              { code: "9.2", short: "FAC", name: "Ban Tài chính Kế toán", desc: "FS, CF, P/L, quản trị vốn, dòng tiền Capex/Opex", count: "160 task" },
-                              { code: "9.3", short: "SAC", name: "Ban Kinh doanh", desc: "Kế hoạch sản phẩm, bán hàng B2C, khai thác thương mại", count: "44 task" },
-                              { code: "9.4", short: "MAC", name: "Ban Marketing", desc: "Chiến lược MKT, sự kiện mở bán, nội dung & digital", count: "145 task" },
-                              { code: "9.5", short: "PTC", name: "Ban Cung ứng Đấu thầu", desc: "Cung ứng VLXD/MEP, tổ chức đấu thầu & thanh quyết toán", count: "128 task" },
-                              { code: "9.6", short: "QSB", name: "Phòng Khối lượng và Ngân sách", desc: "Suất đầu tư, ngân sách xây dựng, kiểm soát khối lượng BoQ", count: "43 task" },
-                              { code: "9.7", short: "SED", name: "Phòng An ninh", desc: "Phương án an ninh nội bộ, bảo vệ dự án, giám sát an toàn", count: "30 task" },
-                              { code: "9.8", short: "IDC", name: "Trung tâm Thiết kế Nội bộ", desc: "Thiết kế quy hoạch, ý tưởng kiến trúc, nội thất & cảnh quan", count: "169 task" },
-                              { code: "9.9", short: "CSC", name: "Trung tâm Bồi thường GPMB", desc: "Kế hoạch đền bù, thỏa thuận bồi thường & giải phóng MB", count: "7 task" },
-                            ].map((g) => {
-                              const isSelected = initSelectedDeptCode === g.code;
-                              return (
-                                <div
-                                  key={g.code}
-                                  onClick={() => setInitSelectedDeptCode(g.code)}
-                                  style={{
-                                    background: isSelected ? "#eff6ff" : "#f8fafc",
-                                    border: isSelected ? "2px solid #2563eb" : "1px solid #e2e8f0",
-                                    borderRadius: 6,
-                                    padding: "6px 8px",
-                                    display: "flex",
-                                    alignItems: "center",
-                                    justifyContent: "space-between",
-                                    gap: 8,
-                                    cursor: "pointer",
-                                    transition: "all 0.12s ease",
-                                  }}
-                                  title={`Bấm để xem công việc phân rã của ${g.short} – ${g.name}`}
-                                >
-                                  <div style={{ minWidth: 0, flex: 1 }}>
-                                    <div style={{ fontSize: "11.5px", fontWeight: 700, color: isSelected ? "#1d4ed8" : "#0f172a", display: "flex", alignItems: "center", gap: 5 }}>
-                                      <span style={{ color: "#2563eb" }}>{g.code}</span>
-                                      <span>{g.short} – {g.name}</span>
-                                      {isSelected && (
-                                        <span style={{ fontSize: "9.5px", fontWeight: 800, color: "#ffffff", background: "#2563eb", padding: "1px 5px", borderRadius: 3, marginLeft: "auto" }}>
-                                          Đang chọn
-                                        </span>
-                                      )}
-                                    </div>
-                                    <div style={{ fontSize: "10px", color: isSelected ? "#2563eb" : "#64748b", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-                                      {g.desc}
-                                    </div>
-                                  </div>
-                                  <span style={{
-                                    fontSize: "10.5px",
-                                    fontWeight: 700,
-                                    color: isSelected ? "#ffffff" : "#2563eb",
-                                    background: isSelected ? "#2563eb" : "#eff6ff",
-                                    border: "1px solid #bfdbfe",
-                                    padding: "2px 6px",
-                                    borderRadius: 4,
-                                    flex: "none",
-                                  }}>
-                                    {g.count}
-                                  </span>
+                      <div style={{ display: "flex", flexDirection: "column", gap: 5, flex: 1, overflowY: "auto", paddingRight: 2 }}>
+                        {[
+                          { code: "9.1", short: "HRC", name: "Ban Nhân sự", desc: "Quản lý nguồn nhân lực, tuyển dụng, đào tạo & HRBP", count: "57 task", type: "khoi9" },
+                          { code: "9.2", short: "FAC", name: "Ban Tài chính Kế toán", desc: "FS, CF, P/L, quản trị vốn, dòng tiền Capex/Opex", count: "160 task", type: "khoi9" },
+                          { code: "9.3", short: "SAC", name: "Ban Kinh doanh", desc: "Kế hoạch sản phẩm, bán hàng B2C, khai thác thương mại", count: "44 task", type: "khoi9" },
+                          { code: "9.4", short: "MAC", name: "Ban Marketing", desc: "Chiến lược MKT, sự kiện mở bán, nội dung & digital", count: "145 task", type: "khoi9" },
+                          { code: "9.5", short: "PTC", name: "Ban Cung ứng Đấu thầu", desc: "Cung ứng VLXD/MEP, tổ chức đấu thầu & thanh quyết toán", count: "128 task", type: "khoi9" },
+                          { code: "9.6", short: "QSB", name: "Phòng Khối lượng và Ngân sách", desc: "Suất đầu tư, ngân sách xây dựng, kiểm soát khối lượng BoQ", count: "43 task", type: "khoi9" },
+                          { code: "9.7", short: "SED", name: "Phòng An ninh", desc: "Phương án an ninh nội bộ, bảo vệ dự án, giám sát an toàn", count: "30 task", type: "khoi9" },
+                          { code: "9.8", short: "IDC", name: "Trung tâm Thiết kế Nội bộ", desc: "Thiết kế quy hoạch, ý tưởng kiến trúc, nội thất & cảnh quan", count: "169 task", type: "khoi9" },
+                          { code: "9.9", short: "CSC", name: "Trung tâm Bồi thường GPMB", desc: "Kế hoạch đền bù, thỏa thuận bồi thường & giải phóng MB", count: "7 task", type: "khoi9" },
+                          { code: "4.0", short: "PMD", name: "Phòng Điều hành Dự án", desc: "Chủ trì lập, tích hợp & điều phối tổng tiến độ MTL", count: "7 task", type: "khoi4" },
+                          { code: "4.1", short: "PLP", name: "Phòng Thủ tục Pháp lý Dự án", desc: "Chủ trương ĐT, quy hoạch 1/500, đất đai, GPXD, nghiệm thu", count: "99 task", type: "khoi4" },
+                          { code: "4.2", short: "DMD", name: "Phòng Quản lý Thiết kế", desc: "Nhiệm vụ thiết kế, TKCS, TKBVTC, thẩm duyệt PCCC", count: "120 task", type: "khoi4" },
+                          { code: "4.3", short: "PCD", name: "Phòng Quản lý Xây dựng, An toàn & MT", desc: "Mặt bằng, cọc móng, kết cấu ngầm/thân, MEP, hạ tầng", count: "74 task", type: "khoi4" },
+                          { code: "4.4", short: "OM", name: "Phòng Quản lý Vận hành Dự án", desc: "Phí QLVH, pre-opening vận hành, nghiệm thu bàn giao", count: "17 task", type: "khoi4" },
+                        ].map((g) => {
+                          const isSelected = initSelectedDeptCode === g.code;
+                          const isKhoi9 = g.type === "khoi9";
+                          return (
+                            <div
+                              key={g.code}
+                              onClick={() => setInitSelectedDeptCode(g.code)}
+                              style={{
+                                background: isSelected
+                                  ? (isKhoi9 ? "#eff6ff" : "#f0fdf4")
+                                  : (isKhoi9 ? "#f8fafc" : "#f0fdf4"),
+                                border: isSelected
+                                  ? (isKhoi9 ? "2px solid #2563eb" : "2px solid #16a34a")
+                                  : (isKhoi9 ? "1px solid #e2e8f0" : "1px solid #bbf7d0"),
+                                borderRadius: 6,
+                                padding: "6px 8px",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "space-between",
+                                gap: 8,
+                                cursor: "pointer",
+                                transition: "all 0.12s ease",
+                              }}
+                              title={`Bấm để xem công việc phân rã của ${g.short} – ${g.name}`}
+                            >
+                              <div style={{ minWidth: 0, flex: 1 }}>
+                                <div style={{
+                                  fontSize: "11.5px",
+                                  fontWeight: 700,
+                                  color: isSelected
+                                    ? (isKhoi9 ? "#1d4ed8" : "#15803d")
+                                    : (isKhoi9 ? "#0f172a" : "#14532d"),
+                                  display: "flex",
+                                  alignItems: "center",
+                                  gap: 5,
+                                }}>
+                                  <span style={{ color: isKhoi9 ? "#2563eb" : "#15803d" }}>{g.code}</span>
+                                  <span>{g.short} – {g.name}</span>
+                                  {isSelected && (
+                                    <span style={{
+                                      fontSize: "9.5px",
+                                      fontWeight: 800,
+                                      color: "#ffffff",
+                                      background: isKhoi9 ? "#2563eb" : "#16a34a",
+                                      padding: "1px 5px",
+                                      borderRadius: 3,
+                                      marginLeft: "auto",
+                                    }}>
+                                      Đang chọn
+                                    </span>
+                                  )}
                                 </div>
-                              );
-                            })}
-                          </div>
-                        </div>
-
-                        {/* Block 4 */}
-                        <div>
-                          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 5 }}>
-                            <span style={{ fontSize: "11px", fontWeight: 800, color: "#166534", textTransform: "uppercase", letterSpacing: "0.3px" }}>
-                              Khối 4 · Trực tiếp & Chủ trì (5 nhóm · 317 task)
-                            </span>
-                            <span style={{ fontSize: "10px", fontWeight: 700, color: "#15803d", background: "#dcfce7", padding: "1px 5px", borderRadius: 3 }}>
-                              Direct & PMD
-                            </span>
-                          </div>
-                          <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
-                            {[
-                              { code: "4.0", short: "PMD", name: "Phòng Điều hành Dự án", desc: "Chủ trì lập, tích hợp & điều phối tổng tiến độ MTL", count: "7 task" },
-                              { code: "4.1", short: "PLP", name: "Phòng Thủ tục Pháp lý Dự án", desc: "Chủ trương ĐT, quy hoạch 1/500, đất đai, GPXD, nghiệm thu", count: "99 task" },
-                              { code: "4.2", short: "DMD", name: "Phòng Quản lý Thiết kế", desc: "Nhiệm vụ thiết kế, TKCS, TKBVTC, thẩm duyệt PCCC", count: "120 task" },
-                              { code: "4.3", short: "PCD", name: "Phòng Quản lý Xây dựng, An toàn & MT", desc: "Mặt bằng, cọc móng, kết cấu ngầm/thân, MEP, hạ tầng", count: "74 task" },
-                              { code: "4.4", short: "OM", name: "Phòng Quản lý Vận hành Dự án", desc: "Phí QLVH, pre-opening vận hành, nghiệm thu bàn giao", count: "17 task" },
-                            ].map((g) => {
-                              const isSelected = initSelectedDeptCode === g.code;
-                              return (
-                                <div
-                                  key={g.code}
-                                  onClick={() => setInitSelectedDeptCode(g.code)}
-                                  style={{
-                                    background: isSelected ? "#f0fdf4" : "#f8fafc",
-                                    border: isSelected ? "2px solid #16a34a" : "1px solid #bbf7d0",
-                                    borderRadius: 6,
-                                    padding: "6px 8px",
-                                    display: "flex",
-                                    alignItems: "center",
-                                    justifyContent: "space-between",
-                                    gap: 8,
-                                    cursor: "pointer",
-                                    transition: "all 0.12s ease",
-                                  }}
-                                  title={`Bấm để xem công việc phân rã của ${g.short} – ${g.name}`}
-                                >
-                                  <div style={{ minWidth: 0, flex: 1 }}>
-                                    <div style={{ fontSize: "11.5px", fontWeight: 700, color: isSelected ? "#15803d" : "#14532d", display: "flex", alignItems: "center", gap: 5 }}>
-                                      <span style={{ color: "#15803d" }}>{g.code}</span>
-                                      <span>{g.short} – {g.name}</span>
-                                      {isSelected && (
-                                        <span style={{ fontSize: "9.5px", fontWeight: 800, color: "#ffffff", background: "#16a34a", padding: "1px 5px", borderRadius: 3, marginLeft: "auto" }}>
-                                          Đang chọn
-                                        </span>
-                                      )}
-                                    </div>
-                                    <div style={{ fontSize: "10px", color: isSelected ? "#16a34a" : "#475569", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-                                      {g.desc}
-                                    </div>
-                                  </div>
-                                  <span style={{
-                                    fontSize: "10.5px",
-                                    fontWeight: 700,
-                                    color: isSelected ? "#ffffff" : "#166534",
-                                    background: isSelected ? "#16a34a" : "#ffffff",
-                                    border: "1px solid #86efac",
-                                    padding: "2px 6px",
-                                    borderRadius: 4,
-                                    flex: "none",
-                                  }}>
-                                    {g.count}
-                                  </span>
+                                <div style={{
+                                  fontSize: "10px",
+                                  color: isSelected
+                                    ? (isKhoi9 ? "#2563eb" : "#16a34a")
+                                    : (isKhoi9 ? "#64748b" : "#475569"),
+                                  whiteSpace: "nowrap",
+                                  overflow: "hidden",
+                                  textOverflow: "ellipsis",
+                                }}>
+                                  {g.desc}
                                 </div>
-                              );
-                            })}
-                          </div>
-                        </div>
+                              </div>
+                              <span style={{
+                                fontSize: "10.5px",
+                                fontWeight: 700,
+                                color: isSelected
+                                  ? "#ffffff"
+                                  : (isKhoi9 ? "#2563eb" : "#166534"),
+                                background: isSelected
+                                  ? (isKhoi9 ? "#2563eb" : "#16a34a")
+                                  : (isKhoi9 ? "#eff6ff" : "#ffffff"),
+                                border: `1px solid ${isKhoi9 ? "#bfdbfe" : "#86efac"}`,
+                                padding: "2px 6px",
+                                borderRadius: 4,
+                                flex: "none",
+                              }}>
+                                {g.count}
+                              </span>
+                            </div>
+                          );
+                        })}
                       </div>
                     </div>
 
