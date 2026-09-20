@@ -6115,14 +6115,77 @@ export default function Home() {
           gap: 6px !important;
         }
         /* ================= PROJECTS OVERVIEW TABLE ================= */
+        .projects-overview-table {
+          width: 100% !important;
+          margin: 0 !important;
+          overflow-x: hidden !important;
+          box-sizing: border-box !important;
+        }
         .projects-overview-table .project-table-head,
         .projects-overview-table .project-table-row {
-          min-width: 960px !important;
-          grid-template-columns: 140px minmax(200px, 2fr) 130px 150px 320px !important;
+          min-width: 0 !important;
+          width: 100% !important;
+          box-sizing: border-box !important;
+          grid-template-columns: 160px minmax(220px, 1.6fr) 130px 160px 120px !important;
+          padding: 10px 16px !important;
+          gap: 12px !important;
         }
         .projects-overview-table .project-action-cell {
-          justify-content: flex-start !important;
+          justify-content: center !important;
           gap: 6px !important;
+          display: flex !important;
+          align-items: center !important;
+        }
+        .projects-overview-table .project-table-head span:last-child {
+          text-align: center !important;
+        }
+        .projects-overview-table .action-btn {
+          width: 32px !important;
+          height: 32px !important;
+          display: inline-flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+          border-radius: 6px !important;
+          border: 1px solid #e2e8f0 !important;
+          background: #ffffff !important;
+          cursor: pointer !important;
+          transition: all 0.15s ease !important;
+          padding: 0 !important;
+          flex-shrink: 0 !important;
+        }
+        .projects-overview-table .action-btn svg {
+          width: 15px !important;
+          height: 15px !important;
+        }
+        .projects-overview-table .action-btn.view-btn {
+          border-color: #e2e8f0 !important;
+          background: #f8fafc !important;
+          color: #475569 !important;
+        }
+        .projects-overview-table .action-btn.view-btn:hover {
+          border-color: #0284c7 !important;
+          background: #f0f9ff !important;
+          color: #0284c7 !important;
+        }
+        .projects-overview-table .action-btn.complete-btn {
+          border-color: #bbf7d0 !important;
+          background: #f0fdf4 !important;
+          color: #16a34a !important;
+        }
+        .projects-overview-table .action-btn.complete-btn:hover {
+          border-color: #16a34a !important;
+          background: #dcfce7 !important;
+          color: #15803d !important;
+        }
+        .projects-overview-table .action-btn.delete-btn {
+          border-color: #fecdd3 !important;
+          background: #fff1f2 !important;
+          color: #e11d48 !important;
+        }
+        .projects-overview-table .action-btn.delete-btn:hover {
+          border-color: #e11d48 !important;
+          background: #ffe4e6 !important;
+          color: #be123c !important;
         }
       `}</style>
       <aside className={`sidebar ${sidebarCollapsed ? "collapsed" : ""}`}>
@@ -7254,20 +7317,7 @@ export default function Home() {
                             </button>
                             <button
                               type="button"
-                              className="primary-button"
-                              style={{
-                                height: "30px",
-                                fontSize: "11px",
-                                fontWeight: 700,
-                                padding: "0 8px",
-                                background: isCompleted ? "#f0fdf4" : "#16a34a",
-                                color: isCompleted ? "#15803d" : "#ffffff",
-                                border: isCompleted ? "1px solid #86efac" : "1px solid #15803d",
-                                display: "inline-flex",
-                                alignItems: "center",
-                                gap: "4px",
-                                whiteSpace: "nowrap"
-                              }}
+                              className="action-btn complete-btn"
                               title="Xác nhận hoàn thiện tiến độ & xuất hồ sơ"
                               aria-label="Xác nhận hoàn thiện"
                               onClick={() => {
@@ -7276,27 +7326,15 @@ export default function Home() {
                               }}
                             >
                               <IconCheck />
-                              <span>Xác nhận hoàn thiện</span>
                             </button>
                             <button
                               type="button"
-                              className="danger-button"
-                              style={{
-                                height: "30px",
-                                fontSize: "11px",
-                                fontWeight: 600,
-                                padding: "0 8px",
-                                display: "inline-flex",
-                                alignItems: "center",
-                                gap: "4px",
-                                whiteSpace: "nowrap"
-                              }}
+                              className="action-btn delete-btn"
                               title="Xóa dự án"
                               aria-label="Xóa dự án"
                               onClick={() => setProjectToDelete(project)}
                             >
                               <IconTrash />
-                              <span>Xóa</span>
                             </button>
                           </span>
                         </div>
