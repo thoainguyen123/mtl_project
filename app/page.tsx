@@ -8053,68 +8053,47 @@ export default function Home() {
           </div>
         ) : view === "init_template" ? (
           <div className="init-template-view">
-            {/* Main Body */}
-            <div className="init-template-body">
-              {/* Breadcrumbs */}
-              <nav className="init-breadcrumb" aria-label="Breadcrumb" style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            <header className="page-top-header">
+              <div className="page-top-title-group">
                 <button
                   type="button"
-                  style={{ background: "none", border: "none", cursor: "pointer", color: "#64748b", display: "inline-flex", alignItems: "center", padding: "2px" }}
-                  onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-                  title="Thu gọn / Mở rộng menu"
+                  className="topbar-toggle-sidebar-btn"
+                  onClick={() => setSidebarCollapsed((prev) => !prev)}
+                  title={sidebarCollapsed ? "Mở rộng thanh điều hướng (Ctrl+B)" : "Thu nhỏ thanh điều hướng (Ctrl+B)"}
+                  aria-label="Chuyển đổi thanh điều hướng"
                 >
                   <IconMenu />
                 </button>
-                <button
-                  onClick={() => setView("home")}
-                  style={{ background: "none", border: "none", padding: 0, cursor: "pointer", color: "#64748b", display: "inline-flex", alignItems: "center" }}
-                  title="Trang chủ"
-                >
-                  <IconHome />
-                </button>
-                <span className="init-breadcrumb-sep">/</span>
-                <button
-                  onClick={() => setView("projects")}
-                  style={{ background: "none", border: "none", padding: 0, cursor: "pointer", color: "#64748b" }}
-                >
-                  Dự án
-                </button>
-                <span className="init-breadcrumb-sep">/</span>
-                <span style={{ color: "#0f172a", fontWeight: 600 }}>Khởi tạo tiến độ</span>
-              </nav>
-
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", flexWrap: "wrap", gap: 12 }}>
-                <div>
-                  <h1 className="init-page-title">Khởi tạo tiến độ Master Timeline</h1>
-                  <p className="init-page-desc">
-                    Khởi tạo tiến độ mới hoàn toàn từ Mẫu chuẩn (Cấu trúc Master Timeline) hoặc kế thừa từ Version MTL đã duyệt để cập nhật điều chỉnh.
-                  </p>
-                </div>
-
-                {/* Mode Switcher Tabs */}
-                <div className="init-mode-switcher" role="tablist">
-                  <button
-                    type="button"
-                    role="tab"
-                    aria-selected={initMode === "from_template"}
-                    className={`init-mode-btn ${initMode === "from_template" ? "active mode-template" : ""}`}
-                    onClick={() => setInitMode("from_template")}
-                  >
-                    <IconSparkles />
-                    <span>1. Khởi tạo mới từ Mẫu chuẩn</span>
-                  </button>
-                  <button
-                    type="button"
-                    role="tab"
-                    aria-selected={initMode === "from_approved_version"}
-                    className={`init-mode-btn ${initMode === "from_approved_version" ? "active mode-update" : ""}`}
-                    onClick={() => setInitMode("from_approved_version")}
-                  >
-                    <IconRefresh />
-                    <span>2. Khởi tạo từ Version MTL đã duyệt (Cập nhật)</span>
-                  </button>
-                </div>
+                <h1>Khởi tạo tiến độ</h1>
               </div>
+
+              {/* Mode Switcher Tabs */}
+              <div className="init-mode-switcher" role="tablist" style={{ margin: 0 }}>
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={initMode === "from_template"}
+                  className={`init-mode-btn ${initMode === "from_template" ? "active mode-template" : ""}`}
+                  onClick={() => setInitMode("from_template")}
+                >
+                  <IconSparkles />
+                  <span>1. Khởi tạo mới từ Mẫu chuẩn</span>
+                </button>
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={initMode === "from_approved_version"}
+                  className={`init-mode-btn ${initMode === "from_approved_version" ? "active mode-update" : ""}`}
+                  onClick={() => setInitMode("from_approved_version")}
+                >
+                  <IconRefresh />
+                  <span>2. Khởi tạo từ Version MTL đã duyệt (Cập nhật)</span>
+                </button>
+              </div>
+            </header>
+
+            {/* Main Body */}
+            <div className="init-template-body" style={{ padding: "16px 24px 20px" }}>
 
               {initMode === "from_template" ? (
                 /* ================= MODE 1: KHỞI TẠO MỚI TỪ MẪU CHUẨN ================= */
