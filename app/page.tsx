@@ -1252,6 +1252,7 @@ export default function Home() {
   const [initSelectedDeptCode, setInitSelectedDeptCode] = useState<string>("9.1");
   const [initWbsCollapsed, setInitWbsCollapsed] = useState<Set<string>>(new Set());
   const [initWbsSearch, setInitWbsSearch] = useState<string>("");
+  const [initWbsLevel, setInitWbsLevel] = useState<string>("all");
   const [initTreeExpanded, setInitTreeExpanded] = useState<Record<string, boolean>>({
     root: true,
     block4: true,
@@ -1786,6 +1787,23 @@ export default function Home() {
         );
         setCatalogCollapsed(toCollapse);
         setCatalogLevel(String(num));
+      }
+    }
+  };
+  const applyInitWbsLevel = (lvl: string | number) => {
+    if (lvl === "all") {
+      setInitWbsCollapsed(new Set());
+      setInitWbsLevel("all");
+    } else {
+      const num = typeof lvl === "string" ? Number(lvl) : lvl;
+      if (Number.isFinite(num) && num >= 1) {
+        const toCollapse = new Set(
+          fullCatalog
+            .filter((task) => catalogParentCodes.has(task.code) && task.level >= num)
+            .map((task) => task.code)
+        );
+        setInitWbsCollapsed(toCollapse);
+        setInitWbsLevel(String(num));
       }
     }
   };
@@ -8069,28 +8087,49 @@ export default function Home() {
                           );
                         })()}
 
-                        <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 6 }}>
-                          <button
-                            type="button"
-                            className="init-tree-ctrl-btn"
-                            onClick={() => setInitWbsCollapsed(new Set())}
-                            title="Mở rộng toàn bộ cây công việc"
-                          >
-                            Mở tất cả
-                          </button>
-                          <button
-                            type="button"
-                            className="init-tree-ctrl-btn"
-                            onClick={() => {
-                              const parentCodesToCollapse = fullCatalog
-                                .filter((t) => t.level >= 2 && catalogParentCodes.has(t.code))
-                                .map((t) => t.code);
-                              setInitWbsCollapsed(new Set(parentCodesToCollapse));
+                        <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 8 }}>
+                          <label
+                            style={{
+                              display: "inline-flex",
+                              alignItems: "center",
+                              gap: "6px",
+                              fontSize: "11px",
+                              fontWeight: 700,
+                              color: "#475569",
+                              background: "#f8fafc",
+                              border: "1px solid #cbd5e1",
+                              borderRadius: "5px",
+                              padding: "2px 6px 2px 8px",
+                              cursor: "pointer",
                             }}
-                            title="Thu gọn các cấp chi tiết"
                           >
-                            Thu gọn
-                          </button>
+                            <span style={{ whiteSpace: "nowrap" }}>Cấp công việc</span>
+                            <select
+                              value={initWbsLevel}
+                              onChange={(e) => applyInitWbsLevel(e.target.value === "all" ? "all" : Number(e.target.value))}
+                              style={{
+                                height: "24px",
+                                padding: "0 6px",
+                                fontSize: "11px",
+                                fontWeight: 600,
+                                color: "#0f172a",
+                                background: "#ffffff",
+                                border: "1px solid #cbd5e1",
+                                borderRadius: "4px",
+                                outline: "none",
+                                cursor: "pointer",
+                              }}
+                              title="Hiển thị theo cấp công việc"
+                            >
+                              <option value="all">Tất cả cấp</option>
+                              <option value="1">Cấp 1</option>
+                              <option value="2">Cấp 2</option>
+                              <option value="3">Cấp 3</option>
+                              <option value="4">Cấp 4</option>
+                              <option value="5">Cấp 5</option>
+                              {initWbsLevel === "custom" && <option value="custom">Tùy biến</option>}
+                            </select>
+                          </label>
                           {initSelectedDeptCode !== "all" ? (
                             <button
                               type="button"
@@ -8172,6 +8211,7 @@ export default function Home() {
                                         aria-label={isCollapsed ? `Mở rộng ${task.code}` : `Thu gọn ${task.code}`}
                                         title={isCollapsed ? "Mở rộng" : "Thu gọn"}
                                         onClick={() => {
+                                          setInitWbsLevel("custom");
                                           setInitWbsCollapsed((current) => {
                                             const next = new Set(current);
                                             if (isCollapsed) next.delete(task.code);
