@@ -6114,6 +6114,16 @@ export default function Home() {
           justify-content: flex-start !important;
           gap: 6px !important;
         }
+        /* ================= PROJECTS OVERVIEW TABLE ================= */
+        .projects-overview-table .project-table-head,
+        .projects-overview-table .project-table-row {
+          min-width: 960px !important;
+          grid-template-columns: 140px minmax(200px, 2fr) 130px 150px 320px !important;
+        }
+        .projects-overview-table .project-action-cell {
+          justify-content: flex-start !important;
+          gap: 6px !important;
+        }
       `}</style>
       <aside className={`sidebar ${sidebarCollapsed ? "collapsed" : ""}`}>
         <div className="brand">
@@ -7178,7 +7188,7 @@ export default function Home() {
             </header>
             <section className="project-index" style={{ padding: "20px 24px" }}>
               {projects.length > 0 ? (
-                <div className="project-table" aria-label="Danh sách dự án Hoàn thiện tiến độ">
+                <div className="project-table projects-overview-table" aria-label="Danh sách dự án Hoàn thiện tiến độ">
                   <div className="project-table-head">
                     <span>Vùng dự án</span>
                     <span>Tên dự án</span>
@@ -7233,11 +7243,60 @@ export default function Home() {
                             </select>
                           </span>
                           <span className="project-action-cell" onClick={(event) => event.stopPropagation()}>
-                            <button type="button" className="action-btn view-btn" title="Hoàn thiện tiến độ" aria-label="Hoàn thiện tiến độ" onClick={() => openProject(project)}>
+                            <button
+                              type="button"
+                              className="action-btn view-btn"
+                              title="Chỉnh sửa tiến độ"
+                              aria-label="Chỉnh sửa tiến độ"
+                              onClick={() => openProject(project)}
+                            >
                               <IconEye />
                             </button>
-                            <button type="button" className="action-btn delete-btn" title="Xóa dự án" aria-label="Xóa dự án" onClick={() => setProjectToDelete(project)}>
+                            <button
+                              type="button"
+                              className="primary-button"
+                              style={{
+                                height: "30px",
+                                fontSize: "11px",
+                                fontWeight: 700,
+                                padding: "0 8px",
+                                background: isCompleted ? "#f0fdf4" : "#16a34a",
+                                color: isCompleted ? "#15803d" : "#ffffff",
+                                border: isCompleted ? "1px solid #86efac" : "1px solid #15803d",
+                                display: "inline-flex",
+                                alignItems: "center",
+                                gap: "4px",
+                                whiteSpace: "nowrap"
+                              }}
+                              title="Xác nhận hoàn thiện tiến độ & xuất hồ sơ"
+                              aria-label="Xác nhận hoàn thiện"
+                              onClick={() => {
+                                setActiveId(project.id);
+                                setShowCompleteModal(true);
+                              }}
+                            >
+                              <IconCheck />
+                              <span>Xác nhận hoàn thiện</span>
+                            </button>
+                            <button
+                              type="button"
+                              className="danger-button"
+                              style={{
+                                height: "30px",
+                                fontSize: "11px",
+                                fontWeight: 600,
+                                padding: "0 8px",
+                                display: "inline-flex",
+                                alignItems: "center",
+                                gap: "4px",
+                                whiteSpace: "nowrap"
+                              }}
+                              title="Xóa dự án"
+                              aria-label="Xóa dự án"
+                              onClick={() => setProjectToDelete(project)}
+                            >
                               <IconTrash />
+                              <span>Xóa</span>
                             </button>
                           </span>
                         </div>
@@ -9279,16 +9338,6 @@ export default function Home() {
                     <IconExternalLink />
                   </a>
                 )}
-                <button
-                  type="button"
-                  className="primary-button"
-                  style={{ background: "#16a34a", borderColor: "#15803d", height: "30px", fontSize: "12px", fontWeight: 700, display: "inline-flex", alignItems: "center", gap: 5 }}
-                  onClick={() => setShowCompleteModal(true)}
-                  title="Xác nhận hoàn thiện Master Timeline để xuất PDF trình duyệt"
-                >
-                  ✓ Xác nhận hoàn thiện
-                </button>
-                <button className="danger-button" onClick={() => setShowDelete(true)}>Xóa dự án</button>
               </div>
             </header>
 
@@ -9822,14 +9871,39 @@ export default function Home() {
               </button>
               <button
                 type="button"
-                className="primary-button"
-                style={{ background: "#16a34a", borderColor: "#15803d", display: "inline-flex", alignItems: "center", gap: 6 }}
+                className="secondary-button"
+                style={{ display: "inline-flex", alignItems: "center", gap: 6 }}
                 onClick={() => {
                   exportSchedulePdf(pdfExportLevel);
                 }}
               >
                 🖨️ Xuất file PDF bảng tiến độ
               </button>
+              {!(activeProject.approvalStatus === "approved" || Boolean(activeProject.isOfficialApproved)) && (
+                <button
+                  type="button"
+                  className="primary-button"
+                  style={{ background: "#16a34a", borderColor: "#15803d", display: "inline-flex", alignItems: "center", gap: 6 }}
+                  onClick={() => {
+                    setProjects((curr) =>
+                      curr.map((p) =>
+                        p.id === activeProject.id
+                          ? {
+                              ...p,
+                              approvalStatus: "approved",
+                              isOfficialApproved: true,
+                              approvedAt: p.approvedAt || new Date().toISOString(),
+                            }
+                          : p
+                      )
+                    );
+                    setShowCompleteModal(false);
+                    notify(`Đã xác nhận hoàn thiện tiến độ dự án "${activeProject.name}"!`);
+                  }}
+                >
+                  ✓ Xác nhận hoàn thiện dự án
+                </button>
+              )}
             </footer>
           </div>
         </div>
