@@ -613,10 +613,10 @@ function scheduleTasks(project: Project): ScheduledTask[] {
   });
 
   const rolledUp = tasks.map((task) => {
-    if (!task.summary) return task;
     const descendants = tasks.filter((candidate) => candidate.code.startsWith(`${task.code}.`));
-    if (!descendants.length) return task;
-    const nonSummary = descendants.filter((c) => !c.summary);
+    const isParent = task.summary || descendants.length > 0;
+    if (!isParent || !descendants.length) return task;
+    const nonSummary = descendants.filter((c) => !c.summary && !tasks.some((other) => other.code.startsWith(`${c.code}.`)));
     const startDate = descendants.reduce((earliest, candidate) => candidate.startDate < earliest ? candidate.startDate : earliest, descendants[0].startDate);
     const endDate = descendants.reduce((latest, candidate) => candidate.endDate > latest ? candidate.endDate : latest, descendants[0].endDate);
     const actualProgress = nonSummary.length
@@ -629,6 +629,7 @@ function scheduleTasks(project: Project): ScheduledTask[] {
 
     return {
       ...task,
+      summary: true,
       startDate,
       endDate,
       duration: Math.max(1, workingDaysBetween(startDate, endDate)),
@@ -1993,7 +1994,8 @@ export default function Home() {
     const initialTaskForm = { ...emptyTaskForm, startDate, endDate: dateAtWorkingOffset(startDate, 9), addToCurrent: forCurrentProject && Boolean(activeProject) };
     if (anchor) {
       const parentCode = asChild || anchor.summary ? anchor.code : anchor.parentCode ?? anchor.groupCode;
-      const siblingNumbers = fullCatalog.filter((task) => task.parentCode === parentCode).map((task) => Number(task.code.split(".").at(-1))).filter(Number.isFinite);
+      const allTasks = activeProject ? [...fullCatalog, ...allProjectTasks(activeProject)] : fullCatalog;
+      const siblingNumbers = allTasks.filter((task) => task.parentCode === parentCode).map((task) => Number(task.code.split(".").at(-1))).filter(Number.isFinite);
       const nextNumber = Math.max(0, ...siblingNumbers) + 1;
       setTaskForm({ ...initialTaskForm, groupCode: anchor.groupCode, parentCode, code: `${parentCode}.${nextNumber}`, addToCurrent: true });
     } else {
@@ -2123,7 +2125,7 @@ export default function Home() {
       parentCode: taskForm.parentCode.trim() || taskForm.groupCode,
       groupCode: taskForm.groupCode,
       name,
-      level: Math.min(4, code.split(".").length - 1),
+      level: Math.max(1, code.split(".").length - 1),
       summary: false,
       defaultDuration: taskFormDuration,
       custom: true,
@@ -2134,6 +2136,11 @@ export default function Home() {
       setProjects((current) => current.map((project) => project.id === activeProject.id
         ? { ...project, selectedGroups: project.selectedGroups.includes(task.groupCode) ? project.selectedGroups : [...project.selectedGroups, task.groupCode], customTasks: [...project.customTasks, task], includedTaskCodes: [...project.includedTaskCodes, task.code], taskEdits: { ...project.taskEdits, [task.code]: { startDate: taskForm.startDate, endDate: taskForm.endDate, duration: taskFormDuration, status: taskForm.status } }, taskDependencies: { ...project.taskDependencies, [task.code]: taskForm.predecessorCodes.map((predecessorCode) => ({ predecessorCode, type: "FS" as const, lagDays: 0 })) }, departmentApprovals: { ...project.departmentApprovals, [task.groupCode]: { reviewer: project.departmentApprovals[task.groupCode]?.reviewer ?? "", status: "pending", note: "" } }, approvalStatus: "draft", approvedAt: undefined, approvedVersion: undefined }
         : project));
+      setCollapsed((current) => {
+        const next = new Set(current);
+        if (task.parentCode) next.delete(task.parentCode);
+        return next;
+      });
     }
     setShowTaskModal(false);
     setInsertAnchor(null);
@@ -9402,6 +9409,7 @@ export default function Home() {
                     <option value="3">Cấp 3</option>
                     <option value="4">Cấp 4</option>
                     <option value="5">Cấp 5</option>
+                    <option value="6">Cấp 6</option>
                   </select>
                 </label>
               </div>
@@ -9711,7 +9719,7 @@ export default function Home() {
 
       {contextMenu && contextTask && activeProject && <section className="task-context-menu" style={{ left: contextMenu.x, top: contextMenu.y }} onPointerDown={(event) => event.stopPropagation()}>
         <header><span>{contextTask.code}</span><b>{contextTask.name}</b></header>
-        <button disabled={contextTask.level >= 4 || activeProject.baselineLocked} onClick={() => { setContextMenu(null); openTaskCreator(true, contextTask, true); }}><i>+</i><span><b>Thêm công việc con</b><small>{contextTask.level >= 4 ? "Đã đạt WBS cấp 4" : `Tạo bên dưới ${contextTask.code}`}</small></span></button>
+        <button disabled={activeProject.baselineLocked} onClick={() => { setContextMenu(null); openTaskCreator(true, contextTask, true); }}><i>+</i><span><b>Thêm công việc con</b><small>Tạo bên dưới {contextTask.code}</small></span></button>
         <button onClick={() => { setSelectedCode(contextTask.code); setContextMenu(null); }}><i>…</i><span><b>Chỉnh sửa chi tiết</b><small>Mở bảng thông tin bên phải</small></span></button>
         {!contextTask.summary && <button onClick={() => { setContextMenu(null); openProgressModal(contextTask); }}><i>%</i><span><b>Cập nhật tiến độ</b><small>Nhập % hoàn thành thực tế</small></span></button>}
         <button className="context-danger" disabled={activeProject.baselineLocked} onClick={() => { setContextMenu(null); removeTaskFromProject(contextTask); }}><i>×</i><span><b>Xóa khỏi dự án</b><small>{contextTask.summary ? "Bao gồm các công việc con" : "Không xóa khỏi danh mục mẫu"}</small></span></button>
@@ -9760,7 +9768,7 @@ export default function Home() {
                   onChange={(e) => setPdfExportLevel(e.target.value as "all" | "1" | "2" | "3")}
                   style={{ height: "38px", fontSize: "12px" }}
                 >
-                  <option value="all">Toàn bộ chi tiết (Tất cả cấp độ WBS Level 1, 2, 3, 4)</option>
+                  <option value="all">Toàn bộ chi tiết (Tất cả cấp độ WBS)</option>
                   <option value="1">Rút gọn Cấp 1 (Chỉ 14 Khối Ban/Phòng gián tiếp & trực tiếp)</option>
                   <option value="2">Cấp 1 & Cấp 2 (Nhóm công việc cốt lõi)</option>
                   <option value="3">Cấp 1, Cấp 2 & Cấp 3 (Hạng mục chi tiết, ẩn cấp 4)</option>
