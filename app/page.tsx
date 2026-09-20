@@ -4653,6 +4653,25 @@ export default function Home() {
           line-height: 1.45 !important;
           word-break: break-word !important;
         }
+        .init-wbs-scroll-container {
+          scrollbar-width: thin !important;
+          scrollbar-color: #94a3b8 #f1f5f9 !important;
+        }
+        .init-wbs-scroll-container::-webkit-scrollbar {
+          width: 8px !important;
+          height: 8px !important;
+        }
+        .init-wbs-scroll-container::-webkit-scrollbar-track {
+          background: #f1f5f9 !important;
+          border-radius: 4px !important;
+        }
+        .init-wbs-scroll-container::-webkit-scrollbar-thumb {
+          background: #cbd5e1 !important;
+          border-radius: 4px !important;
+        }
+        .init-wbs-scroll-container::-webkit-scrollbar-thumb:hover {
+          background: #94a3b8 !important;
+        }
         .init-col-card {
           background: #ffffff;
           border: 1px solid #e2e8f0;
@@ -7996,55 +8015,18 @@ export default function Home() {
           </>
         ) : view === "init_template" ? (
           <div className="init-template-view">
-            {/* Topbar */}
-            <header className="init-template-topbar">
-              <div className="init-topbar-left">
+            {/* Main Body */}
+            <div className="init-template-body">
+              {/* Breadcrumbs */}
+              <nav className="init-breadcrumb" aria-label="Breadcrumb" style={{ display: "flex", alignItems: "center", gap: 6 }}>
                 <button
                   type="button"
-                  style={{ background: "none", border: "none", cursor: "pointer", color: "#64748b", display: "grid", placeItems: "center" }}
+                  style={{ background: "none", border: "none", cursor: "pointer", color: "#64748b", display: "inline-flex", alignItems: "center", padding: "2px" }}
                   onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
                   title="Thu gọn / Mở rộng menu"
                 >
                   <IconMenu />
                 </button>
-                <div className="init-search-box">
-                  <IconSearch />
-                  <input
-                    type="text"
-                    placeholder="Tìm kiếm dự án, công việc, tài liệu..."
-                    value={initTemplateSearch}
-                    onChange={(e) => setInitTemplateSearch(e.target.value)}
-                  />
-                </div>
-              </div>
-
-              <div className="init-topbar-right">
-                <button
-                  type="button"
-                  style={{ background: "none", border: "none", cursor: "pointer", color: "#64748b", display: "grid", placeItems: "center" }}
-                  title="Thông báo"
-                >
-                  <IconBell />
-                </button>
-                <div style={{ width: 1, height: 18, background: "#e2e8f0" }} />
-                <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: "12.5px", fontWeight: 600, color: "#1e293b", cursor: "pointer" }}>
-                  <span style={{ width: 22, height: 22, borderRadius: "50%", background: "#f1f5f9", display: "grid", placeItems: "center", color: "#64748b", fontSize: "11px", fontWeight: 700 }}>
-                    NV
-                  </span>
-                  <span>Nguyễn Văn A</span>
-                  <IconChevronDown />
-                </div>
-                <button className="init-btn-home" onClick={() => setView("home")}>
-                  <IconHome />
-                  <span>Về trang chủ</span>
-                </button>
-              </div>
-            </header>
-
-            {/* Main Body */}
-            <div className="init-template-body">
-              {/* Breadcrumbs */}
-              <nav className="init-breadcrumb" aria-label="Breadcrumb">
                 <button
                   onClick={() => setView("home")}
                   style={{ background: "none", border: "none", padding: 0, cursor: "pointer", color: "#64748b", display: "inline-flex", alignItems: "center" }}
@@ -8101,7 +8083,7 @@ export default function Home() {
                 <>
                   <div className="init-template-grid">
                     {/* Column 1: Thông tin dự án mới */}
-                    <div className="init-col-card">
+                    <div className="init-col-card" style={{ height: "calc(100vh - 230px)", minHeight: "560px", display: "flex", flexDirection: "column", overflowY: "auto" }}>
                       <div className="init-col-head">
                         <span className="init-num-badge">1</span>
                         <span className="init-col-title">Thông tin dự án mới</span>
@@ -8198,7 +8180,7 @@ export default function Home() {
                     </div>
 
                     {/* Column 2: Cấu trúc Master Timeline (9-4) */}
-                    <div className="init-col-card">
+                    <div className="init-col-card" style={{ height: "calc(100vh - 230px)", minHeight: "560px", display: "flex", flexDirection: "column" }}>
                       <div className="init-col-head">
                         <span className="init-num-badge">2</span>
                         <span className="init-col-title">Cấu trúc Master Timeline (9-4)</span>
@@ -8208,7 +8190,7 @@ export default function Home() {
                         Nhấn vào từng ban/phòng bên dưới để xem phân rã WBS ở bảng bên phải:
                       </div>
 
-                      <div style={{ display: "flex", flexDirection: "column", gap: 5, flex: 1, overflowY: "auto", paddingRight: 2 }}>
+                      <div className="init-wbs-scroll-container" style={{ display: "flex", flexDirection: "column", gap: 5, flex: 1, minHeight: 0, overflowY: "auto", paddingRight: 4 }}>
                         {[
                           { code: "9.1", short: "HRC", name: "Ban Nhân sự", desc: "Quản lý nguồn nhân lực, tuyển dụng, đào tạo & HRBP", count: "57 task", type: "khoi9" },
                           { code: "9.2", short: "FAC", name: "Ban Tài chính Kế toán", desc: "FS, CF, P/L, quản trị vốn, dòng tiền Capex/Opex", count: "160 task", type: "khoi9" },
@@ -8311,7 +8293,7 @@ export default function Home() {
                     </div>
 
                     {/* Column 3: Chi tiết công việc */}
-                    <div className="init-col-card" style={{ minWidth: 0 }}>
+                    <div className="init-col-card" style={{ minWidth: 0, height: "calc(100vh - 230px)", minHeight: "560px", display: "flex", flexDirection: "column" }}>
                       <div className="init-col-head" style={{ flexWrap: "wrap", gap: 8, alignItems: "center" }}>
                         <span className="init-num-badge">3</span>
                         <span className="init-col-title">Chi tiết công việc</span>
@@ -8437,15 +8419,18 @@ export default function Home() {
                       </div>
 
                       {/* The WBS Decomposed Table matching user screenshot */}
-                      <div style={{
-                        flex: 1,
-                        overflowY: "auto",
-                        overflowX: "auto",
-                        border: "1px solid #e2e8f0",
-                        borderRadius: 8,
-                        background: "#ffffff",
-                        minHeight: 0,
-                      }}>
+                      <div
+                        className="init-wbs-scroll-container"
+                        style={{
+                          flex: 1,
+                          minHeight: 0,
+                          overflowY: "auto",
+                          overflowX: "auto",
+                          border: "1px solid #e2e8f0",
+                          borderRadius: 8,
+                          background: "#ffffff",
+                        }}
+                      >
                         <div className="init-wbs-table" style={{ minWidth: 580 }}>
                           <div className="init-wbs-head">
                             <span>WBS</span>
