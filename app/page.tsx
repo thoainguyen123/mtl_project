@@ -470,7 +470,9 @@ function normalizeProject(project: Partial<Project>): Project {
     selectedGroups,
     createdAt: project.createdAt ?? new Date().toISOString(),
     taskEdits,
-    taskDependencies: project.taskDependencies ?? defaultDependenciesForCodes(includedTaskCodes),
+    taskDependencies: project.taskDependencies && Object.keys(project.taskDependencies).length > 50
+      ? project.taskDependencies
+      : defaultDependenciesForCodes(includedTaskCodes),
     customTasks: project.customTasks ?? [],
     includedTaskCodes,
     departmentApprovals: normalizeDepartmentApprovals(selectedGroups, project.departmentApprovals, Boolean(!project.departmentApprovals && project.approvalStatus && project.approvalStatus !== "draft")),
@@ -2262,6 +2264,14 @@ export default function Home() {
   const deleteProject = () => {
     if (!activeProject) return;
     deleteProjectById(activeProject.id);
+  };
+
+  const applyDefaultDependencies = () => {
+    if (!activeProject || !isPlanEditable(activeProject)) return;
+    const newDeps = defaultDependenciesForCodes(activeProject.includedTaskCodes);
+    const linkCount = Object.values(newDeps).reduce((sum, list) => sum + list.length, 0);
+    setProjects((current) => current.map((p) => p.id === activeProject.id ? { ...p, taskDependencies: newDeps } : p));
+    notify(`Đã cập nhật ${linkCount} liên kết MTL chuẩn (9-4) cho dự án ${activeProject.code}`);
   };
 
   const exportMicrosoftProject = () => {
@@ -9264,6 +9274,16 @@ export default function Home() {
               </div>
               <div className="top-actions">
                 <span className="saved-state"><i />Đã lưu trên thiết bị</span>
+                <button
+                  type="button"
+                  className="secondary-button"
+                  style={{ height: "30px", fontSize: "11px", display: "inline-flex", alignItems: "center", gap: "4px" }}
+                  onClick={applyDefaultDependencies}
+                  disabled={activeProject.baselineLocked}
+                  title="Cập nhật toàn bộ 788 liên kết chuẩn từ file MTL 9-4 vào dự án hiện tại"
+                >
+                  <span>🔗 Đồng bộ liên kết chuẩn</span>
+                </button>
                 <button className="secondary-button project-export" onClick={exportMicrosoftProject}>
                   Xuất Microsoft Project
                 </button>

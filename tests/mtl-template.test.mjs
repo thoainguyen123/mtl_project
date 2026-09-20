@@ -28,23 +28,19 @@ test("MTL template carries the reporting metadata from the September 2026 workbo
   assert.equal(template.filter((task) => task.workGroup).length, 788);
   assert.equal(template.filter((task) => task.workGroup === "Báo cáo định kỳ").length, 276);
   assert.equal(template.filter((task) => task.workGroup === "Tracking công việc").length, 512);
-  assert.equal(template.filter((task) => task.notes).length, 61);
+  assert.equal(template.filter((task) => task.notes).length, 819);
   assert.deepEqual(
     [...new Set(template.flatMap((task) => task.workGroup ? [task.workGroup] : []))].sort(),
     ["Báo cáo định kỳ", "Tracking công việc"],
   );
 });
 
-test("default predecessor links from the August 2026 MPP match WBS codes", () => {
+test("default predecessor links from MTL_9_4_Lien_ket_Cong_viec match WBS codes", () => {
   const codes = new Set(template.map((task) => task.code));
-  assert.equal(dependencies.length, 31);
+  assert.equal(dependencies.length, 788);
   assert.ok(dependencies.every((dependency) => codes.has(dependency.successorCode) && codes.has(dependency.predecessorCode)));
   assert.deepEqual(
-    Object.fromEntries(["FS", "FF", "SS"].map((type) => [type, dependencies.filter((dependency) => dependency.type === type).length])),
-    { FS: 21, FF: 9, SS: 1 },
-  );
-  assert.deepEqual(
-    dependencies.find((dependency) => dependency.lagDays !== 0),
-    { successorCode: "4.3.8.1.3", predecessorCode: "4.3.8.1.2", type: "SS", lagDays: 90 },
+    Object.fromEntries(["FS", "SS"].map((type) => [type, dependencies.filter((dependency) => dependency.type === type).length])),
+    { FS: 728, SS: 60 },
   );
 });
