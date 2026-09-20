@@ -1255,6 +1255,8 @@ export default function Home() {
   const [initWbsLevel, setInitWbsLevel] = useState<string>("all");
   const [workspaceDeptFilter, setWorkspaceDeptFilter] = useState<string>("all");
   const [workspaceLevelFilter, setWorkspaceLevelFilter] = useState<string>("all");
+  const [showCompleteModal, setShowCompleteModal] = useState(false);
+  const [pdfExportLevel, setPdfExportLevel] = useState<string>("all");
   const [initTreeExpanded, setInitTreeExpanded] = useState<Record<string, boolean>>({
     root: true,
     block4: true,
@@ -2207,6 +2209,284 @@ export default function Home() {
     link.click();
     URL.revokeObjectURL(url);
     notify("Đã xuất file mở trực tiếp bằng Microsoft Project");
+  };
+
+  const exportSchedulePdf = (exportLevel: string = pdfExportLevel) => {
+    if (!activeProject) return;
+    const printWindow = window.open("", "_blank");
+    if (!printWindow) {
+      notify("Vui lòng cho phép mở cửa sổ popup để xuất file PDF");
+      return;
+    }
+
+    const tasksToPrint = scheduled.filter((task) => {
+      if (exportLevel === "all") return true;
+      return task.level <= Number(exportLevel);
+    });
+
+    const html = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>BẢNG TIẾN ĐỘ MASTER TIMELINE - ${activeProject.name}</title>
+  <style>
+    @page {
+      size: A3 landscape;
+      margin: 12mm 10mm;
+    }
+    @media print {
+      body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .no-print { display: none !important; }
+      table { page-break-inside: auto; }
+      tr { page-break-inside: avoid; page-break-after: auto; }
+      thead { display: table-header-group; }
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      color: #0f172a;
+      background: #ffffff;
+      margin: 0;
+      padding: 15px;
+      font-size: 11px;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      border-bottom: 2px solid #0f172a;
+      padding-bottom: 12px;
+      margin-bottom: 14px;
+    }
+    .logo-box {
+      font-size: 16px;
+      font-weight: 900;
+      letter-spacing: 1px;
+      color: #1e3a8a;
+    }
+    .logo-sub {
+      font-size: 10px;
+      font-weight: 700;
+      color: #64748b;
+      letter-spacing: 0.5px;
+      margin-top: 2px;
+    }
+    .title-box {
+      text-align: center;
+      flex: 1;
+      padding: 0 20px;
+    }
+    .title-box h1 {
+      font-size: 18px;
+      margin: 0 0 4px;
+      text-transform: uppercase;
+      color: #0f172a;
+      letter-spacing: 0.5px;
+    }
+    .title-box h2 {
+      font-size: 14px;
+      font-weight: 700;
+      color: #2563eb;
+      margin: 0;
+    }
+    .meta-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      padding: 10px 14px;
+      margin-bottom: 14px;
+      font-size: 11px;
+    }
+    .meta-item { display: flex; flex-direction: column; }
+    .meta-item span { color: #64748b; font-size: 10px; font-weight: 600; text-transform: uppercase; }
+    .meta-item b { color: #0f172a; font-size: 12px; margin-top: 2px; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 10.5px;
+    }
+    th, td {
+      border: 1px solid #cbd5e1;
+      padding: 5px 8px;
+      text-align: left;
+    }
+    th {
+      background: #1e293b;
+      color: #ffffff;
+      font-weight: 700;
+      font-size: 10.5px;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+    tr.level-1 {
+      background: #e2e8f0;
+      font-weight: 800;
+      color: #0f172a;
+    }
+    tr.level-2 {
+      background: #f1f5f9;
+      font-weight: 700;
+      color: #1e293b;
+    }
+    tr.level-3 {
+      background: #f8fafc;
+      font-weight: 600;
+    }
+    tr.summary {
+      font-weight: 700;
+    }
+    .wbs-col { width: 130px; font-family: monospace; font-weight: 700; }
+    .dur-col { width: 90px; text-align: right; }
+    .date-col { width: 85px; text-align: center; }
+    .note-col { width: 140px; }
+    .link-col { width: 110px; }
+    .signatures {
+      margin-top: 28px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      text-align: center;
+      page-break-inside: avoid;
+    }
+    .sig-box {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      height: 110px;
+      justify-content: space-between;
+    }
+    .sig-title {
+      font-weight: 700;
+      text-transform: uppercase;
+      font-size: 11px;
+    }
+    .sig-role {
+      font-size: 9.5px;
+      color: #64748b;
+      font-style: italic;
+    }
+    .sig-name {
+      font-weight: 700;
+      font-size: 11px;
+      border-top: 1px dashed #94a3b8;
+      padding-top: 4px;
+      width: 180px;
+    }
+    .btn-print-bar {
+      position: sticky;
+      top: 0;
+      background: #0f172a;
+      color: #fff;
+      padding: 10px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: -15px -15px 15px -15px;
+      z-index: 100;
+    }
+    .btn-print {
+      background: #16a34a;
+      color: white;
+      border: none;
+      padding: 8px 18px;
+      font-weight: 700;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+  <div class="btn-print-bar no-print">
+    <div>
+      <b>Hồ sơ Master Timeline trình duyệt:</b> ${activeProject.name} (${tasksToPrint.length} công việc)
+    </div>
+    <div style="display: flex; gap: 8px;">
+      <button class="btn-print" onclick="window.print()">🖨️ In / Tải file PDF ngay</button>
+      <button style="background: #475569; color: white; border: none; padding: 8px 14px; border-radius: 6px; cursor: pointer;" onclick="window.close()">Đóng</button>
+    </div>
+  </div>
+
+  <div class="header">
+    <div>
+      <div class="logo-box">NOVALAND GROUP</div>
+      <div class="logo-sub">PMD · BAN ĐIỀU HÀNH DỰ ÁN</div>
+    </div>
+    <div class="title-box">
+      <h1>KẾ HOẠCH TIẾN ĐỘ MASTER TIMELINE (MTL)</h1>
+      <h2>${activeProject.name}</h2>
+    </div>
+    <div style="text-align: right; font-size: 10px; color: #475569;">
+      <div>Mã dự án: <b>${activeProject.code}</b></div>
+      <div>Phiên bản: <b>${activeProject.officialVersion || "v1.0"} (Trình duyệt)</b></div>
+      <div>Ngày xuất: <b>${formatDate(today)}</b></div>
+    </div>
+  </div>
+
+  <div class="meta-grid">
+    <div class="meta-item"><span>Chủ đầu tư</span><b>${activeProject.investor || "Tập đoàn Novaland"}</b></div>
+    <div class="meta-item"><span>Loại hình & Khu vực</span><b>${activeProject.type} · ${activeProject.location || activeProject.area || "Việt Nam"}</b></div>
+    <div class="meta-item"><span>Thời gian thực hiện</span><b>${formatDate(activeProject.startDate)} → ${formatDate(activeProject.targetDate)}</b></div>
+    <div class="meta-item"><span>Quy mô WBS</span><b>${tasksToPrint.length} công việc · 14 Ban/Phòng (9-4)</b></div>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th class="wbs-col">MÃ WBS</th>
+        <th>HẠNG MỤC CÔNG VIỆC</th>
+        <th class="dur-col">THỜI GIAN</th>
+        <th class="date-col">BẮT ĐẦU</th>
+        <th class="date-col">KẾT THÚC</th>
+        <th class="note-col">GHI CHÚ</th>
+        <th class="link-col">LIÊN KẾT</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${tasksToPrint.map((t) => {
+        const indent = (t.level - 1) * 14;
+        const taskNote = activeProject.taskEdits[t.code]?.note || activeProject.taskEdits[t.code]?.actualNote || "";
+        const rowClass = t.level === 1 ? "level-1" : t.level === 2 ? "level-2" : t.level === 3 ? "level-3" : t.summary ? "summary" : "";
+        const links = (t.predecessors || []).map((p) => p.predecessorCode + (p.lagDays ? "+" + p.lagDays + "d" : "")).join(", ");
+        return `
+          <tr class="${rowClass}">
+            <td class="wbs-col" style="padding-left: ${indent + 8}px;">${t.code}</td>
+            <td>${t.name}</td>
+            <td class="dur-col">${t.duration} ngày</td>
+            <td class="date-col">${formatDate(t.startDate)}</td>
+            <td class="date-col">${formatDate(t.endDate)}</td>
+            <td class="note-col">${taskNote}</td>
+            <td class="link-col">${links}</td>
+          </tr>
+        `;
+      }).join("")}
+    </tbody>
+  </table>
+
+  <div class="signatures">
+    <div class="sig-box">
+      <div class="sig-title">ĐƠN VỊ LẬP TIẾN ĐỘ</div>
+      <div class="sig-role">Phòng Điều hành Dự án (PMD)</div>
+      <div class="sig-name">Trưởng ban PMD</div>
+    </div>
+    <div class="sig-box">
+      <div class="sig-title">ĐƠN VỊ KIỂM SOÁT</div>
+      <div class="sig-role">Ban Quản lý Thiết kế & Xây dựng (DMD / PCD)</div>
+      <div class="sig-name">Giám đốc Khối</div>
+    </div>
+    <div class="sig-box">
+      <div class="sig-title">CẤP PHÊ DUYỆT</div>
+      <div class="sig-role">Ban Tổng Giám đốc / HĐQT Novaland</div>
+      <div class="sig-name">Tổng Giám Đốc</div>
+    </div>
+  </div>
+</body>
+</html>`;
+
+    printWindow.document.open();
+    printWindow.document.write(html);
+    printWindow.document.close();
   };
 
   /* SOP B5 → B6: người lập trình MTL lên GMD kiểm soát, không gửi thẳng GMS.P. */
@@ -9061,45 +9341,28 @@ export default function Home() {
                     <IconExternalLink />
                   </a>
                 )}
-                {!activeProject.isOfficialApproved ? (
-                  <button
-                    type="button"
-                    className="primary-button"
-                    style={{ background: "#73b52d", borderColor: "#64a024", height: "30px", fontSize: "12px", fontWeight: 700 }}
-                    onClick={() => openEApprovalModal(activeProject)}
-                  >
-                    ✓ Xác nhận phê duyệt
-                  </button>
-                ) : (
-                  <button
-                    type="button"
-                    className="secondary-button"
-                    style={{ height: "30px", fontSize: "12px", fontWeight: 600 }}
-                    onClick={reopenApproved}
-                  >
-                    Tạo bản điều chỉnh
-                  </button>
-                )}
+                <button
+                  type="button"
+                  className="primary-button"
+                  style={{ background: "#16a34a", borderColor: "#15803d", height: "30px", fontSize: "12px", fontWeight: 700, display: "inline-flex", alignItems: "center", gap: 5 }}
+                  onClick={() => setShowCompleteModal(true)}
+                  title="Xác nhận hoàn thiện Master Timeline để xuất PDF trình duyệt"
+                >
+                  ✓ Xác nhận hoàn thiện
+                </button>
                 <button className="danger-button" onClick={() => setShowDelete(true)}>Xóa dự án</button>
               </div>
             </header>
 
-            <section className="project-header">
+            <section className="project-header" style={{ padding: "14px 20px" }}>
               <div className="project-header-left">
                 <div className="project-title-row">
-                  <span className={`status-badge approval-${activeProject.approvalStatus}`}>
-                    {activeProject.isOfficialApproved ? "🛡️ " : ""}{projectApprovalLabel(activeProject)}{activeProject.approvedVersion ? ` · ${activeProject.approvedVersion}` : ""}
-                  </span>
-                  <h1>{activeProject.name}</h1>
+                  <h1 style={{ fontSize: "20px", fontWeight: 800, margin: 0, color: "#0f172a" }}>{activeProject.name}</h1>
                 </div>
-                <p>
-                  {activeProject.code} · {activeProject.type}{activeProject.location ? ` · ${activeProject.location}` : ""}
-                  {activeProject.isOfficialApproved && activeProject.eApprovalCode ? ` · QĐ: ${activeProject.eApprovalCode} (${formatDate(activeProject.eApprovalDate || activeProject.approvedAt)})` : ""}
-                </p>
               </div>
               <div className="top-stat-cards workspace-stat-cards">
                 <div className="top-stat-card">
-                  <span>Công việc</span>
+                  <span>CÔNG VIỆC</span>
                   <b>{scheduled.length}</b>
                 </div>
                 <div className="top-stat-card">
@@ -9379,29 +9642,12 @@ export default function Home() {
                     <span>CHI TIẾT & CHỈNH SỬA TIẾN ĐỘ</span>
                     <button aria-label="Đóng chi tiết" onClick={() => setSelectedCode("")}>Đóng</button>
                   </header>
-                  {activeProject.isOfficialApproved && (
-                    <div className="locked-banner" style={{ background: "#102d4b", color: "#9fe3d5" }}>
-                      🛡️ Baseline đã khóa · Cập nhật tiến độ thực tế bên dưới
-                    </div>
-                  )}
                   <div className="detail-code">{selectedTask.code}</div>
                   <h2>{selectedTask.name}</h2>
                   <div className="detail-meta">
                     <span>{GROUP_BY_CODE[selectedTask.groupCode]?.short || selectedTask.groupCode} – {GROUP_BY_CODE[selectedTask.groupCode]?.name}</span>
                     <b>{selectedTask.summary ? "Nhóm công việc (Summary)" : "Công việc thực hiện"}</b>
                   </div>
-                  
-                  {!selectedTask.summary && (
-                    <div style={{ margin: "14px 0", padding: "12px", background: "#f0f7f5", borderRadius: "8px", border: "1px solid #cce8e2" }}>
-                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
-                        <span style={{ fontSize: "11px", fontWeight: 700, color: "#167664" }}>Tiến độ thực tế:</span>
-                        <b style={{ fontSize: "14px", color: "#167664" }}>{selectedTask.actualProgress}% ({selectedTask.actualStatus})</b>
-                      </div>
-                      <button type="button" className="primary-button" style={{ width: "100%", height: "32px", fontSize: "11px" }} onClick={() => openProgressModal(selectedTask)}>
-                        Cập nhật % & Ngày thực tế
-                      </button>
-                    </div>
-                  )}
 
                   <label className="field">
                     <span>PIC phụ trách</span>
@@ -9539,6 +9785,96 @@ export default function Home() {
         {!contextTask.summary && <button onClick={() => { setContextMenu(null); openProgressModal(contextTask); }}><i>%</i><span><b>Cập nhật tiến độ</b><small>Nhập % hoàn thành thực tế</small></span></button>}
         <button className="context-danger" disabled={activeProject.baselineLocked} onClick={() => { setContextMenu(null); removeTaskFromProject(contextTask); }}><i>×</i><span><b>Xóa khỏi dự án</b><small>{contextTask.summary ? "Bao gồm các công việc con" : "Không xóa khỏi danh mục mẫu"}</small></span></button>
       </section>}
+
+      {showCompleteModal && activeProject && (
+        <div className="modal-backdrop" onMouseDown={() => setShowCompleteModal(false)}>
+          <div className="project-modal" style={{ maxWidth: "660px" }} onMouseDown={(e) => e.stopPropagation()}>
+            <header>
+              <div>
+                <span className="status-badge" style={{ background: "#dcfce7", color: "#15803d", borderColor: "#bbf7d0" }}>
+                  XÁC NHẬN HOÀN THIỆN TIẾN ĐỘ
+                </span>
+                <h2>Hồ sơ Master Timeline trình duyệt</h2>
+                <p>Kiểm tra thông tin tiến độ đã hoàn thiện và xuất bản in PDF khổ ngang phục vụ công tác trình phê duyệt cấp thẩm quyền.</p>
+              </div>
+              <button type="button" onClick={() => setShowCompleteModal(false)}>Đóng</button>
+            </header>
+
+            <div className="form-grid" style={{ gap: "14px" }}>
+              <div className="field field-wide" style={{ background: "#f8fafc", padding: "14px", borderRadius: "8px", border: "1px solid #e2e8f0" }}>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", fontSize: "12px" }}>
+                  <div>
+                    <span style={{ color: "#64748b", display: "block", fontSize: "11px", marginBottom: "2px" }}>Tên dự án</span>
+                    <b style={{ color: "#0f172a", fontSize: "13px" }}>{activeProject.name}</b>
+                  </div>
+                  <div>
+                    <span style={{ color: "#64748b", display: "block", fontSize: "11px", marginBottom: "2px" }}>Mã dự án & Phiên bản</span>
+                    <b style={{ color: "#0f172a" }}>{activeProject.code} · {activeProject.officialVersion || "v1.0"}</b>
+                  </div>
+                  <div>
+                    <span style={{ color: "#64748b", display: "block", fontSize: "11px", marginBottom: "2px" }}>Thời gian thực hiện</span>
+                    <b style={{ color: "#0f172a" }}>{formatDate(activeProject.startDate)} → {formatDate(activeProject.targetDate)}</b>
+                  </div>
+                  <div>
+                    <span style={{ color: "#64748b", display: "block", fontSize: "11px", marginBottom: "2px" }}>Quy mô cấu trúc WBS</span>
+                    <b style={{ color: "#16a34a" }}>{scheduled.length} công việc · 14 Ban/Phòng (9-4)</b>
+                  </div>
+                </div>
+              </div>
+
+              <label className="field field-wide">
+                <span style={{ fontWeight: 700, color: "#0f172a", marginBottom: "4px" }}>Cấp độ chi tiết WBS xuất PDF</span>
+                <select
+                  value={pdfExportLevel}
+                  onChange={(e) => setPdfExportLevel(e.target.value as "all" | "1" | "2" | "3")}
+                  style={{ height: "38px", fontSize: "12px" }}
+                >
+                  <option value="all">Toàn bộ chi tiết (Tất cả cấp độ WBS Level 1, 2, 3, 4)</option>
+                  <option value="1">Rút gọn Cấp 1 (Chỉ 14 Khối Ban/Phòng gián tiếp & trực tiếp)</option>
+                  <option value="2">Cấp 1 & Cấp 2 (Nhóm công việc cốt lõi)</option>
+                  <option value="3">Cấp 1, Cấp 2 & Cấp 3 (Hạng mục chi tiết, ẩn cấp 4)</option>
+                </select>
+              </label>
+
+              <div className="field field-wide" style={{ border: "1px dashed #cbd5e1", borderRadius: "8px", padding: "12px", background: "#fafafa" }}>
+                <span style={{ fontSize: "11.5px", fontWeight: 700, color: "#334155", display: "block", marginBottom: "8px" }}>
+                  📋 Khung chữ ký phê duyệt chuẩn đính kèm trong bản in PDF:
+                </span>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "8px", textAlign: "center", fontSize: "11px" }}>
+                  <div style={{ background: "#ffffff", padding: "8px", borderRadius: "6px", border: "1px solid #e2e8f0" }}>
+                    <div style={{ fontWeight: 700, color: "#1e3a8a" }}>1. ĐƠN VỊ LẬP TIẾN ĐỘ</div>
+                    <div style={{ color: "#64748b", fontSize: "10px", marginTop: "2px" }}>Ban Điều hành Dự án (PMD)</div>
+                  </div>
+                  <div style={{ background: "#ffffff", padding: "8px", borderRadius: "6px", border: "1px solid #e2e8f0" }}>
+                    <div style={{ fontWeight: 700, color: "#1e3a8a" }}>2. ĐƠN VỊ KIỂM SOÁT</div>
+                    <div style={{ color: "#64748b", fontSize: "10px", marginTop: "2px" }}>Ban QL Thiết kế & XD (DMD / PCD)</div>
+                  </div>
+                  <div style={{ background: "#ffffff", padding: "8px", borderRadius: "6px", border: "1px solid #e2e8f0" }}>
+                    <div style={{ fontWeight: 700, color: "#1e3a8a" }}>3. CẤP PHÊ DUYỆT</div>
+                    <div style={{ color: "#64748b", fontSize: "10px", marginTop: "2px" }}>Ban Tổng Giám đốc / HĐQT</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <footer className="modal-actions-only" style={{ marginTop: "20px" }}>
+              <button type="button" className="secondary-button" onClick={() => setShowCompleteModal(false)}>
+                Đóng
+              </button>
+              <button
+                type="button"
+                className="primary-button"
+                style={{ background: "#16a34a", borderColor: "#15803d", display: "inline-flex", alignItems: "center", gap: 6 }}
+                onClick={() => {
+                  exportSchedulePdf(pdfExportLevel);
+                }}
+              >
+                🖨️ Xuất file PDF bảng tiến độ
+              </button>
+            </footer>
+          </div>
+        </div>
+      )}
 
       {showEApprovalModal && (
         <div className="modal-backdrop" onMouseDown={() => setShowEApprovalModal(false)}>
