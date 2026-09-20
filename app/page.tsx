@@ -2616,19 +2616,16 @@ export default function Home() {
 
   <div class="signatures">
     <div class="sig-box">
-      <div class="sig-title">ĐƠN VỊ LẬP TIẾN ĐỘ</div>
-      <div class="sig-role">Phòng Điều hành Dự án (PMD)</div>
-      <div class="sig-name">Trưởng ban PMD</div>
+      <div class="sig-title">LẬP TIẾN ĐỘ</div>
+      <div class="sig-name"></div>
     </div>
     <div class="sig-box">
-      <div class="sig-title">ĐƠN VỊ KIỂM SOÁT</div>
-      <div class="sig-role">Ban Quản lý Thiết kế & Xây dựng (DMD / PCD)</div>
-      <div class="sig-name">Giám đốc Khối</div>
+      <div class="sig-title">XEM XÉT</div>
+      <div class="sig-name"></div>
     </div>
     <div class="sig-box">
-      <div class="sig-title">CẤP PHÊ DUYỆT</div>
-      <div class="sig-role">Ban Tổng Giám đốc / HĐQT Novaland</div>
-      <div class="sig-name">Tổng Giám Đốc</div>
+      <div class="sig-title">PHÊ DUYỆT</div>
+      <div class="sig-name"></div>
     </div>
   </div>
 </body>
@@ -9872,27 +9869,21 @@ export default function Home() {
                 <span style={{ fontSize: "11.5px", fontWeight: 700, color: "#334155", display: "block", marginBottom: "8px" }}>
                   📋 Khung chữ ký phê duyệt chuẩn đính kèm trong bản in PDF:
                 </span>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "8px", textAlign: "center", fontSize: "11px" }}>
-                  <div style={{ background: "#ffffff", padding: "8px", borderRadius: "6px", border: "1px solid #e2e8f0" }}>
-                    <div style={{ fontWeight: 700, color: "#1e3a8a" }}>1. ĐƠN VỊ LẬP TIẾN ĐỘ</div>
-                    <div style={{ color: "#64748b", fontSize: "10px", marginTop: "2px" }}>Ban Điều hành Dự án (PMD)</div>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "8px", textAlign: "center", fontSize: "12px" }}>
+                  <div style={{ background: "#ffffff", padding: "12px 8px", borderRadius: "6px", border: "1px solid #e2e8f0", fontWeight: 700, color: "#1e3a8a", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    Lập tiến độ
                   </div>
-                  <div style={{ background: "#ffffff", padding: "8px", borderRadius: "6px", border: "1px solid #e2e8f0" }}>
-                    <div style={{ fontWeight: 700, color: "#1e3a8a" }}>2. ĐƠN VỊ KIỂM SOÁT</div>
-                    <div style={{ color: "#64748b", fontSize: "10px", marginTop: "2px" }}>Ban QL Thiết kế & XD (DMD / PCD)</div>
+                  <div style={{ background: "#ffffff", padding: "12px 8px", borderRadius: "6px", border: "1px solid #e2e8f0", fontWeight: 700, color: "#1e3a8a", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    Xem xét
                   </div>
-                  <div style={{ background: "#ffffff", padding: "8px", borderRadius: "6px", border: "1px solid #e2e8f0" }}>
-                    <div style={{ fontWeight: 700, color: "#1e3a8a" }}>3. CẤP PHÊ DUYỆT</div>
-                    <div style={{ color: "#64748b", fontSize: "10px", marginTop: "2px" }}>Ban Tổng Giám đốc / HĐQT</div>
+                  <div style={{ background: "#ffffff", padding: "12px 8px", borderRadius: "6px", border: "1px solid #e2e8f0", fontWeight: 700, color: "#1e3a8a", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    Phê duyệt
                   </div>
                 </div>
               </div>
             </div>
 
-            <footer className="modal-actions-only" style={{ marginTop: "20px" }}>
-              <button type="button" className="secondary-button" onClick={() => setShowCompleteModal(false)}>
-                Đóng
-              </button>
+            <footer className="modal-actions-only" style={{ marginTop: "20px", display: "flex", justifyContent: "flex-end", gap: "10px" }}>
               <button
                 type="button"
                 className="secondary-button"
@@ -9901,7 +9892,7 @@ export default function Home() {
                   exportSchedulePdf(pdfExportLevel);
                 }}
               >
-                🖨️ Xuất file PDF bảng tiến độ
+                🖨️ Xuất file
               </button>
               {!(activeProject.approvalStatus === "approved" || Boolean(activeProject.isOfficialApproved)) ? (
                 <button
@@ -9925,7 +9916,7 @@ export default function Home() {
                     notify(`Đã xác nhận hoàn thiện tiến độ dự án "${activeProject.name}"!`);
                   }}
                 >
-                  ✓ Xác nhận hoàn thiện dự án
+                  ✓ Xác nhận
                 </button>
               ) : (
                 <button
