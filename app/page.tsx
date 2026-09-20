@@ -6117,6 +6117,7 @@ export default function Home() {
         /* ================= PROJECTS OVERVIEW TABLE ================= */
         .projects-overview-table {
           width: 100% !important;
+          max-width: 960px !important;
           margin: 0 !important;
           overflow-x: hidden !important;
           box-sizing: border-box !important;
@@ -6126,18 +6127,19 @@ export default function Home() {
           min-width: 0 !important;
           width: 100% !important;
           box-sizing: border-box !important;
-          grid-template-columns: 160px minmax(220px, 1.6fr) 130px 160px 120px !important;
+          grid-template-columns: 140px minmax(200px, 1fr) 120px 140px 110px !important;
           padding: 10px 16px !important;
           gap: 12px !important;
+        }
+        .projects-overview-table .project-table-head span:nth-child(4),
+        .projects-overview-table .project-table-head span:last-child {
+          text-align: center !important;
         }
         .projects-overview-table .project-action-cell {
           justify-content: center !important;
           gap: 6px !important;
           display: flex !important;
           align-items: center !important;
-        }
-        .projects-overview-table .project-table-head span:last-child {
-          text-align: center !important;
         }
         .projects-overview-table .action-btn {
           width: 32px !important;
@@ -7269,41 +7271,25 @@ export default function Home() {
                             <b>{project.name}</b>
                           </span>
                           <span className="project-code">{project.code}</span>
-                          <span onClick={(e) => e.stopPropagation()}>
-                            <select
-                              aria-label="Trạng thái hoàn thiện"
-                              className={`status-select ${isCompleted ? "status-completed" : "status-in-progress"}`}
-                              value={isCompleted ? "completed" : "in_progress"}
-                              onChange={(e) => {
-                                const isNowDone = e.target.value === "completed";
-                                setProjects((curr) =>
-                                  curr.map((p) =>
-                                    p.id === project.id
-                                      ? {
-                                          ...p,
-                                          approvalStatus: isNowDone ? "approved" : "draft",
-                                          isOfficialApproved: isNowDone,
-                                          approvedAt: isNowDone ? (p.approvedAt || new Date().toISOString()) : undefined,
-                                        }
-                                      : p
-                                  )
-                                );
-                              }}
+                          <span style={{ display: "flex", justifyContent: "center" }}>
+                            <span
+                              className={`status-badge ${isCompleted ? "status-completed" : "status-in-progress"}`}
                               style={{
-                                cursor: "pointer",
-                                padding: "6px 10px",
+                                display: "inline-flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                padding: "5px 12px",
                                 borderRadius: "6px",
                                 fontWeight: 700,
                                 fontSize: "11px",
                                 border: isCompleted ? "1px solid #86efac" : "1px solid #bae6fd",
                                 background: isCompleted ? "#dcfce7" : "#e0f2fe",
                                 color: isCompleted ? "#15803d" : "#0284c7",
-                                outline: "none",
+                                whiteSpace: "nowrap",
                               }}
                             >
-                              <option value="in_progress">Đang hoàn thiện</option>
-                              <option value="completed">Đã hoàn thiện</option>
-                            </select>
+                              {isCompleted ? "Đã hoàn thiện" : "Đang hoàn thiện"}
+                            </span>
                           </span>
                           <span className="project-action-cell" onClick={(event) => event.stopPropagation()}>
                             <button
@@ -9917,7 +9903,7 @@ export default function Home() {
               >
                 🖨️ Xuất file PDF bảng tiến độ
               </button>
-              {!(activeProject.approvalStatus === "approved" || Boolean(activeProject.isOfficialApproved)) && (
+              {!(activeProject.approvalStatus === "approved" || Boolean(activeProject.isOfficialApproved)) ? (
                 <button
                   type="button"
                   className="primary-button"
@@ -9940,6 +9926,30 @@ export default function Home() {
                   }}
                 >
                   ✓ Xác nhận hoàn thiện dự án
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  className="secondary-button"
+                  style={{ color: "#0284c7", borderColor: "#bae6fd", background: "#f0f9ff", display: "inline-flex", alignItems: "center", gap: 6 }}
+                  onClick={() => {
+                    setProjects((curr) =>
+                      curr.map((p) =>
+                        p.id === activeProject.id
+                          ? {
+                              ...p,
+                              approvalStatus: "draft",
+                              isOfficialApproved: false,
+                              approvedAt: undefined,
+                            }
+                          : p
+                      )
+                    );
+                    setShowCompleteModal(false);
+                    notify(`Đã chuyển dự án "${activeProject.name}" về trạng thái Đang hoàn thiện.`);
+                  }}
+                >
+                  ↺ Mở lại Đang hoàn thiện
                 </button>
               )}
             </footer>
