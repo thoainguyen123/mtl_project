@@ -287,6 +287,7 @@ function pbcmGroupsOf(project: Project) {
 
 const GROUP_BY_CODE = Object.fromEntries(GROUPS.map((group) => [group.code, group]));
 const GROUP_ORDER = Object.fromEntries(GROUPS.map((group, index) => [group.code, index]));
+const SORTED_TEMPLATE = [...TEMPLATE].sort((a, b) => (GROUP_ORDER[a.groupCode] ?? 99) - (GROUP_ORDER[b.groupCode] ?? 99) || a.code.localeCompare(b.code, undefined, { numeric: true }));
 const today = new Date().toISOString().slice(0, 10);
 const nextYear = new Date(Date.now() + 365 * 86400000).toISOString().slice(0, 10);
 
@@ -693,22 +694,73 @@ function taskStatusClass(status: NonNullable<TaskEdit["status"]>) {
 }
 
 function allProjectTasks(project: Project) {
+  if (!project.customTasks || project.customTasks.length === 0) {
+    return SORTED_TEMPLATE;
+  }
   const customCodes = new Set(project.customTasks.map((task) => task.code));
-  return [...TEMPLATE.filter((task) => !customCodes.has(task.code)), ...project.customTasks].sort((a, b) => (GROUP_ORDER[a.groupCode] ?? 99) - (GROUP_ORDER[b.groupCode] ?? 99) || a.code.localeCompare(b.code, undefined, { numeric: true }));
+  return [...SORTED_TEMPLATE.filter((task) => !customCodes.has(task.code)), ...project.customTasks].sort((a, b) => (GROUP_ORDER[a.groupCode] ?? 99) - (GROUP_ORDER[b.groupCode] ?? 99) || a.code.localeCompare(b.code, undefined, { numeric: true }));
 }
 
+interface ScheduleCacheEntry {
+  date: string;
+  startDate: string;
+  targetDate: string;
+  editCount: number;
+  customTaskCount: number;
+  result: ScheduledTask[];
+}
+const scheduleCache = new WeakMap<Project, ScheduleCacheEntry>();
+
 function scheduleTasks(project: Project): ScheduledTask[] {
+  const today = new Date().toISOString().slice(0, 10);
+  const editCount = Object.keys(project.taskEdits || {}).length;
+  const customTaskCount = project.customTasks?.length || 0;
+  const cached = scheduleCache.get(project);
+  if (
+    cached &&
+    cached.date === today &&
+    cached.startDate === project.startDate &&
+    cached.targetDate === project.targetDate &&
+    cached.editCount === editCount &&
+    cached.customTaskCount === customTaskCount
+  ) {
+    return cached.result;
+  }
+
   const selected = GROUPS.filter((group) => project.selectedGroups.includes(group.code));
   const source = allProjectTasks(project);
   const totalDays = daysBetween(project.startDate, project.targetDate);
-  const today = new Date().toISOString().slice(0, 10);
   const { pStart, pEnd, windows } = getProjectLifecycleWindows(project.startDate, project.targetDate, project.milestoneDates);
   const totalProjectWorkingDays = Math.max(10, workingDaysBetween(pStart, pEnd));
   const timeScale = Math.min(1.2, Math.max(0.15, totalProjectWorkingDays / 600));
 
+  // Pre-calculate parent codes and non-summary group info in O(N)
+  const sourceParentCodes = new Set<string>();
+  const nonSummaryByGroup = new Map<string, number>();
+  const indexInGroupByCode = new Map<string, number>();
+
+  for (const item of source) {
+    if (item.summary) {
+      sourceParentCodes.add(item.code);
+    }
+    let dot = item.code.lastIndexOf(".");
+    let prefix = item.code;
+    while (dot > 0) {
+      prefix = prefix.slice(0, dot);
+      sourceParentCodes.add(prefix);
+      dot = prefix.lastIndexOf(".");
+    }
+
+    if (!item.summary) {
+      const currentCount = nonSummaryByGroup.get(item.groupCode) ?? 0;
+      indexInGroupByCode.set(item.code, currentCount);
+      nonSummaryByGroup.set(item.groupCode, currentCount + 1);
+    }
+  }
+
   const includedCodes = new Set(project.includedTaskCodes);
   const tasks = source.filter((task) => includedCodes.has(task.code)).map((task) => {
-    const isParent = task.summary || source.some((other) => other.code !== task.code && other.code.startsWith(`${task.code}.`));
+    const isParent = task.summary || sourceParentCodes.has(task.code);
     const isBaoCao = task.workGroup === "Báo cáo định kỳ";
     const edit = project.taskEdits[task.code] ?? {};
     const isKeyMilestone = /\.MILE_(?:PLP|PCD|COM|OM)_\d+$/.test(task.code);
@@ -741,10 +793,10 @@ function scheduleTasks(project: Project): ScheduledTask[] {
         duration = isKeyMilestone ? 0 : (edit.duration ?? Math.max(1, workingDaysBetween(startDate, endDate)));
       } else {
         const [wStart, wEnd] = windows[task.groupCode] ?? [pStart, pEnd];
-        const groupTasks = source.filter((item) => item.groupCode === task.groupCode && !item.summary);
-        const indexInGroup = Math.max(0, groupTasks.findIndex((item) => item.code === task.code));
+        const groupCount = nonSummaryByGroup.get(task.groupCode) ?? 1;
+        const indexInGroup = indexInGroupByCode.get(task.code) ?? 0;
         const wWorkingDays = Math.max(5, workingDaysBetween(wStart, wEnd));
-        const offsetWorkingDays = Math.floor((indexInGroup / Math.max(1, groupTasks.length)) * Math.max(0, wWorkingDays - 4) * 0.85);
+        const offsetWorkingDays = Math.floor((indexInGroup / Math.max(1, groupCount)) * Math.max(0, wWorkingDays - 4) * 0.85);
 
         startDate = edit.startDate ?? dateAtWorkingOffset(wStart, offsetWorkingDays);
         if (startDate < pStart) startDate = pStart;
@@ -814,10 +866,27 @@ function scheduleTasks(project: Project): ScheduledTask[] {
     };
   });
 
+  // Pre-index descendants by parent prefix in O(N)
+  const descendantsByParent = new Map<string, typeof tasks>();
+  for (const candidate of tasks) {
+    let dot = candidate.code.lastIndexOf(".");
+    let prefix = candidate.code;
+    while (dot > 0) {
+      prefix = prefix.slice(0, dot);
+      let list = descendantsByParent.get(prefix);
+      if (!list) {
+        list = [];
+        descendantsByParent.set(prefix, list);
+      }
+      list.push(candidate);
+      dot = prefix.lastIndexOf(".");
+    }
+  }
+
   const rolledUp = tasks.map((task) => {
-    const descendants = tasks.filter((candidate) => candidate.code.startsWith(`${task.code}.`));
-    const isParent = task.summary || descendants.length > 0;
-    if (!isParent || !descendants.length) return task;
+    const descendants = descendantsByParent.get(task.code);
+    const isParent = task.summary || Boolean(descendants && descendants.length > 0);
+    if (!isParent || !descendants || !descendants.length) return task;
 
     // Tổng hợp ngày của các công việc con bên trong (chỉ lấy các công việc con có ngày hợp lệ)
     const datedDescendants = descendants.filter((c) => Boolean(c.startDate && c.endDate));
@@ -863,12 +932,13 @@ function scheduleTasks(project: Project): ScheduledTask[] {
       actualStatus: "Chưa bắt đầu",
     };
   });
-  const byCode = Object.fromEntries(rolledUp.map((task) => [task.code, task]));
 
-  return rolledUp.map((task) => {
+  const byCode = new Map(rolledUp.map((task) => [task.code, task]));
+
+  const finalTasks = rolledUp.map((task) => {
     const missingCodes: string[] = [];
     const requirements = task.predecessors.flatMap((dependency) => {
-      const predecessor = byCode[dependency.predecessorCode];
+      const predecessor = byCode.get(dependency.predecessorCode);
       if (!predecessor) {
         missingCodes.push(dependency.predecessorCode);
         return [];
@@ -904,6 +974,17 @@ function scheduleTasks(project: Project): ScheduledTask[] {
       suggestedStartDate: suggestedStartDate || undefined,
     };
   });
+
+  scheduleCache.set(project, {
+    date: today,
+    startDate: project.startDate,
+    targetDate: project.targetDate,
+    editCount,
+    customTaskCount,
+    result: finalTasks,
+  });
+
+  return finalTasks;
 }
 
 function isHierarchicallyRelated(firstCode: string, secondCode: string) {
@@ -1649,35 +1730,32 @@ export default function Home() {
   };
 
   useEffect(() => {
-    const timer = window.setTimeout(() => {
-      try {
-        const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? "[]") as Partial<Project>[];
-        const savedCustomCatalog = JSON.parse(localStorage.getItem(CATALOG_KEY) ?? "[]") as TemplateTask[];
-        const savedEnabledCodes = localStorage.getItem(CATALOG_ENABLED_KEY);
-        const savedWorkTypeEdits = JSON.parse(localStorage.getItem(CATALOG_WORK_TYPE_KEY) ?? "{}") as Record<string, WorkType>;
-        const savedUsername = localStorage.getItem(SESSION_KEY) ?? "";
-        const initialList = (saved && saved.length > 0) ? saved : DEFAULT_INITIAL_PROJECTS;
-        const normalized = initialList.map(normalizeProject);
-        setProjects(normalized);
-        setCustomCatalog(savedCustomCatalog);
-        setCatalogWorkTypeEdits(savedWorkTypeEdits);
-        setCurrentAccount(DEMO_ACCOUNTS.find((account) => account.username === savedUsername) ?? null);
-        const catalogCodes = new Set([...TEMPLATE, ...savedCustomCatalog].map((task) => task.code));
-        setEnabledCatalogCodes(new Set(savedEnabledCodes ? (JSON.parse(savedEnabledCodes) as string[]).filter((code) => catalogCodes.has(code)) : [...catalogCodes]));
-        setActiveId(localStorage.getItem(ACTIVE_KEY) ?? normalized[0]?.id ?? "");
-        const savedCollapsed = localStorage.getItem("mtl-sidebar-collapsed") === "true";
-        if (savedCollapsed) setSidebarCollapsed(true);
-      } catch {
-        const normalized = DEFAULT_INITIAL_PROJECTS.map(normalizeProject);
-        setProjects(normalized);
-        setCustomCatalog([]);
-        setCatalogWorkTypeEdits({});
-        setCurrentAccount(null);
-        setEnabledCatalogCodes(new Set(TEMPLATE.map((task) => task.code)));
-      }
-      setHydrated(true);
-    }, 0);
-    return () => window.clearTimeout(timer);
+    try {
+      const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? "[]") as Partial<Project>[];
+      const savedCustomCatalog = JSON.parse(localStorage.getItem(CATALOG_KEY) ?? "[]") as TemplateTask[];
+      const savedEnabledCodes = localStorage.getItem(CATALOG_ENABLED_KEY);
+      const savedWorkTypeEdits = JSON.parse(localStorage.getItem(CATALOG_WORK_TYPE_KEY) ?? "{}") as Record<string, WorkType>;
+      const savedUsername = localStorage.getItem(SESSION_KEY) ?? "";
+      const initialList = (saved && saved.length > 0) ? saved : DEFAULT_INITIAL_PROJECTS;
+      const normalized = initialList.map(normalizeProject);
+      setProjects(normalized);
+      setCustomCatalog(savedCustomCatalog);
+      setCatalogWorkTypeEdits(savedWorkTypeEdits);
+      setCurrentAccount(DEMO_ACCOUNTS.find((account) => account.username === savedUsername) ?? null);
+      const catalogCodes = new Set([...TEMPLATE, ...savedCustomCatalog].map((task) => task.code));
+      setEnabledCatalogCodes(new Set(savedEnabledCodes ? (JSON.parse(savedEnabledCodes) as string[]).filter((code) => catalogCodes.has(code)) : [...catalogCodes]));
+      setActiveId(localStorage.getItem(ACTIVE_KEY) ?? normalized[0]?.id ?? "");
+      const savedCollapsed = localStorage.getItem("mtl-sidebar-collapsed") === "true";
+      if (savedCollapsed) setSidebarCollapsed(true);
+    } catch {
+      const normalized = DEFAULT_INITIAL_PROJECTS.map(normalizeProject);
+      setProjects(normalized);
+      setCustomCatalog([]);
+      setCatalogWorkTypeEdits({});
+      setCurrentAccount(null);
+      setEnabledCatalogCodes(new Set(TEMPLATE.map((task) => task.code)));
+    }
+    setHydrated(true);
   }, []);
 
   useEffect(() => {
@@ -1741,19 +1819,31 @@ export default function Home() {
     return officialApprovedProjects.reduce((sum, p) => sum + projectTaskCount(p), 0);
   }, [officialApprovedProjects]);
 
-  const approvedAverageProgress = useMemo(() => {
-    if (!officialApprovedProjects.length) return 0;
-    const allTasks = officialApprovedProjects.flatMap((p) => scheduleTasks(p).filter((t) => !t.summary));
-    if (!allTasks.length) return 0;
-    return Math.round(allTasks.reduce((sum, t) => sum + t.actualProgress, 0) / allTasks.length);
-  }, [officialApprovedProjects]);
+  const { approvedAverageProgress, approvedDoneTasks, approvedLateTasks } = useMemo(() => {
+    if (!officialApprovedProjects.length) {
+      return { approvedAverageProgress: 0, approvedDoneTasks: 0, approvedLateTasks: 0 };
+    }
+    let totalProgress = 0;
+    let taskCount = 0;
+    let doneTasks = 0;
+    let lateTasks = 0;
 
-  const approvedDoneTasks = useMemo(() => {
-    return officialApprovedProjects.flatMap((p) => scheduleTasks(p).filter((t) => !t.summary && t.actualStatus === "Hoàn thành")).length;
-  }, [officialApprovedProjects]);
+    for (const p of officialApprovedProjects) {
+      const tasks = scheduleTasks(p);
+      for (const t of tasks) {
+        if (t.summary) continue;
+        taskCount++;
+        totalProgress += t.actualProgress;
+        if (t.actualStatus === "Hoàn thành") doneTasks++;
+        else if (t.actualStatus === "Trễ hạn") lateTasks++;
+      }
+    }
 
-  const approvedLateTasks = useMemo(() => {
-    return officialApprovedProjects.flatMap((p) => scheduleTasks(p).filter((t) => !t.summary && t.actualStatus === "Trễ hạn")).length;
+    return {
+      approvedAverageProgress: taskCount ? Math.round(totalProgress / taskCount) : 0,
+      approvedDoneTasks: doneTasks,
+      approvedLateTasks: lateTasks,
+    };
   }, [officialApprovedProjects]);
 
   /* Chỉ hồ sơ đã qua thẩm định mới đủ điều kiện trình E-Approval (SOP B8). */
@@ -7005,10 +7095,16 @@ export default function Home() {
                     {visibleHomeProjects.length > 0 ? (
                       <div className="exec-portfolio-grid">
                         {visibleHomeProjects.map((p) => {
-                          const tasks = scheduleTasks(p).filter((t) => !t.summary);
-                          const calculated = tasks.length
-                            ? Math.round(tasks.reduce((sum, t) => sum + (t.actualProgress ?? 0), 0) / tasks.length)
-                            : 0;
+                          const tasks = scheduleTasks(p);
+                          let totalProgress = 0;
+                          let nonSummaryCount = 0;
+                          for (const t of tasks) {
+                            if (!t.summary) {
+                              nonSummaryCount++;
+                              totalProgress += (t.actualProgress ?? 0);
+                            }
+                          }
+                          const calculated = nonSummaryCount ? Math.round(totalProgress / nonSummaryCount) : 0;
                           const progressVal = calculated > 0
                             ? calculated
                             : (p.id === "proj-aqua-city-phoenix" ? 92 : (p.id === "proj-the-grand-manhattan" ? 78 : 85));
@@ -8213,9 +8309,17 @@ export default function Home() {
                   <div className="project-table-body">
                     {pagedApprovedProjects.map((project) => {
                       const tasks = scheduleTasks(project);
-                      const nonSummary = tasks.filter((t) => !t.summary);
-                      const progress = nonSummary.length ? Math.round(nonSummary.reduce((s, t) => s + t.actualProgress, 0) / nonSummary.length) : 0;
-                      const lateCount = nonSummary.filter((t) => t.actualStatus === "Trễ hạn").length;
+                      let sum = 0;
+                      let nonSummaryCount = 0;
+                      let lateCount = 0;
+                      for (const t of tasks) {
+                        if (!t.summary) {
+                          nonSummaryCount++;
+                          sum += t.actualProgress;
+                          if (t.actualStatus === "Trễ hạn") lateCount++;
+                        }
+                      }
+                      const progress = nonSummaryCount ? Math.round(sum / nonSummaryCount) : 0;
                       return (
                         <div key={project.id} className="project-table-row" style={{ gridTemplateColumns: "90px 100px minmax(170px, 1.4fr) 140px 80px 100px 130px 110px 150px" }} onClick={() => openProject(project)}>
                           <span className="project-region-cell">{project.region || project.area || "—"}</span>
