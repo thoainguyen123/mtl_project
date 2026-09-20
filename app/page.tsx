@@ -7998,11 +7998,11 @@ export default function Home() {
                       </div>
                     </div>
 
-                    {/* Column 3: Cấu trúc WBS mẫu (9-4) */}
+                    {/* Column 3: Chi tiết công việc */}
                     <div className="init-col-card" style={{ minWidth: 0 }}>
-                      <div className="init-col-head" style={{ flexWrap: "wrap", gap: 8 }}>
+                      <div className="init-col-head" style={{ flexWrap: "wrap", gap: 8, alignItems: "center" }}>
                         <span className="init-num-badge">3</span>
-                        <span className="init-col-title">Cấu trúc WBS mẫu (9-4)</span>
+                        <span className="init-col-title">Chi tiết công việc</span>
                         {(() => {
                           const allDepts = [
                             { code: "9.1", short: "HRC", name: "Ban Nhân sự" },
@@ -8044,71 +8044,69 @@ export default function Home() {
                           );
                         })()}
 
-                        <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 8 }}>
-                          <label
+                        <label
+                          style={{
+                            display: "inline-flex",
+                            alignItems: "center",
+                            gap: "6px",
+                            fontSize: "11px",
+                            fontWeight: 700,
+                            color: "#475569",
+                            background: "#f8fafc",
+                            border: "1px solid #cbd5e1",
+                            borderRadius: "5px",
+                            padding: "2px 6px 2px 8px",
+                            cursor: "pointer",
+                          }}
+                        >
+                          <span style={{ whiteSpace: "nowrap" }}>Cấp công việc</span>
+                          <select
+                            value={initWbsLevel}
+                            onChange={(e) => applyInitWbsLevel(e.target.value === "all" ? "all" : Number(e.target.value))}
                             style={{
-                              display: "inline-flex",
-                              alignItems: "center",
-                              gap: "6px",
+                              height: "24px",
+                              padding: "0 6px",
                               fontSize: "11px",
-                              fontWeight: 700,
-                              color: "#475569",
-                              background: "#f8fafc",
+                              fontWeight: 600,
+                              color: "#0f172a",
+                              background: "#ffffff",
                               border: "1px solid #cbd5e1",
-                              borderRadius: "5px",
-                              padding: "2px 6px 2px 8px",
+                              borderRadius: "4px",
+                              outline: "none",
                               cursor: "pointer",
                             }}
+                            title="Hiển thị theo cấp công việc"
                           >
-                            <span style={{ whiteSpace: "nowrap" }}>Cấp công việc</span>
-                            <select
-                              value={initWbsLevel}
-                              onChange={(e) => applyInitWbsLevel(e.target.value === "all" ? "all" : Number(e.target.value))}
-                              style={{
-                                height: "24px",
-                                padding: "0 6px",
-                                fontSize: "11px",
-                                fontWeight: 600,
-                                color: "#0f172a",
-                                background: "#ffffff",
-                                border: "1px solid #cbd5e1",
-                                borderRadius: "4px",
-                                outline: "none",
-                                cursor: "pointer",
-                              }}
-                              title="Hiển thị theo cấp công việc"
-                            >
-                              <option value="all">Tất cả cấp</option>
-                              <option value="1">Cấp 1</option>
-                              <option value="2">Cấp 2</option>
-                              <option value="3">Cấp 3</option>
-                              <option value="4">Cấp 4</option>
-                              <option value="5">Cấp 5</option>
-                              {initWbsLevel === "custom" && <option value="custom">Tùy biến</option>}
-                            </select>
-                          </label>
-                          {initSelectedDeptCode !== "all" ? (
-                            <button
-                              type="button"
-                              className="init-tree-ctrl-btn"
-                              onClick={() => setInitSelectedDeptCode("all")}
-                              style={{ background: "#e0e7ff", color: "#3730a3", borderColor: "#c7d2fe" }}
-                              title="Hiển thị toàn bộ công việc của tất cả 14 ban/phòng"
-                            >
-                              Tất cả khối ({fullCatalog.length})
-                            </button>
-                          ) : (
-                            <button
-                              type="button"
-                              className="init-tree-ctrl-btn"
-                              onClick={() => setInitSelectedDeptCode("9.1")}
-                              style={{ background: "#dbeafe", color: "#1e40af", borderColor: "#bfdbfe" }}
-                              title="Quay lại lọc theo ban/phòng"
-                            >
-                              Theo ban/phòng
-                            </button>
-                          )}
-                        </div>
+                            <option value="all">Tất cả cấp</option>
+                            <option value="1">Cấp 1</option>
+                            <option value="2">Cấp 2</option>
+                            <option value="3">Cấp 3</option>
+                            <option value="4">Cấp 4</option>
+                            <option value="5">Cấp 5</option>
+                            {initWbsLevel === "custom" && <option value="custom">Tùy biến</option>}
+                          </select>
+                        </label>
+                        {initSelectedDeptCode !== "all" ? (
+                          <button
+                            type="button"
+                            className="init-tree-ctrl-btn"
+                            onClick={() => setInitSelectedDeptCode("all")}
+                            style={{ background: "#e0e7ff", color: "#3730a3", borderColor: "#c7d2fe" }}
+                            title="Hiển thị toàn bộ công việc của tất cả 14 ban/phòng"
+                          >
+                            Tất cả
+                          </button>
+                        ) : (
+                          <button
+                            type="button"
+                            className="init-tree-ctrl-btn"
+                            onClick={() => setInitSelectedDeptCode("9.1")}
+                            style={{ background: "#dbeafe", color: "#1e40af", borderColor: "#bfdbfe" }}
+                            title="Quay lại lọc theo ban/phòng"
+                          >
+                            Theo ban/phòng
+                          </button>
+                        )}
                       </div>
 
                       {/* Search bar inside Column 3 */}
