@@ -534,8 +534,10 @@ function daysBetween(start: string, end: string) {
 }
 
 function rawDaysBetween(start: string, end: string) {
+  if (!start || !end) return 0;
   const [startYear, startMonth, startDay] = start.slice(0, 10).split("-").map(Number);
   const [endYear, endMonth, endDay] = end.slice(0, 10).split("-").map(Number);
+  if (isNaN(startYear) || isNaN(endYear)) return 0;
   return Math.round((Date.UTC(endYear, endMonth - 1, endDay) - Date.UTC(startYear, startMonth - 1, startDay)) / 86400000);
 }
 
@@ -564,35 +566,65 @@ function scheduleTasks(project: Project): ScheduledTask[] {
   const selected = GROUPS.filter((group) => project.selectedGroups.includes(group.code));
   const source = allProjectTasks(project);
   const totalDays = daysBetween(project.startDate, project.targetDate);
+  const today = new Date().toISOString().slice(0, 10);
 
   const includedCodes = new Set(project.includedTaskCodes);
   const tasks = source.filter((task) => includedCodes.has(task.code)).map((task) => {
-    const groupIndex = selected.findIndex((group) => group.code === task.groupCode);
-    const groupTasks = source.filter((item) => item.groupCode === task.groupCode);
-    const indexInGroup = groupTasks.findIndex((item) => item.code === task.code);
-    const groupSpan = Math.max(7, Math.floor(totalDays / Math.max(selected.length, 1)));
-    const groupStart = Math.floor(groupIndex * (totalDays / Math.max(selected.length, 1)));
-    const suggestedOffset = task.level === 1 ? groupStart : groupStart + Math.floor((indexInGroup / Math.max(groupTasks.length, 1)) * groupSpan * 0.76);
+    const isParent = task.summary || source.some((other) => other.code !== task.code && other.code.startsWith(`${task.code}.`));
+    const isBaoCao = task.workGroup === "Báo cáo định kỳ";
     const edit = project.taskEdits[task.code] ?? {};
     const isKeyMilestone = /\.MILE_(?:PLP|PCD|COM|OM)_\d+$/.test(task.code);
-    const suggestedDuration = task.level === 1 ? Math.max(2, groupSpan - 2) : task.defaultDuration;
-    const startDate = edit.startDate ?? dateAtOffset(project.startDate, suggestedOffset);
-    const duration = isKeyMilestone ? 0 : edit.endDate
-      ? Math.max(1, workingDaysBetween(startDate, edit.endDate))
-      : Math.max(1, Number(edit.duration ?? suggestedDuration));
-    const endDate = isKeyMilestone ? startDate : edit.endDate && edit.endDate >= startDate ? edit.endDate : dateAtWorkingOffset(startDate, duration - 1);
-    const startOffset = Math.max(0, rawDaysBetween(project.startDate, startDate));
+
+    let startDate = "";
+    let endDate = "";
+    let duration = 0;
+
+    if (isParent) {
+      // Công việc cấp cha: sẽ tổng hợp từ các công việc con bên trong
+      startDate = "";
+      endDate = "";
+      duration = 0;
+    } else if (isBaoCao) {
+      // Công việc mà Loại công việc là "Báo cáo định kỳ" thì khi khởi tạo sẽ không có Thời gian thực hiện / Ngày bắt đầu / Ngày kết thúc
+      if (edit.startDate && edit.endDate) {
+        startDate = edit.startDate;
+        endDate = edit.endDate;
+        duration = edit.duration ?? (edit.startDate && edit.endDate ? Math.max(1, workingDaysBetween(edit.startDate, edit.endDate)) : 0);
+      } else {
+        startDate = "";
+        endDate = "";
+        duration = 0;
+      }
+    } else {
+      // Chỉ những công việc mà Loại công việc là "Tracking công việc" (hoặc công việc lá thực hiện) thì mới có thông tin
+      const groupIndex = selected.findIndex((group) => group.code === task.groupCode);
+      const groupTasks = source.filter((item) => item.groupCode === task.groupCode);
+      const indexInGroup = groupTasks.findIndex((item) => item.code === task.code);
+      const groupSpan = Math.max(7, Math.floor(totalDays / Math.max(selected.length, 1)));
+      const groupStart = Math.floor(groupIndex * (totalDays / Math.max(selected.length, 1)));
+      const suggestedOffset = task.level === 1 ? groupStart : groupStart + Math.floor((indexInGroup / Math.max(groupTasks.length, 1)) * groupSpan * 0.76);
+      const suggestedDuration = task.level === 1 ? Math.max(2, groupSpan - 2) : task.defaultDuration;
+
+      startDate = edit.startDate ?? dateAtOffset(project.startDate, suggestedOffset);
+      duration = isKeyMilestone ? 0 : edit.endDate
+        ? Math.max(1, workingDaysBetween(startDate, edit.endDate))
+        : Math.max(1, Number(edit.duration ?? suggestedDuration));
+      endDate = isKeyMilestone ? startDate : edit.endDate && edit.endDate >= startDate ? edit.endDate : dateAtWorkingOffset(startDate, duration - 1);
+    }
+
+    const hasDates = Boolean(startDate && endDate && (duration > 0 || isKeyMilestone));
+    const startOffset = hasDates ? Math.max(0, rawDaysBetween(project.startDate, startDate)) : 0;
 
     const actualProgress = edit.actualProgress !== undefined ? edit.actualProgress : (edit.status === "Hoàn thành" ? 100 : (edit.status === "Đang thực hiện" ? 30 : 0));
-    const actualStartDate = edit.actualStartDate ?? (actualProgress > 0 ? startDate : undefined);
-    const actualEndDate = edit.actualEndDate ?? (actualProgress === 100 ? endDate : undefined);
+    const actualStartDate = edit.actualStartDate ?? (actualProgress > 0 && startDate ? startDate : undefined);
+    const actualEndDate = edit.actualEndDate ?? (actualProgress === 100 && endDate ? endDate : undefined);
 
     let actualStatus: "Chưa bắt đầu" | "Đang thực hiện" | "Hoàn thành" | "Trễ hạn" = "Chưa bắt đầu";
     if (actualProgress === 100 || edit.status === "Hoàn thành") {
       actualStatus = "Hoàn thành";
-    } else if (endDate < today && actualProgress < 100) {
+    } else if (hasDates && endDate < today && actualProgress < 100) {
       actualStatus = "Trễ hạn";
-    } else if (actualProgress > 0 || (startDate <= today && endDate >= today)) {
+    } else if (actualProgress > 0 || (hasDates && startDate <= today && endDate >= today)) {
       actualStatus = "Đang thực hiện";
     }
 
@@ -601,8 +633,8 @@ function scheduleTasks(project: Project): ScheduledTask[] {
       startDate,
       endDate,
       duration,
-      left: Math.min(98, (startOffset / totalDays) * 100),
-      width: Math.max(0.7, Math.min(100, (duration / totalDays) * 100)),
+      left: hasDates ? Math.min(98, (startOffset / totalDays) * 100) : 0,
+      width: hasDates ? Math.max(0.7, Math.min(100, (duration / totalDays) * 100)) : 0,
       pic: edit.pic ?? "",
       status: actualStatus === "Hoàn thành" ? "Hoàn thành" : (actualStatus === "Trễ hạn" ? "Trễ hạn" : (edit.status ?? "Đang thực hiện")),
       actualProgress,
@@ -618,25 +650,49 @@ function scheduleTasks(project: Project): ScheduledTask[] {
     const descendants = tasks.filter((candidate) => candidate.code.startsWith(`${task.code}.`));
     const isParent = task.summary || descendants.length > 0;
     if (!isParent || !descendants.length) return task;
-    const nonSummary = descendants.filter((c) => !c.summary && !tasks.some((other) => other.code.startsWith(`${c.code}.`)));
-    const startDate = descendants.reduce((earliest, candidate) => candidate.startDate < earliest ? candidate.startDate : earliest, descendants[0].startDate);
-    const endDate = descendants.reduce((latest, candidate) => candidate.endDate > latest ? candidate.endDate : latest, descendants[0].endDate);
-    const actualProgress = nonSummary.length
-      ? Math.round(nonSummary.reduce((sum, c) => sum + c.actualProgress, 0) / nonSummary.length)
-      : task.actualProgress;
-    let actualStatus = task.actualStatus;
-    if (actualProgress === 100) actualStatus = "Hoàn thành";
-    else if (endDate < today && actualProgress < 100) actualStatus = "Trễ hạn";
-    else if (actualProgress > 0) actualStatus = "Đang thực hiện";
 
+    // Tổng hợp ngày của các công việc con bên trong (chỉ lấy các công việc con có ngày hợp lệ)
+    const datedDescendants = descendants.filter((c) => Boolean(c.startDate && c.endDate));
+    const nonSummaryDated = datedDescendants.filter((c) => !c.summary);
+
+    if (datedDescendants.length > 0) {
+      const startDate = datedDescendants.reduce(
+        (earliest, candidate) => (!earliest || candidate.startDate < earliest ? candidate.startDate : earliest),
+        datedDescendants[0].startDate
+      );
+      const endDate = datedDescendants.reduce(
+        (latest, candidate) => (!latest || candidate.endDate > latest ? candidate.endDate : latest),
+        datedDescendants[0].endDate
+      );
+      const duration = Math.max(1, workingDaysBetween(startDate, endDate));
+      const actualProgress = nonSummaryDated.length
+        ? Math.round(nonSummaryDated.reduce((sum, c) => sum + c.actualProgress, 0) / nonSummaryDated.length)
+        : task.actualProgress;
+      let actualStatus = task.actualStatus;
+      if (actualProgress === 100) actualStatus = "Hoàn thành";
+      else if (endDate < today && actualProgress < 100) actualStatus = "Trễ hạn";
+      else if (actualProgress > 0) actualStatus = "Đang thực hiện";
+
+      return {
+        ...task,
+        summary: true,
+        startDate,
+        endDate,
+        duration,
+        actualProgress,
+        actualStatus,
+      };
+    }
+
+    // Nếu không có công việc con nào có ngày (ví dụ chỉ có Báo cáo định kỳ chưa có ngày)
     return {
       ...task,
       summary: true,
-      startDate,
-      endDate,
-      duration: Math.max(1, workingDaysBetween(startDate, endDate)),
-      actualProgress,
-      actualStatus,
+      startDate: "",
+      endDate: "",
+      duration: 0,
+      actualProgress: 0,
+      actualStatus: "Chưa bắt đầu",
     };
   });
   const byCode = Object.fromEntries(rolledUp.map((task) => [task.code, task]));
@@ -647,6 +703,9 @@ function scheduleTasks(project: Project): ScheduledTask[] {
       const predecessor = byCode[dependency.predecessorCode];
       if (!predecessor) {
         missingCodes.push(dependency.predecessorCode);
+        return [];
+      }
+      if (!predecessor.startDate || !predecessor.endDate || !task.startDate) {
         return [];
       }
       if (dependency.type === "SS") {
@@ -667,11 +726,12 @@ function scheduleTasks(project: Project): ScheduledTask[] {
     const conflict = missingCodes.length
       ? `Không tìm thấy công việc cần hoàn thành trước ${missingCodes.join(", ")}.`
       : blockingCodes.length ? `Các liên kết ${blockingCodes.join(", ")} yêu cầu bắt đầu không sớm hơn ${formatDate(suggestedStartDate)}.` : "";
-    const startOffset = Math.max(0, rawDaysBetween(project.startDate, task.startDate));
+    const hasDates = Boolean(task.startDate && task.endDate && (task.duration > 0 || /\.MILE_/.test(task.code)));
+    const startOffset = hasDates ? Math.max(0, rawDaysBetween(project.startDate, task.startDate)) : 0;
     return {
       ...task,
-      left: Math.min(98, (startOffset / totalDays) * 100),
-      width: Math.max(0.7, Math.min(100, (Math.max(1, rawDaysBetween(task.startDate, task.endDate) + 1) / totalDays) * 100)),
+      left: hasDates ? Math.min(98, (startOffset / totalDays) * 100) : 0,
+      width: hasDates ? Math.max(0.7, Math.min(100, (Math.max(1, rawDaysBetween(task.startDate, task.endDate) + 1) / totalDays) * 100)) : 0,
       dependencyConflict: conflict || undefined,
       suggestedStartDate: suggestedStartDate || undefined,
     };
@@ -1179,8 +1239,7 @@ function projectXml(project: Project, tasks: ScheduledTask[]) {
       <UID>${index + 1}</UID><ID>${index + 1}</ID><Name>${escapeXml(`${task.code} ${task.name}`)}</Name>
       <Type>1</Type><IsNull>0</IsNull><CreateDate>${created}</CreateDate><WBS>${escapeXml(task.code)}</WBS>
       <OutlineNumber>${escapeXml(task.code)}</OutlineNumber><OutlineLevel>${task.level}</OutlineLevel><Priority>500</Priority>
-      <Start>${task.startDate}T08:00:00</Start><Finish>${task.endDate}T${isKeyMilestone ? "08:00:00" : "17:00:00"}</Finish>
-      <Duration>PT${task.duration * 8}H0M0S</Duration><DurationFormat>7</DurationFormat>
+      ${task.startDate && task.endDate ? `<Start>${task.startDate}T08:00:00</Start><Finish>${task.endDate}T${isKeyMilestone ? "08:00:00" : "17:00:00"}</Finish><Duration>PT${task.duration * 8}H0M0S</Duration>` : `<Duration>PT0H0M0S</Duration>`}<DurationFormat>7</DurationFormat>
       <Summary>${task.summary ? 1 : 0}</Summary><Milestone>${isKeyMilestone ? 1 : 0}</Milestone><PercentComplete>${task.status === "Hoàn thành" ? 100 : 0}</PercentComplete>
       ${predecessorXml}
       <Active>1</Active><Manual>0</Manual><Notes>${escapeXml(`${GROUP_BY_CODE[task.groupCode]?.short ?? task.groupCode}${task.pic ? ` · PIC: ${task.pic}` : ""}`)}</Notes>
@@ -2534,9 +2593,9 @@ export default function Home() {
           <tr class="${rowClass}">
             <td class="wbs-col" style="padding-left: ${indent + 8}px;">${t.code}</td>
             <td>${t.name}</td>
-            <td class="dur-col">${t.duration} ngày</td>
-            <td class="date-col">${formatDate(t.startDate)}</td>
-            <td class="date-col">${formatDate(t.endDate)}</td>
+            <td class="dur-col">${t.duration && t.duration > 0 ? `${t.duration} ngày` : "—"}</td>
+            <td class="date-col">${t.startDate ? formatDate(t.startDate) : "—"}</td>
+            <td class="date-col">${t.endDate ? formatDate(t.endDate) : "—"}</td>
             <td class="note-col">${taskNote}</td>
             <td class="link-col">${links}</td>
           </tr>
@@ -9561,17 +9620,29 @@ export default function Home() {
 
                         {/* 3. Thời gian thực hiện */}
                         <span className="task-cell task-cell-duration">
-                          <span className="duration-badge">{task.duration} ngày</span>
+                          {task.duration && task.duration > 0 ? (
+                            <span className="duration-badge">{task.duration} ngày</span>
+                          ) : (
+                            <span style={{ color: "#94a3b8" }}>—</span>
+                          )}
                         </span>
 
                         {/* 4. Ngày bắt đầu */}
                         <span className="task-cell task-cell-date">
-                          <b>{formatDate(task.startDate)}</b>
+                          {task.startDate ? (
+                            <b>{formatDate(task.startDate)}</b>
+                          ) : (
+                            <span style={{ color: "#94a3b8" }}>—</span>
+                          )}
                         </span>
 
                         {/* 5. Ngày kết thúc */}
                         <span className="task-cell task-cell-date">
-                          <b>{formatDate(task.endDate)}</b>
+                          {task.endDate ? (
+                            <b>{formatDate(task.endDate)}</b>
+                          ) : (
+                            <span style={{ color: "#94a3b8" }}>—</span>
+                          )}
                         </span>
 
                         {/* 6. Ghi chú */}
@@ -9644,7 +9715,7 @@ export default function Home() {
                     {selectedTask.summary ? (
                       <input
                         readOnly
-                        value={`${selectedTask.duration} ngày (tính tự động từ công việc con)`}
+                        value={selectedTask.duration ? `${selectedTask.duration} ngày (tính tự động từ công việc con)` : "— (chưa có công việc con có ngày)"}
                         style={{ background: "#f8fafc", color: "#64748b" }}
                       />
                     ) : (
@@ -9652,11 +9723,13 @@ export default function Home() {
                         type="number"
                         min={1}
                         disabled={activeProject.baselineLocked}
-                        value={selectedTask.duration}
+                        value={selectedTask.duration || ""}
+                        placeholder={selectedTask.workGroup === "Báo cáo định kỳ" ? "Không áp dụng (Báo cáo định kỳ)" : "Số ngày"}
                         onChange={(event) => {
                           const days = Math.max(1, Number(event.target.value) || 1);
-                          const newEnd = dateAtWorkingOffset(selectedTask.startDate, days - 1);
-                          updateTask(selectedTask.code, { duration: days, endDate: newEnd });
+                          const baseStart = selectedTask.startDate || activeProject.startDate;
+                          const newEnd = dateAtWorkingOffset(baseStart, days - 1);
+                          updateTask(selectedTask.code, { duration: days, startDate: baseStart, endDate: newEnd });
                         }}
                       />
                     )}
@@ -9667,13 +9740,14 @@ export default function Home() {
                     <input
                       disabled={activeProject.baselineLocked || selectedTask.summary}
                       type="date"
-                      value={selectedTask.startDate}
-                      max={selectedTask.endDate}
+                      value={selectedTask.startDate || ""}
+                      max={selectedTask.endDate || undefined}
                       onChange={(event) => {
                         const newStart = event.target.value;
                         if (!newStart) return;
-                        const newEnd = dateAtWorkingOffset(newStart, selectedTask.duration - 1);
-                        updateTask(selectedTask.code, { startDate: newStart, endDate: newEnd });
+                        const dur = selectedTask.duration || 1;
+                        const newEnd = dateAtWorkingOffset(newStart, dur - 1);
+                        updateTask(selectedTask.code, { startDate: newStart, endDate: newEnd, duration: dur });
                       }}
                     />
                   </label>
@@ -9683,9 +9757,14 @@ export default function Home() {
                     <input
                       disabled={activeProject.baselineLocked || selectedTask.summary}
                       type="date"
-                      value={selectedTask.endDate}
-                      min={selectedTask.startDate}
-                      onChange={(event) => updateTaskDates(selectedTask.code, selectedTask.startDate, event.target.value)}
+                      value={selectedTask.endDate || ""}
+                      min={selectedTask.startDate || undefined}
+                      onChange={(event) => {
+                        const newEnd = event.target.value;
+                        if (!newEnd) return;
+                        const start = selectedTask.startDate || activeProject.startDate;
+                        updateTaskDates(selectedTask.code, start, newEnd);
+                      }}
                     />
                   </label>
 

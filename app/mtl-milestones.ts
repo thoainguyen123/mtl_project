@@ -172,6 +172,7 @@ export function createInitialSampleSchedule(
     const [from, to] = phaseWindows[groupCode] ?? [investment, handover];
     groupTasks.forEach((task, index) => {
       if (edits[task.code]?.startDate && edits[task.code]?.endDate) return;
+      if (task.workGroup === "Báo cáo định kỳ") return;
       const startDate = between(from, to, (index / Math.max(groupTasks.length, 1)) * 0.82);
       const duration = durationOf(task, durationEdits);
       edits[task.code] = { ...durationEdits[task.code], startDate, endDate: shiftWorking(startDate, duration - 1) };
