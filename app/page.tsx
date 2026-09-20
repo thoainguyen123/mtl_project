@@ -3827,18 +3827,16 @@ export default function Home() {
           align-items: center !important;
           justify-content: center !important;
         }
-        /* ================= HOME FLAT EXECUTIVE DASHBOARD ================= */
+        /* ================= HOME EXECUTIVE COMMAND CENTER (FOR GIÁM ĐỐC BĐHDA) ================= */
         .home-dashboard-view {
           display: flex;
           flex-direction: column;
+          min-height: 100vh;
           height: 100vh;
-          overflow: hidden;
-          background: #f4f6f8;
-        }
-        @media (max-height: 750px) {
-          .home-dashboard-view {
-            overflow-y: auto;
-          }
+          overflow-y: auto;
+          background: #f1f5f9;
+          color: #0f172a;
+          box-sizing: border-box;
         }
         .home-topbar {
           background: #ffffff;
@@ -3851,6 +3849,9 @@ export default function Home() {
           height: 52px;
           box-sizing: border-box;
           gap: 16px;
+          position: sticky;
+          top: 0;
+          z-index: 20;
         }
         .home-breadcrumb {
           display: flex;
@@ -3875,7 +3876,6 @@ export default function Home() {
           color: #0f172a;
           letter-spacing: 0.2px;
         }
-
         .period-chips-group-flat {
           display: inline-flex;
           align-items: center;
@@ -3905,499 +3905,524 @@ export default function Home() {
           border-color: #102a45;
           font-weight: 700;
         }
-
         .home-topbar-right {
           display: flex;
           align-items: center;
           gap: 10px;
         }
-        .home-pill-badge {
-          display: inline-flex;
-          align-items: center;
-          gap: 6px;
-          border-radius: 20px;
-          padding: 4px 12px;
-          font-size: 11.5px;
-          font-weight: 700;
-          flex: none;
-        }
-        .home-pill-badge.kpi {
-          background: #e8f5e9;
-          color: #16a34a;
-          border: 1px solid #bbf7d0;
-        }
-        .home-pill-badge.overdue {
-          background: #fee2e2;
-          color: #dc2626;
-          border: 1px solid #fecaca;
-        }
-        .home-pill-badge.date {
-          background: #ffffff;
-          color: #475569;
-          border: 1px solid #e2e8f0;
-          font-weight: 600;
-        }
-        .home-role-title {
-          font-size: 12.5px;
-          font-weight: 600;
-          color: #2563eb;
-          white-space: nowrap;
-        }
-
-        /* 3-Column Landscape Grid */
-        .home-content-wrap {
-          flex: 1;
-          min-height: 0;
-          padding: 12px 18px 14px;
-          max-width: 100%;
-          width: 100%;
-          margin: 0;
-          box-sizing: border-box;
-          display: flex;
-          flex-direction: column;
-        }
-        .home-landscape-grid {
-          flex: 1;
-          min-height: 0;
-          height: 100%;
-          display: grid;
-          grid-template-columns: 290px minmax(0, 1.48fr) minmax(0, 1.28fr);
-          gap: 12px;
-          align-items: stretch;
-        }
-        @media (max-width: 1320px) {
-          .home-landscape-grid {
-            grid-template-columns: 275px minmax(0, 1.4fr) minmax(0, 1.25fr);
-            gap: 10px;
-          }
-        }
-        @media (max-width: 1100px) {
-          .home-landscape-grid {
-            grid-template-columns: 1fr 1fr;
-          }
-        }
-        @media (max-width: 768px) {
-          .home-landscape-grid {
-            grid-template-columns: 1fr;
-          }
-        }
-
-        .home-col {
-          display: flex;
-          flex-direction: column;
-          gap: 12px;
-          height: 100%;
-          min-height: 0;
-        }
-
-        /* Base Flat Card */
-        .exec-card-flat {
-          background: #ffffff;
-          border: 1px solid #e2e8f0;
-          border-radius: 12px;
-          padding: 12px 15px;
-          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
-          display: flex;
-          flex-direction: column;
-          min-height: 0;
-        }
-        .exec-card-flat.card-kpi {
-          flex: 1;
-        }
-        .exec-card-flat.card-mgmt {
-          flex: 1.15;
-        }
-        .exec-card-flat.card-ops {
-          height: 100%;
-          flex: 1;
-        }
-        .exec-card-flat.card-today {
-          flex: 1.05;
-        }
-        .exec-card-flat.card-overdue {
-          flex: 0.95;
-          border-color: #fee2e2;
-        }
-
-        .exec-card-head-flat {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          margin-bottom: 8px;
-          padding-bottom: 8px;
-          border-bottom: 1px solid #f1f5f9;
-          flex: none;
-        }
-        .exec-card-title-flat {
+        .home-role-badge-box {
           display: flex;
           align-items: center;
           gap: 8px;
-          font-size: 12.5px;
-          font-weight: 800;
-          color: #0f172a;
-          text-transform: uppercase;
-          letter-spacing: 0.3px;
-        }
-        .exec-card-title-flat.red {
-          color: #ef4444;
-        }
-        .exec-icon-box-flat {
-          width: 26px;
-          height: 26px;
-          border-radius: 6px;
-          display: grid;
-          place-items: center;
-          color: #ffffff;
-          flex: none;
-        }
-        .exec-icon-box-flat.green { background: #22c55e; }
-        .exec-icon-box-flat.purple { background: #8b5cf6; }
-        .exec-icon-box-flat.blue { background: #0284c7; }
-        .exec-icon-box-flat.red { background: #ef4444; }
-
-        .exec-badge-pill-flat {
-          font-size: 11px;
-          font-weight: 700;
-          padding: 2.5px 9px;
+          padding: 4px 12px;
+          background: #f0fdf4;
+          border: 1px solid #bbf7d0;
           border-radius: 20px;
-          border: 1px solid #e2e8f0;
-          background: #ffffff;
-          color: #64748b;
-          flex: none;
         }
-        .exec-badge-pill-flat.green {
-          background: #ecfdf5;
-          border-color: #bbf7d0;
-          color: #16a34a;
+        .home-role-avatar-dot {
+          width: 8px;
+          height: 8px;
+          border-radius: 50%;
+          background: #16a34a;
+          box-shadow: 0 0 0 2px rgba(22, 163, 74, 0.2);
         }
-        .exec-badge-pill-flat.blue {
-          background: #e0f2fe;
-          border-color: #bae6fd;
-          color: #0284c7;
+        .home-role-title-text {
+          font-size: 12px;
+          font-weight: 700;
+          color: #166534;
         }
-        .exec-badge-pill-flat.red {
-          background: #fef2f2;
-          border-color: #fecaca;
-          color: #ef4444;
-        }
-
-        /* Card 1A Gauge & Sub-metrics */
-        .gauge-sub-metrics-grid {
-          display: grid;
-          grid-template-columns: repeat(3, 1fr);
-          gap: 6px;
-          margin-top: auto;
-          padding-top: 10px;
-          border-top: 1px solid #f1f5f9;
-          flex: none;
-        }
-        .gauge-sub-metric-item {
-          text-align: center;
-        }
-        .sub-metric-label {
-          display: flex;
+        .home-date-pill {
+          display: inline-flex;
           align-items: center;
-          justify-content: center;
-          gap: 4px;
-          font-size: 11px;
+          gap: 5px;
+          padding: 4px 10px;
+          background: #f8fafc;
+          border: 1px solid #e2e8f0;
+          border-radius: 6px;
+          font-size: 11.5px;
           color: #64748b;
           font-weight: 600;
         }
-        .metric-dot {
-          font-size: 9px;
-          line-height: 1;
-        }
-        .metric-dot.green { color: #22c55e; }
-        .metric-dot.red { color: #ef4444; }
-        .metric-dot.orange { color: #f59e0b; }
 
-        .sub-metric-val {
-          display: block;
-          font-size: 13.5px;
-          font-weight: 800;
-          color: #0f172a;
-          margin-top: 3px;
-        }
-        .sub-metric-val.text-red {
-          color: #ef4444;
-        }
-
-        /* Card 1B Trách Nhiệm Quản Lý */
-        .mgmt-flat-list {
+        /* Container */
+        .exec-dashboard-body {
+          flex: 1;
+          padding: 14px 20px 24px;
+          max-width: 1600px;
+          width: 100%;
+          margin: 0 auto;
+          box-sizing: border-box;
           display: flex;
           flex-direction: column;
-          justify-content: space-between;
-          gap: 6px;
-          flex: 1;
-          min-height: 0;
+          gap: 14px;
         }
-        .mgmt-flat-item {
+
+        /* 4 Executive KPI Ribbon */
+        .exec-kpi-ribbon {
+          display: grid;
+          grid-template-columns: repeat(4, minmax(0, 1fr));
+          gap: 12px;
+        }
+        @media (max-width: 1024px) {
+          .exec-kpi-ribbon {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+          }
+        }
+        .exec-kpi-card {
+          background: #ffffff;
+          border: 1px solid #e2e8f0;
+          border-radius: 10px;
+          padding: 12px 16px;
+          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
           display: flex;
           align-items: center;
           justify-content: space-between;
-          gap: 10px;
-          padding: 7px 10px;
-          border-radius: 6px;
-          background: #f8fafc;
-          border: 1px solid #f1f5f9;
+          gap: 12px;
           transition: all 0.15s ease;
-          flex: 1;
         }
-        .mgmt-flat-item:hover {
-          background: #ffffff;
+        .exec-kpi-card:hover {
           border-color: #cbd5e1;
-          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
         }
-        .mgmt-flat-info {
+        .exec-kpi-card.highlight {
+          border-left: 4px solid #16a34a;
+        }
+        .exec-kpi-card.warning {
+          border-left: 4px solid #ea580c;
+        }
+        .exec-kpi-card.danger {
+          border-left: 4px solid #ef4444;
+        }
+        .exec-kpi-card.blue {
+          border-left: 4px solid #0284c7;
+        }
+        .exec-kpi-left {
+          display: flex;
+          flex-direction: column;
+          gap: 3px;
           min-width: 0;
-          flex: 1;
         }
-        .mgmt-flat-role {
-          font-size: 11.5px;
+        .exec-kpi-label {
+          font-size: 11px;
           font-weight: 700;
+          text-transform: uppercase;
+          letter-spacing: 0.3px;
+          color: #64748b;
+        }
+        .exec-kpi-num-row {
+          display: flex;
+          align-items: baseline;
+          gap: 8px;
+        }
+        .exec-kpi-big-num {
+          font-size: 24px;
+          font-weight: 800;
           color: #0f172a;
+          line-height: 1;
+        }
+        .exec-kpi-tag {
+          font-size: 10.5px;
+          font-weight: 700;
+          padding: 2px 7px;
+          border-radius: 4px;
+          white-space: nowrap;
+        }
+        .exec-kpi-tag.green {
+          background: #ecfdf5;
+          color: #16a34a;
+          border: 1px solid #bbf7d0;
+        }
+        .exec-kpi-tag.orange {
+          background: #fff7ed;
+          color: #ea580c;
+          border: 1px solid #fed7aa;
+        }
+        .exec-kpi-tag.red {
+          background: #fef2f2;
+          color: #ef4444;
+          border: 1px solid #fecaca;
+        }
+        .exec-kpi-tag.blue {
+          background: #f0f9ff;
+          color: #0284c7;
+          border: 1px solid #bae6fd;
+        }
+        .exec-kpi-sub {
+          font-size: 11px;
+          color: #64748b;
           white-space: nowrap;
           overflow: hidden;
           text-overflow: ellipsis;
         }
-        .mgmt-flat-scope {
-          font-size: 9.5px;
+        .exec-kpi-action-btn {
+          font-size: 11px;
+          font-weight: 700;
+          padding: 6px 11px;
+          border-radius: 6px;
+          cursor: pointer;
+          white-space: nowrap;
+          transition: all 0.15s ease;
+          border: none;
+          flex: none;
+        }
+        .exec-kpi-action-btn.primary {
+          background: #16a34a;
+          color: #ffffff;
+        }
+        .exec-kpi-action-btn.primary:hover {
+          background: #15803d;
+        }
+        .exec-kpi-action-btn.danger-outline {
+          background: #ffffff;
+          color: #dc2626;
+          border: 1px solid #fca5a5;
+        }
+        .exec-kpi-action-btn.danger-outline:hover {
+          background: #fef2f2;
+        }
+
+        /* SECTION: 3 KEY PROJECTS HEALTH */
+        .exec-portfolio-box {
+          background: #ffffff;
+          border: 1px solid #e2e8f0;
+          border-radius: 10px;
+          padding: 14px 18px;
+          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+        }
+        .exec-section-header {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          margin-bottom: 12px;
+        }
+        .exec-section-title {
+          font-size: 13px;
+          font-weight: 800;
+          color: #0f172a;
+          text-transform: uppercase;
+          letter-spacing: 0.3px;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+        .exec-section-sub {
+          font-size: 11.5px;
           color: #64748b;
+          font-weight: 500;
+        }
+        .exec-portfolio-grid {
+          display: grid;
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+          gap: 12px;
+        }
+        @media (max-width: 900px) {
+          .exec-portfolio-grid {
+            grid-template-columns: 1fr;
+          }
+        }
+        .exec-proj-card {
+          background: #f8fafc;
+          border: 1px solid #e2e8f0;
+          border-radius: 8px;
+          padding: 12px 14px;
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+          gap: 10px;
+          transition: all 0.15s ease;
+        }
+        .exec-proj-card:hover {
+          background: #ffffff;
+          border-color: #cbd5e1;
+          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+        }
+        .exec-proj-top {
+          display: flex;
+          align-items: flex-start;
+          justify-content: space-between;
+          gap: 8px;
+        }
+        .exec-proj-code {
+          font-size: 11px;
+          font-weight: 700;
+          color: #2563eb;
+          letter-spacing: 0.2px;
+        }
+        .exec-proj-name {
+          font-size: 13px;
+          font-weight: 700;
+          color: #0f172a;
           margin-top: 2px;
           white-space: nowrap;
           overflow: hidden;
           text-overflow: ellipsis;
         }
-        .mgmt-flat-score-box {
+        .exec-proj-region {
+          font-size: 10.5px;
+          color: #64748b;
+        }
+        .exec-proj-progress-row {
           display: flex;
-          flex-direction: column;
           align-items: center;
-          justify-content: center;
-          min-width: 58px;
-          padding: 3px 6px;
-          border-radius: 5px;
-          flex: none;
-          text-align: center;
+          justify-content: space-between;
+          gap: 10px;
         }
-        .mgmt-flat-score-box.passed {
-          background: #f0fdf4;
-          border: 1px solid #dcfce7;
-          color: #16a34a;
+        .exec-proj-bar-track {
+          flex: 1;
+          height: 6px;
+          background: #e2e8f0;
+          border-radius: 3px;
+          overflow: hidden;
         }
-        .mgmt-flat-score-box.improve {
-          background: #fffbeb;
-          border: 1px solid #fef3c7;
-          color: #d97706;
+        .exec-proj-bar-fill {
+          height: 100%;
+          border-radius: 3px;
+          transition: width 0.3s ease;
         }
-        .mgmt-flat-score {
-          font-size: 12px;
+        .exec-proj-bar-fill.green { background: #16a34a; }
+        .exec-proj-bar-fill.orange { background: #ea580c; }
+        .exec-proj-bar-fill.blue { background: #0284c7; }
+        .exec-proj-percent {
+          font-size: 12.5px;
           font-weight: 800;
-          line-height: 1.2;
+          color: #0f172a;
+          min-width: 36px;
+          text-align: right;
         }
-        .mgmt-flat-status {
-          font-size: 9px;
-          font-weight: 700;
-          line-height: 1;
-          margin-top: 1px;
-        }
-
-        /* Card 2 Tiến Độ Nghiệp Vụ BĐHDA */
-        .op-filter-pills-flat {
+        .exec-proj-bottom {
           display: flex;
-          gap: 4px;
+          align-items: center;
+          justify-content: space-between;
+          gap: 8px;
+          padding-top: 8px;
+          border-top: 1px dashed #e2e8f0;
         }
-        .op-filter-pill-btn {
-          padding: 3px 9px;
-          border-radius: 20px;
+        .exec-proj-status-tag {
           font-size: 10.5px;
           font-weight: 700;
+          padding: 2px 7px;
+          border-radius: 4px;
+        }
+        .exec-proj-status-tag.approved {
+          background: #ecfdf5;
+          color: #16a34a;
+          border: 1px solid #bbf7d0;
+        }
+        .exec-proj-status-tag.in-progress {
+          background: #eff6ff;
+          color: #1d4ed8;
+          border: 1px solid #bfdbfe;
+        }
+        .exec-proj-status-tag.pending-eapp {
+          background: #fffbeb;
+          color: #b45309;
+          border: 1px solid #fde68a;
+        }
+        .exec-proj-btn {
+          font-size: 11px;
+          font-weight: 700;
+          padding: 4px 9px;
+          border-radius: 5px;
+          cursor: pointer;
           border: 1px solid #cbd5e1;
           background: #ffffff;
-          color: #475569;
+          color: #334155;
+          transition: all 0.15s ease;
+          white-space: nowrap;
+        }
+        .exec-proj-btn:hover {
+          background: #f1f5f9;
+          border-color: #94a3b8;
+        }
+        .exec-proj-btn.primary {
+          background: #16a34a;
+          border-color: #15803d;
+          color: #ffffff;
+        }
+        .exec-proj-btn.primary:hover {
+          background: #15803d;
+        }
+
+        /* SECTION: LOWER SPLIT GRID (Matrix 2x3 + Action & Escalation) */
+        .exec-lower-grid {
+          display: grid;
+          grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+          gap: 14px;
+          align-items: stretch;
+        }
+        @media (max-width: 1150px) {
+          .exec-lower-grid {
+            grid-template-columns: 1fr;
+          }
+        }
+
+        /* Left: Operations Matrix 2x3 */
+        .exec-matrix-box {
+          background: #ffffff;
+          border: 1px solid #e2e8f0;
+          border-radius: 10px;
+          padding: 14px 18px;
+          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+          display: flex;
+          flex-direction: column;
+        }
+        .exec-matrix-grid {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 10px;
+          flex: 1;
+        }
+        @media (max-width: 600px) {
+          .exec-matrix-grid {
+            grid-template-columns: 1fr;
+          }
+        }
+        .exec-matrix-card {
+          background: #f8fafc;
+          border: 1px solid #e2e8f0;
+          border-radius: 8px;
+          padding: 10px 12px;
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+          gap: 6px;
           cursor: pointer;
           transition: all 0.15s ease;
         }
-        .op-filter-pill-btn:hover {
-          background: #f8fafc;
-        }
-        .op-filter-pill-btn.active {
-          background: #102a45;
-          color: #ffffff;
-          border-color: #102a45;
-        }
-
-        .op-subhead-row-flat {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          font-size: 11px;
-          font-weight: 600;
-          margin-bottom: 6px;
-          flex: none;
-        }
-        .op-legend-flat {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-        }
-        .op-legend-item {
-          display: flex;
-          align-items: center;
-          gap: 5px;
-        }
-        .op-link-all {
-          display: inline-flex;
-          align-items: center;
-          gap: 4px;
-          color: #2563eb;
-          font-size: 11px;
-          font-weight: 700;
-          text-decoration: none;
-          cursor: pointer;
-          border: none;
-          background: transparent;
-          transition: all 0.15s;
-        }
-        .op-link-all:hover {
-          color: #1d4ed8;
-          transform: translateX(1px);
-        }
-
-        .op-flat-list {
-          display: flex;
-          flex-direction: column;
-          justify-content: space-between;
-          gap: 7px;
-          flex: 1;
-          min-height: 0;
-        }
-        .op-flat-card {
-          padding: 8px 12px;
-          border-radius: 8px;
+        .exec-matrix-card:hover {
           background: #ffffff;
-          border: 1px solid #e2e8f0;
-          display: flex;
-          flex-direction: column;
-          justify-content: space-between;
-          flex: 1;
-          transition: all 0.15s;
-        }
-        .op-flat-card:hover {
           border-color: #cbd5e1;
-          box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03);
+          box-shadow: 0 2px 5px rgba(0, 0, 0, 0.03);
+          transform: translateY(-1px);
         }
-        .op-flat-row-1 {
+        .exec-matrix-header {
           display: flex;
           align-items: center;
           justify-content: space-between;
-          gap: 8px;
+          gap: 6px;
         }
-        .op-flat-left {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          min-width: 0;
-          flex: 1;
-        }
-        .op-flat-badge {
+        .exec-matrix-code {
+          font-size: 10px;
+          font-weight: 800;
           padding: 2px 6px;
           border-radius: 4px;
           color: #ffffff;
-          font-size: 10px;
-          font-weight: 800;
-          flex: none;
         }
-        .op-flat-badge.blue { background: #2563eb; }
-        .op-flat-badge.orange { background: #ea580c; }
-        .op-flat-title {
-          font-size: 12px;
+        .exec-matrix-code.blue { background: #2563eb; }
+        .exec-matrix-code.orange { background: #ea580c; }
+        .exec-matrix-title {
+          font-size: 11.5px;
           font-weight: 700;
           color: #0f172a;
           white-space: nowrap;
           overflow: hidden;
           text-overflow: ellipsis;
+          flex: 1;
         }
-        .op-flat-right {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          flex: none;
-        }
-        .op-flat-score {
-          font-size: 12.5px;
+        .exec-matrix-rate {
+          font-size: 12px;
           font-weight: 800;
         }
-        .op-flat-score.green { color: #16a34a; }
-        .op-flat-score.orange { color: #ea580c; }
-        .op-flat-btn {
-          padding: 2.5px 8px;
-          border-radius: 4px;
-          border: 1px solid #bfdbfe;
-          background: #ffffff;
-          color: #2563eb;
-          font-size: 10.5px;
-          font-weight: 700;
-          cursor: pointer;
-          transition: all 0.15s;
+        .exec-matrix-rate.green { color: #16a34a; }
+        .exec-matrix-rate.orange { color: #ea580c; }
+        .exec-matrix-track {
+          width: 100%;
+          height: 5px;
+          background: #e2e8f0;
+          border-radius: 3px;
+          overflow: hidden;
         }
-        .op-flat-btn:hover {
-          background: #eff6ff;
-          border-color: #93c5fd;
+        .exec-matrix-fill {
+          height: 100%;
+          border-radius: 3px;
         }
-        .op-flat-row-2 {
+        .exec-matrix-fill.green { background: #16a34a; }
+        .exec-matrix-fill.orange { background: #ea580c; }
+        .exec-matrix-foot {
           display: flex;
           align-items: center;
           justify-content: space-between;
           font-size: 10.5px;
           color: #64748b;
-          margin: 2px 0 4px;
         }
-        .op-flat-bar-track {
-          width: 100%;
-          height: 5px;
-          border-radius: 3px;
-          background: #e2e8f0;
-          overflow: hidden;
+        .exec-matrix-status {
+          font-weight: 700;
         }
-        .op-flat-bar-fill {
-          height: 100%;
-          border-radius: 3px;
-          transition: width 0.3s ease;
-        }
-        .op-flat-bar-fill.green { background: #22c55e; }
-        .op-flat-bar-fill.orange { background: #ea580c; }
+        .exec-matrix-status.green { color: #16a34a; }
+        .exec-matrix-status.orange { color: #ea580c; }
 
-        /* Card 3A Công Việc Hôm Nay */
-        .today-flat-list {
+        /* Right: Director's Action & Escalation Hub */
+        .exec-hub-box {
           display: flex;
           flex-direction: column;
-          justify-content: space-between;
-          gap: 6px;
-          flex: 1;
-          min-height: 0;
+          gap: 12px;
         }
-        .today-flat-item {
+        .exec-action-card {
+          background: #ffffff;
+          border: 1px solid #e2e8f0;
+          border-radius: 10px;
+          padding: 12px 16px;
+          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+        }
+        .exec-action-card.escalation {
+          border-color: #fee2e2;
+        }
+        .exec-hub-head {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding-bottom: 6px;
+          border-bottom: 1px solid #f1f5f9;
+        }
+        .exec-hub-title {
+          font-size: 12px;
+          font-weight: 800;
+          text-transform: uppercase;
+          letter-spacing: 0.3px;
+          display: flex;
+          align-items: center;
+          gap: 6px;
+        }
+        .exec-hub-title.blue { color: #0284c7; }
+        .exec-hub-title.red { color: #ef4444; }
+        .exec-hub-badge {
+          font-size: 10.5px;
+          font-weight: 700;
+          padding: 2px 7px;
+          border-radius: 12px;
+        }
+        .exec-hub-badge.blue {
+          background: #e0f2fe;
+          color: #0284c7;
+        }
+        .exec-hub-badge.red {
+          background: #fee2e2;
+          color: #dc2626;
+        }
+        .exec-task-row {
           display: flex;
           align-items: center;
           gap: 8px;
-          padding: 6px 9px;
+          padding: 6px 8px;
           border-radius: 6px;
-          background: #ffffff;
+          background: #f8fafc;
           border: 1px solid #f1f5f9;
           cursor: pointer;
-          transition: all 0.15s;
-          flex: 1;
+          transition: all 0.15s ease;
         }
-        .today-flat-item:hover {
-          background: #f8fafc;
+        .exec-task-row:hover {
+          background: #ffffff;
           border-color: #e2e8f0;
         }
-        .today-flat-item.is-done {
-          opacity: 0.7;
+        .exec-task-row.is-done {
+          opacity: 0.65;
         }
-        .today-flat-check {
-          width: 17px;
-          height: 17px;
+        .exec-task-check {
+          width: 16px;
+          height: 16px;
           border-radius: 4px;
           border: 1.5px solid #cbd5e1;
           display: grid;
@@ -4405,149 +4430,142 @@ export default function Home() {
           background: #ffffff;
           color: #ffffff;
           flex: none;
-          transition: all 0.15s;
         }
-        .today-flat-check.checked {
-          background: #22c55e;
-          border-color: #22c55e;
+        .exec-task-check.checked {
+          background: #16a34a;
+          border-color: #16a34a;
         }
-        .today-flat-body {
+        .exec-task-text {
+          font-size: 11.5px;
+          font-weight: 600;
+          color: #1e293b;
+          flex: 1;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+        .exec-task-tag {
+          font-size: 10px;
+          font-weight: 700;
+          color: #64748b;
+          background: #ffffff;
+          border: 1px solid #e2e8f0;
+          padding: 2px 6px;
+          border-radius: 4px;
+          flex: none;
+        }
+
+        /* Escalation Item */
+        .exec-escala-row {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 8px;
+          padding: 6px 8px;
+          border-radius: 6px;
+          background: #fffafa;
+          border: 1px solid #fee2e2;
+          transition: all 0.15s ease;
+        }
+        .exec-escala-row:hover {
+          border-color: #fca5a5;
+        }
+        .exec-escala-left {
           min-width: 0;
           flex: 1;
         }
-        .today-flat-title {
+        .exec-escala-title {
           font-size: 11px;
-          font-weight: 600;
+          font-weight: 700;
           color: #1e293b;
           white-space: nowrap;
           overflow: hidden;
           text-overflow: ellipsis;
         }
-        .today-flat-meta {
-          font-size: 9.5px;
+        .exec-escala-sub {
+          font-size: 10px;
           color: #64748b;
           margin-top: 1px;
-          white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          display: flex;
-          gap: 6px;
         }
-        .today-flat-pill {
-          font-size: 9.5px;
-          font-weight: 700;
-          padding: 2px 7px;
-          border-radius: 4px;
-          flex: none;
-        }
-        .today-flat-pill.routine {
-          background: #f0f9ff;
-          color: #0284c7;
-          border: 1px solid #e0f2fe;
-        }
-        .today-flat-pill.technical {
-          background: #f5f3ff;
-          color: #7c3aed;
-          border: 1px solid #ede9fe;
-        }
-        .today-flat-pill.extra {
-          background: #fff7ed;
-          color: #ea580c;
-          border: 1px solid #ffedd5;
-        }
-
-        /* Card 3B Công Việc Đang Trễ Hạn */
-        .overdue-flat-list {
-          display: flex;
-          flex-direction: column;
-          justify-content: space-between;
-          gap: 6px;
-          flex: 1;
-          min-height: 0;
-        }
-        .overdue-flat-card {
-          padding: 7px 10px;
-          border-radius: 6px;
-          background: #ffffff;
-          border: 1px solid #fee2e2;
-          display: flex;
-          flex-direction: column;
-          justify-content: space-between;
-          flex: 1;
-          transition: all 0.15s;
-        }
-        .overdue-flat-card:hover {
-          border-color: #fca5a5;
-          background: #fffdfd;
-        }
-        .overdue-flat-top {
+        .exec-escala-right {
           display: flex;
           align-items: center;
-          justify-content: space-between;
           gap: 6px;
-        }
-        .overdue-flat-title {
-          font-size: 11px;
-          font-weight: 700;
-          color: #1e293b;
-          white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          flex: 1;
-        }
-        .overdue-flat-actions {
-          display: flex;
-          align-items: center;
-          gap: 4px;
           flex: none;
         }
-        .overdue-flat-badge-days {
+        .exec-escala-days {
           background: #ef4444;
           color: #ffffff;
-          font-size: 9.5px;
+          font-size: 10px;
           font-weight: 700;
           padding: 2px 6px;
           border-radius: 4px;
-          flex: none;
+          white-space: nowrap;
         }
-        .overdue-flat-btn-urge {
+        .exec-escala-btn {
           background: #dc2626;
           color: #ffffff;
           border: none;
-          font-size: 10px;
+          font-size: 10.5px;
           font-weight: 700;
-          padding: 2.5px 7px;
+          padding: 3px 8px;
           border-radius: 4px;
           cursor: pointer;
-          transition: all 0.15s;
+          transition: all 0.15s ease;
         }
-        .overdue-flat-btn-urge:hover {
+        .exec-escala-btn:hover {
           background: #b91c1c;
         }
-        .overdue-flat-btn-mtl {
+
+        /* Executive Team Leads Strip */
+        .exec-team-strip {
           background: #ffffff;
-          border: 1px solid #cbd5e1;
-          color: #475569;
-          font-size: 10px;
-          font-weight: 700;
-          padding: 2px 6px;
-          border-radius: 4px;
-          cursor: pointer;
-          transition: all 0.15s;
-        }
-        .overdue-flat-btn-mtl:hover {
-          background: #f1f5f9;
-          border-color: #94a3b8;
-        }
-        .overdue-flat-sub {
-          font-size: 9.5px;
-          color: #64748b;
-          margin-top: 2px;
+          border: 1px solid #e2e8f0;
+          border-radius: 10px;
+          padding: 10px 14px;
           display: flex;
           align-items: center;
+          justify-content: space-between;
+          gap: 8px;
+        }
+        .exec-team-lead-item {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          flex: 1;
+          min-width: 0;
+        }
+        .exec-team-lead-avatar {
+          width: 26px;
+          height: 26px;
+          border-radius: 50%;
+          background: #102a45;
+          color: #ffffff;
+          display: grid;
+          place-items: center;
+          font-size: 10px;
+          font-weight: 800;
+          flex: none;
+        }
+        .exec-team-lead-info {
+          min-width: 0;
+          flex: 1;
+        }
+        .exec-team-lead-role {
+          font-size: 10.5px;
+          font-weight: 700;
+          color: #0f172a;
           white-space: nowrap;
           overflow: hidden;
           text-overflow: ellipsis;
+        }
+        .exec-team-lead-kpi {
+          font-size: 10px;
+          font-weight: 800;
+          color: #16a34a;
+        }
+        .exec-team-lead-kpi.orange {
+          color: #ea580c;
         }
 
         /* ================= KHỞI TẠO TIẾN ĐỘ TỪ TEMPLATE (FLAT UI) ================= */
@@ -6444,15 +6462,15 @@ export default function Home() {
                 </button>
                 <div className="home-breadcrumb-link">
                   <IconHome />
-                  <span>Dự án</span>
+                  <span>Novaland</span>
                 </div>
                 <span className="home-breadcrumb-sep">&gt;</span>
                 <span className="home-breadcrumb-title">
-                  BẢNG ĐIỀU HÀNH &amp; THEO DÕI HIỆU SUẤT BĐHDA
+                  BẢNG ĐIỀU HÀNH BĐHDA
                 </span>
               </div>
 
-              {/* Minimalist Period Switcher directly in topbar */}
+              {/* Period Switcher */}
               <div className="period-chips-group-flat">
                 <button
                   type="button"
@@ -6479,458 +6497,424 @@ export default function Home() {
               </div>
 
               <div className="home-topbar-right">
-                <div className="home-pill-badge kpi">
-                  <span>KPI: {homePeriod === "6m" ? "88,0%" : homePeriod === "q3" ? "85,5%" : "89,2%"}</span>
-                </div>
-                <div className="home-pill-badge overdue">
-                  <span>Trễ: 3 việc</span>
-                </div>
-                <div className="home-pill-badge date">
+                <div className="home-date-pill">
                   <IconCalendar />
                   <span>{formatDate(overviewToday)}</span>
                 </div>
-                <div className="home-role-title">
-                  Giám đốc Ban điều hành dự án
+                <div className="home-role-badge-box">
+                  <span className="home-role-avatar-dot" />
+                  <span className="home-role-title-text">Giám đốc Ban điều hành dự án</span>
                 </div>
               </div>
             </header>
 
             {(() => {
-              const todayDoneCount = todayTasksList.filter((t) => t.done).length;
-              const todayTotalCount = todayTasksList.length;
+              const pAqua = projects.find((p) => p.id === "proj-aqua-city") || projects[0];
+              const pNova = projects.find((p) => p.id === "proj-novaworld-phanthiet") || projects[1];
+              const pTgm = projects.find((p) => p.id === "proj-the-grand-manhattan") || projects[2];
 
               const bdhdaOperationsList = [
                 {
                   code: "NV-01",
-                  name: "Lập & Kiểm soát Master Timeline (WBS Cấp 1-5)",
-                  dept: "Phòng Quản lý Dự án & MTL",
+                  name: "Lập & Kiểm soát MTL",
                   progress: 92,
                   target: 90,
                   status: "passed",
                   statusText: "Đạt chuẩn",
                   actionView: "projects" as const,
-                  actionLabel: "Xem Lập MTL",
                 },
                 {
                   code: "NV-02",
-                  name: "Phê duyệt Nhiệm vụ Thiết kế (NVTVK) & Phương án KT",
-                  dept: "Phòng Quản lý Thiết kế",
+                  name: "Phê duyệt NVTK & KT",
                   progress: 86,
                   target: 80,
                   status: "passed",
                   statusText: "Đạt chuẩn",
                   actionView: "design_task" as const,
-                  actionLabel: "Xem NVTK",
                 },
                 {
                   code: "NV-03",
-                  name: "Thẩm định Mô hình Khả thi FS Thực thi (FS-Ver2)",
-                  dept: "Phòng Thẩm định Đầu tư & FS",
+                  name: "Thẩm định FS-Ver2",
                   progress: 82,
                   target: 80,
                   status: "passed",
                   statusText: "Đạt chuẩn",
                   actionView: "fs_ver2" as const,
-                  actionLabel: "Xem FS-Ver2",
                 },
                 {
                   code: "NV-04",
-                  name: "Quản lý Hồ sơ Pháp lý & Mốc Giấy phép XD (GPXD)",
-                  dept: "Ban Pháp lý Dự án",
+                  name: "Pháp lý & GPXD",
                   progress: 90,
                   target: 85,
                   status: "passed",
                   statusText: "Đạt chuẩn",
                   actionView: "overview" as const,
-                  actionLabel: "Xem Tiến độ",
                 },
                 {
                   code: "NV-05",
-                  name: "Giám sát Tiến độ Hiện trường & Nghiệm thu MEP",
-                  dept: "Ban QLDA Xây dựng Hiện trường",
+                  name: "Giám sát Hiện trường",
                   progress: 85,
                   target: 80,
                   status: "passed",
                   statusText: "Đạt chuẩn",
                   actionView: "overview" as const,
-                  actionLabel: "Xem Tiến độ",
                 },
                 {
                   code: "NV-06",
-                  name: "Hoàn công, Thẩm duyệt PCCC & Bàn giao Dự án",
-                  dept: "Ban Quản lý Bàn giao & CSKH",
+                  name: "Hoàn công & Bàn giao",
                   progress: 76,
                   target: 80,
                   status: "improve",
                   statusText: "Cần đẩy nhanh",
                   actionView: "overview" as const,
-                  actionLabel: "Mốc bàn giao",
                 },
               ];
 
-              const filteredOps = bdhdaOperationsList.filter((op) => {
-                if (homeOpFilter === "passed") return op.status === "passed";
-                if (homeOpFilter === "improve") return op.status === "improve";
-                return true;
-              });
-
-              const teamMembersList = [
+              const keyProjects = [
                 {
-                  role: "Phó giám đốc Phòng điều hành dự án",
-                  email: "gmd.pgd@novaland.com.vn",
-                  kpiScore: 92.0,
-                  status: "passed",
-                  statusText: "Đạt chuẩn",
-                  scope: "Phụ trách Vùng Hồ Chí Minh & Khối Cao tầng",
-                  projects: 4,
+                  project: pAqua,
+                  code: pAqua?.code || "NVL-AQC-2026",
+                  name: "Aqua City Phoenix South",
+                  region: "Vùng Đồng Nai 1",
+                  progress: 92,
+                  progressColor: "green",
+                  statusTag: "approved",
+                  statusLabel: "✓ MTL v1.0 ĐÃ DUYỆT",
+                  note: "Mốc GPXD & Hạ tầng đúng hạn",
+                  actionLabel: "Xem MTL ↗",
+                  isPrimary: false,
+                  onAction: () => {
+                    if (pAqua) {
+                      setActiveId(pAqua.id);
+                      setView("workspace");
+                    }
+                  },
                 },
                 {
-                  role: "Trưởng phòng cao cấp Quản lý dự án",
-                  email: "gmd.tpcc@novaland.com.vn",
-                  kpiScore: 88.5,
-                  status: "passed",
-                  statusText: "Đạt chuẩn",
-                  scope: "Phụ trách Vùng Phan Thiết 1 & Khu nghỉ dưỡng",
-                  projects: 3,
+                  project: pNova,
+                  code: pNova?.code || "NVL-NVW-2026",
+                  name: "NovaWorld Phan Thiet",
+                  region: "Vùng Phan Thiết 1",
+                  progress: 85,
+                  progressColor: "blue",
+                  statusTag: "in-progress",
+                  statusLabel: "ĐANG THI CÔNG",
+                  note: "Cảnh báo PCCC Tháp B & C (-40d)",
+                  actionLabel: "Xem MTL ↗",
+                  isPrimary: false,
+                  onAction: () => {
+                    if (pNova) {
+                      setActiveId(pNova.id);
+                      setView("workspace");
+                    }
+                  },
                 },
                 {
-                  role: "Trưởng phòng Quản lý dự án",
-                  email: "gmd.tp@novaland.com.vn",
-                  kpiScore: 78.0,
-                  status: "improve",
-                  statusText: "Cần đôn đốc",
-                  scope: "Kiểm soát MT, & Thẩm định, mốc tiến độ",
-                  projects: 5,
-                },
-                {
-                  role: "Admin hệ thống (PMD / ITT)",
-                  email: "itt.admin@novagroup.vn",
-                  kpiScore: 96.0,
-                  status: "passed",
-                  statusText: "Xuất sắc",
-                  scope: "Quản trị dữ liệu WBS & Phân quyền hệ thống",
-                  projects: 14,
+                  project: pTgm,
+                  code: pTgm?.code || "NVL-GMH-2026",
+                  name: "The Grand Manhattan",
+                  region: "Vùng TP.HCM 1",
+                  progress: 78,
+                  progressColor: "orange",
+                  statusTag: "pending-eapp",
+                  statusLabel: "CHỜ E-APPROVAL",
+                  note: "Đã hoàn thiện MTL v1.0 · Cần duyệt",
+                  actionLabel: "✓ Phê duyệt E-Approval",
+                  isPrimary: true,
+                  onAction: () => {
+                    if (pTgm) {
+                      openEApprovalModal(pTgm);
+                    }
+                  },
                 },
               ];
 
-              const overdueList = [
+              const overdueAlerts = [
                 {
                   id: "od-1",
-                  title: "Nộp hồ sơ thẩm duyệt nghiệm thu PCCC Tháp B & C",
+                  title: "Thẩm duyệt nghiệm thu PCCC Tháp B & C",
                   project: "NovaWorld Phan Thiết",
-                  projectCode: "NVL-NVW-2026",
-                  projectId: "proj-novaworld-phanthiet",
-                  dept: "Ban QLDA & Pháp lý",
-                  dueDate: "10/08/2026",
                   daysLate: 40,
-                  severity: "critical",
-                  severityText: "Nghiêm trọng",
-                  targetModule: "workspace" as const,
+                  dept: "Ban QLDA & Pháp lý",
                 },
                 {
                   id: "od-2",
-                  title: "Nghiệm thu hoàn thành cọc khoan nhồi Phân khu 2",
+                  title: "Nghiệm thu cọc khoan nhồi Phân khu 2",
                   project: "Aqua City",
-                  projectCode: "NVL-AQC-2026",
-                  projectId: "proj-aqua-city",
-                  dept: "Ban QLDA Hiện trường",
-                  dueDate: "12/08/2026",
                   daysLate: 38,
-                  severity: "warning",
-                  severityText: "Cảnh báo trễ",
-                  targetModule: "workspace" as const,
+                  dept: "Ban QLDA Hiện trường",
                 },
                 {
                   id: "od-3",
-                  title: "Đối chiếu chi phí tư vấn và ký nháy hồ sơ NVTK",
+                  title: "Đối chiếu chi phí tư vấn & ký nháy NVTK",
                   project: "Sunrise Riverside",
-                  projectCode: "NVL-SRR-2026",
-                  projectId: "proj-sunrise-riverside",
-                  dept: "Phòng Quản lý Thiết kế",
-                  dueDate: "20/08/2026",
                   daysLate: 30,
-                  severity: "alert",
-                  severityText: "Chờ ký duyệt",
-                  targetModule: "design_task" as const,
+                  dept: "Phòng Quản lý Thiết kế",
                 },
               ];
 
+              const teamLeads = [
+                { role: "PGĐ Vùng HCM", kpi: 92.0, avatar: "HCM" },
+                { role: "TPCC Phan Thiết", kpi: 88.5, avatar: "PT" },
+                { role: "TP QLDA MTL", kpi: 78.0, avatar: "MTL", orange: true },
+                { role: "Admin Quản trị", kpi: 96.0, avatar: "ITT" },
+              ];
+
+              const score = homePeriod === "6m" ? 88.0 : homePeriod === "q3" ? 85.5 : 89.2;
+              const directorTasks = todayTasksList.slice(0, 3);
+              const doneDirectorTasks = directorTasks.filter((t) => t.done).length;
+
               return (
-                <div className="home-content-wrap">
-                  {/* Flat 3-Column Landscape Grid */}
-                  <div className="home-landscape-grid">
-                    {/* CỘT 1: TỔNG QUAN TIẾN ĐỘ & TRÁCH NHIỆM QUẢN LÝ */}
-                    <div className="home-col">
-                      {/* Card 1A: Tổng Quan Tiến Độ */}
-                      <div className="exec-card-flat card-kpi">
-                        <div className="exec-card-head-flat">
-                          <div className="exec-card-title-flat">
-                            <div className="exec-icon-box-flat green">
-                              <IconAward />
-                            </div>
-                            <span>Tổng Quan Tiến Độ</span>
-                          </div>
-                          <span className="exec-badge-pill-flat">
-                            {homePeriod === "6m" ? "Kỳ 6 Tháng" : homePeriod === "q3" ? "Kỳ Quý 3" : "Kỳ Cả Năm"}
-                          </span>
+                <div className="exec-dashboard-body">
+                  {/* 1. Executive KPI Ribbon */}
+                  <div className="exec-kpi-ribbon">
+                    <div className="exec-kpi-card highlight">
+                      <div className="exec-kpi-left">
+                        <span className="exec-kpi-label">Hiệu suất BĐHDA</span>
+                        <div className="exec-kpi-num-row">
+                          <span className="exec-kpi-big-num">{score.toFixed(1).replace(".", ",")}%</span>
+                          <span className="exec-kpi-tag green">Đạt chuẩn (≥80%)</span>
                         </div>
-
-                        <ExecutiveArcGauge
-                          score={homePeriod === "6m" ? 88.0 : homePeriod === "q3" ? 85.5 : 89.2}
-                          max={100}
-                          label="ĐẠT CHUẨN"
-                        />
-
-                        <div className="gauge-sub-metrics-grid">
-                          <div className="gauge-sub-metric-item">
-                            <span className="sub-metric-label"><span className="metric-dot green">●</span> Đúng hạn</span>
-                            <span className="sub-metric-val">92.5 d</span>
-                          </div>
-                          <div className="gauge-sub-metric-item">
-                            <span className="sub-metric-label"><span className="metric-dot red">●</span> Trễ hạn</span>
-                            <span className="sub-metric-val text-red">+3.5 d</span>
-                          </div>
-                          <div className="gauge-sub-metric-item">
-                            <span className="sub-metric-label"><span className="metric-dot orange">●</span> Quá hạn</span>
-                            <span className="sub-metric-val">75.0%</span>
-                          </div>
-                        </div>
+                        <span className="exec-kpi-sub">Đúng hạn: 92.5d · Bù: +3.5d</span>
                       </div>
-
-                      {/* Card 1B: Trách Nhiệm Quản Lý */}
-                      <div className="exec-card-flat card-mgmt">
-                        <div className="exec-card-head-flat">
-                          <div className="exec-card-title-flat">
-                            <div className="exec-icon-box-flat purple">
-                              <IconUsers />
-                            </div>
-                            <span>Trách Nhiệm Quản Lý</span>
-                          </div>
-                          <span className="exec-badge-pill-flat green">
-                            3/4 Đạt (75%)
-                          </span>
-                        </div>
-
-                        <div className="mgmt-flat-list">
-                          {teamMembersList.map((m) => (
-                            <div className="mgmt-flat-item" key={m.role}>
-                              <div className="mgmt-flat-info">
-                                <div className="mgmt-flat-role">{m.role}</div>
-                                <div className="mgmt-flat-scope">{m.scope}</div>
-                              </div>
-                              <div className={`mgmt-flat-score-box ${m.status}`}>
-                                <span className="mgmt-flat-score">{m.kpiScore.toFixed(1)}</span>
-                                <span className="mgmt-flat-status">{m.statusText}</span>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
+                      <IconAward />
                     </div>
 
-                    {/* CỘT 2: TIẾN ĐỘ NGHIỆP VỤ BĐHDA */}
-                    <div className="home-col">
-                      <div className="exec-card-flat card-ops">
-                        <div className="exec-card-head-flat">
-                          <div className="exec-card-title-flat">
-                            <div className="exec-icon-box-flat blue">
-                              <IconBriefcase />
-                            </div>
-                            <span>Tiến Độ Nghiệp Vụ BĐHDA</span>
-                          </div>
-                          <div className="op-filter-pills-flat">
-                            <button
-                              type="button"
-                              className={`op-filter-pill-btn ${homeOpFilter === "all" ? "active" : ""}`}
-                              onClick={() => setHomeOpFilter("all")}
-                            >
-                              Tất cả ({bdhdaOperationsList.length})
-                            </button>
-                            <button
-                              type="button"
-                              className={`op-filter-pill-btn ${homeOpFilter === "passed" ? "active" : ""}`}
-                              onClick={() => setHomeOpFilter("passed")}
-                            >
-                              Đạt ({bdhdaOperationsList.filter((o) => o.status === "passed").length})
-                            </button>
-                            <button
-                              type="button"
-                              className={`op-filter-pill-btn ${homeOpFilter === "improve" ? "active" : ""}`}
-                              onClick={() => setHomeOpFilter("improve")}
-                            >
-                              Cần đẩy nhanh ({bdhdaOperationsList.filter((o) => o.status === "improve").length})
-                            </button>
-                          </div>
+                    <div className="exec-kpi-card blue">
+                      <div className="exec-kpi-left">
+                        <span className="exec-kpi-label">Dự án Đang Quản lý</span>
+                        <div className="exec-kpi-num-row">
+                          <span className="exec-kpi-big-num">3 / 3</span>
+                          <span className="exec-kpi-tag blue">Đúng hạn 92%</span>
                         </div>
-
-                        <div className="op-subhead-row-flat">
-                          <div className="op-legend-flat">
-                            <span className="op-legend-item" style={{ color: "#16a34a" }}>● Đạt chuẩn (≥80%)</span>
-                            <span className="op-legend-item" style={{ color: "#ea580c" }}>● Cần cải thiện (&lt;80%)</span>
-                          </div>
-                          <button
-                            type="button"
-                            className="op-link-all"
-                            onClick={() => {
-                              setTrackingOpen(true);
-                              setView("overview");
-                            }}
-                          >
-                            <span>Xem tất cả tiến độ</span>
-                            <span>→</span>
-                          </button>
-                        </div>
-
-                        <div className="op-flat-list">
-                          {filteredOps.map((op) => (
-                            <div className="op-flat-card" key={op.code}>
-                              <div className="op-flat-row-1">
-                                <div className="op-flat-left">
-                                  <span className={`op-flat-badge ${op.status === "improve" ? "orange" : "blue"}`}>
-                                    {op.code}
-                                  </span>
-                                  <span className="op-flat-title" title={op.name}>
-                                    {op.name}
-                                  </span>
-                                </div>
-                                <div className="op-flat-right">
-                                  <span className={`op-flat-score ${op.status === "improve" ? "orange" : "green"}`}>
-                                    {op.progress}%
-                                  </span>
-                                  <button
-                                    type="button"
-                                    className="op-flat-btn"
-                                    onClick={() => setView(op.actionView)}
-                                    title={`Mở phân hệ ${op.actionLabel}`}
-                                  >
-                                    {op.actionLabel} →
-                                  </button>
-                                </div>
-                              </div>
-                              <div className="op-flat-row-2">
-                                <span>{op.dept}</span>
-                                <span>Chỉ tiêu: {op.target}%</span>
-                              </div>
-                              <div className="op-flat-bar-track">
-                                <div
-                                  className={`op-flat-bar-fill ${op.status === "improve" ? "orange" : "green"}`}
-                                  style={{ width: `${op.progress}%` }}
-                                />
-                              </div>
-                            </div>
-                          ))}
-                        </div>
+                        <span className="exec-kpi-sub">Aqua City · NVW Phan Thiết · TGM</span>
                       </div>
+                      <IconBuilding />
                     </div>
 
-                    {/* CỘT 3: CÔNG VIỆC HÔM NAY & CÔNG VIỆC ĐANG TRỄ HẠN */}
-                    <div className="home-col">
-                      {/* Card 3A: Công Việc Hôm Nay */}
-                      <div className="exec-card-flat card-today">
-                        <div className="exec-card-head-flat">
-                          <div className="exec-card-title-flat">
-                            <div className="exec-icon-box-flat blue">
-                              <IconClock />
-                            </div>
-                            <span>Công Việc Hôm Nay</span>
-                          </div>
-                          <span
-                            className="exec-badge-pill-flat blue"
-                          >
-                            {todayDoneCount}/{todayTotalCount} Hoàn thành
-                          </span>
+                    <div className="exec-kpi-card warning">
+                      <div className="exec-kpi-left">
+                        <span className="exec-kpi-label">Hồ sơ Chờ Giám Đốc Duyệt</span>
+                        <div className="exec-kpi-num-row">
+                          <span className="exec-kpi-big-num">1</span>
+                          <span className="exec-kpi-tag orange">Chờ E-Approval</span>
                         </div>
+                        <span className="exec-kpi-sub">The Grand Manhattan (v1.0)</span>
+                      </div>
+                      <button
+                        type="button"
+                        className="exec-kpi-action-btn primary"
+                        onClick={() => {
+                          if (pTgm) openEApprovalModal(pTgm);
+                          else setView("confirm_approval");
+                        }}
+                      >
+                        Duyệt ngay →
+                      </button>
+                    </div>
 
-                        <div className="today-flat-list">
-                          {todayTasksList.map((t) => (
-                            <div
-                              key={t.id}
-                              className={`today-flat-item ${t.done ? "is-done" : ""}`}
-                              onClick={() => {
-                                setTodayTasksList((prev) =>
-                                  prev.map((item) => (item.id === t.id ? { ...item, done: !item.done } : item))
-                                );
-                              }}
+                    <div className="exec-kpi-card danger">
+                      <div className="exec-kpi-left">
+                        <span className="exec-kpi-label">Cảnh báo Mốc Trọng yếu</span>
+                        <div className="exec-kpi-num-row">
+                          <span className="exec-kpi-big-num">3</span>
+                          <span className="exec-kpi-tag red">Cần đôn đốc</span>
+                        </div>
+                        <span className="exec-kpi-sub">PCCC (40d) · Cọc nhồi (38d)</span>
+                      </div>
+                      <button
+                        type="button"
+                        className="exec-kpi-action-btn danger-outline"
+                        onClick={() => setToast("Đã gửi văn bản đôn đốc khẩn cấp tới các Ban QLDA")}
+                      >
+                        Đôn đốc tất cả
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* 2. Key Projects Portfolio Health */}
+                  <div className="exec-portfolio-box">
+                    <div className="exec-section-header">
+                      <span className="exec-section-title">
+                        <IconBuilding /> Sức khỏe Các Đại Dự Án Trọng Điểm
+                      </span>
+                      <span className="exec-section-sub">3 Dự án BĐHDA trực tiếp kiểm soát tiến độ</span>
+                    </div>
+
+                    <div className="exec-portfolio-grid">
+                      {keyProjects.map((kp) => (
+                        <div className="exec-proj-card" key={kp.code}>
+                          <div className="exec-proj-top">
+                            <div>
+                              <span className="exec-proj-code">{kp.code}</span>
+                              <div className="exec-proj-name" title={kp.name}>{kp.name}</div>
+                              <span className="exec-proj-region">{kp.region}</span>
+                            </div>
+                            <span className={`exec-proj-status-tag ${kp.statusTag}`}>
+                              {kp.statusLabel}
+                            </span>
+                          </div>
+
+                          <div className="exec-proj-progress-row">
+                            <div className="exec-proj-bar-track">
+                              <div
+                                className={`exec-proj-bar-fill ${kp.progressColor}`}
+                                style={{ width: `${kp.progress}%` }}
+                              />
+                            </div>
+                            <span className="exec-proj-percent">{kp.progress}%</span>
+                          </div>
+
+                          <div className="exec-proj-bottom">
+                            <span style={{ fontSize: "11px", color: "#64748b", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                              {kp.note}
+                            </span>
+                            <button
+                              type="button"
+                              className={`exec-proj-btn ${kp.isPrimary ? "primary" : ""}`}
+                              onClick={kp.onAction}
                             >
-                              <div className={`today-flat-check ${t.done ? "checked" : ""}`}>
-                                {t.done && (
-                                  <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                                    <polyline points="20 6 9 17 4 12" />
-                                  </svg>
-                                )}
-                              </div>
-                              <div className="today-flat-body">
-                                <div className="today-flat-title">{t.title}</div>
-                                <div className="today-flat-meta">
-                                  <span>🕒 {t.time}</span>
-                                  {t.project && <span>🏢 {t.project}</span>}
-                                </div>
-                              </div>
-                              <span className={`today-flat-pill ${t.category}`}>
-                                {t.category === "routine" ? "Định kỳ" : t.category === "technical" ? "Kỹ thuật" : "Giao thêm"}
+                              {kp.actionLabel}
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* 3. Lower Grid: Operations Matrix & Action Hub */}
+                  <div className="exec-lower-grid">
+                    {/* Left: 6 BĐHDA Operations Matrix */}
+                    <div className="exec-matrix-box">
+                      <div className="exec-section-header">
+                        <span className="exec-section-title">
+                          <IconBriefcase /> 6 Chỉ Tiêu Nghiệp Vụ BĐHDA
+                        </span>
+                        <span className="exec-section-sub">Chỉ tiêu chuẩn hóa ≥ 80%</span>
+                      </div>
+
+                      <div className="exec-matrix-grid">
+                        {bdhdaOperationsList.map((op) => (
+                          <div
+                            className="exec-matrix-card"
+                            key={op.code}
+                            onClick={() => setView(op.actionView)}
+                            title={`Nhấn để mở phân hệ ${op.name}`}
+                          >
+                            <div className="exec-matrix-header">
+                              <span className={`exec-matrix-code ${op.status === "improve" ? "orange" : "blue"}`}>
+                                {op.code}
+                              </span>
+                              <span className="exec-matrix-title">{op.name}</span>
+                              <span className={`exec-matrix-rate ${op.status === "improve" ? "orange" : "green"}`}>
+                                {op.progress}%
                               </span>
                             </div>
-                          ))}
-                        </div>
-                      </div>
 
-                      {/* Card 3B: Công Việc Đang Trễ Hạn */}
-                      <div className="exec-card-flat card-overdue">
-                        <div className="exec-card-head-flat" style={{ borderBottomColor: "#fee2e2" }}>
-                          <div className="exec-card-title-flat red">
-                            <div className="exec-icon-box-flat red">
-                              <IconAlertTriangle />
+                            <div className="exec-matrix-track">
+                              <div
+                                className={`exec-matrix-fill ${op.status === "improve" ? "orange" : "green"}`}
+                                style={{ width: `${op.progress}%` }}
+                              />
                             </div>
-                            <span>Công Việc Đang Trễ Hạn</span>
+
+                            <div className="exec-matrix-foot">
+                              <span>Mục tiêu: {op.target}%</span>
+                              <span className={`exec-matrix-status ${op.status === "improve" ? "orange" : "green"}`}>
+                                {op.statusText} →
+                              </span>
+                            </div>
                           </div>
-                          <span className="exec-badge-pill-flat red">
-                            {overdueList.length} việc
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Right: Executive Action & Escalation Hub */}
+                    <div className="exec-hub-box">
+                      {/* Card 1: Today's Priorities */}
+                      <div className="exec-action-card">
+                        <div className="exec-hub-head">
+                          <span className="exec-hub-title blue">
+                            <IconClock /> Việc Trọng Tâm Cần Xử Lý Hôm Nay
+                          </span>
+                          <span className="exec-hub-badge blue">
+                            {doneDirectorTasks}/{directorTasks.length} Hoàn thành
                           </span>
                         </div>
 
-                        <div className="overdue-flat-list">
-                          {overdueList.map((item) => (
-                            <div className="overdue-flat-card" key={item.id}>
-                              <div className="overdue-flat-top">
-                                <span className="overdue-flat-title" title={item.title}>
-                                  {item.title}
-                                </span>
-                                <div className="overdue-flat-actions">
-                                  <span className="overdue-flat-badge-days">
-                                    Trễ {item.daysLate} ngày
-                                  </span>
-                                  <button
-                                    type="button"
-                                    className="overdue-flat-btn-urge"
-                                    onClick={() => setToast(`Đã gửi thông báo đôn đốc khẩn cấp cho: ${item.dept}`)}
-                                    title="Gửi thông báo đôn đốc trực tiếp"
-                                  >
-                                    Đôn đốc
-                                  </button>
-                                  <button
-                                    type="button"
-                                    className="overdue-flat-btn-mtl"
-                                    onClick={() => {
-                                      if (item.targetModule === "workspace") {
-                                        setActiveId(item.projectId);
-                                        setView("workspace");
-                                      } else {
-                                        setView(item.targetModule);
-                                      }
-                                    }}
-                                    title="Mở MTL để xem chi tiết"
-                                  >
-                                    ↗ MTL
-                                  </button>
-                                </div>
+                        {directorTasks.map((task) => (
+                          <div
+                            className={`exec-task-row ${task.done ? "is-done" : ""}`}
+                            key={task.id}
+                            onClick={() => {
+                              setTodayTasksList((prev) =>
+                                prev.map((item) => (item.id === task.id ? { ...item, done: !item.done } : item))
+                              );
+                            }}
+                          >
+                            <div className={`exec-task-check ${task.done ? "checked" : ""}`}>
+                              {task.done && (
+                                <svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                                  <polyline points="20 6 9 17 4 12" />
+                                </svg>
+                              )}
+                            </div>
+                            <span className="exec-task-text" title={task.title}>
+                              {task.title}
+                            </span>
+                            <span className="exec-task-tag">{task.project || task.time}</span>
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* Card 2: Escalation Alerts */}
+                      <div className="exec-action-card escalation">
+                        <div className="exec-hub-head">
+                          <span className="exec-hub-title red">
+                            <IconAlertTriangle /> Điểm Nóng Cần Chỉ Đạo Khẩn
+                          </span>
+                          <span className="exec-hub-badge red">
+                            {overdueAlerts.length} Điểm nóng
+                          </span>
+                        </div>
+
+                        {overdueAlerts.map((item) => (
+                          <div className="exec-escala-row" key={item.id}>
+                            <div className="exec-escala-left">
+                              <div className="exec-escala-title" title={item.title}>
+                                {item.title}
                               </div>
-                              <div className="overdue-flat-sub">
-                                <span>🏢 {item.project}</span>
-                                <span style={{ color: "#ef4444", marginLeft: "8px" }}>📅 Hạn: {item.dueDate}</span>
+                              <div className="exec-escala-sub">
+                                {item.project} · {item.dept}
                               </div>
                             </div>
-                          ))}
-                        </div>
+                            <div className="exec-escala-right">
+                              <span className="exec-escala-days">Trễ {item.daysLate}d</span>
+                              <button
+                                type="button"
+                                className="exec-escala-btn"
+                                onClick={() => setToast(`Đã gửi lệnh đôn đốc khẩn cấp tới ${item.dept} cho dự án ${item.project}`)}
+                              >
+                                Đôn đốc
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* Direct Reports Strip */}
+                      <div className="exec-team-strip">
+                        {teamLeads.map((lead) => (
+                          <div className="exec-team-lead-item" key={lead.role}>
+                            <div className="exec-team-lead-avatar">{lead.avatar}</div>
+                            <div className="exec-team-lead-info">
+                              <div className="exec-team-lead-role" title={lead.role}>{lead.role}</div>
+                              <span className={`exec-team-lead-kpi ${lead.orange ? "orange" : ""}`}>
+                                KPI {lead.kpi.toFixed(1)}
+                              </span>
+                            </div>
+                          </div>
+                        ))}
                       </div>
                     </div>
                   </div>
