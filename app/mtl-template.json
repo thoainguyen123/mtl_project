@@ -9453,7 +9453,7 @@
     "code": "4.0",
     "parentCode": null,
     "groupCode": "4.0",
-    "name": "PMD",
+    "name": "PHÒNG ĐIỀU HÀNH DỰ ÁN",
     "level": 1,
     "summary": true,
     "defaultDuration": 1
@@ -9529,7 +9529,7 @@
     "code": "4.1",
     "parentCode": null,
     "groupCode": "4.1",
-    "name": "PLP",
+    "name": "PHÒNG THỦ TỤC PHÁP LÝ XÂY DỰNG",
     "level": 1,
     "summary": true,
     "defaultDuration": 1
@@ -10703,7 +10703,7 @@
     "code": "4.2",
     "parentCode": null,
     "groupCode": "4.2",
-    "name": "DMD",
+    "name": "PHÒNG QUẢN LÝ THIẾT KẾ",
     "level": 1,
     "summary": true,
     "defaultDuration": 1
@@ -12091,7 +12091,7 @@
     "code": "4.3",
     "parentCode": null,
     "groupCode": "4.3",
-    "name": "PCD",
+    "name": "PHÒNG QUẢN LÝ XÂY DỰNG, AN TOÀN & MÔI TRƯỜNG",
     "level": 1,
     "summary": true,
     "defaultDuration": 1
@@ -12941,7 +12941,7 @@
     "code": "4.4",
     "parentCode": null,
     "groupCode": "4.4",
-    "name": "OM",
+    "name": "PHÒNG QUẢN LÝ VẬN HÀNH DỰ ÁN",
     "level": 1,
     "summary": true,
     "defaultDuration": 1

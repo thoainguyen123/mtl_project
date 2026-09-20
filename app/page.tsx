@@ -265,9 +265,9 @@ const GROUPS = [
   { code: "9.8", short: "IDD", name: "Phòng Thiết kế Nội bộ", role: "indirect", scope: "9 phòng ban" },
   { code: "9.9", short: "CSC", name: "Trung tâm Bồi thường GPMB", role: "indirect", scope: "9 phòng ban" },
   { code: "4.0", short: "PMD", name: "Phòng Điều hành Dự án", role: "coordinator", scope: "Chủ trì lập MTL" },
-  { code: "4.1", short: "PLP", name: "Phòng Thủ tục Pháp lý Dự án", role: "direct", scope: "4 phòng trực tiếp" },
+  { code: "4.1", short: "PLP", name: "Phòng Thủ tục Pháp lý Xây dựng", role: "direct", scope: "4 phòng trực tiếp" },
   { code: "4.2", short: "DMD", name: "Phòng Quản lý Thiết kế", role: "direct", scope: "4 phòng trực tiếp" },
-  { code: "4.3", short: "PCD", name: "Phòng Quản lý Xây dựng, An toàn và Môi trường", role: "direct", scope: "4 phòng trực tiếp" },
+  { code: "4.3", short: "PCD", name: "Phòng Quản lý Xây dựng, An toàn & Môi trường", role: "direct", scope: "4 phòng trực tiếp" },
   { code: "4.4", short: "OM", name: "Phòng Quản lý Vận hành Dự án", role: "direct", scope: "4 phòng trực tiếp" },
 ] as const;
 
