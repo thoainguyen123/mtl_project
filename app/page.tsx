@@ -9736,43 +9736,6 @@ export default function Home() {
                 </span>
                 <span style={{ color: "#cbd5e1" }}>|</span>
                 <button className="breadcrumb-back" onClick={() => setView("projects")}>← Danh sách dự án</button>
-                <button
-                  className="breadcrumb-back"
-                  onClick={() => setView("init_template")}
-                  style={{ color: "#16a34a", borderColor: "#bbf7d0", background: "#f0fdf4" }}
-                >
-                  + Khởi tạo tiến độ mới
-                </button>
-                {projects.length > 1 && (
-                  <label style={{ display: "inline-flex", alignItems: "center", gap: 5, fontSize: "11px", fontWeight: 600, color: "#64748b" }}>
-                    <span>Dự án:</span>
-                    <select
-                      value={activeProject.id}
-                      onChange={(e) => {
-                        setActiveId(e.target.value);
-                        setSelectedCode("");
-                      }}
-                      style={{
-                        height: "28px",
-                        padding: "0 6px",
-                        fontSize: "11.5px",
-                        fontWeight: 600,
-                        borderRadius: "5px",
-                        border: "1px solid #cbd5e1",
-                        background: "#ffffff",
-                        color: "#0f172a",
-                        cursor: "pointer",
-                        maxWidth: "200px",
-                      }}
-                    >
-                      {projects.map((p) => (
-                        <option key={p.id} value={p.id}>
-                          {p.name} ({p.code})
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-                )}
               </div>
               <div className="top-actions">
                 <span className="saved-state"><i />Đã lưu trên thiết bị</span>
@@ -9804,28 +9767,10 @@ export default function Home() {
               </div>
             </header>
 
-            <section className="project-header" style={{ padding: "14px 20px" }}>
+            <section className="project-header" style={{ padding: "10px 20px" }}>
               <div className="project-header-left">
                 <div className="project-title-row">
                   <h1 style={{ fontSize: "20px", fontWeight: 800, margin: 0, color: "#0f172a" }}>{activeProject.name}</h1>
-                </div>
-              </div>
-              <div className="top-stat-cards workspace-stat-cards">
-                <div className="top-stat-card">
-                  <span>CÔNG VIỆC</span>
-                  <b>{scheduled.length}</b>
-                </div>
-                <div className="top-stat-card">
-                  <span>BAN/PHÒNG GIÁN TIẾP</span>
-                  <b>{activeProject.selectedGroups.filter((code) => GROUP_BY_CODE[code]?.role === "indirect").length}/{INDIRECT_COUNT}</b>
-                </div>
-                <div className="top-stat-card">
-                  <span>PHÒNG TRỰC TIẾP</span>
-                  <b>{activeProject.selectedGroups.filter((code) => GROUP_BY_CODE[code]?.role === "direct").length}/{DIRECT_COUNT}</b>
-                </div>
-                <div className="top-stat-card">
-                  <span>NGÀY MỤC TIÊU</span>
-                  <b style={{ fontSize: "13px" }}>{formatDate(activeProject.targetDate)}</b>
                 </div>
               </div>
             </section>
@@ -9848,7 +9793,7 @@ export default function Home() {
                     cursor: "pointer",
                   }}
                 >
-                  Tất cả công việc ({scheduled.length})
+                  Tất cả công việc
                 </button>
                 <select
                   value={workspaceDeptFilter}
@@ -9924,6 +9869,26 @@ export default function Home() {
                     <option value="6">Cấp 6</option>
                   </select>
                 </label>
+
+                <div
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "6px",
+                    fontSize: "11px",
+                    fontWeight: 700,
+                    color: "#0f172a",
+                    background: "#f8fafc",
+                    border: "1px solid #cbd5e1",
+                    borderRadius: "6px",
+                    padding: "4px 9px",
+                    height: "28px",
+                  }}
+                  title="Tổng số công việc"
+                >
+                  <span style={{ color: "#64748b" }}>Số công việc:</span>
+                  <b style={{ color: "#1e3a8a", fontSize: "12px" }}>{scheduled.length}</b>
+                </div>
               </div>
 
               <div style={{ marginLeft: "auto", display: "inline-flex", alignItems: "center", gap: 8 }}>
@@ -9935,30 +9900,6 @@ export default function Home() {
                     placeholder="Mã WBS hoặc tên công việc"
                   />
                 </label>
-                <button
-                  type="button"
-                  className="text-button"
-                  onClick={() => {
-                    setCollapsed(new Set());
-                    setWorkspaceLevelFilter("all");
-                  }}
-                >
-                  Mở tất cả
-                </button>
-                <button
-                  type="button"
-                  className="text-button"
-                  onClick={() => {
-                    const toCollapse = new Set<string>();
-                    scheduled.forEach((t) => {
-                      if (t.summary && t.level >= 2) toCollapse.add(t.code);
-                    });
-                    setCollapsed(toCollapse);
-                    setWorkspaceLevelFilter("1");
-                  }}
-                >
-                  Thu gọn
-                </button>
               </div>
             </section>
 
