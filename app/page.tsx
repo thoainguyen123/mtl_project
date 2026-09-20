@@ -7623,21 +7623,16 @@ export default function Home() {
           <>
             <header className="page-top-header">
               <div className="page-top-title-group">
+                <button
+                  type="button"
+                  className="topbar-toggle-sidebar-btn"
+                  onClick={() => setSidebarCollapsed((prev) => !prev)}
+                  title={sidebarCollapsed ? "Mở rộng thanh điều hướng (Ctrl+B)" : "Thu nhỏ thanh điều hướng (Ctrl+B)"}
+                  aria-label="Chuyển đổi thanh điều hướng"
+                >
+                  <IconMenu />
+                </button>
                 <h1>Xác nhận phê duyệt</h1>
-                <div className="top-stat-cards">
-                  <div className="top-stat-card">
-                    <span>TỔNG DỰ ÁN</span>
-                    <b>{projects.length}</b>
-                  </div>
-                  <div className="top-stat-card">
-                    <span>CHỜ XÁC NHẬN E-APPROVAL</span>
-                    <b style={{ color: "#d97706" }}>{projects.filter((p) => !p.isOfficialApproved).length}</b>
-                  </div>
-                  <div className="top-stat-card">
-                    <span>ĐÃ PHÊ DUYỆT CHÍNH THỨC</span>
-                    <b style={{ color: "#167461" }}>{officialApprovedProjects.length}</b>
-                  </div>
-                </div>
               </div>
               <div className="page-top-actions">
                 <label className="search-field" style={{ margin: 0, minWidth: "220px", maxWidth: "300px" }}>
