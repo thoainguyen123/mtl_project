@@ -2994,7 +2994,17 @@ export default function Home() {
     notify(`Đã cập nhật tiến độ ${editingProgressTask.code}: ${progress}%`);
   };
 
-  if (!hydrated) return <main className="loading-screen"><div className="loading-mark">MTL</div><p>Đang chuẩn bị không gian dự án…</p></main>;
+  if (!hydrated) {
+    return (
+      <main className="loading-screen">
+        <div className="loading-mark">
+          <span className="loading-mark-code">PMD</span>
+          <span className="loading-mark-title">Project Management</span>
+        </div>
+        <p>Đang chuẩn bị không gian dự án…</p>
+      </main>
+    );
+  }
 
   if (!currentAccount) return (
     <main className="login-screen">
