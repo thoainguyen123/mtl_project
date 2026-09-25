@@ -47,6 +47,8 @@ type TaskEdit = {
   actualStartDate?: string;
   actualEndDate?: string;
   actualNote?: string;
+  workGroup?: WorkType;
+  note?: string;
 };
 
 type TaskDependency = {
@@ -761,8 +763,9 @@ function scheduleTasks(project: Project): ScheduledTask[] {
   const includedCodes = new Set(project.includedTaskCodes);
   const tasks = source.filter((task) => includedCodes.has(task.code)).map((task) => {
     const isParent = task.summary || sourceParentCodes.has(task.code);
-    const isBaoCao = task.workGroup === "Báo cáo định kỳ";
     const edit = project.taskEdits[task.code] ?? {};
+    const effectiveWorkGroup = edit.workGroup !== undefined ? edit.workGroup : task.workGroup;
+    const isBaoCao = effectiveWorkGroup === "Báo cáo định kỳ";
     const isKeyMilestone = /\.MILE_(?:PLP|PCD|COM|OM)_\d+$/.test(task.code);
 
     let startDate = "";
@@ -850,13 +853,14 @@ function scheduleTasks(project: Project): ScheduledTask[] {
 
     return {
       ...task,
+      workGroup: effectiveWorkGroup,
       startDate,
       endDate,
       duration,
       left: leftPercent,
       width: widthPercent,
       pic: edit.pic ?? "",
-      status: actualStatus === "Hoàn thành" ? "Hoàn thành" : (actualStatus === "Trễ hạn" ? "Trễ hạn" : (edit.status ?? "Đang thực hiện")),
+      status: edit.status === "Đóng" ? "Đóng" : (actualStatus === "Hoàn thành" ? "Hoàn thành" : (actualStatus === "Trễ hạn" ? "Trễ hạn" : (edit.status ?? "Đang thực hiện"))),
       actualProgress,
       actualStartDate,
       actualEndDate,
@@ -2537,6 +2541,85 @@ export default function Home() {
     const duration = workingDaysBetween(startDate, endDate);
     if (duration < 1) return notify("Khoảng ngày phải có ít nhất một ngày làm việc từ thứ Hai đến thứ Sáu");
     updateTask(code, { startDate, endDate, duration });
+  };
+
+  const updateTaskWorkGroup = (code: string, workGroup: WorkType) => {
+    if (!activeProject || !isPlanEditable(activeProject)) return;
+    const currentEdit = activeProject.taskEdits[code] ?? {};
+    let updatedEdit: TaskEdit = {
+      ...currentEdit,
+      workGroup,
+    };
+    if (workGroup === "Báo cáo định kỳ") {
+      updatedEdit.duration = 0;
+      updatedEdit.startDate = "";
+      updatedEdit.endDate = "";
+    }
+    const groupCode = allProjectTasks(activeProject).find((task) => task.code === code)?.groupCode;
+    setProjects((current) =>
+      current.map((project) =>
+        project.id === activeProject.id
+          ? {
+              ...project,
+              taskEdits: { ...project.taskEdits, [code]: updatedEdit },
+              departmentApprovals: groupCode
+                ? {
+                    ...project.departmentApprovals,
+                    [groupCode]: {
+                      ...project.departmentApprovals[groupCode],
+                      status: "pending",
+                      note: "",
+                      reviewedAt: undefined,
+                    },
+                  }
+                : project.departmentApprovals,
+              approvalStatus: project.approvalStatus === "submitted" ? "draft" : project.approvalStatus,
+            }
+          : project
+      )
+    );
+  };
+
+  const toggleProjectTaskStatus = (task: ScheduledTask) => {
+    if (!activeProject || !isPlanEditable(activeProject)) return;
+    const isCurrentlyClosed = task.status === "Đóng";
+    const newStatus: TaskEdit["status"] = isCurrentlyClosed ? "Đang thực hiện" : "Đóng";
+    const allTasks = allProjectTasks(activeProject);
+    const affectedCodes = task.summary
+      ? allTasks.filter((item) => item.code === task.code || item.code.startsWith(`${task.code}.`)).map((item) => item.code)
+      : [task.code];
+
+    const updatedEdits = { ...activeProject.taskEdits };
+    affectedCodes.forEach((code) => {
+      updatedEdits[code] = {
+        ...updatedEdits[code],
+        status: newStatus,
+      };
+    });
+
+    const groupCode = task.groupCode;
+    setProjects((current) =>
+      current.map((project) =>
+        project.id === activeProject.id
+          ? {
+              ...project,
+              taskEdits: updatedEdits,
+              departmentApprovals: groupCode
+                ? {
+                    ...project.departmentApprovals,
+                    [groupCode]: {
+                      ...project.departmentApprovals[groupCode],
+                      status: "pending",
+                      note: "",
+                      reviewedAt: undefined,
+                    },
+                  }
+                : project.departmentApprovals,
+              approvalStatus: project.approvalStatus === "submitted" ? "draft" : project.approvalStatus,
+            }
+          : project
+      )
+    );
   };
 
   const updateTaskDependencies = (successorCode: string, requestedDependencies: TaskDependency[]) => {
@@ -5148,7 +5231,7 @@ export default function Home() {
         }
         .init-wbs-head {
           display: grid !important;
-          grid-template-columns: 175px 1fr 170px 85px !important;
+          grid-template-columns: 175px 1fr !important;
           align-items: center !important;
           gap: 10px !important;
           padding: 10px 14px !important;
@@ -5165,7 +5248,7 @@ export default function Home() {
         }
         .init-wbs-row {
           display: grid !important;
-          grid-template-columns: 175px 1fr 170px 85px !important;
+          grid-template-columns: 175px 1fr !important;
           align-items: center !important;
           gap: 10px !important;
           padding: 8px 14px !important;
@@ -6332,9 +6415,9 @@ export default function Home() {
         }
         .task-grid .grid-header {
           display: grid !important;
-          grid-template-columns: 150px minmax(280px, 2.5fr) 180px 120px 120px minmax(140px, 1.2fr) minmax(140px, 1.2fr) !important;
+          grid-template-columns: 135px minmax(260px, 2fr) 150px 105px 105px minmax(120px, 1fr) 150px 85px minmax(130px, 1.1fr) !important;
           align-items: center !important;
-          min-width: 1130px !important;
+          min-width: 1240px !important;
           height: 42px !important;
           background: #f8fafc !important;
           border-bottom: 1px solid #e2e8f0 !important;
@@ -6359,9 +6442,9 @@ export default function Home() {
         }
         .task-grid .task-row {
           display: grid !important;
-          grid-template-columns: 150px minmax(280px, 2.5fr) 180px 120px 120px minmax(140px, 1.2fr) minmax(140px, 1.2fr) !important;
+          grid-template-columns: 135px minmax(260px, 2fr) 150px 105px 105px minmax(120px, 1fr) 150px 85px minmax(130px, 1.1fr) !important;
           align-items: center !important;
-          min-width: 1130px !important;
+          min-width: 1240px !important;
           min-height: 44px !important;
           border-bottom: 1px solid #f1f5f9 !important;
           color: #1e293b !important;
@@ -6459,6 +6542,17 @@ export default function Home() {
           white-space: nowrap !important;
           overflow: hidden !important;
           text-overflow: ellipsis !important;
+        }
+        .task-cell-worktype {
+          padding: 0 8px !important;
+          display: flex !important;
+          align-items: center !important;
+        }
+        .task-cell-status-toggle {
+          padding: 0 8px !important;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
         }
         .task-cell-links {
           padding: 0 12px !important;
@@ -8983,22 +9077,19 @@ export default function Home() {
                           background: "#ffffff",
                         }}
                       >
-                        <div className="init-wbs-table" style={{ minWidth: 580 }}>
+                        <div className="init-wbs-table" style={{ minWidth: "100%" }}>
                           <div className="init-wbs-head">
                             <span>WBS</span>
                             <span>HẠNG MỤC CÔNG VIỆC</span>
-                            <span>LOẠI CÔNG VIỆC</span>
-                            <span>TRẠNG THÁI</span>
                           </div>
                           <div className="init-wbs-body">
                             {visibleInitWbsTasks.map((task) => {
                               const hasChildren = catalogParentCodes.has(task.code);
                               const isCollapsed = initWbsCollapsed.has(task.code);
-                              const isEnabled = enabledCatalogCodes.has(task.code);
                               return (
                                 <div
                                   key={task.code}
-                                  className={`init-wbs-row ${isEnabled ? "auto-enabled" : ""}`}
+                                  className="init-wbs-row auto-enabled"
                                 >
                                   {/* WBS Cell */}
                                   <div
@@ -9046,34 +9137,6 @@ export default function Home() {
                                     title={task.name}
                                   >
                                     {task.name}
-                                  </div>
-
-                                  {/* Loại công việc Cell */}
-                                  <div>
-                                    <select
-                                      className="catalog-work-type-select"
-                                      value={task.workGroup ?? ""}
-                                      onChange={(event) => updateCatalogWorkType(task, event.target.value as WorkType)}
-                                      aria-label={`Loại công việc ${task.code}`}
-                                    >
-                                      <option value="">Chưa phân loại</option>
-                                      <option value="Báo cáo định kỳ">Báo cáo định kỳ</option>
-                                      <option value="Tracking công việc">Tracking công việc</option>
-                                    </select>
-                                  </div>
-
-                                  {/* Trạng thái Cell */}
-                                  <div>
-                                    <label className="auto-generate-check">
-                                      <input
-                                        type="checkbox"
-                                        checked={isEnabled}
-                                        onChange={() => toggleCatalogTask(task)}
-                                        aria-label={`Trạng thái ${task.code}`}
-                                      />
-                                      <i />
-                                      <b>{isEnabled ? "Có" : "Không"}</b>
-                                    </label>
                                   </div>
                                 </div>
                               );
@@ -9554,12 +9617,10 @@ export default function Home() {
                                 background: "#ffffff",
                               }}
                             >
-                              <div className="init-wbs-table" style={{ minWidth: 580 }}>
+                              <div className="init-wbs-table" style={{ minWidth: "100%" }}>
                                 <div className="init-wbs-head">
                                   <span>WBS</span>
                                   <span>HẠNG MỤC CÔNG VIỆC</span>
-                                  <span>LOẠI CÔNG VIỆC</span>
-                                  <span>TRẠNG THÁI</span>
                                 </div>
                                 <div className="init-wbs-body">
                                   {visibleInitUpdateWbsTasks.map((task) => {
@@ -9616,29 +9677,6 @@ export default function Home() {
                                           title={task.name}
                                         >
                                           {task.name}
-                                        </div>
-
-                                        {/* Loại công việc Cell */}
-                                        <div>
-                                          <span style={{ fontSize: "11px", color: "#475569", fontWeight: 600 }}>
-                                            {task.workGroup || "Phối hợp"}
-                                          </span>
-                                        </div>
-
-                                        {/* Trạng thái Cell */}
-                                        <div>
-                                          <span
-                                            className="status-badge"
-                                            style={{
-                                              background: "#eff6ff",
-                                              color: "#1d4ed8",
-                                              border: "1px solid #bfdbfe",
-                                              fontSize: "10.5px",
-                                              padding: "2px 6px",
-                                            }}
-                                          >
-                                            Kế thừa
-                                          </span>
                                         </div>
                                       </div>
                                     );
@@ -9896,13 +9934,15 @@ export default function Home() {
 
             <div className={`planning-area ${selectedTask ? "with-detail" : ""}`}>
               <section className="task-grid" aria-label="Cây công việc Master Timeline">
-                <div className="grid-header" style={{ gridTemplateColumns: "150px minmax(280px, 2.5fr) 180px 120px 120px minmax(140px, 1.2fr) minmax(140px, 1.2fr)" }}>
+                <div className="grid-header" style={{ gridTemplateColumns: "135px minmax(260px, 2fr) 150px 105px 105px minmax(120px, 1fr) 150px 85px minmax(130px, 1.1fr)" }}>
                   <span>WBS</span>
                   <span>HẠNG MỤC</span>
                   <span style={{ whiteSpace: "nowrap" }}>THỜI GIAN THỰC HIỆN</span>
                   <span>NGÀY BẮT ĐẦU</span>
                   <span>NGÀY KẾT THÚC</span>
                   <span>GHI CHÚ</span>
+                  <span>LOẠI CÔNG VIỆC</span>
+                  <span>TRẠNG THÁI</span>
                   <span>LIÊN KẾT</span>
                 </div>
                 <div className="grid-body">
@@ -9915,7 +9955,10 @@ export default function Home() {
                         role="button"
                         tabIndex={0}
                         className={`task-row level-${Math.min(task.level, 4)} ${selectedCode === task.code ? "selected" : ""} ${task.summary ? "summary" : ""}`}
-                        style={{ gridTemplateColumns: "150px minmax(280px, 2.5fr) 180px 120px 120px minmax(140px, 1.2fr) minmax(140px, 1.2fr)" }}
+                        style={{
+                          gridTemplateColumns: "135px minmax(260px, 2fr) 150px 105px 105px minmax(120px, 1fr) 150px 85px minmax(130px, 1.1fr)",
+                          opacity: task.status === "Đóng" ? 0.6 : 1,
+                        }}
                         onClick={() => setSelectedCode(task.code)}
                         onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") setSelectedCode(task.code); }}
                       >
@@ -10005,7 +10048,42 @@ export default function Home() {
                           )}
                         </span>
 
-                        {/* 7. Liên kết */}
+                        {/* 7. Loại công việc */}
+                        <span className="task-cell task-cell-worktype" onClick={(e) => e.stopPropagation()}>
+                          {task.summary ? (
+                            <span style={{ color: "#94a3b8", fontSize: "11px", fontStyle: "italic" }}>—</span>
+                          ) : (
+                            <select
+                              className="catalog-work-type-select"
+                              style={{ height: "26px", fontSize: "11px", padding: "0 6px" }}
+                              value={task.workGroup ?? ""}
+                              onChange={(e) => updateTaskWorkGroup(task.code, e.target.value as WorkType)}
+                              disabled={activeProject.baselineLocked}
+                              aria-label={`Loại công việc ${task.code}`}
+                            >
+                              <option value="">Chưa phân loại</option>
+                              <option value="Báo cáo định kỳ">Báo cáo định kỳ</option>
+                              <option value="Tracking công việc">Tracking công việc</option>
+                            </select>
+                          )}
+                        </span>
+
+                        {/* 8. Trạng thái */}
+                        <span className="task-cell task-cell-status-toggle" onClick={(e) => e.stopPropagation()}>
+                          <label className="auto-generate-check" style={{ cursor: activeProject.baselineLocked ? "not-allowed" : "pointer" }}>
+                            <input
+                              type="checkbox"
+                              checked={task.status !== "Đóng"}
+                              disabled={activeProject.baselineLocked}
+                              onChange={() => toggleProjectTaskStatus(task)}
+                              aria-label={`Trạng thái ${task.code}`}
+                            />
+                            <i />
+                            <b>{task.status !== "Đóng" ? "Có" : "Không"}</b>
+                          </label>
+                        </span>
+
+                        {/* 9. Liên kết */}
                         <span className="task-cell task-cell-links">
                           {task.predecessors.length > 0 ? (
                             <div className="link-chips-wrap">
