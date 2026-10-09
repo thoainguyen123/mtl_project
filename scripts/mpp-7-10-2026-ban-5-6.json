@@ -1,0 +1,797 @@
+[
+{
+"ol": "5",
+"lvl": 1,
+"name": "9.5 BAN CUNG ỨNG ĐẤU THẦU"
+},
+{
+"ol": "5.1",
+"lvl": 2,
+"name": "9.5.1 Lập kế hoạch cung ứng đấu thầu (CUDT)"
+},
+{
+"ol": "5.2",
+"lvl": 2,
+"name": "9.5.2 Thực hiện kế hoạch cung ứng đấu thầu"
+},
+{
+"ol": "5.2.1",
+"lvl": 3,
+"name": "9.5.2.1 Chọn thầu tư vấn"
+},
+{
+"ol": "5.2.1.1",
+"lvl": 4,
+"name": "9.5.2.1.1 Tư vấn thiết kế ba bộ môn"
+},
+{
+"ol": "5.2.1.1.1",
+"lvl": 5,
+"name": "9.5.2.1.1.1 Chọn thầu và phát hành LOA"
+},
+{
+"ol": "5.2.1.1.2",
+"lvl": 5,
+"name": "9.5.2.1.1.2 Hoàn thành hợp đồng"
+},
+{
+"ol": "5.2.1.1.3",
+"lvl": 5,
+"name": "9.5.2.1.1.3 Hoàn thành tạm ứng"
+},
+{
+"ol": "5.2.1.2",
+"lvl": 4,
+"name": "9.5.2.1.2 Tư vấn giám sát"
+},
+{
+"ol": "5.2.1.2.1",
+"lvl": 5,
+"name": "9.5.2.1.2.1 Chọn thầu và phát hành LOA"
+},
+{
+"ol": "5.2.1.2.2",
+"lvl": 5,
+"name": "9.5.2.1.2.2 Hoàn thành hợp đồng"
+},
+{
+"ol": "5.2.1.2.3",
+"lvl": 5,
+"name": "9.5.2.1.2.3 Hoàn thành tạm ứng"
+},
+{
+"ol": "5.2.1.3",
+"lvl": 4,
+"name": "9.5.2.1.3 Tư vấn quản lý dự án"
+},
+{
+"ol": "5.2.1.3.1",
+"lvl": 5,
+"name": "9.5.2.1.3.1 Chọn thầu và phát hành LOA"
+},
+{
+"ol": "5.2.1.3.2",
+"lvl": 5,
+"name": "9.5.2.1.3.2 Hoàn thành hợp đồng"
+},
+{
+"ol": "5.2.1.3.3",
+"lvl": 5,
+"name": "9.5.2.1.3.3 Hoàn thành tạm ứng"
+},
+{
+"ol": "5.2.1.4",
+"lvl": 4,
+"name": "9.5.2.1.4 Tư vấn DTM"
+},
+{
+"ol": "5.2.1.4.1",
+"lvl": 5,
+"name": "9.5.2.1.4.1 Chọn thầu và phát hành LOA"
+},
+{
+"ol": "5.2.1.4.2",
+"lvl": 5,
+"name": "9.5.2.1.4.2 Hoàn thành hợp đồng"
+},
+{
+"ol": "5.2.1.4.3",
+"lvl": 5,
+"name": "9.5.2.1.4.3 Hoàn thành tạm ứng"
+},
+{
+"ol": "5.2.1.5",
+"lvl": 4,
+"name": "9.5.2.1.5 Tư vấn qui hoạch 1/500"
+},
+{
+"ol": "5.2.1.5.1",
+"lvl": 5,
+"name": "9.5.2.1.5.1 Chọn thầu và phát hành LOA"
+},
+{
+"ol": "5.2.1.5.2",
+"lvl": 5,
+"name": "9.5.2.1.5.2 Hoàn thành hợp đồng"
+},
+{
+"ol": "5.2.1.5.3",
+"lvl": 5,
+"name": "9.5.2.1.5.3 Hoàn thành tạm ứng"
+},
+{
+"ol": "5.2.1.6",
+"lvl": 4,
+"name": "9.5.2.1.6 Tư vấn thẩm tra"
+},
+{
+"ol": "5.2.1.6.1",
+"lvl": 5,
+"name": "9.5.2.1.6.1 Chọn thầu và phát hành LOA"
+},
+{
+"ol": "5.2.1.6.2",
+"lvl": 5,
+"name": "9.5.2.1.6.2 Hoàn thành hợp đồng"
+},
+{
+"ol": "5.2.1.6.3",
+"lvl": 5,
+"name": "9.5.2.1.6.3 Hoàn thành tạm ứng"
+},
+{
+"ol": "5.2.1.7",
+"lvl": 4,
+"name": "9.5.2.1.7 Tư vấn thẩm duyệt PCCC"
+},
+{
+"ol": "5.2.1.7.1",
+"lvl": 5,
+"name": "9.5.2.1.7.1 Chọn thầu và phát hành LOA"
+},
+{
+"ol": "5.2.1.7.2",
+"lvl": 5,
+"name": "9.5.2.1.7.2 Hoàn thành hợp đồng"
+},
+{
+"ol": "5.2.1.7.3",
+"lvl": 5,
+"name": "9.5.2.1.7.3 Hoàn thành tạm ứng"
+},
+{
+"ol": "5.2.1.8",
+"lvl": 4,
+"name": "9.5.2.1.8 Tư vấn khối lượng"
+},
+{
+"ol": "5.2.1.8.1",
+"lvl": 5,
+"name": "9.5.2.1.8.1 Chọn thầu và phát hành LOA"
+},
+{
+"ol": "5.2.1.8.2",
+"lvl": 5,
+"name": "9.5.2.1.8.2 Hoàn thành hợp đồng"
+},
+{
+"ol": "5.2.1.8.3",
+"lvl": 5,
+"name": "9.5.2.1.8.3 Hoàn thành tạm ứng"
+},
+{
+"ol": "5.2.1.9",
+"lvl": 4,
+"name": "9.5.2.1.9 Tư vấn thiết kế nội thất"
+},
+{
+"ol": "5.2.1.9.1",
+"lvl": 5,
+"name": "9.5.2.1.9.1 Chọn thầu và phát hành LOA"
+},
+{
+"ol": "5.2.1.9.2",
+"lvl": 5,
+"name": "9.5.2.1.9.2 Hoàn thành hợp đồng"
+},
+{
+"ol": "5.2.1.9.3",
+"lvl": 5,
+"name": "9.5.2.1.9.3 Hoàn thành tạm ứng"
+},
+{
+"ol": "5.2.1.10",
+"lvl": 4,
+"name": "9.5.2.1.10 Tư vấn thiết kế khác"
+},
+{
+"ol": "5.2.1.10.1",
+"lvl": 5,
+"name": "9.5.2.1.10.1 Tư vấn thiết kế khác - Tư vấn 1"
+},
+{
+"ol": "5.2.1.10.1.1",
+"lvl": 6,
+"name": "9.5.2.1.10.1.1 Chọn thầu và phát hành LOA"
+},
+{
+"ol": "5.2.1.10.1.2",
+"lvl": 6,
+"name": "9.5.2.1.10.1.2 Hoàn thành hợp đồng"
+},
+{
+"ol": "5.2.1.10.1.3",
+"lvl": 6,
+"name": "9.5.2.1.10.1.3 Hoàn thành tạm ứng"
+},
+{
+"ol": "5.2.1.10.2",
+"lvl": 5,
+"name": "9.5.2.1.10.2 Tư vấn thiết kế khác - Tư vấn 2"
+},
+{
+"ol": "5.2.1.10.2.1",
+"lvl": 6,
+"name": "9.5.2.1.10.2.1 Chọn thầu và phát hành LOA"
+},
+{
+"ol": "5.2.1.10.2.2",
+"lvl": 6,
+"name": "9.5.2.1.10.2.2 Hoàn thành hợp đồng"
+},
+{
+"ol": "5.2.1.10.2.3",
+"lvl": 6,
+"name": "9.5.2.1.10.2.3 Hoàn thành tạm ứng"
+},
+{
+"ol": "5.2.2",
+"lvl": 3,
+"name": "9.5.2.2 Chọn thầu thi công"
+},
+{
+"ol": "5.2.2.1",
+"lvl": 4,
+"name": "9.5.2.2.1 Hạ tầng kỹ thuật C&S"
+},
+{
+"ol": "5.2.2.1.1",
+"lvl": 5,
+"name": "9.5.2.2.1.1 Chọn thầu và phát hành LOA"
+},
+{
+"ol": "5.2.2.1.2",
+"lvl": 5,
+"name": "9.5.2.2.1.2 Hoàn thành hợp đồng"
+},
+{
+"ol": "5.2.2.1.3",
+"lvl": 5,
+"name": "9.5.2.2.1.3 Hoàn thành tạm ứng"
+},
+{
+"ol": "5.2.2.2",
+"lvl": 4,
+"name": "9.5.2.2.2 Hạ tầng kỹ thuật MEP"
+},
+{
+"ol": "5.2.2.2.1",
+"lvl": 5,
+"name": "9.5.2.2.2.1 Chọn thầu và phát hành LOA"
+},
+{
+"ol": "5.2.2.2.2",
+"lvl": 5,
+"name": "9.5.2.2.2.2 Hoàn thành hợp đồng"
+},
+{
+"ol": "5.2.2.2.3",
+"lvl": 5,
+"name": "9.5.2.2.2.3 Hoàn thành tạm ứng"
+},
+{
+"ol": "5.2.2.3",
+"lvl": 4,
+"name": "9.5.2.2.3 Gói thầu cọc (nhà thấp tầng)"
+},
+{
+"ol": "5.2.2.3.1",
+"lvl": 5,
+"name": "9.5.2.2.3.1 Chọn thầu và phát hành LOA"
+},
+{
+"ol": "5.2.2.3.2",
+"lvl": 5,
+"name": "9.5.2.2.3.2 Hoàn thành hợp đồng"
+},
+{
+"ol": "5.2.2.3.3",
+"lvl": 5,
+"name": "9.5.2.2.3.3 Hoàn thành tạm ứng"
+},
+{
+"ol": "5.2.2.4",
+"lvl": 4,
+"name": "9.5.2.2.4 Gói thầu cọc và tường vây (nhà cao tầng)"
+},
+{
+"ol": "5.2.2.4.1",
+"lvl": 5,
+"name": "9.5.2.2.4.1 Chọn thầu và phát hành LOA"
+},
+{
+"ol": "5.2.2.4.2",
+"lvl": 5,
+"name": "9.5.2.2.4.2 Hoàn thành hợp đồng"
+},
+{
+"ol": "5.2.2.4.3",
+"lvl": 5,
+"name": "9.5.2.2.4.3 Hoàn thành tạm ứng"
+},
+{
+"ol": "5.2.2.5",
+"lvl": 4,
+"name": "9.5.2.2.5 Kết cấu và hoàn thiện công trình nhà"
+},
+{
+"ol": "5.2.2.5.1",
+"lvl": 5,
+"name": "9.5.2.2.5.1 Chọn thầu và phát hành LOA"
+},
+{
+"ol": "5.2.2.5.2",
+"lvl": 5,
+"name": "9.5.2.2.5.2 Hoàn thành hợp đồng"
+},
+{
+"ol": "5.2.2.5.3",
+"lvl": 5,
+"name": "9.5.2.2.5.3 Hoàn thành tạm ứng"
+},
+{
+"ol": "5.2.2.6",
+"lvl": 4,
+"name": "9.5.2.2.6 Kết cấu và hoàn thiện công trình tiện ích"
+},
+{
+"ol": "5.2.2.6.1",
+"lvl": 5,
+"name": "9.5.2.2.6.1 Chọn thầu và phát hành LOA"
+},
+{
+"ol": "5.2.2.6.2",
+"lvl": 5,
+"name": "9.5.2.2.6.2 Hoàn thành hợp đồng"
+},
+{
+"ol": "5.2.2.6.3",
+"lvl": 5,
+"name": "9.5.2.2.6.3 Hoàn thành tạm ứng"
+},
+{
+"ol": "5.2.2.7",
+"lvl": 4,
+"name": "9.5.2.2.7 Chọn thầu thi công khác"
+},
+{
+"ol": "5.2.2.7.1",
+"lvl": 5,
+"name": "9.5.2.2.7.1 Chọn thầu thi công khác - Nhà thầu 1"
+},
+{
+"ol": "5.2.2.7.1.1",
+"lvl": 6,
+"name": "9.5.2.2.7.1.1 Chọn thầu và phát hành LOA"
+},
+{
+"ol": "5.2.2.7.1.2",
+"lvl": 6,
+"name": "9.5.2.2.7.1.2 Hoàn thành hợp đồng"
+},
+{
+"ol": "5.2.2.7.1.3",
+"lvl": 6,
+"name": "9.5.2.2.7.1.3 Hoàn thành tạm ứng"
+},
+{
+"ol": "5.2.2.7.2",
+"lvl": 5,
+"name": "9.5.2.2.7.2 Chọn thầu thi công khác - Nhà thầu 2"
+},
+{
+"ol": "5.2.2.7.2.1",
+"lvl": 6,
+"name": "9.5.2.2.7.2.1 Chọn thầu và phát hành LOA"
+},
+{
+"ol": "5.2.2.7.2.2",
+"lvl": 6,
+"name": "9.5.2.2.7.2.2 Hoàn thành hợp đồng"
+},
+{
+"ol": "5.2.2.7.2.3",
+"lvl": 6,
+"name": "9.5.2.2.7.2.3 Hoàn thành tạm ứng"
+},
+{
+"ol": "5.2.3",
+"lvl": 3,
+"name": "9.5.2.3 Chọn nhà cung cấp"
+},
+{
+"ol": "5.2.3.1",
+"lvl": 4,
+"name": "9.5.2.3.1 Cung cấp & lắp đặt - cửa và phụ kiện (nhà thấp tầng)"
+},
+{
+"ol": "5.2.3.1.1",
+"lvl": 5,
+"name": "9.5.2.3.1.1 Chọn thầu và phát hành LOA"
+},
+{
+"ol": "5.2.3.1.2",
+"lvl": 5,
+"name": "9.5.2.3.1.2 Hoàn thành hợp đồng"
+},
+{
+"ol": "5.2.3.1.3",
+"lvl": 5,
+"name": "9.5.2.3.1.3 Hoàn thành tạm ứng"
+},
+{
+"ol": "5.2.3.2",
+"lvl": 4,
+"name": "9.5.2.3.2 Cung cấp & thi công - đá ốp lát"
+},
+{
+"ol": "5.2.3.2.1",
+"lvl": 5,
+"name": "9.5.2.3.2.1 Chọn thầu và phát hành LOA"
+},
+{
+"ol": "5.2.3.2.2",
+"lvl": 5,
+"name": "9.5.2.3.2.2 Hoàn thành hợp đồng"
+},
+{
+"ol": "5.2.3.2.3",
+"lvl": 5,
+"name": "9.5.2.3.2.3 Hoàn thành tạm ứng"
+},
+{
+"ol": "5.2.3.3",
+"lvl": 4,
+"name": "9.5.2.3.3 Cung cấp & thi công - cảnh quan mềm (gồm hệ thống tưới)"
+},
+{
+"ol": "5.2.3.3.1",
+"lvl": 5,
+"name": "9.5.2.3.3.1 Chọn thầu và phát hành LOA"
+},
+{
+"ol": "5.2.3.3.2",
+"lvl": 5,
+"name": "9.5.2.3.3.2 Hoàn thành hợp đồng"
+},
+{
+"ol": "5.2.3.3.3",
+"lvl": 5,
+"name": "9.5.2.3.3.3 Hoàn thành tạm ứng"
+},
+{
+"ol": "5.2.3.4",
+"lvl": 4,
+"name": "9.5.2.3.4 Cung cấp & lắp đặt - Playground"
+},
+{
+"ol": "5.2.3.4.1",
+"lvl": 5,
+"name": "9.5.2.3.4.1 Chọn thầu và phát hành LOA"
+},
+{
+"ol": "5.2.3.4.2",
+"lvl": 5,
+"name": "9.5.2.3.4.2 Hoàn thành hợp đồng"
+},
+{
+"ol": "5.2.3.4.3",
+"lvl": 5,
+"name": "9.5.2.3.4.3 Hoàn thành tạm ứng"
+},
+{
+"ol": "5.2.3.5",
+"lvl": 4,
+"name": "9.5.2.3.5 Cung cấp & lắp đặt - Bảng hiệu"
+},
+{
+"ol": "5.2.3.5.1",
+"lvl": 5,
+"name": "9.5.2.3.5.1 Chọn thầu và phát hành LOA"
+},
+{
+"ol": "5.2.3.5.2",
+"lvl": 5,
+"name": "9.5.2.3.5.2 Hoàn thành hợp đồng"
+},
+{
+"ol": "5.2.3.5.3",
+"lvl": 5,
+"name": "9.5.2.3.5.3 Hoàn thành tạm ứng"
+},
+{
+"ol": "5.2.3.6",
+"lvl": 4,
+"name": "9.5.2.3.6 Cung cấp & lắp đặt - Khóa từ"
+},
+{
+"ol": "5.2.3.6.1",
+"lvl": 5,
+"name": "9.5.2.3.6.1 Chọn thầu và phát hành LOA"
+},
+{
+"ol": "5.2.3.6.2",
+"lvl": 5,
+"name": "9.5.2.3.6.2 Hoàn thành hợp đồng"
+},
+{
+"ol": "5.2.3.6.3",
+"lvl": 5,
+"name": "9.5.2.3.6.3 Hoàn thành tạm ứng"
+},
+{
+"ol": "5.2.3.7",
+"lvl": 4,
+"name": "9.5.2.3.7 Cung cấp - Gạch ốp lát"
+},
+{
+"ol": "5.2.3.7.1",
+"lvl": 5,
+"name": "9.5.2.3.7.1 Chọn thầu và phát hành LOA"
+},
+{
+"ol": "5.2.3.7.2",
+"lvl": 5,
+"name": "9.5.2.3.7.2 Hoàn thành hợp đồng"
+},
+{
+"ol": "5.2.3.7.3",
+"lvl": 5,
+"name": "9.5.2.3.7.3 Hoàn thành tạm ứng"
+},
+{
+"ol": "5.2.3.8",
+"lvl": 4,
+"name": "9.5.2.3.8 Cung cấp - Đèn landscape/façade"
+},
+{
+"ol": "5.2.3.8.1",
+"lvl": 5,
+"name": "9.5.2.3.8.1 Chọn thầu và phát hành LOA"
+},
+{
+"ol": "5.2.3.8.2",
+"lvl": 5,
+"name": "9.5.2.3.8.2 Hoàn thành hợp đồng"
+},
+{
+"ol": "5.2.3.8.3",
+"lvl": 5,
+"name": "9.5.2.3.8.3 Hoàn thành tạm ứng"
+},
+{
+"ol": "5.2.3.9",
+"lvl": 4,
+"name": "9.5.2.3.9 Cung cấp bàn ghế + dù ngoài trời cho khu tiện ích"
+},
+{
+"ol": "5.2.3.9.1",
+"lvl": 5,
+"name": "9.5.2.3.9.1 Chọn thầu và phát hành LOA"
+},
+{
+"ol": "5.2.3.9.2",
+"lvl": 5,
+"name": "9.5.2.3.9.2 Hoàn thành hợp đồng"
+},
+{
+"ol": "5.2.3.9.3",
+"lvl": 5,
+"name": "9.5.2.3.9.3 Hoàn thành tạm ứng"
+},
+{
+"ol": "5.2.3.10",
+"lvl": 4,
+"name": "9.5.2.3.10 Cung cấp & lắp đặt - thang máy (nhà cao tầng)"
+},
+{
+"ol": "5.2.3.10.1",
+"lvl": 5,
+"name": "9.5.2.3.10.1 Chọn thầu và phát hành LOA"
+},
+{
+"ol": "5.2.3.10.2",
+"lvl": 5,
+"name": "9.5.2.3.10.2 Hoàn thành hợp đồng"
+},
+{
+"ol": "5.2.3.10.3",
+"lvl": 5,
+"name": "9.5.2.3.10.3 Hoàn thành tạm ứng"
+},
+{
+"ol": "5.2.3.11",
+"lvl": 4,
+"name": "9.5.2.3.11 Cung cấp & lắp đặt - Cửa gỗ và phụ kiện (nhà cao tầng)"
+},
+{
+"ol": "5.2.3.11.1",
+"lvl": 5,
+"name": "9.5.2.3.11.1 Chọn thầu và phát hành LOA"
+},
+{
+"ol": "5.2.3.11.2",
+"lvl": 5,
+"name": "9.5.2.3.11.2 Hoàn thành hợp đồng"
+},
+{
+"ol": "5.2.3.11.3",
+"lvl": 5,
+"name": "9.5.2.3.11.3 Hoàn thành tạm ứng"
+},
+{
+"ol": "5.2.3.12",
+"lvl": 4,
+"name": "9.5.2.3.12 Cung cấp & lắp đặt - Thiết bị phòng Gym (nhà cao tầng)"
+},
+{
+"ol": "5.2.3.12.1",
+"lvl": 5,
+"name": "9.5.2.3.12.1 Chọn thầu và phát hành LOA"
+},
+{
+"ol": "5.2.3.12.2",
+"lvl": 5,
+"name": "9.5.2.3.12.2 Hoàn thành hợp đồng"
+},
+{
+"ol": "5.2.3.12.3",
+"lvl": 5,
+"name": "9.5.2.3.12.3 Hoàn thành tạm ứng"
+},
+{
+"ol": "5.2.3.13",
+"lvl": 4,
+"name": "9.5.2.3.13 Thi công hoàn thiện sảnh chính + phòng Gym (nhà cao tầng)"
+},
+{
+"ol": "5.2.3.13.1",
+"lvl": 5,
+"name": "9.5.2.3.13.1 Chọn thầu và phát hành LOA"
+},
+{
+"ol": "5.2.3.13.2",
+"lvl": 5,
+"name": "9.5.2.3.13.2 Hoàn thành hợp đồng"
+},
+{
+"ol": "5.2.3.13.3",
+"lvl": 5,
+"name": "9.5.2.3.13.3 Hoàn thành tạm ứng"
+},
+{
+"ol": "5.2.3.14",
+"lvl": 4,
+"name": "9.5.2.3.14 Cung cấp - Thiết bị vệ sinh (nhà cao tầng)"
+},
+{
+"ol": "5.2.3.14.1",
+"lvl": 5,
+"name": "9.5.2.3.14.1 Chọn thầu và phát hành LOA"
+},
+{
+"ol": "5.2.3.14.2",
+"lvl": 5,
+"name": "9.5.2.3.14.2 Hoàn thành hợp đồng"
+},
+{
+"ol": "5.2.3.14.3",
+"lvl": 5,
+"name": "9.5.2.3.14.3 Hoàn thành tạm ứng"
+},
+{
+"ol": "5.2.3.15",
+"lvl": 4,
+"name": "9.5.2.3.15 Cung cấp - Máy nước nóng (nhà cao tầng)"
+},
+{
+"ol": "5.2.3.15.1",
+"lvl": 5,
+"name": "9.5.2.3.15.1 Chọn thầu và phát hành LOA"
+},
+{
+"ol": "5.2.3.15.2",
+"lvl": 5,
+"name": "9.5.2.3.15.2 Hoàn thành hợp đồng"
+},
+{
+"ol": "5.2.3.15.3",
+"lvl": 5,
+"name": "9.5.2.3.15.3 Hoàn thành tạm ứng"
+},
+{
+"ol": "5.2.3.16",
+"lvl": 4,
+"name": "9.5.2.3.16 Chọn nhà cung cấp khác"
+},
+{
+"ol": "5.2.3.16.1",
+"lvl": 5,
+"name": "9.5.2.3.16.1 Chọn nhà cung cấp khác - Nhà cung cấp 1"
+},
+{
+"ol": "5.2.3.16.1.1",
+"lvl": 6,
+"name": "9.5.2.3.16.1.1 Chọn thầu và phát hành LOA"
+},
+{
+"ol": "5.2.3.16.1.2",
+"lvl": 6,
+"name": "9.5.2.3.16.1.2 Hoàn thành hợp đồng"
+},
+{
+"ol": "5.2.3.16.1.3",
+"lvl": 6,
+"name": "9.5.2.3.16.1.3 Hoàn thành tạm ứng"
+},
+{
+"ol": "5.2.3.16.2",
+"lvl": 5,
+"name": "9.5.2.3.16.2 Chọn nhà cung cấp khác - Nhà cung cấp 2"
+},
+{
+"ol": "5.2.3.16.2.1",
+"lvl": 6,
+"name": "9.5.2.3.16.2.1 Chọn thầu và phát hành LOA"
+},
+{
+"ol": "5.2.3.16.2.2",
+"lvl": 6,
+"name": "9.5.2.3.16.2.2 Hoàn thành hợp đồng"
+},
+{
+"ol": "5.2.3.16.2.3",
+"lvl": 6,
+"name": "9.5.2.3.16.2.3 Hoàn thành tạm ứng"
+},
+{
+"ol": "6",
+"lvl": 1,
+"name": "9.6 PHÒNG KHỐI LƯỢNG VÀ NGÂN SÁCH"
+},
+{
+"ol": "6.1",
+"lvl": 2,
+"name": "9.6.1 Lập dự toán triển khai dự án"
+},
+{
+"ol": "6.2",
+"lvl": 2,
+"name": "9.6.2 Lập ngân sách thực thi dự án"
+},
+{
+"ol": "6.3",
+"lvl": 2,
+"name": "9.6.3 Lập ngân sách gói thầu (BOQ)"
+},
+{
+"ol": "6.3.1",
+"lvl": 3,
+"name": "9.6.3.1 Ngân sách gói thầu (BOQ) - gói A"
+},
+{
+"ol": "6.3.2",
+"lvl": 3,
+"name": "9.6.3.2 Ngân sách gói thầu (BOQ) - gói B"
+}
+]

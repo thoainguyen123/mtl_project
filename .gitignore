@@ -55,3 +55,7 @@ next-env.d.ts
 # database & logs
 /drizzle/
 *.log
+
+# prototype local data
+/.data/
+.prod.log
