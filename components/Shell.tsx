@@ -41,6 +41,7 @@ const NAV: (NavLeaf | NavGroup)[] = [
   },
   { href: "/design-tasks", label: "Lập Nhiệm vụ Thiết kế", icon: <ClipboardList className="h-4 w-4" /> },
   { href: "/fs", label: "Lập FS Thực thi", icon: <FileSpreadsheet className="h-4 w-4" /> },
+  { href: "/pyc", label: "PYC HHDV", icon: <ClipboardCheck className="h-4 w-4" /> },
 ];
 const NAV_BOTTOM = [
   { href: "/templates", label: "Template & Định mức", icon: <Layers className="h-4 w-4" /> },
@@ -48,6 +49,7 @@ const NAV_BOTTOM = [
 ];
 
 const CRUMBS: Record<string, string> = {
+  pyc: "PYC HHDV",
   projects: "Thông tin dự án", mtl: "Lập Master Timeline", new: "Khởi tạo MTL", tracking: "Theo dõi tiến độ dự án", approval: "Trình Phê Duyệt", review: "Thẩm định", templates: "Template & Định mức",
   settings: "Cài đặt Hệ thống", "design-tasks": "Lập Nhiệm vụ Thiết kế", fs: "Lập FS Thực thi", "to-trinh": "Tờ trình E-Approval",
 };

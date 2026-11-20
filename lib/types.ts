@@ -324,6 +324,7 @@ export interface FsVersion {
 }
 
 export interface Db {
+  pycs?: import("./pyc").Pyc[];
   projects: Project[];
   designBriefs: DesignBrief[];
   fsVersions: FsVersion[];
